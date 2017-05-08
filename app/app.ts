@@ -25,7 +25,6 @@ import notFoundHandler from './middlewares/notFoundHandler';
 import session from './middlewares/session';
 import setLocals from './middlewares/setLocals';
 
-import customerRouter from './routes/customer';
 import router from './routes/router';
 import staffRouter from './routes/staff';
 import windowRouter from './routes/window';
@@ -97,7 +96,6 @@ app.use(expressValidator()); // バリデーション
 app.use(setLocals); // ローカル変数セット
 
 // ルーティング登録の順序に注意！
-app.use('/customer', customerRouter);
 app.use('/staff', staffRouter);
 app.use('/window', windowRouter);
 app.use('/', router);

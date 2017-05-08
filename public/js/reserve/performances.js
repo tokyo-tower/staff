@@ -70,8 +70,9 @@ $(function () {
                 if (scheduleClmCount === 0) {
                     html += '<div class="wrapper-scheduleitems">';
                 }
+                console.log(performance)
                 html +=
-                    '<div class="scheduleitem scheduleitem-' + NAMETABLE_STATUS[performance.seat_status] + ' select-performance" data-performance-id="' + performance.id + '">' +
+                    '<div class="scheduleitem scheduleitem-' + NAMETABLE_STATUS[performance.attributes.seat_status] + ' select-performance" data-performance-id="' + performance.id + '">' +
                     '<div class="text">' +
                     '<h3>' + performance.attributes.day + ' ' + performance.attributes.start_time + ' - </h3>' +
                     '<p>' + performance.attributes.theater_name + '<br class="visible-pc">' + performance.attributes.screen_name.replace(/ /g, '&nbsp;') + '</p>' +
