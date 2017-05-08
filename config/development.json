@@ -1,0 +1,27 @@
+{
+    "official_website_url": "http://motionpicture.jp",
+    "meta": {
+        "keywords": "CHEVRE_EVENT_NAME, 2016, CHEVRE, コンペティション,Competiton,",
+        "description": "CHEVRE_EVENT_NAMEは2016年10月25日（火）から11月3日（木・祝）の10日間開催いたします。"
+    },
+    "email": {
+        "from": "noreply@default.chevre.motionpicture.jp",
+        "fromname": "CHEVRE_EVENT_NAME Online Ticket [dev]"
+    },
+    "gmo_payment_api_link_multi_entry": "https://pt01.mul-pay.jp/link/tshop00027145/Multi/Entry",
+    "datetimes": {
+        "reservation_start_staffs": "2016-09-28T00:00:00+09:00",
+        "reservation_start_sponsors": "2016-09-28T00:00:00+09:00",
+        "reservation_start_members": "2016-10-19T12:00:00+09:00",
+        "reservation_end_members": "2017-12-31T23:59:59+09:00",
+        "reservation_start_customers_first": "2016-09-28T00:00:00+09:00",
+        "reservation_start_customers_second": "2016-10-22T10:30:00+09:00",
+        "reservation_start_pre_customers": "2016-09-28T00:00:00+09:00",
+        "reservation_end_pre_customers": "2017-12-31T23:59:59+09:00",
+        "event_start": "2016-10-25T00:00:00+09:00",
+        "event_end": "2017-12-31T23:59:59+09:00"
+    },
+    "temporary_reservation_valid_period_seconds": 900,
+    "waiting_settlement_reservatioin_valid_period_hours": 72,
+    "performanceIds4limit2": []
+}

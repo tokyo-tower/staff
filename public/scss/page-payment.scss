@@ -1,0 +1,69 @@
+//予約者情報入力ページ
+.page-payment{
+
+  .wrapper-2clm{
+    .clm-left{
+      padding-left:260px;
+      margin-left:-260px;
+      width:100%;
+      @media screen and (max-width: $breakpoint_tablet){
+        margin:auto;
+        padding:0;
+      }
+    }
+    .clm-right{
+      width:240px;
+      @media screen and (max-width: $breakpoint_tablet){
+          width:100%;
+      }
+    }
+  }
+
+  .table-profile{
+    tr,th,td{
+      @media screen and (max-width: $breakpoint_tablet){
+        display:block;
+      }
+    }
+    tr:first-child{
+      th,td{
+        border-top:none;
+      }
+    }
+
+    th{
+      background-color:#898989;
+      color:#fff;
+      vertical-align:middle;
+      padding-left:1em;
+      .required{
+        display:block;
+        background-color:#c30d23;
+        color:#fff;
+        font-size:0.7em;
+        width:6em;
+        text-align:center;
+        vertical-align:middle;
+        border-radius:4px;
+        padding:2px;
+        @media screen and (max-width: $breakpoint_tablet){
+          display:inline-block;
+          margin-left:1em;
+        }
+      }
+    }
+
+    td{
+      background-color:#ddd;
+      border-top-color:#fff;
+      padding:1em;
+    }
+    .notice{
+      font-size:0.8em;
+      line-height:2;
+    }
+
+    p{
+    }
+  }
+}

@@ -1,0 +1,61 @@
+.modal.selected-seat-map{
+  .modal-content{
+    position:relative;
+    border-radius:0;
+    @media screen and (max-width: $breakpoint_tablet){
+      border-radius:6px;
+    }
+  }
+  .btn-circle-close{
+    position:absolute;
+    top:-16px;
+    right:-16px;
+    @media screen and (max-width: $breakpoint_tablet){
+      top:-10px;
+      right:-10px;
+    }
+    &::before{
+      content:'';
+      display:block;
+      width:32px;
+      height:32px;
+      background-size:64px 32px;
+      background-repeat:no-repeat;
+      background-position:left;
+      background-image:url(/images/common/btn-circle-close.png);
+      @media screen and (max-width: $breakpoint_tablet){
+        width:48px;
+        height:48px;
+        background-size:96px 48px;
+      }
+    }
+    &:hover{
+      &::before{
+        cursor:pointer;
+        background-position:right;
+      }
+    }
+  }
+  .modal-header{
+    text-align:center;
+    border:none;
+    font-size:20px;
+    padding:30px;
+  }
+  .modal-footer{
+    text-align:center;
+    border:none;
+    padding:30px;
+    @media screen and (max-width: $breakpoint_tablet){
+      padding-top:15px;
+    }
+    .btn-close{
+      margin:auto;
+      width:200px;
+      height:45px;
+      @media screen and (max-width: $breakpoint_tablet){
+        width:80%;
+      }
+    }
+  }
+}

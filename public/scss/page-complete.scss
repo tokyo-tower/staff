@@ -1,0 +1,178 @@
+//購入完了ページ
+.page-complete{
+
+  .table-complete{
+    max-width:800px;
+    width:100%;
+    margin:auto;
+    tr,th,td{
+      @media screen and (max-width: $breakpoint_tablet){
+        display:block;
+        width:100%;
+      }
+    }
+    th,td{
+      line-height:2;
+      vertical-align:middle;
+      padding:1rem;
+      border-top:2px solid #fff;
+      @media screen and (max-width: $breakpoint_tablet){
+        border-top:none;
+      }
+    }
+    th{
+      background-color:#898989;
+      border-bottom:none;
+      color:#fff;
+      text-align:center;
+      vertical-align:middle;
+      width:160px;
+      @media screen and (max-width: $breakpoint_tablet){
+        background-color:#898989;
+        color:#fff;
+        text-align:left;
+      }
+    }
+
+    thead{
+      td{
+        background-color:#ddd;
+      }
+    }
+
+    tbody{
+      th{
+        @media screen and (max-width: $breakpoint_tablet){
+          display:none;
+        }
+      }
+      td{
+        padding:0;
+        @media screen and (max-width: $breakpoint_tablet){
+          margin-top:1em;
+        }
+      }
+
+      .wrapper-seatcells{
+        background-color:#ddd;
+        @media screen and (max-width: $breakpoint_tablet){
+          background-color:#e5e5e5;
+        }
+        &:last-child{
+          border-bottom:none;
+        }
+      }
+
+      .accordion_mobile_toggle{
+        display:none;
+        @media screen and (max-width: $breakpoint_tablet){
+          display:block;
+          padding:1em;
+          background-color:#595758;
+          color:#fff;
+          &:before{
+            display:none;
+          }
+        }
+      }
+      .accordion_mobile_inner{
+        @media screen and (max-width: $breakpoint_tablet){
+          padding-bottom:10px;
+        }
+      }
+
+      .innercontent{
+        display:table;
+        width:100%;
+        >div{
+          display:table-cell;
+          vertical-align:middle;
+          text-align: center;
+          padding:1em;
+          border-right:1px solid #ddd;
+          width:25%;
+          @media screen and (max-width: $breakpoint_tablet){
+            display:block;
+            width:100%;
+            padding:10px;
+            border:none;
+          }
+          &:last-child{
+            border-right:none;
+          }
+        }
+        .cell-seatcode{
+          @media screen and (max-width: $breakpoint_tablet){
+            display:none;
+          }
+        }
+        .cell-codeimg{
+          >img{
+            vertical-align:middle;
+          }
+        }
+        .cell-print{
+          @media screen and (max-width: $breakpoint_tablet){
+            display:none;
+          }
+        }
+        .cell-showseat{
+          display:none;
+          @media screen and (max-width: $breakpoint_tablet){
+            display:block;
+          }
+        }
+        .cell-btn{
+          .btn{
+            max-width:200px;
+            width:100%;
+            height:50px;
+            margin:auto;
+            >span{
+              font-size:0.9em;
+              &::after{
+                left:10px;
+              }
+            }
+          }
+        }
+        .cell-mail{
+          .btn>span{
+            padding-left:1em;
+          }
+        }
+
+      }
+
+    }
+
+  }
+
+  .btn-showseat{
+    margin:2em auto;
+    background-color:#2490d0;
+    &:hover,&:active,&:focus,&:active:focus,{
+      background-color:#34a0e0;
+    }
+  }
+
+}
+
+#page_window_reserve_complete{
+  .table-complete .innercontent{
+    .cell-print{
+      display:table-cell;
+      @media screen and (max-width: $breakpoint_tablet){
+        display:block;
+      }
+    }
+    .cell-mail{
+      display:none;
+    }
+  }
+  .btn-thermalprintall{
+    font-size:20px;
+    width:260px;
+    margin:4em auto;
+  }
+}

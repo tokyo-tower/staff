@@ -1,0 +1,76 @@
+//券種選択ページ
+.page-tickets{
+
+  .wrapper-2clm{
+    .clm-left{
+      padding-left:260px;
+      margin-left:-260px;
+      width:100%;
+      @media screen and (max-width: $breakpoint_tablet){
+        margin:auto;
+        padding:0;
+      }
+    }
+    .clm-right{
+      width:240px;
+      @media screen and (max-width: $breakpoint_tablet){
+          width:100%;
+      }
+    }
+  }
+
+  .table-tickets{
+    td,th{
+      border-top:2px solid #f2f2f2;
+    }
+    thead{
+      background-color:#898989;
+      color:#fff;
+      @media screen and (max-width: $breakpoint_tablet){
+        display:none;
+      }
+      th:first-child{
+        width:110px;
+      }
+    }
+    thead,tbody{
+      th:first-child{
+        border-right:2px solid #f2f2f2;
+      }      
+    }
+    tbody,tfoot{
+      background-color:#ddd;
+      td{
+        padding:8px 16px;
+      }
+    }
+    tfoot{
+      td{
+        line-height:4em;
+        text-align:right;
+        .price{
+          margin-left:1em;
+          font-weight:bold;
+          color:red;
+        }
+      }
+    }
+    tr,th,td{
+      @media screen and (max-width: $breakpoint_tablet){
+        display:block;
+      }
+    }
+    th{
+      text-align:center;
+      vertical-align:middle;
+      @media screen and (max-width: $breakpoint_tablet){
+        text-align:left;
+        background-color:#898989;
+        color:#fff;
+      }
+    }
+
+
+  }
+
+}

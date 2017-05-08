@@ -1,0 +1,135 @@
+<%
+let reservationsById = {};
+for (let reservation of reservationDocuments) {
+    let _reservation = reservation.toObject();
+    _reservation['ticket_type_detail_str'] = reservation.get('ticket_type_detail_str');
+    _reservation['qr_str'] = reservation.get('qr_str');
+    reservationsById[reservation._id.toString()] = _reservation;
+}
+%>
+<input type="hidden" name="reservationsById" value="<%= JSON.stringify(reservationsById) %>">
+<script src="/js/reserve/complete.js"></script>
+
+<!-- StarWebPRNTライブラリ　= http://sp-support.star-m.jp/SDKDocumentation.aspx -->
+<script src="/js/thermalprint/StarWebPrintBuilder.js"></script>
+<script src="/js/thermalprint/StarWebPrintTrader.js"></script>
+<!-- 当日入場券サーマル印刷用モジュール -->
+<script src="/js/thermalprint/tiffThermalPrint.js"></script>
+
+
+<%- include('./_step') %>
+
+<h1 class="pagetitle"><%- __('h1.CompleteReservation') %></h1>
+<p class="guidetext"><%- __('Label.CompleteReservationGuideText') %></p>
+
+
+<table class="table table-complete">
+    <thead>
+        <tr>
+            <th><%- __('Label.PaymentNo') %></th>
+            <td><%- reservationDocuments[0].get('payment_no') %></td>
+        </tr>
+        <tr>
+            <th><%- __('Label.FilmName') %></th>
+            <td><%= reservationDocuments[0].get(`film_name`)[locale] %></td>
+        </tr>
+        <tr>
+            <th><%- __('Label.PerformanceTime') %>/<%- __('Label.PerformancePlace') %></th>
+            <td>
+                <%= reservationDocuments[0].get(`performance_start_str`)[locale] %>&nbsp;&nbsp;<%= reservationDocuments[0].get(`location_str`)[locale] %>
+            </td>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <th><%- __('Label.SeatCode') %></th>
+            <td>
+                <% reservationDocuments.forEach((reservation, index) => { %>
+                <div class="wrapper-seatcells">
+                    <h2 class="accordion_mobile_toggle"><%- __('Label.SeatCode') %> <%- reservation.seat_code %></h2>
+                    <div>
+                        <div class="innercontent">
+                            <div class="cell-seatcode">
+                                <%- reservation.seat_code %>
+                            </div>
+                            <div class="cell-btn cell-print">
+
+                                <% if (reservation.purchaser_group === ReservationUtil.PURCHASER_GROUP_WINDOW) { %>
+                                <a class="btn btn-icon-print btn-thermalprint" data-reservation-id="<%- reservation._id %>" href="javascript:void(0)"><span><%- __('Button.ThermalPrint') %></span></a>
+                                <% } else { %>
+                                <a class="btn btn-default btn-icon-print" target="_blank" href="/reserve/print?ids=<%= JSON.stringify([reservation._id.toString()]) %>"><span><%- __('Button.Print') %></span></a>
+                                <% } %>
+
+                            </div>
+                            <div class="cell-codeimg">
+                                
+                                <img class="codeimg-barcode" src="//chart.apis.google.com/chart?chs=150x150&cht=qr&chl=<%= reservation.qr_str %>" alt="">
+
+                            </div>
+
+                            <% if (reservation.purchaser_group !== ReservationUtil.PURCHASER_GROUP_WINDOW) { %>
+                            <div class="cell-btn cell-mail">
+                                <a class="btn btn-default btn-icon-mail send-mail" href="javascript:void(0)" data-reservation-id="<%- reservation._id %>" data-url="<%= process.env.API_ENDPOINT %>/<%- locale %>/reservation/<%= reservation._id.toString() %>/transfer"><span><%- __('Button.InformFriends') %></span></a>
+                            </div>
+                            <% } %>
+
+                            <div class="cell-btn cell-showseat">
+                                <a class="btn btn-showseat show-seat-position" href="javascript:void(0)" data-screen-id="<%- reservation.screen %>" data-seat-codes="<%- reservation.seat_code %>"><span><%- __('Label.ShowSeats') %></span></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            </td>
+        </tr>
+
+    </tbody>
+
+</table>
+
+<%
+let seatCodes = reservationDocuments.map((reservationDocument) => {return reservationDocument.seat_code});
+%>
+<a class="visible-pc btn btn-lg btn-showseat show-seat-position" href="javascript:void(0)" data-screen-id="<%- reservationDocuments[0].screen %>" data-seat-codes="<%- seatCodes.join(',') %>"><span><%- __('Label.ShowSeats') %></span></a>
+
+
+<div class="modal modal-mail fade transfering" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <p class="btn-circle-close" data-dismiss="modal"></p>
+            <div class="modal-body">
+                <h2>
+                    <% if (req.locale === 'ja') { %>
+                    メールアドレスを入力して<br class="visible-mobile-block">
+                    送信ボタンを押してください。<br>
+                    <% } else { %>
+                    Enter your email address<br class="visible-mobile-block">
+                     and click on the Send button.<br>
+                    <% } %>
+                </h2>
+                <p class="row small text-left" style="line-height: normal; width: 80%; margin-left: auto; margin-right: auto;"><%- __('Message.SettingForLimitingEmailReception') %></p>
+                <p class="errmsg"></p>
+                <div class="form-group form-inline">
+                    <input type="email" name="email" id="id_email" class="form-control">
+                    <p class="btn btn-submit form-control execute-transfer"><span><%- __('Button.Send') %></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal modal-mail fade loading" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <p class="btn-circle-close" data-dismiss="modal"></p>
+            <div class="modal-body">
+                <div class="text-center sending"><%- __('Message.Sending') %></div>
+                <div class="text-center sent"><%- __('Message.Sent') %></div>
+                <div class="text-center unsent"><%- __('Message.Unsent') %></div>
+            </div>
+            <div class="modal-footer">
+                <p class="btn btn-close" data-dismiss="modal"><span><%- __('Button.Close') %></span></p>
+            </div>
+        </div>
+    </div>
+</div>

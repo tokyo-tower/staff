@@ -1,0 +1,77 @@
+//座席選択ページ
+.page-seats{
+
+  .wrapper-2clm{
+    .clm-left{
+      padding-left:260px;
+      margin-left:-260px;
+      width:100%;
+      @media screen and (max-width: $breakpoint_tablet){
+        margin:auto;
+        padding:0;
+      }
+    }
+    .clm-right{
+      width:240px;
+      @media screen and (max-width: $breakpoint_tablet){
+          width:100%;
+          margin-top:20px;
+      }
+    }
+  }
+
+  .wrapper-seats-guides{
+    background-color:#fff;
+    padding:10px;
+    margin-bottom:20px;
+  }
+
+  .seats-guide{
+    font-size:0.9em;
+    line-height:1.5;
+    padding:0;
+    margin:auto;
+    @media screen and (max-width: $breakpoint_tablet){
+      margin:auto;
+    }
+    @include clearfix;
+    .figure{
+      background-color:#b2b2b2;
+      display:table;
+      float:left;
+      padding:1em;
+      width:33.3333%;
+      min-height:104px;
+      @media screen and (max-width: $breakpoint_mobile){
+        float:none;
+        display:block;
+        width:100%;
+        min-height:0;
+        border-bottom:1px solid #eee;
+      }
+      div{
+        display: table-cell;
+        padding:0;
+        vertical-align:middle;
+        &:first-child{
+          width:30px;
+          img{
+            width:30px;
+          }
+        }
+        &:last-child{
+          padding-left:10px;
+        }
+        strong{
+          display:block;
+          font-weight:bold;
+        }
+      }
+    }
+  }
+  .seats-guide-special{
+    .figure{
+      border-top:1px solid #fff;
+    }
+  }
+}

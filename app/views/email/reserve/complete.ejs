@@ -1,0 +1,72 @@
+<%= titleJa %>
+<%= titleEn %>
+
+<%= reservations[0].get('purchaser_name').ja %> 様
+Dear <%= reservations[0].get('purchaser_name').en %>,
+
+この度はご購入いただき誠にありがとうございます。
+ご入場の際に本メールのQRコードが必要となりますので、ご鑑賞当日は必ずお持ちください。
+QRコードは画像保存もしくは印刷していただくと便利です。
+尚、お取り扱いには十分ご注意ください。
+＊本メールはご鑑賞後まで、大切に保管してください。
+
+Thank you very much for your purchase.
+Please be sure to bring the QR code attached to the email with you when attending your screening as it is required for admission. 
+It is recommended to save the QR code as image data or to print it for your convenience. Please handle carefully.
+*Please keep this email until your screening is finished.
+
+
+作品名 (Title) :
+<%- reservations[0].get('film_name').ja %>
+<%- reservations[0].get('film_name').en %>
+
+購入番号 (Transaction number) :
+<%- reservations[0].get('payment_no') %>
+
+劇場 (Location) :
+<%- reservations[0].get('location_str').ja %>
+<%- reservations[0].get('theater_address').ja %>
+<%- reservations[0].get('theater_name').en %> <%- reservations[0].get('screen_name').en %>
+<%- reservations[0].get('theater_address').en %>
+
+時間 (Date and time) :
+<%- reservations[0].get('performance_start_str').ja %>
+<%- reservations[0].get('performance_start_str').en %>
+
+券種 (Type of ticket) :
+<%= reservations.map((reservation) => reservation.get('ticket_type_detail_str').ja.replace(/\\/g, '￥')).join('\n') %>
+<%= reservations.map((reservation) => reservation.get('ticket_type_detail_str').en.replace(/\\/g, '￥')).join('\n') %>
+
+<% if (reservations[0].get('payment_method') === GMOUtil.PAY_TYPE_CVS) { %>
+コンビニ決済手数料 (Handling charge) :
+￥<%- ReservationUtil.CHARGE_CVS %> x <%- reservations.length %>
+<% } %>
+
+購入枚数 (Number of tickets purchased) :
+<%- reservations.length %>枚
+<%- reservations.length %> ticket(s)
+
+<% const totalCharge = reservations.reduce((a, b) => a  + b.get('charge'), 0); %>
+<% if (totalCharge > 0) { %>
+合計金額 (Total) :
+￥<%- numeral(totalCharge).format('0,0') %>(税込)
+<%- numeral(totalCharge).format('0,0') %> yen (including tax)
+<% } %>
+
+
+※学生（小学生は除く）の方は、劇場へのご入場の際に、必ず学生証または生徒手帳のご提示をお願いします。
+※交通渋滞による来場遅延、その他いかなる場合でも、ご購入後のチケットの変更およびキャンセル・払い戻しはいたしません。なお不可抗力により表記公演の興行を中止する場合の払い戻しは、所定の期間内に所定の方法にて行います。
+*Students (excluding elementary school students) are asked to show their student ID card or student handbook before entering the cinema.
+*Once tickets are purchased, they cannot be changed, canceled or refunded under any circumstance, including delayed arrival due to traffic congestion. If the event is canceled due to any unforeseen causes, tickets will be refunded by the prescribed methods during the prescribed period of time.
+
+--------------------
+
+CHEVRE_EVENT_NAME  CHEVRE 2016
+本メールアドレスは送信専用です。返信はできませんのであらかじめご了承ください。
+本メールに心当たりのない方やチケットに関してご不明な点は、下記電話番号までお問い合わせください。
+チケットのお問合せ：050-3786-0368　/12:00～18:00（休業：土/日/祝日　CHEVRE_EVENT_NAME開催期間中は無休）
+オフィシャルサイト： <%= conf.get('official_website_url') %>
+This email was sent from a send-only address. Please do not reply to this message.
+If you are not the intended recipient of this email or have any questions about tickets, Please contact us at the telephone number below.
+For inquiries about tickets: 050-3786-0368/12:00 p.m. to 6:00 p.m. (Closed on Saturdays, Sundays, and national holidays, except during CHEVRE)
+Official website: <%= conf.get('official_website_url') %>

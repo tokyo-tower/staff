@@ -1,0 +1,14 @@
+//マイページ-内部スタッフ
+#page_staff_mypage{
+  select[name="film"]{
+    width:400px;
+  }
+
+  .td-distribution{
+    min-width:290px;
+    .btn{
+        margin-left:8px;
+    }
+
+  }
+}

@@ -1,0 +1,80 @@
+//パフォーマンス選択以降のページでincludeされる予約情報表示ボックス
+.reservationstatus{
+  color:#fff;
+  line-height:1.5;
+  font-weight:lighter;
+
+  h2{
+    text-align:center;
+    padding:1em 0.5em;
+    background-color:#595758;
+    @media screen and (max-width: $breakpoint_tablet){
+      text-align:left;
+      padding:1em;
+      border-radius:6px;
+      cursor:pointer;
+      &:before{
+        display:block;
+      }
+    }
+  }
+
+  .reservationstatus-inner{
+    background-color:#595758;
+    padding:0 1em 20px;
+    @media screen and (max-width: $breakpoint_tablet){
+      display:none;
+      padding:1em 12%;
+      background-color:#e5e5e5;
+      color:#000;
+    }
+  }
+
+  hr{
+    @media screen and (max-width: $breakpoint_tablet){
+      border-top-color:#595758;
+    }
+  }
+
+  .reservationstatus-info{
+    font-size:0.8em;
+    >p{
+      display:table;
+      &::before{
+        content:'';
+        display:table-cell;
+        width:16px;height:16px;
+        background-size:32px 16px;
+        background-position:left;
+        background-repeat:no-repeat;
+        @media screen and (max-width: $breakpoint_tablet){
+          background-position:right;
+        }
+      }
+      &.info-date{
+        &::before{
+          background-image:url(/images/common/icon-clock.png);
+        }
+      }
+      &.info-screen{
+        margin-top:4px;
+        &::before{
+          background-image:url(/images/common/icon-screen.png);
+        }
+      }
+      >span{
+        display:table-cell;
+        padding-left:10px;
+      }
+    }
+  }
+
+  .btn-showseat{
+    margin:30px auto 10px;
+    width:90%;
+  }
+}
+
+.page-seats .reservationstatus .btn{
+  display:none;
+}

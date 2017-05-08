@@ -1,0 +1,78 @@
+//ページ上部のSTEP表示
+.steps{
+  position:absolute;
+  width:100%;
+  left:0;
+  background-color:#fff;
+  height:70px;
+  .container{ //bootstrap上書き
+    display:table;
+    height:100%;
+    @media screen and (max-width: $breakpoint_tablet){
+      width:100%;
+      padding:0;
+    }
+  }
+  .step{
+    width:100%;
+    color:#c9caca;
+    font-size:0.8em;
+    user-select:none;
+    cursor:default;
+    width:16.6%;
+    display:table-cell;
+    text-align:center;
+    vertical-align:middle;
+    position:relative;
+    &.active{
+      color:#000;
+    }
+    &::before,&::after{ //STEP間の矢印を擬似要素で作る
+      position:absolute;
+      content:'';
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 25px 0 25px 12px;
+      border-color: transparent transparent transparent #000000;
+      top:50%;
+      margin-top:-25px;
+      @media screen and (max-width: $breakpoint_tablet){
+        border-left-width:6px;
+      }
+    }
+    &::before{
+      right:-5px;
+      border-color: transparent transparent transparent #b5b5b6;
+      @media screen and (max-width: $breakpoint_tablet){
+        right:-1px;
+      }
+    }
+    &::after{
+      right:-4px;
+      border-color: transparent transparent transparent #ffffff;
+      @media screen and (max-width: $breakpoint_tablet){
+        right:0px;
+      }
+    }
+    &:last-child{
+      &::before,&::after{
+        display:none;
+      }
+    }
+    .visible-pc{//PCレイアウト時のみSTEP番号の下に"○○選択"などを表示
+      line-height:1.2;
+    }
+  }
+}
+//STEP表示の有る各ページで現在STEPをアクティブ化
+@each $pageName in performances, seats, tickets, profile, confirm, complete, waitingSettlement {
+  .page-#{$pageName} {
+    .pagetitle{
+      margin-top:130px;
+    }
+    .step-#{$pageName} {
+      color:#000;
+    }
+  }
+}

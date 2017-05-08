@@ -1,0 +1,61 @@
+<%- include('./_step') %>
+
+<h1 class="pagetitle"><%- __('h1.SelectTickets') %></h1>
+<p class="guidetext"><%- __('Label.SelectTicketsGuideText') %></p>
+
+<% if (reservationModel.purchaserGroup === ReservationUtil.PURCHASER_GROUP_STAFF) { %>
+<p class="row small text-left errmsg"><%- __('Label.NameOfPersonWhoWillSeeFilm') %>:<br><%- __('Message.UpdateWatcherNameHelp') %></p>
+<% } %>
+
+<div class="wrapper-2clm">
+
+    <div class="clm-left" data-token="">
+
+        <table class="table table-tickets">
+
+            <thead><tr><th><%- __('Label.SeatCode') %></th><th><%- __('Label.TicketType') %></th></tr></thead>
+
+            <tbody>
+                <% for (let seatCode of reservationModel.seatCodes) { %>
+                <% let reservation = new Models.Reservation(reservationModel.seatCode2reservationDocument(seatCode)); %>
+                <tr data-seat-code="<%- reservation.seat_code %>" data-seat-extra-charge="<%= reservationModel.getChargeExceptTicketTypeBySeatCode(seatCode) %>">
+
+                    <th><span class="visible-mobile"><%- __('Label.SeatCode') %></span> <%- reservation.get('seat_code') %></th>
+                    <td>
+                        <select class="form-control">
+                            <% reservationModel.ticketTypes.forEach(function(ticketType) { %>
+                            <option value="<%- ticketType._id %>" data-charge="<%= ticketType.charge %>"<%- (reservation.get('ticket_type') === ticketType._id) ? ' selected="selected"' : '' %>>
+                                <%- reservation.set(`ticket_type_name`, ticketType.name).set('ticket_type_charge', ticketType.charge).get('ticket_type_detail_str')[locale].replace(/\\/g, '&yen;') %>
+                            </option>
+                            <% }) %>
+                        </select>
+
+                        <% if (reservationModel.purchaserGroup === ReservationUtil.PURCHASER_GROUP_STAFF) { %>
+                        <input type="text" name="watcherName" class="form-control" placeholder="<%- __('Label.PleaseEnterWatcherName') %>" value="<%- reservation.get('watcher_name') %>">
+                        <% } %>
+                    </td>
+                </tr>
+                <% } %>
+            </tbody>
+
+            <tfoot class="hidden">
+                <tr><td colspan="2">
+                    <%- __('Label.TotalCharge') %><span class="price"></span>
+                </td></tr>
+            </tfoot>
+
+        </table>
+
+    </div>
+
+    <div class="clm-right">
+        <%- include('./_reservationModel') %>
+    </div>
+
+</div>
+
+<form method="post">
+    <input type="hidden" name="choices">
+</form>
+
+<script src="/js/reserve/tickets.js"></script>

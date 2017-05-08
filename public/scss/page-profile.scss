@@ -1,0 +1,137 @@
+//予約者情報入力ページ
+.page-profile{
+
+  .wrapper-2clm{
+    .clm-left{
+      padding-left:260px;
+      margin-left:-260px;
+      width:100%;
+      @media screen and (max-width: $breakpoint_tablet){
+        margin:auto;
+        padding:0;
+      }
+    }
+    .clm-right{
+      width:240px;
+      @media screen and (max-width: $breakpoint_tablet){
+          width:100%;
+      }
+    }
+  }
+
+  .table-profile{
+    tr,th,td{
+      @media screen and (max-width: $breakpoint_tablet){
+        display:block;
+      }
+    }
+    tr:first-child{
+      th,td{
+        border-top:none;
+      }
+    }
+
+    th{
+      background-color:#898989;
+      color:#fff;
+      vertical-align:middle;
+      padding-left:1em;
+      .required{
+        display:block;
+        background-color:#c30d23;
+        color:#fff;
+        font-size:0.7em;
+        width:6em;
+        text-align:center;
+        vertical-align:middle;
+        border-radius:4px;
+        padding:2px;
+        @media screen and (max-width: $breakpoint_tablet){
+          display:inline-block;
+          margin-left:1em;
+        }
+      }
+    }
+
+    td{
+      background-color:#ddd;
+      border-top-color:#fff;
+      padding:1em;
+    }
+    .notice{
+      font-size:0.8em;
+      line-height:2;
+    }
+
+    p{
+    }
+  }
+
+  .wrapper-names{
+    @include clearfix;
+    .wrapper-nameinput{
+      display:table;
+      width:49%;
+      float:right;
+      @media screen and (max-width: $breakpoint_tablet){
+        float:none;
+        display:block;
+        width:100%;
+      }
+      &:first-child{
+        float:left;
+        @media screen and (max-width: $breakpoint_tablet){
+          float:none;
+        }
+      }
+      label,input{
+        display:table-cell;
+      }
+      label{
+        text-align:center;
+      }
+
+    }
+  }
+
+  .wrapper-emailconfirm{
+    display:table;
+    width:100%;
+
+    >input,>span{
+      display:table-cell;
+    }
+
+    >span{
+      text-align:center;
+    }
+
+  }
+  .wrapper-payment{
+    margin-bottom:1em;
+    @media screen and (max-width: $breakpoint_tablet){
+      display:table;
+      width:100%;
+    }
+    .payment{
+      border:1px solid #b4b4b4;
+      padding:1em;
+      @media screen and (max-width: $breakpoint_tablet){
+        display:table-cell;
+        width:50%;
+        text-align:center;
+      }
+      input[type=radio]{
+        box-shadow:none;
+        margin-right:8px;
+        height:20px;
+        @media screen and (max-width: $breakpoint_tablet){
+          display:block;
+          width:20px;
+          margin:auto;
+          text-align:center;
+        }
+      }
+    }
+  }
+}

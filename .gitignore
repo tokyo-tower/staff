@@ -1,0 +1,23 @@
+iisnode.yml
+lock/
+logs/
+node_modules/
+npm-debug.log*
+typings/
+iisnode/
+docs
+.env*
+.vscode/
+
+!.gitignore
+!.gitkeep
+
+# Elastic Beanstalk Files
+
+.elasticbeanstalk/*
+
+!.elasticbeanstalk/*.cfg.yml
+
+!.elasticbeanstalk/*.global.yml
+
+*.js.map

@@ -1,0 +1,22 @@
+//座席解放
+.page-release{
+
+  .wrapper-releaseform{
+    background-color:#fff;
+    padding:4em 0;
+    margin:2em auto;
+    form{
+      text-align:center;
+    }
+    select{
+      width:400px;
+    }
+    .btn{
+      >span{
+        padding:4px 1em;
+      }
+    }
+  }
+
+
+}

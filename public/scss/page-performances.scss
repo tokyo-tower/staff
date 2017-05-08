@@ -1,0 +1,359 @@
+//パフォーマンス検索ページ
+.page-performances{
+
+  .performancesearchform{
+    background-color:#e5e5e5;
+    padding:16px;
+    @media screen and (max-width: $breakpoint_tablet){
+      padding:8px;
+    }
+
+    select[name=section]{
+      width: 400px;
+      @media screen and (max-width: $breakpoint_tablet){
+        width:100%;
+      }
+    }
+
+    .form-group,.wrapper-btn{
+      display:table-cell;
+      @media screen and (max-width: $breakpoint_tablet){
+        display:block;
+      }
+    }
+
+    .form-group{
+      padding:0 1em 0 0;
+      @media screen and (max-width: $breakpoint_tablet){
+        margin-bottom:8px;
+        padding:0;
+      }
+    }
+
+    .wrapper-btn{
+      vertical-align:bottom;
+      .btn-search{
+        @media screen and (max-width: $breakpoint_tablet){
+          @include btn-big;
+          display:table;
+          width:80%;
+          margin:20px auto;
+        }
+      }
+    }
+
+    .form-seachqueryinput{
+      width:100%;
+      input{
+        width:100%;
+      }
+    }
+
+  }
+
+
+
+  .searchresult{
+    margin:1em 0;
+    @media screen and (max-width: $breakpoint_tablet){
+      text-align:center;
+    }
+  }
+
+
+  .performance{
+    width:100%;
+    margin:auto;
+    overflow:hidden;
+    position:relative;
+    margin-top:10px;
+    padding-top:43px;
+    display:table;
+    @media screen and (max-width: $breakpoint_tablet){
+      padding-top:0;
+    }
+    &.accordion_mobile_toggle::before{ //携帯レイアウト時アコーディオンの三角形位置調整
+      top:36px;
+      right:10px;
+    }
+    &.accordion_mobile_toggleIsOpen{
+      &::before{
+        border-bottom-color:#898989;      
+      }
+      .performance-title{
+        background-color:#fff;
+        color:#000;
+        @media screen and (max-width: $breakpoint_mobile){
+          border-bottom-right-radius:0;
+        }
+      }
+    }
+    .performance-title{
+      font-size: 14px;
+      background-color:#898989;
+      color:#fff;
+      line-height:1.25;
+      height:38px;
+      margin:0 0 4px 0;
+      display:block;
+      width:100%;
+      position:absolute;
+      top:0;
+      padding:0 10px;
+      @media screen and (max-width: $breakpoint_tablet){
+        width:auto;
+        position:static;
+        margin-left:204px;//サムネイル画像は固定幅でタイトルだけ伸縮する
+      }
+      @media screen and (max-width: $breakpoint_mobile){
+        margin-bottom:0;
+        height:67px; //floatされているサムネイル画像の横に来るので高さを合わせる
+        margin-left:120px;
+        border-radius:0 6px 6px 0;
+      }
+      >h3{
+        display:table;
+        width:100%;
+        height:100%;
+        @media screen and (max-width: $breakpoint_mobile){
+          padding-right:16px; //アコーディオンの三角が出るので重ならないようにする
+          font-size:11px;
+        }
+        >span{
+          display:table-cell;
+          vertical-align:middle;
+          word-break:break-all;
+        }
+      }
+    }
+    .performance-image{
+      width:270px;
+      padding-right:4px;
+      float:left;
+      img{
+        width:266px;
+        height:150px;
+      }
+      @media screen and (max-width: $breakpoint_tablet){
+        width:204px;
+        img{
+          width:200px;
+          height:112px;
+        }
+      }
+      @media screen and (max-width: $breakpoint_mobile){
+        padding-right:0;
+        width:120px;
+        height:67px;
+        img{
+          width:120px;
+          height:67px;
+        }
+      }
+    }
+
+    .performance-inner{
+      width:100%;
+      padding-left:270px;
+      padding-bottom:20px;
+      @media screen and (max-width: $breakpoint_tablet){
+        position:static;
+        padding-left:0;
+        padding-bottom:0;
+      }
+      @media screen and (max-width: $breakpoint_mobile){
+        clear:both;
+        display:none;
+        background-color:#e5e5e5;
+      }
+    }
+    .performance-copyrights {
+      font-size:10px;
+      padding:4px;
+      position:absolute;
+      left:0;
+      bottom:0;
+      @media screen and (max-width: $breakpoint_tablet){
+        position:static;
+        padding:8px;
+      }
+    }
+    .performance-info{
+      line-height: 2;
+      background-color:#fff;
+      padding:0;
+      @media screen and (max-width: $breakpoint_tablet){
+        background-color:transparent;
+        margin-left:204px;
+      }
+      @media screen and (max-width: $breakpoint_mobile){
+        margin-left:0;
+      }
+      .desc,.genreslength{
+        font-size:12px;
+        background-color:#fff;
+        display:inline-block;
+        vertical-align:middle;
+        @media screen and (max-width: $breakpoint_tablet){
+          display:block;
+          height:32px;
+          line-height:32px;
+        }
+        @media screen and (max-width: $breakpoint_mobile){
+          background-color:transparent;
+          height:auto;
+          line-height:1.5;
+        }
+      }
+      .genreslength{
+        @include clearfix;
+        background-color:#fff;
+        float:right;
+        position:relative;
+        padding-right:10px;
+        line-height:32px;
+        //padding-top:4px;
+        @media screen and (max-width: 1025px){
+          float:none;
+        }
+        @media screen and (max-width: $breakpoint_tablet){
+          margin-top:4px;
+        }
+        @media screen and (max-width: $breakpoint_mobile){
+          margin-top:0;
+          line-height:1.5;
+          padding:0;
+        }
+        .genres,.length{
+          display:inline-block;
+        }
+        .genres{
+          display:none; //ジャンル廃止
+          float:left;
+          padding:0 4px;
+          span{
+            background-color: #dcdcdc;
+            padding:0 4px;
+            margin:2px 2px 0 0;
+            display:inline-block;
+          }
+        }
+        .length{
+          float:right;
+          font-size:12px;
+          @media screen and (max-width: $breakpoint_tablet){
+            float:none;
+            padding-left:4px;
+          }
+        }
+      }
+      .desc{
+        padding-left:4px;
+        @media screen and (max-width: $breakpoint_mobile){
+          padding-top:2px;
+        }
+      }
+    }
+    .performance-schedule{
+      margin-top:4px;
+      font-size:0;
+      background-color:#e5e5e5;
+      padding:4px 5px;
+      @media screen and (max-width: $breakpoint_tablet){
+        clear:both;
+      }
+      @media screen and (max-width: $breakpoint_mobile){
+        margin-top:0;
+        padding-top:0;
+      }
+      .wrapper-scheduleitems{ 
+        @media screen and (max-width: $breakpoint_mobile){
+          padding:0 2px;
+        }
+      }
+      .scheduleitem{
+        cursor:pointer;
+        text-align:center;
+        font-size:12px;
+        line-height:1.4;
+        display:inline-block;
+        width:33.333%;
+        background-color:#fff;
+        padding:6px 0;
+        border:2px solid #e5e5e5;
+        border-width: 0 2px 2px;
+        border-bottom-color:#9fa0a0;
+        @media screen and (max-width: $breakpoint_mobile){
+          text-align:left;
+          display:block;
+          border-radius:4px;
+          box-shadow:0 1px rgba(0,0,0,0.2);;
+          width:100%;
+          margin:4px auto 0;
+          border:none;
+        }
+        &:hover{
+          cursor:pointer;
+          opacity:0.9;
+        }
+        h3{
+          font-size:20px;
+        }
+        .text{
+          @media screen and (max-width: $breakpoint_mobile){
+            display:table-cell;
+            width:100%;
+            font-size:11px;
+            padding:4px;
+          }
+        }
+        .status{
+          font-size:24px;
+          color:red;
+          font-weight:lighter;
+          user-select:none;
+          @media screen and (max-width: $breakpoint_mobile){
+            display:table-cell;
+            vertical-align:middle;
+            padding:0 10px;
+          }
+        }
+      }
+      .scheduleitem-crowded{
+        .status{
+          color:#3ab7f1;
+        }
+      }
+      .scheduleitem-soldout,
+      .scheduleitem-unknown{
+        pointer-events:none;
+        background-color:#aaa;
+        color:#fff;
+        &:hover{
+          cursor:default;
+          opacity:1;
+        }
+        .status{
+          color:#fff;
+        }
+      }
+    }
+  }
+  .performance-longtitle{
+    padding-top:84px;
+    @media screen and (max-width: $breakpoint_tablet){
+      padding-top:0;
+    }
+    .performance-title{
+      height:80px;
+      @media screen and (max-width: $breakpoint_tablet){
+        font-size:10px;
+        line-height:1;
+      }
+      @media screen and (max-width: $breakpoint_mobile){
+        height:120px;
+      }
+    }
+  }
+
+}

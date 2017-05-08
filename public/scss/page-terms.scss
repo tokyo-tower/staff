@@ -1,0 +1,23 @@
+//規約同意ページ
+.page-terms{
+
+  .termtext{
+    line-height:1.8;
+    padding:1em 20px;
+    height:600px;
+    overflow:scroll;
+    background-color:#fff;
+    border:1px solid #d0d0d0;
+    @media screen and (max-width: $breakpoint_tablet){
+        height:300px;
+    }
+  }
+
+}
+
+//一般購入は同意ボタンだけなので背景色不要
+#page_customer_reserve_terms{
+    .loginform{
+        background-color:transparent;
+    }
+}

@@ -1,0 +1,31 @@
+<%
+let routeName = '';
+if (req.hasOwnProperty('route')) {
+    routeName = req.route.path;
+}
+%>
+<footer>
+    <% if (routeName.indexOf('mypage') < 0) { %>
+    <ul>
+        <li><a href="/privacy" target="_blank"><%- __('h1.Privacy') %></a></li>
+        <li><a href="/policy" target="_blank"><%- __('h1.Policy') %></a></li>
+        <li><a href="/commercialTransactions" target="_blank"><%- __('h1.ActOnSpecifiedCommercialTransactions') %></a></li>
+    </ul>
+    <% } %>
+    <div class="copyrights">
+        <div class="inner">
+            <!-- 購入フロー中で、パフォーマンスが確定していれば作品著作権をフッターに追加 -->
+            <% if (typeof(reservationModel) !== 'undefined' && reservationModel.performance) { %>
+            <p class="film-copyright"><%- reservationModel.performance.film.copyright %></p>
+            <% } %>
+        </div>
+    </div>
+</footer>
+
+<script>
+$(function(){
+    $(document).on('click', '.update-locale', function(){
+        location.href = '/language/update/' + $(this).attr('data-locale') + '?cb=' + location.href;
+    })
+});
+</script>

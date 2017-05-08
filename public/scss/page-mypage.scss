@@ -1,0 +1,136 @@
+//マイページ共通
+.page-mypage{
+
+
+  .wrapper-searchform{
+    background-color:#fff;
+    padding:0 1em;
+    margin:2em auto;
+    td{
+      border-top:none;
+      padding:15px;
+    }
+    .btn{
+      >span{
+        padding:4px 1em;
+      }
+    }
+  }
+
+
+  .wrapper-reservations{
+
+    thead{
+      background-color:#898989;
+      color:#fff;
+    }
+
+    tbody{
+      background-color:#fff;
+    }
+
+    th,td{
+      vertical-align:middle;
+      padding:1em;
+    }
+    th{
+      font-size:14px;
+      text-align:center;
+    }
+
+    input[type=checkbox]{
+      transform:scale(1.5);
+    }
+
+    .btn{
+      >span{
+        padding:8px;
+      }
+    }
+
+    .td-number,
+    .td-title{
+      font-size:0.8em;
+    }
+
+    .td-seat{
+      text-align:center;
+      a{
+        text-decoration:underline;
+      }
+    }
+
+    .td-updater{
+      text-align:center;
+    }
+
+
+    .td-actions{
+      width:160px;
+      .btn{
+        width:100%;
+        &:first-child{
+          margin-bottom:12px;
+        }
+        &.confirm-cancel{
+          background-color:#ea5514;
+        }
+      }
+    }
+
+  }
+
+
+  .wrapper-controls{
+
+    .navigation{
+      text-align:center;
+      span{
+        color:#666;
+        padding:0 4px;
+        >a{
+          color:#666;
+          text-decoration:underline;
+        }
+      }
+    }
+  }
+
+
+}
+
+
+#page_tel_mypage,
+#page_window_mypage{
+  //電話と窓口のマイページはキャンセルボタン無し
+  .confirm-cancel{
+    display:none;
+  }
+  //電話と窓口のマイページはfont-10px
+  #reservations{
+    font-size:10px;
+  }
+}
+#page_staff_mypage,
+#page_sponsor_mypage{
+  header,footer,.container{
+    @media screen and (max-width: 1170px){
+        width:1170px;
+    }
+  }  
+}
+#page_tel_mypage,
+#page_window_mypage,
+#page_staff_mypage{ 
+  //電話と窓口と内部関係者のマイページは検索ボタン右下端
+  .wrapper-searchform{
+    .form-group:last-child{
+      width:100%;
+      .btn{
+        @include clearfix;
+        float:right;
+        margin:10px 0;
+      }
+    }
+  }
+}

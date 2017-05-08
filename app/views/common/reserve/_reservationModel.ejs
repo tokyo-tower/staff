@@ -1,0 +1,13 @@
+<div class="reservationstatus row">
+    <h2 class="accordion_mobile_toggle"><%- __('Label.PurchaseContent') %></h2>
+    <div class="reservationstatus-inner accordion_mobile_inner">
+        <p class="reservationstatus-image"><img src="/images/film/<%- reservationModel.performance.film._id %>.jpg"></p>
+        <p class="reservationstatus-title"><%= reservationModel.performance.film.name[locale] %></p>
+        <hr>
+        <div class="reservationstatus-info">
+            <p class="info-date"><span><%= reservationModel.performance[`start_str`][locale] %></span></p>
+            <p class="info-screen"><span><%= reservationModel.performance[`location_str`][locale] %></span></p>
+        </div>
+        <p class="btn btn-block btn-showseat show-seat-position" data-screen-id="<%- reservationModel.performance.screen._id %>" data-seat-codes="<%- reservationModel.seatCodes.join(',') %>"><span><%- __('Label.ShowSeats') %></span></p>
+    </div>
+</div>

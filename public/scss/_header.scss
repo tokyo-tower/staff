@@ -1,0 +1,101 @@
+
+header{
+  @include clearfix;
+  background-color:#fff;
+  z-index:128;
+  height:70px;
+  user-select:none;
+  .container{
+    display:table;
+    height:100%;
+    @media screen and (max-width: $breakpoint_tablet){
+      width:100%;
+    }
+  }
+  .header-logo{
+    display:table-cell;
+    vertical-align:middle;
+    img{
+      width:300px;
+      @media screen and (max-width: $breakpoint_mobile){
+        width:220px;
+      }
+    }
+
+  }
+  .header-menu{
+    float:right;
+    font-size: 12px;
+    .myname{
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+    .menu-langs{
+      @include clearfix;
+      li{
+        font-size:1em;
+        float:left;
+        line-height:70px;
+        &:first-child::after{
+          content:'/';
+          margin:0 0.5em;
+        }
+      }
+    }
+    .menu-user{
+
+      text-align:right;
+      .link-cancel{
+        color:#000;
+        text-decoration:underline;
+        &:hover{
+          opacity:0.8;
+        }
+        &::before{
+          content:'';
+          display:inline-block;
+          width:12px;
+          height:12px;
+          background-image:url(/images/common/icon-close.png);
+          background-size:contain;
+        }
+      }
+    }
+    .menu-staff{
+      text-align:right;
+      @media screen and (max-width: $breakpoint_mobile){
+        min-width:174px;
+      }
+      .staff-btns{
+        @include clearfix;
+        .btn{
+          float:right;
+          margin-left:0.5em;
+          @media screen and (max-width: $breakpoint_mobile){
+            font-size:12px;
+            padding:6px;
+          }
+        }
+      }
+    }
+  }
+}
+.page-ja{
+  .menu-langs .langs-ja a{
+    color:#000;
+    text-decoration:none;
+    pointer-events:none;
+  }
+}
+.page-en{
+  .menu-langs .langs-en a{
+    color:#000;
+    text-decoration:none;
+    pointer-events:none;
+  }
+}
+.page-staff{
+  .menu-langs{
+    display:none;
+  }
+}

@@ -1,0 +1,61 @@
+//当日入場バーコード読み取りページ
+#page_admission_confirm{
+  >.container{
+    padding:0;
+  }
+  .pagetitle{
+    margin:1.5em auto;
+  }
+
+  .performancedata{
+    padding:0 1em;
+    h2{
+      font-size:16px;
+    }
+    .when{
+      font-size:24px;
+      line-height:2;
+      display:block;
+    }
+  }
+
+  .text-primary{
+    font-weight:bold;
+    color:#00a0e9;
+  }
+
+  .confirmresult{
+    display:table;
+    width:100%;
+    min-height:80px;
+    font-size:28px;
+    color:#fff;
+    border-radius:0;
+    .glyphicon{
+      font-size:0.8em;
+      margin-right:4px;
+    }
+    .inner{
+      display:table-cell;
+      text-align:center;
+      vertical-align:middle;
+    }
+  }
+  .confirmresult-ok{
+    background-color:#00a0e9;
+  }
+  .confirmresult-ok-student{
+    background-color:#009944;
+  }
+  .confirmresult-ng{
+    background-color:#e83828;
+  }
+  .confirmresult-entered{
+    background-color:#f39800;
+  }
+
+
+  .results{
+    font-size:11px;
+  }
+}
