@@ -9,7 +9,7 @@ import { ReservationUtil } from '@motionpicture/chevre-domain';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 
-const debug = createDebug('chevre-frontend:controller:staffCancel');
+const debug = createDebug('chevre-staff:controller:staffCancel');
 
 export async function execute(req: Request, res: Response, next: NextFunction): Promise<void> {
     if (req.staffUser === undefined) {

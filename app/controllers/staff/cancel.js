@@ -16,7 +16,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const chevre_domain_1 = require("@motionpicture/chevre-domain");
 const chevre_domain_2 = require("@motionpicture/chevre-domain");
 const createDebug = require("debug");
-const debug = createDebug('chevre-frontend:controller:staffCancel');
+const debug = createDebug('chevre-staff:controller:staffCancel');
 function execute(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (req.staffUser === undefined) {

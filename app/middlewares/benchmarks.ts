@@ -7,7 +7,7 @@
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 
-const debug = createDebug('chevre-frontend:middlewares:benchmarks');
+const debug = createDebug('chevre-staff:middlewares:benchmarks');
 
 // tslint:disable-next-line:variable-name
 export default (req: Request, _: Response, next: NextFunction) => {

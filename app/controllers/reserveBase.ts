@@ -18,7 +18,7 @@ import reserveProfileForm from '../forms/reserve/reserveProfileForm';
 import reserveTicketForm from '../forms/reserve/reserveTicketForm';
 import ReservationModel from '../models/reserve/session';
 
-const debug = createDebug('chevre-frontend:controller:reserveBase');
+const debug = createDebug('chevre-staff:controller:reserveBase');
 const DEFAULT_RADIX = 10;
 
 /**
@@ -150,8 +150,6 @@ function initializePayment(reservationModel: ReservationModel, req: Request): vo
         throw new Error('purchaser group undefined.');
     }
 
-    const purchaserFromSession = <IPurchaser | undefined>(<any>req.session).purchaser;
-
     reservationModel.purchaser = {
         lastName: '',
         firstName: '',
@@ -164,14 +162,6 @@ function initializePayment(reservationModel: ReservationModel, req: Request): vo
     reservationModel.paymentMethodChoices = [];
 
     switch (reservationModel.purchaserGroup) {
-        case ReservationUtil.PURCHASER_GROUP_CUSTOMER:
-            if (purchaserFromSession !== undefined) {
-                reservationModel.purchaser = purchaserFromSession;
-            }
-
-            reservationModel.paymentMethodChoices = [GMO.Util.PAY_TYPE_CREDIT, GMO.Util.PAY_TYPE_CVS];
-            break;
-
         case ReservationUtil.PURCHASER_GROUP_STAFF:
             if (req.staffUser === undefined) {
                 throw new Error(req.__('Message.UnexpectedError'));
@@ -405,23 +395,6 @@ export async function processAllExceptConfirm(reservationModel: ReservationModel
     };
 
     switch (reservationModel.purchaserGroup) {
-        case ReservationUtil.PURCHASER_GROUP_CUSTOMER:
-            // クレジット決済
-            if (reservationModel.paymentMethod === GMO.Util.PAY_TYPE_CREDIT) {
-                commonUpdate.gmo_shop_id = process.env.GMO_SHOP_ID;
-                commonUpdate.gmo_shop_pass = process.env.GMO_SHOP_PASS;
-                commonUpdate.gmo_order_id = reservationModel.transactionGMO.orderId;
-                commonUpdate.gmo_amount = reservationModel.transactionGMO.amount;
-                commonUpdate.gmo_access_id = reservationModel.transactionGMO.accessId;
-                commonUpdate.gmo_access_pass = reservationModel.transactionGMO.accessPass;
-                commonUpdate.gmo_status = GMO.Util.STATUS_CREDIT_AUTH;
-            } else if (reservationModel.paymentMethod === GMO.Util.PAY_TYPE_CVS) {
-                // オーダーID保管
-                commonUpdate.gmo_order_id = reservationModel.transactionGMO.orderId;
-            }
-
-            break;
-
         case ReservationUtil.PURCHASER_GROUP_STAFF:
             commonUpdate.staff = (<Express.StaffUser>req.staffUser).get('_id');
             commonUpdate.staff_user_id = (<Express.StaffUser>req.staffUser).get('user_id');
@@ -502,19 +475,6 @@ export async function processFixReservations(performanceDay: string, paymentNo: 
         console.error(error);
         // 失敗してもスルー(ログと運用でなんとかする)
     }
-}
-
-/**
- * 購入者情報インターフェース
- */
-interface IPurchaser {
-    lastName: string;
-    firstName: string;
-    tel: string;
-    email: string;
-    age: string;
-    address: string;
-    gender: string;
 }
 
 /**

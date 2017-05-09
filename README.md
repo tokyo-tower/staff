@@ -73,7 +73,7 @@ set WEBSITE_TIME_ZONE=Tokyo Standard Time
 DEBUG
 
 ```shell
-set DEBUG=chevre-frontend*
+set DEBUG=chevre-staff*
 ```
 
 

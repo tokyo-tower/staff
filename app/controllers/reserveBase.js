@@ -24,7 +24,7 @@ const _ = require("underscore");
 const reserveProfileForm_1 = require("../forms/reserve/reserveProfileForm");
 const reserveTicketForm_1 = require("../forms/reserve/reserveTicketForm");
 const session_1 = require("../models/reserve/session");
-const debug = createDebug('chevre-frontend:controller:reserveBase');
+const debug = createDebug('chevre-staff:controller:reserveBase');
 const DEFAULT_RADIX = 10;
 /**
  * 券種FIXプロセス
@@ -148,7 +148,6 @@ function initializePayment(reservationModel, req) {
     if (reservationModel.purchaserGroup === undefined) {
         throw new Error('purchaser group undefined.');
     }
-    const purchaserFromSession = req.session.purchaser;
     reservationModel.purchaser = {
         lastName: '',
         firstName: '',
@@ -160,12 +159,6 @@ function initializePayment(reservationModel, req) {
     };
     reservationModel.paymentMethodChoices = [];
     switch (reservationModel.purchaserGroup) {
-        case chevre_domain_1.ReservationUtil.PURCHASER_GROUP_CUSTOMER:
-            if (purchaserFromSession !== undefined) {
-                reservationModel.purchaser = purchaserFromSession;
-            }
-            reservationModel.paymentMethodChoices = [GMO.Util.PAY_TYPE_CREDIT, GMO.Util.PAY_TYPE_CVS];
-            break;
         case chevre_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF:
             if (req.staffUser === undefined) {
                 throw new Error(req.__('Message.UnexpectedError'));
@@ -374,22 +367,6 @@ function processAllExceptConfirm(reservationModel, req) {
     return __awaiter(this, void 0, void 0, function* () {
         const commonUpdate = {};
         switch (reservationModel.purchaserGroup) {
-            case chevre_domain_1.ReservationUtil.PURCHASER_GROUP_CUSTOMER:
-                // クレジット決済
-                if (reservationModel.paymentMethod === GMO.Util.PAY_TYPE_CREDIT) {
-                    commonUpdate.gmo_shop_id = process.env.GMO_SHOP_ID;
-                    commonUpdate.gmo_shop_pass = process.env.GMO_SHOP_PASS;
-                    commonUpdate.gmo_order_id = reservationModel.transactionGMO.orderId;
-                    commonUpdate.gmo_amount = reservationModel.transactionGMO.amount;
-                    commonUpdate.gmo_access_id = reservationModel.transactionGMO.accessId;
-                    commonUpdate.gmo_access_pass = reservationModel.transactionGMO.accessPass;
-                    commonUpdate.gmo_status = GMO.Util.STATUS_CREDIT_AUTH;
-                }
-                else if (reservationModel.paymentMethod === GMO.Util.PAY_TYPE_CVS) {
-                    // オーダーID保管
-                    commonUpdate.gmo_order_id = reservationModel.transactionGMO.orderId;
-                }
-                break;
             case chevre_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF:
                 commonUpdate.staff = req.staffUser.get('_id');
                 commonUpdate.staff_user_id = req.staffUser.get('user_id');
