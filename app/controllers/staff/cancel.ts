@@ -4,12 +4,12 @@
  * @namespace controller/staff/cancel
  */
 
-import { Models } from '@motionpicture/chevre-domain';
-import { ReservationUtil } from '@motionpicture/chevre-domain';
+import { Models } from '@motionpicture/ttts-domain';
+import { ReservationUtil } from '@motionpicture/ttts-domain';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 
-const debug = createDebug('chevre-staff:controller:staffCancel');
+const debug = createDebug('ttts-staff:controller:staffCancel');
 
 export async function execute(req: Request, res: Response, next: NextFunction): Promise<void> {
     if (req.staffUser === undefined) {
@@ -27,17 +27,17 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
 
         const promises = reservationIds.map(async (id) => {
             debug(
-                'updating to STATUS_KEPT_BY_CHEVRE by staff... staff:', staffUser.get('user_id'),
+                'updating to STATUS_KEPT_BY_TTTS by staff... staff:', staffUser.get('user_id'),
                 'signature:', staffUser.get('signature'),
                 'id:', id
             );
             const reservation = await Models.Reservation.findOneAndUpdate(
                 { _id: id },
-                { status: ReservationUtil.STATUS_KEPT_BY_CHEVRE },
+                { status: ReservationUtil.STATUS_KEPT_BY_TTTS },
                 { new: true }
             ).exec();
             debug(
-                'updated to STATUS_KEPT_BY_CHEVRE by staff.', reservation,
+                'updated to STATUS_KEPT_BY_TTTS by staff.', reservation,
                 'staff:', staffUser.get('user_id'),
                 'signature:', staffUser.get('signature'),
                 'id:', id

@@ -13,7 +13,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const chevre_domain_1 = require("@motionpicture/chevre-domain");
+const ttts_domain_1 = require("@motionpicture/ttts-domain");
 const session_1 = require("../models/reserve/session");
 /**
  * 座席の状態を取得する
@@ -21,7 +21,7 @@ const session_1 = require("../models/reserve/session");
 function getUnavailableSeatCodes(req, res, __) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const seatCodes = yield chevre_domain_1.Models.Reservation.distinct('seat_code', {
+            const seatCodes = yield ttts_domain_1.Models.Reservation.distinct('seat_code', {
                 performance: req.params.performanceId
             }).exec();
             res.json(seatCodes);
@@ -45,7 +45,7 @@ function getSeatProperties(req, res, __) {
             }
             const propertiesBySeatCode = {};
             // 予約リストを取得
-            const reservations = yield chevre_domain_1.Models.Reservation.find({
+            const reservations = yield ttts_domain_1.Models.Reservation.find({
                 performance: reservationModel.performance._id
             }).exec();
             // 予約データが存在すれば、現在仮押さえ中の座席を除いて予約不可(disabled)
@@ -58,10 +58,10 @@ function getSeatProperties(req, res, __) {
                     avalilable = true;
                 }
                 // 内部関係者用
-                if (reservationModel.purchaserGroup === chevre_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF) {
+                if (reservationModel.purchaserGroup === ttts_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF) {
                     baloonContent = reservation.get('baloon_content4staff');
-                    // 内部関係者はCHEVRE確保も予約できる
-                    if (reservation.get('status') === chevre_domain_1.ReservationUtil.STATUS_KEPT_BY_CHEVRE) {
+                    // 内部関係者はTTTS確保も予約できる
+                    if (reservation.get('status') === ttts_domain_1.ReservationUtil.STATUS_KEPT_BY_TTTS) {
                         avalilable = true;
                     }
                 }
@@ -98,16 +98,16 @@ function print(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const ids = JSON.parse(req.query.ids);
-            const reservations = yield chevre_domain_1.Models.Reservation.find({
+            const reservations = yield ttts_domain_1.Models.Reservation.find({
                 _id: { $in: ids },
-                status: chevre_domain_1.ReservationUtil.STATUS_RESERVED
+                status: ttts_domain_1.ReservationUtil.STATUS_RESERVED
             }).exec();
             if (reservations.length === 0) {
                 next(new Error(req.__('Message.NotFound')));
                 return;
             }
             reservations.sort((a, b) => {
-                return chevre_domain_1.ScreenUtil.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
+                return ttts_domain_1.ScreenUtil.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
             });
             res.render('reserve/print', {
                 layout: false,

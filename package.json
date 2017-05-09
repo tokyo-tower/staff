@@ -17,8 +17,8 @@
     }
   ],
   "dependencies": {
-    "@motionpicture/chevre-domain": "^9.0.1",
     "@motionpicture/gmo-service": "^3.0.4",
+    "@motionpicture/ttts-domain": "^3.0.0",
     "basic-auth": "^1.0.4",
     "body-parser": "^1.17.1",
     "config": "^1.26.1",
@@ -42,7 +42,7 @@
     "serve-favicon": "^2.4.2",
     "underscore": "^1.8.3"
   },
-  "description": "This is a repogitory for CHEVRE online website.",
+  "description": "This is a repogitory for TTTS online website.",
   "devDependencies": {
     "@types/basic-auth": "0.0.31",
     "@types/body-parser": "0.0.34",
@@ -89,7 +89,7 @@
   "keywords": [],
   "license": "UNLICENSED",
   "main": "index.js",
-  "name": "chevre-staff",
+  "name": "ttts-staff",
   "private": true,
   "repository": {},
   "scripts": {

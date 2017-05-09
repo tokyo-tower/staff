@@ -13,7 +13,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const chevre_domain_1 = require("@motionpicture/chevre-domain");
+const ttts_domain_1 = require("@motionpicture/ttts-domain");
 const express = require("express");
 const staffAuthController = require("../controllers/staff/auth");
 const staffCancelController = require("../controllers/staff/cancel");
@@ -38,7 +38,7 @@ const authentication = (req, res, next) => __awaiter(this, void 0, void 0, funct
     // 自動ログインチェック
     if (req.cookies.remember_staff !== undefined) {
         try {
-            const authenticationDoc = yield chevre_domain_1.Models.Authentication.findOne({
+            const authenticationDoc = yield ttts_domain_1.Models.Authentication.findOne({
                 token: req.cookies.remember_staff,
                 owner: { $ne: null }
             }).exec();
@@ -47,11 +47,11 @@ const authentication = (req, res, next) => __awaiter(this, void 0, void 0, funct
             }
             else {
                 // トークン再生成
-                const token = chevre_domain_1.CommonUtil.createToken();
+                const token = ttts_domain_1.CommonUtil.createToken();
                 yield authenticationDoc.update({ token: token }).exec();
                 // tslint:disable-next-line:no-cookies
                 res.cookie('remember_staff', token, { path: '/', httpOnly: true, maxAge: 604800000 });
-                const owner = yield chevre_domain_1.Models.Owner.findOne({ _id: authenticationDoc.get('owner') }).exec();
+                const owner = yield ttts_domain_1.Models.Owner.findOne({ _id: authenticationDoc.get('owner') }).exec();
                 // ログインしてリダイレクト
                 req.session[staff_1.default.AUTH_SESSION_NAME] = owner.toObject();
                 req.session[staff_1.default.AUTH_SESSION_NAME].signature = authenticationDoc.get('signature');

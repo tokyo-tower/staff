@@ -13,7 +13,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const chevre = require("@motionpicture/chevre-domain");
+const TTTS = require("@motionpicture/ttts-domain");
 const conf = require("config");
 const moment = require("moment");
 const _ = require("underscore");
@@ -21,7 +21,7 @@ const reservePerformanceForm_1 = require("../../forms/reserve/reservePerformance
 const reserveSeatForm_1 = require("../../forms/reserve/reserveSeatForm");
 const session_1 = require("../../models/reserve/session");
 const reserveBaseController = require("../reserveBase");
-const PURCHASER_GROUP = chevre.ReservationUtil.PURCHASER_GROUP_STAFF;
+const PURCHASER_GROUP = TTTS.ReservationUtil.PURCHASER_GROUP_STAFF;
 const layout = 'layouts/staff/layout';
 function start(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -93,7 +93,7 @@ function performances(req, res, next) {
                 yield processCancelSeats(reservationModel);
                 reservationModel.save(req);
                 res.render('staff/reserve/performances', {
-                    FilmUtil: chevre.FilmUtil,
+                    FilmUtil: TTTS.FilmUtil,
                     layout: layout
                 });
             }
@@ -265,10 +265,10 @@ function complete(req, res, next) {
             return;
         }
         try {
-            const reservations = yield chevre.Models.Reservation.find({
+            const reservations = yield TTTS.Models.Reservation.find({
                 performance_day: req.params.performanceDay,
                 payment_no: req.params.paymentNo,
-                status: chevre.ReservationUtil.STATUS_RESERVED,
+                status: TTTS.ReservationUtil.STATUS_RESERVED,
                 owner: req.staffUser.get('_id'),
                 purchased_at: {
                     $gt: moment().add(-30, 'minutes').toISOString() // tslint:disable-line:no-magic-numbers
@@ -279,7 +279,7 @@ function complete(req, res, next) {
                 return;
             }
             reservations.sort((a, b) => {
-                return chevre.ScreenUtil.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
+                return TTTS.ScreenUtil.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
             });
             res.render('staff/reserve/complete', {
                 reservationDocuments: reservations,
@@ -306,15 +306,15 @@ function processCancelSeats(reservationModel) {
         }
         // セッション中の予約リストを初期化
         reservationModel.seatCodes = [];
-        // 仮予約をCHEVRE確保ステータスに戻す
+        // 仮予約をTTTS確保ステータスに戻す
         try {
-            yield chevre.Models.Reservation.update({
+            yield TTTS.Models.Reservation.update({
                 performance: reservationModel.performance._id,
                 seat_code: { $in: seatCodesInSession },
-                status: chevre.ReservationUtil.STATUS_TEMPORARY_ON_KEPT_BY_CHEVRE
+                status: TTTS.ReservationUtil.STATUS_TEMPORARY_ON_KEPT_BY_TTTS
             }, {
                 $set: {
-                    status: chevre.ReservationUtil.STATUS_KEPT_BY_CHEVRE
+                    status: TTTS.ReservationUtil.STATUS_KEPT_BY_TTTS
                 },
                 $unset: {
                     owner: ''
@@ -323,10 +323,10 @@ function processCancelSeats(reservationModel) {
                 multi: true
             }).exec();
             // 仮予約を空席ステータスに戻す
-            yield chevre.Models.Reservation.remove({
+            yield TTTS.Models.Reservation.remove({
                 performance: reservationModel.performance._id,
                 seat_code: { $in: seatCodesInSession },
-                status: chevre.ReservationUtil.STATUS_TEMPORARY
+                status: TTTS.ReservationUtil.STATUS_TEMPORARY
             }).exec();
         }
         catch (error) {
@@ -360,10 +360,10 @@ function processFixSeats(reservationModel, seatCodes, req) {
             }
             // 予約データを作成(同時作成しようとしたり、既に予約があったとしても、unique indexではじかれる)
             try {
-                const reservation = yield chevre.Models.Reservation.create({
+                const reservation = yield TTTS.Models.Reservation.create({
                     performance: reservationModel.performance._id,
                     seat_code: seatCode,
-                    status: chevre.ReservationUtil.STATUS_TEMPORARY,
+                    status: TTTS.ReservationUtil.STATUS_TEMPORARY,
                     expired_at: reservationModel.expiredAt,
                     owner: staffUser.get('_id')
                 });
@@ -385,13 +385,13 @@ function processFixSeats(reservationModel, seatCodes, req) {
                 });
             }
             catch (error) {
-                // CHEVRE確保からの仮予約を試みる
-                const reservation = yield chevre.Models.Reservation.findOneAndUpdate({
+                // TTTS確保からの仮予約を試みる
+                const reservation = yield TTTS.Models.Reservation.findOneAndUpdate({
                     performance: reservationModel.performance._id,
                     seat_code: seatCode,
-                    status: chevre.ReservationUtil.STATUS_KEPT_BY_CHEVRE
+                    status: TTTS.ReservationUtil.STATUS_KEPT_BY_TTTS
                 }, {
-                    status: chevre.ReservationUtil.STATUS_TEMPORARY_ON_KEPT_BY_CHEVRE,
+                    status: TTTS.ReservationUtil.STATUS_TEMPORARY_ON_KEPT_BY_TTTS,
                     expired_at: reservationModel.expiredAt,
                     owner: staffUser.get('_id')
                 }, {
@@ -420,7 +420,7 @@ function processFixSeats(reservationModel, seatCodes, req) {
         }));
         yield Promise.all(promises);
         // 座席コードのソート(文字列順に)
-        reservationModel.seatCodes.sort(chevre.ScreenUtil.sortBySeatCode);
+        reservationModel.seatCodes.sort(TTTS.ScreenUtil.sortBySeatCode);
     });
 }
 exports.processFixSeats = processFixSeats;

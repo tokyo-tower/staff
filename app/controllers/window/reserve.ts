@@ -4,8 +4,8 @@
  * @class controller/window/reserve
  */
 
-import { FilmUtil, Models, ReservationUtil, ScreenUtil } from '@motionpicture/chevre-domain';
 import { Util as GMOUtil } from '@motionpicture/gmo-service';
+import { FilmUtil, Models, ReservationUtil, ScreenUtil } from '@motionpicture/ttts-domain';
 import { NextFunction, Request, Response } from 'express';
 import * as moment from 'moment';
 import * as _ from 'underscore';

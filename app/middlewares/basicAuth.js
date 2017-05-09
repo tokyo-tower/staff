@@ -30,6 +30,6 @@ exports.default = (req, res, next) => {
         return;
     }
     res.statusCode = http_status_1.UNAUTHORIZED;
-    res.setHeader('WWW-Authenticate', 'Basic realm="CHEVRE Authentication"');
+    res.setHeader('WWW-Authenticate', 'Basic realm="TTTS Authentication"');
     res.end('Unauthorized');
 };

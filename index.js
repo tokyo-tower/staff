@@ -9,7 +9,7 @@ const startTime = process.hrtime();
 const createDebug = require("debug");
 const http = require("http");
 const app = require("./app/app");
-const debug = createDebug('chevre-staff:index');
+const debug = createDebug('ttts-staff:index');
 /**
  * Get port from environment and store in Express.
  */

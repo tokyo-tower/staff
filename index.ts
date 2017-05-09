@@ -11,7 +11,7 @@ import * as createDebug from 'debug';
 import * as http from 'http';
 import * as app from './app/app';
 
-const debug = createDebug('chevre-staff:index');
+const debug = createDebug('ttts-staff:index');
 
 /**
  * Get port from environment and store in Express.

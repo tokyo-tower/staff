@@ -4,7 +4,7 @@
  * @ignore
  */
 
-import { CommonUtil, Models } from '@motionpicture/chevre-domain';
+import { CommonUtil, Models } from '@motionpicture/ttts-domain';
 import * as express from 'express';
 import * as windowAuthController from '../controllers/window/auth';
 import * as windowCancelController from '../controllers/window/cancel';

@@ -13,10 +13,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const chevre_domain_1 = require("@motionpicture/chevre-domain");
-const chevre_domain_2 = require("@motionpicture/chevre-domain");
+const ttts_domain_1 = require("@motionpicture/ttts-domain");
+const ttts_domain_2 = require("@motionpicture/ttts-domain");
 const createDebug = require("debug");
-const debug = createDebug('chevre-staff:controller:staffCancel');
+const debug = createDebug('ttts-staff:controller:staffCancel');
 function execute(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (req.staffUser === undefined) {
@@ -31,9 +31,9 @@ function execute(req, res, next) {
                 throw new Error(req.__('Message.UnexpectedError'));
             }
             const promises = reservationIds.map((id) => __awaiter(this, void 0, void 0, function* () {
-                debug('updating to STATUS_KEPT_BY_CHEVRE by staff... staff:', staffUser.get('user_id'), 'signature:', staffUser.get('signature'), 'id:', id);
-                const reservation = yield chevre_domain_1.Models.Reservation.findOneAndUpdate({ _id: id }, { status: chevre_domain_2.ReservationUtil.STATUS_KEPT_BY_CHEVRE }, { new: true }).exec();
-                debug('updated to STATUS_KEPT_BY_CHEVRE by staff.', reservation, 'staff:', staffUser.get('user_id'), 'signature:', staffUser.get('signature'), 'id:', id);
+                debug('updating to STATUS_KEPT_BY_TTTS by staff... staff:', staffUser.get('user_id'), 'signature:', staffUser.get('signature'), 'id:', id);
+                const reservation = yield ttts_domain_1.Models.Reservation.findOneAndUpdate({ _id: id }, { status: ttts_domain_2.ReservationUtil.STATUS_KEPT_BY_TTTS }, { new: true }).exec();
+                debug('updated to STATUS_KEPT_BY_TTTS by staff.', reservation, 'staff:', staffUser.get('user_id'), 'signature:', staffUser.get('signature'), 'id:', id);
             }));
             yield Promise.all(promises);
             res.json({

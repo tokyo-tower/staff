@@ -1,12 +1,12 @@
 {
     "official_website_url": "http://motionpicture.jp",
     "meta": {
-        "keywords": "CHEVRE_EVENT_NAME, 2016, CHEVRE, コンペティション,Competiton,",
-        "description": "CHEVRE_EVENT_NAMEは2016年10月25日（火）から11月3日（木・祝）の10日間開催いたします。"
+        "keywords": "TTTS_EVENT_NAME, 2016, TTTS, コンペティション,Competiton,",
+        "description": "TTTS_EVENT_NAMEは2016年10月25日（火）から11月3日（木・祝）の10日間開催いたします。"
     },
     "email": {
-        "from": "noreply@default.chevre.motionpicture.jp",
-        "fromname": "CHEVRE_EVENT_NAME Online Ticket [dev]"
+        "from": "noreply@default.ttts.motionpicture.jp",
+        "fromname": "TTTS_EVENT_NAME Online Ticket [dev]"
     },
     "gmo_payment_api_link_multi_entry": "https://pt01.mul-pay.jp/link/tshop00027145/Multi/Entry",
     "datetimes": {

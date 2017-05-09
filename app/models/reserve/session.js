@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const chevre_domain_1 = require("@motionpicture/chevre-domain");
 const gmo_service_1 = require("@motionpicture/gmo-service");
+const ttts_domain_1 = require("@motionpicture/ttts-domain");
 const moment = require("moment");
 const MAX_RESERVATION_SEATS_DEFAULT = 4;
 const MAX_RESERVATION_SEATS_STAFFS = 10;
@@ -48,8 +48,8 @@ class ReserveSessionModel {
         let limit = MAX_RESERVATION_SEATS_DEFAULT;
         // 主体によっては、決済方法を強制的に固定で
         switch (this.purchaserGroup) {
-            case chevre_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF:
-            case chevre_domain_1.ReservationUtil.PURCHASER_GROUP_WINDOW:
+            case ttts_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF:
+            case ttts_domain_1.ReservationUtil.PURCHASER_GROUP_WINDOW:
                 limit = MAX_RESERVATION_SEATS_STAFFS;
                 break;
             default:
@@ -83,7 +83,7 @@ class ReserveSessionModel {
     }
     getChargeExceptTicketTypeBySeatCode(seatCode) {
         let charge = 0;
-        if (this.purchaserGroup === chevre_domain_1.ReservationUtil.PURCHASER_GROUP_WINDOW) {
+        if (this.purchaserGroup === ttts_domain_1.ReservationUtil.PURCHASER_GROUP_WINDOW) {
             const reservation = this.getReservation(seatCode);
             // 座席グレード分加算
             if (reservation.seat_grade_additional_charge > 0) {
@@ -91,11 +91,11 @@ class ReserveSessionModel {
             }
             // MX4D分加算
             if (this.performance.film.is_mx4d) {
-                charge += chevre_domain_1.ReservationUtil.CHARGE_MX4D;
+                charge += ttts_domain_1.ReservationUtil.CHARGE_MX4D;
             }
             // コンビニ手数料加算
             if (this.paymentMethod === gmo_service_1.Util.PAY_TYPE_CVS) {
-                charge += chevre_domain_1.ReservationUtil.CHARGE_CVS;
+                charge += ttts_domain_1.ReservationUtil.CHARGE_CVS;
             }
         }
         return charge;
@@ -166,5 +166,5 @@ class ReserveSessionModel {
         };
     }
 }
-ReserveSessionModel.SESSION_KEY = 'chevre-reserve-session';
+ReserveSessionModel.SESSION_KEY = 'ttts-reserve-session';
 exports.default = ReserveSessionModel;

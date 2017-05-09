@@ -50,11 +50,11 @@ npm run css
 ```shell
 set NODE_ENV=**********環境名(development,test,productionなど)**********
 set SENDGRID_API_KEY=**********sendgrid api key**********
-set CHEVRE_PERFORMANCE_STATUSES_REDIS_HOST=**********パフォーマンス空席状況保管先redis host**********
-set CHEVRE_PERFORMANCE_STATUSES_REDIS_PORT=**********パフォーマンス空席状況保管先redis port**********
-set CHEVRE_PERFORMANCE_STATUSES_REDIS_KEY=**********パフォーマンス空席状況保管先redis key**********
+set TTTS_PERFORMANCE_STATUSES_REDIS_HOST=**********パフォーマンス空席状況保管先redis host**********
+set TTTS_PERFORMANCE_STATUSES_REDIS_PORT=**********パフォーマンス空席状況保管先redis port**********
+set TTTS_PERFORMANCE_STATUSES_REDIS_KEY=**********パフォーマンス空席状況保管先redis key**********
 set FRONTEND_GMO_RESULT_ENDPOINT=**********GMOリンク決済からの戻り先エンドポイント**********
-set API_ENDPOINT=**********frontと連携するchevre apiのエンドポイント**********
+set API_ENDPOINT=**********frontと連携するttts apiのエンドポイント**********
 set REDIS_HOST=**********session保管先redis host**********
 set REDIS_PORT=**********session保管先redis port**********
 set REDIS_KEY=**********session保管先redis key**********
@@ -73,7 +73,7 @@ set WEBSITE_TIME_ZONE=Tokyo Standard Time
 DEBUG
 
 ```shell
-set DEBUG=chevre-staff*
+set DEBUG=ttts-staff*
 ```
 
 

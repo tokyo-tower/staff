@@ -4,8 +4,8 @@
  * @namespace controller/reserveBase
  */
 
-import { EmailQueueUtil, Models, ReservationUtil, ScreenUtil, TicketTypeGroupUtil } from '@motionpicture/chevre-domain';
 import * as GMO from '@motionpicture/gmo-service';
+import { EmailQueueUtil, Models, ReservationUtil, ScreenUtil, TicketTypeGroupUtil } from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import * as createDebug from 'debug';
 import { Request, Response } from 'express';
@@ -18,7 +18,7 @@ import reserveProfileForm from '../forms/reserve/reserveProfileForm';
 import reserveTicketForm from '../forms/reserve/reserveTicketForm';
 import ReservationModel from '../models/reserve/session';
 
-const debug = createDebug('chevre-staff:controller:reserveBase');
+const debug = createDebug('ttts-staff:controller:reserveBase');
 const DEFAULT_RADIX = 10;
 
 /**
@@ -183,7 +183,7 @@ function initializePayment(reservationModel: ReservationModel, req: Request): vo
                 lastName: 'マドグチ',
                 firstName: 'タントウシャ',
                 tel: '0362263025',
-                email: 'chevre@localhost.net',
+                email: 'ttts@localhost.net',
                 age: '00',
                 address: '',
                 gender: '1'
@@ -535,8 +535,8 @@ async function createEmailQueue(res: Response, performanceDay: string, paymentNo
         throw new Error('email to unknown');
     }
 
-    const titleJa = 'CHEVRE_EVENT_NAMEチケット 購入完了のお知らせ';
-    const titleEn = 'Notice of Completion of CHEVRE Ticket Purchase';
+    const titleJa = 'TTTS_EVENT_NAMEチケット 購入完了のお知らせ';
+    const titleEn = 'Notice of Completion of TTTS Ticket Purchase';
 
     debug('rendering template...');
     return new Promise<IEmailQueue>((resolve, reject) => {

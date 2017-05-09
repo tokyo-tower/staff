@@ -4,7 +4,7 @@
  * @namespace controller/window/cancel
  */
 
-import { Models, ReservationUtil } from '@motionpicture/chevre-domain';
+import { Models, ReservationUtil } from '@motionpicture/ttts-domain';
 import { NextFunction, Request, Response } from 'express';
 
 export async function execute(req: Request, res: Response, next: NextFunction): Promise<void> {

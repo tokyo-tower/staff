@@ -13,8 +13,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const chevre_domain_1 = require("@motionpicture/chevre-domain");
 const gmo_service_1 = require("@motionpicture/gmo-service");
+const ttts_domain_1 = require("@motionpicture/ttts-domain");
 const moment = require("moment");
 const _ = require("underscore");
 const DEFAULT_RADIX = 10;
@@ -22,7 +22,7 @@ const layout = 'layouts/window/layout';
 function index(__1, res, __2) {
     res.render('window/mypage/index', {
         GMOUtil: gmo_service_1.Util,
-        ReservationUtil: chevre_domain_1.ReservationUtil,
+        ReservationUtil: ttts_domain_1.ReservationUtil,
         layout: layout
     });
 }
@@ -49,12 +49,12 @@ function search(req, res, __) {
         const conditions = [];
         // 内部関係者以外がデフォルト
         conditions.push({
-            purchaser_group: { $ne: chevre_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF },
+            purchaser_group: { $ne: ttts_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF },
             status: {
                 $in: [
-                    chevre_domain_1.ReservationUtil.STATUS_RESERVED,
-                    chevre_domain_1.ReservationUtil.STATUS_WAITING_SETTLEMENT,
-                    chevre_domain_1.ReservationUtil.STATUS_WAITING_SETTLEMENT_PAY_DESIGN
+                    ttts_domain_1.ReservationUtil.STATUS_RESERVED,
+                    ttts_domain_1.ReservationUtil.STATUS_WAITING_SETTLEMENT,
+                    ttts_domain_1.ReservationUtil.STATUS_WAITING_SETTLEMENT_PAY_DESIGN
                 ]
             }
         });
@@ -76,12 +76,12 @@ function search(req, res, __) {
         }
         if (email !== null) {
             // remove space characters
-            email = chevre_domain_1.CommonUtil.toHalfWidth(email.replace(/\s/g, ''));
+            email = ttts_domain_1.CommonUtil.toHalfWidth(email.replace(/\s/g, ''));
             conditions.push({ purchaser_email: { $regex: new RegExp(email, 'i') } });
         }
         if (tel !== null) {
             // remove space characters
-            tel = chevre_domain_1.CommonUtil.toHalfWidth(tel.replace(/\s/g, ''));
+            tel = ttts_domain_1.CommonUtil.toHalfWidth(tel.replace(/\s/g, ''));
             conditions.push({ purchaser_tel: { $regex: new RegExp(tel, 'i') } });
         }
         // 空白つなぎでAND検索
@@ -106,7 +106,7 @@ function search(req, res, __) {
         }
         if (paymentNo !== null) {
             // remove space characters
-            paymentNo = chevre_domain_1.CommonUtil.toHalfWidth(paymentNo.replace(/\s/g, ''));
+            paymentNo = ttts_domain_1.CommonUtil.toHalfWidth(paymentNo.replace(/\s/g, ''));
             conditions.push({ payment_no: { $regex: new RegExp(paymentNo, 'i') } });
         }
         if (day !== null) {
@@ -134,10 +134,10 @@ function search(req, res, __) {
         }
         try {
             // 総数検索
-            const count = yield chevre_domain_1.Models.Reservation.count({
+            const count = yield ttts_domain_1.Models.Reservation.count({
                 $and: conditions
             }).exec();
-            const reservations = yield chevre_domain_1.Models.Reservation.find({ $and: conditions })
+            const reservations = yield ttts_domain_1.Models.Reservation.find({ $and: conditions })
                 .skip(limit * (page - 1))
                 .limit(limit)
                 .lean(true)
@@ -153,7 +153,7 @@ function search(req, res, __) {
                 if (a.screen > b.screen) {
                     return 1;
                 }
-                return chevre_domain_1.ScreenUtil.sortBySeatCode(a.seat_code, b.seat_code);
+                return ttts_domain_1.ScreenUtil.sortBySeatCode(a.seat_code, b.seat_code);
             });
             res.json({
                 success: true,

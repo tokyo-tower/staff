@@ -45,7 +45,7 @@ $(function () {
                 + '<td class="td-updater">' + ((reservation.staff_signature) ? reservation.staff_signature : '') + '</td>'
                 + '<td class="td-distribution form-inline">';
 
-            // CHEVRE確保でなければ配布先更新フォームを表示
+            // TTTS確保でなければ配布先更新フォームを表示
             if (reservation.payment_no && !reservation.performance_canceled) {
                 html += ''
                     + '<div class="form-group">'

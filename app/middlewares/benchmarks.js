@@ -6,7 +6,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 const createDebug = require("debug");
-const debug = createDebug('chevre-staff:middlewares:benchmarks');
+const debug = createDebug('ttts-staff:middlewares:benchmarks');
 // tslint:disable-next-line:variable-name
 exports.default = (req, _, next) => {
     if (process.env.NODE_ENV === 'development') {

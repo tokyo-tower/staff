@@ -4,7 +4,7 @@
  * @namespace controller/staff/mypage
  */
 
-import { CommonUtil, Models, ReservationUtil, ScreenUtil } from '@motionpicture/chevre-domain';
+import { CommonUtil, Models, ReservationUtil, ScreenUtil } from '@motionpicture/ttts-domain';
 import { NextFunction, Request, Response } from 'express';
 import * as mongoose from 'mongoose';
 import * as _ from 'underscore';
@@ -61,7 +61,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
                         status: ReservationUtil.STATUS_RESERVED
                     },
                     {
-                        status: ReservationUtil.STATUS_KEPT_BY_CHEVRE
+                        status: ReservationUtil.STATUS_KEPT_BY_TTTS
                     }
                 ]
             }
@@ -228,7 +228,7 @@ export async function release(req: Request, res: Response, next: NextFunction): 
             await Models.Reservation.remove(
                 {
                     performance_day: day,
-                    status: ReservationUtil.STATUS_KEPT_BY_CHEVRE
+                    status: ReservationUtil.STATUS_KEPT_BY_TTTS
                 }
             ).exec();
 
@@ -247,7 +247,7 @@ export async function release(req: Request, res: Response, next: NextFunction): 
             // 開放座席情報取得
             const reservations = await Models.Reservation.find(
                 {
-                    status: ReservationUtil.STATUS_KEPT_BY_CHEVRE
+                    status: ReservationUtil.STATUS_KEPT_BY_TTTS
                 },
                 'status seat_code performance_day'
             ).exec();

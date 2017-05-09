@@ -8,7 +8,7 @@ import BaseUser from './base';
  * @extends {BaseUser}
  */
 export default class StaffUser extends BaseUser {
-    public static AUTH_SESSION_NAME: string = 'CHEVREFrontendStaffAuth';
+    public static AUTH_SESSION_NAME: string = 'TTTSFrontendStaffAuth';
 
     // tslint:disable-next-line:function-name
     public static parse(session: Express.Session | undefined): StaffUser {

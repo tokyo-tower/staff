@@ -4,7 +4,7 @@
  * @ignore
  */
 
-import { CommonUtil, Models } from '@motionpicture/chevre-domain';
+import { CommonUtil, Models } from '@motionpicture/ttts-domain';
 import * as express from 'express';
 import * as staffAuthController from '../controllers/staff/auth';
 import * as staffCancelController from '../controllers/staff/cancel';

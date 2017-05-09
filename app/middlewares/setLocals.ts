@@ -4,8 +4,8 @@
  * @module middleware/setLocal
  */
 
-import { CommonUtil, Models, ReservationUtil, ScreenUtil } from '@motionpicture/chevre-domain';
 import * as GMO from '@motionpicture/gmo-service';
+import { CommonUtil, Models, ReservationUtil, ScreenUtil } from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import { NextFunction, Request, Response } from 'express';
 import * as moment from 'moment';

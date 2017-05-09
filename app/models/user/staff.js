@@ -21,5 +21,5 @@ class StaffUser extends base_1.default {
         return user;
     }
 }
-StaffUser.AUTH_SESSION_NAME = 'CHEVREFrontendStaffAuth';
+StaffUser.AUTH_SESSION_NAME = 'TTTSFrontendStaffAuth';
 exports.default = StaffUser;

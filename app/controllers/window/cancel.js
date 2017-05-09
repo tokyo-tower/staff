@@ -13,7 +13,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const chevre_domain_1 = require("@motionpicture/chevre-domain");
+const ttts_domain_1 = require("@motionpicture/ttts-domain");
 function execute(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (req.windowUser === undefined) {
@@ -26,9 +26,9 @@ function execute(req, res, next) {
             if (!Array.isArray(reservationIds)) {
                 throw new Error(req.__('Message.UnexpectedError'));
             }
-            yield chevre_domain_1.Models.Reservation.remove({
+            yield ttts_domain_1.Models.Reservation.remove({
                 _id: { $in: reservationIds },
-                purchaser_group: { $ne: chevre_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF } // 念のため、内部は除外
+                purchaser_group: { $ne: ttts_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF } // 念のため、内部は除外
             }).exec();
             res.json({
                 success: true,

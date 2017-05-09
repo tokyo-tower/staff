@@ -13,15 +13,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const chevre_domain_1 = require("@motionpicture/chevre-domain");
 const gmo_service_1 = require("@motionpicture/gmo-service");
+const ttts_domain_1 = require("@motionpicture/ttts-domain");
 const moment = require("moment");
 const _ = require("underscore");
 const reservePerformanceForm_1 = require("../../forms/reserve/reservePerformanceForm");
 const reserveSeatForm_1 = require("../../forms/reserve/reserveSeatForm");
 const session_1 = require("../../models/reserve/session");
 const reserveBaseController = require("../reserveBase");
-const PURCHASER_GROUP = chevre_domain_1.ReservationUtil.PURCHASER_GROUP_WINDOW;
+const PURCHASER_GROUP = ttts_domain_1.ReservationUtil.PURCHASER_GROUP_WINDOW;
 const layout = 'layouts/window/layout';
 function start(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -85,7 +85,7 @@ function performances(req, res, next) {
                     yield reserveBaseController.processCancelSeats(reservationModel);
                     reservationModel.save(req);
                     res.render('window/reserve/performances', {
-                        FilmUtil: chevre_domain_1.FilmUtil,
+                        FilmUtil: ttts_domain_1.FilmUtil,
                         layout: layout
                     });
                 }
@@ -296,10 +296,10 @@ function complete(req, res, next) {
             return;
         }
         try {
-            const reservations = yield chevre_domain_1.Models.Reservation.find({
+            const reservations = yield ttts_domain_1.Models.Reservation.find({
                 performance_day: req.params.performanceDay,
                 payment_no: req.params.paymentNo,
-                status: chevre_domain_1.ReservationUtil.STATUS_RESERVED,
+                status: ttts_domain_1.ReservationUtil.STATUS_RESERVED,
                 owner: req.windowUser.get('_id'),
                 purchased_at: {
                     $gt: moment().add(-30, 'minutes').toISOString() // tslint:disable-line:no-magic-numbers
@@ -310,7 +310,7 @@ function complete(req, res, next) {
                 return;
             }
             reservations.sort((a, b) => {
-                return chevre_domain_1.ScreenUtil.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
+                return ttts_domain_1.ScreenUtil.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
             });
             res.render('window/reserve/complete', {
                 reservationDocuments: reservations,

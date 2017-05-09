@@ -21,5 +21,5 @@ class WindowUser extends base_1.default {
         return user;
     }
 }
-WindowUser.AUTH_SESSION_NAME = 'CHEVREFrontendWindowAuth';
+WindowUser.AUTH_SESSION_NAME = 'TTTSFrontendWindowAuth';
 exports.default = WindowUser;

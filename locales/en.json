@@ -29,8 +29,8 @@
 	"h2": {
 		"SeatInformation": "Seat information",
 		"Profile": "Customer information",
-		"LoginForStaffs": "Log in for people inside CHEVRE",
-		"LoginForSponsors": "Log in for people related to CHEVRE",
+		"LoginForStaffs": "Log in for people inside TTTS",
+		"LoginForSponsors": "Log in for people related to TTTS",
 		"Cancel": "Cancel",
 		"LoginForPreCustomers": "h2.LoginForPreCustomers"
 	},
