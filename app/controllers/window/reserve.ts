@@ -286,7 +286,7 @@ export async function complete(req: Request, res: Response, next: NextFunction):
                 performance_day: req.params.performanceDay,
                 payment_no: req.params.paymentNo,
                 status: ReservationUtil.STATUS_RESERVED,
-                window: req.windowUser.get('_id'),
+                owner: req.windowUser.get('_id'),
                 purchased_at: { // 購入確定から30分有効
                     $gt: moment().add(-30, 'minutes').toISOString() // tslint:disable-line:no-magic-numbers
                 }

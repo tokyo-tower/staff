@@ -322,15 +322,14 @@ function processFixSeats(reservationModel, seatCodes, req) {
                 seat_code: seatCode,
                 status: chevre_domain_1.ReservationUtil.STATUS_TEMPORARY,
                 expired_at: reservationModel.expiredAt,
-                staff: undefined,
-                window: undefined
+                owner: undefined
             };
             switch (reservationModel.purchaserGroup) {
                 case chevre_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF:
-                    newReservation.staff = req.staffUser.get('_id');
+                    newReservation.owner = req.staffUser.get('_id');
                     break;
                 case chevre_domain_1.ReservationUtil.PURCHASER_GROUP_WINDOW:
-                    newReservation.window = req.windowUser.get('_id');
+                    newReservation.owner = req.windowUser.get('_id');
                     break;
                 default:
                     break;
@@ -368,11 +367,12 @@ function processAllExceptConfirm(reservationModel, req) {
         const commonUpdate = {};
         switch (reservationModel.purchaserGroup) {
             case chevre_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF:
-                commonUpdate.staff = req.staffUser.get('_id');
-                commonUpdate.staff_user_id = req.staffUser.get('user_id');
-                commonUpdate.staff_name = req.staffUser.get('name');
-                commonUpdate.staff_email = req.staffUser.get('email');
-                commonUpdate.staff_signature = req.staffUser.get('signature');
+                commonUpdate.owner = req.staffUser.get('_id');
+                commonUpdate.owner_username = req.staffUser.get('username');
+                commonUpdate.owner_name = req.staffUser.get('name');
+                commonUpdate.owner_email = req.staffUser.get('email');
+                commonUpdate.owner_signature = req.staffUser.get('signature');
+                commonUpdate.owner_group = req.staffUser.get('group');
                 commonUpdate.purchaser_last_name = '';
                 commonUpdate.purchaser_first_name = '';
                 commonUpdate.purchaser_email = '';
@@ -382,8 +382,12 @@ function processAllExceptConfirm(reservationModel, req) {
                 commonUpdate.purchaser_gender = '';
                 break;
             case chevre_domain_1.ReservationUtil.PURCHASER_GROUP_WINDOW:
-                commonUpdate.window = req.windowUser.get('_id');
-                commonUpdate.window_user_id = req.windowUser.get('user_id');
+                commonUpdate.owner = req.windowUser.get('_id');
+                commonUpdate.owner_username = req.windowUser.get('username');
+                commonUpdate.owner_name = req.windowUser.get('name');
+                commonUpdate.owner_email = req.windowUser.get('email');
+                commonUpdate.owner_signature = req.windowUser.get('signature');
+                commonUpdate.owner_group = req.windowUser.get('group');
                 commonUpdate.purchaser_last_name = '';
                 commonUpdate.purchaser_first_name = '';
                 commonUpdate.purchaser_email = '';
@@ -455,7 +459,7 @@ function createEmailQueue(res, performanceDay, paymentNo) {
         let to = '';
         switch (reservations[0].get('purchaser_group')) {
             case chevre_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF:
-                to = reservations[0].get('staff_email');
+                to = reservations[0].get('owner_email');
                 break;
             default:
                 to = reservations[0].get('purchaser_email');

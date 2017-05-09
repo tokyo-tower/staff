@@ -300,7 +300,7 @@ function complete(req, res, next) {
                 performance_day: req.params.performanceDay,
                 payment_no: req.params.paymentNo,
                 status: chevre_domain_1.ReservationUtil.STATUS_RESERVED,
-                window: req.windowUser.get('_id'),
+                owner: req.windowUser.get('_id'),
                 purchased_at: {
                     $gt: moment().add(-30, 'minutes').toISOString() // tslint:disable-line:no-magic-numbers
                 }

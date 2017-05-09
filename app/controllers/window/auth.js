@@ -13,10 +13,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const chevre_domain_1 = require("@motionpicture/chevre-domain");
+const chevre = require("@motionpicture/chevre-domain");
+const createDebug = require("debug");
 const _ = require("underscore");
 const windowLoginForm_1 = require("../../forms/window/windowLoginForm");
 const window_1 = require("../../models/user/window");
+const debug = createDebug('chevre-staff:controller:windowAuth');
 const layout = 'layouts/window/layout';
 /**
  * 窓口担当者ログイン
@@ -29,64 +31,58 @@ function login(req, res, next) {
             res.redirect('/window/mypage');
             return;
         }
-        if (req.method === 'POST') {
-            windowLoginForm_1.default(req);
-            const validationResult = yield req.getValidationResult();
-            if (!validationResult.isEmpty()) {
+        try {
+            res.locals.userId = '';
+            res.locals.password = '';
+            if (req.method === 'POST') {
+                windowLoginForm_1.default(req);
+                const validationResult = yield req.getValidationResult();
                 res.locals.userId = req.body.userId;
                 res.locals.password = '';
                 res.locals.validation = validationResult.array();
-                res.render('window/auth/login', { layout: layout });
-                return;
-            }
-            try {
-                // ユーザー認証
-                const window = yield chevre_domain_1.Models.Window.findOne({
-                    user_id: req.body.userId
-                }).exec();
-                res.locals.userId = req.body.userId;
-                res.locals.password = '';
-                if (window === null) {
-                    res.locals.validation = [
-                        { msg: req.__('Message.invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
-                    ];
-                    res.render('window/auth/login', { layout: layout });
-                    return;
+                if (validationResult.isEmpty()) {
+                    // ユーザー認証
+                    const owner = yield chevre.Models.Owner.findOne({
+                        username: req.body.userId,
+                        group: chevre.OwnerUtil.GROUP_WINDOW_STAFF
+                    }).exec();
+                    debug('owner:', owner);
+                    if (owner === null) {
+                        res.locals.validation = [
+                            { msg: req.__('Message.invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
+                        ];
+                    }
+                    else {
+                        // パスワードチェック
+                        if (owner.get('password_hash') !== chevre.CommonUtil.createHash(req.body.password, owner.get('password_salt'))) {
+                            res.locals.validation = [
+                                { msg: req.__('Message.invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
+                            ];
+                        }
+                        else {
+                            // ログイン記憶
+                            if (req.body.remember === 'on') {
+                                // トークン生成
+                                const authentication = yield chevre.Models.Authentication.create({
+                                    token: chevre.CommonUtil.createToken(),
+                                    owner: owner.get('_id')
+                                });
+                                // tslint:disable-next-line:no-cookies
+                                res.cookie('remember_window', authentication.get('token'), { path: '/', httpOnly: true, maxAge: 604800000 });
+                            }
+                            // ログイン
+                            req.session[window_1.default.AUTH_SESSION_NAME] = owner.toObject();
+                            const cb = (!_.isEmpty(req.query.cb)) ? req.query.cb : '/window/mypage';
+                            res.redirect(cb);
+                            return;
+                        }
+                    }
                 }
-                // パスワードチェック
-                if (window.get('password_hash') !== chevre_domain_1.CommonUtil.createHash(req.body.password, window.get('password_salt'))) {
-                    res.locals.validation = [
-                        { msg: req.__('Message.invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
-                    ];
-                    res.render('window/auth/login', { layout: layout });
-                    return;
-                }
-                // ログイン記憶
-                if (req.body.remember === 'on') {
-                    // トークン生成
-                    const authentication = yield chevre_domain_1.Models.Authentication.create({
-                        token: chevre_domain_1.CommonUtil.createToken(),
-                        window: window.get('_id')
-                    });
-                    // tslint:disable-next-line:no-cookies
-                    res.cookie('remember_window', authentication.get('token'), { path: '/', httpOnly: true, maxAge: 604800000 });
-                }
-                // ログイン
-                req.session[window_1.default.AUTH_SESSION_NAME] = window.toObject();
-                const cb = (!_.isEmpty(req.query.cb)) ? req.query.cb : '/window/mypage';
-                res.redirect(cb);
-                return;
             }
-            catch (error) {
-                next(new Error(req.__('Message.UnexpectedError')));
-                return;
-            }
-        }
-        else {
-            res.locals.userId = '';
-            res.locals.password = '';
             res.render('window/auth/login', { layout: layout });
-            return;
+        }
+        catch (error) {
+            next(new Error(req.__('Message.UnexpectedError')));
         }
     });
 }
@@ -99,7 +95,7 @@ function logout(req, res, next) {
                 return;
             }
             delete req.session[window_1.default.AUTH_SESSION_NAME];
-            yield chevre_domain_1.Models.Authentication.remove({ token: req.cookies.remember_window }).exec();
+            yield chevre.Models.Authentication.remove({ token: req.cookies.remember_window }).exec();
             res.clearCookie('remember_window');
             res.redirect('/window/mypage');
         }

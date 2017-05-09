@@ -32,57 +32,45 @@ const authentication = async (req: express.Request, res: express.Response, next:
     }
 
     // 自動ログインチェック
-    const checkRemember = async () => {
-        if (req.cookies.remember_staff === undefined) {
-            return null;
-        }
-
+    if (req.cookies.remember_staff !== undefined) {
         try {
             const authenticationDoc = await Models.Authentication.findOne(
                 {
                     token: req.cookies.remember_staff,
-                    staff: { $ne: null }
+                    owner: { $ne: null }
                 }
             ).exec();
 
             if (authenticationDoc === null) {
                 res.clearCookie('remember_staff');
-                return null;
+            } else {
+                // トークン再生成
+                const token = CommonUtil.createToken();
+                await authenticationDoc.update({ token: token }).exec();
+
+                // tslint:disable-next-line:no-cookies
+                res.cookie('remember_staff', token, { path: '/', httpOnly: true, maxAge: 604800000 });
+                const owner = await Models.Owner.findOne({ _id: authenticationDoc.get('owner') }).exec();
+
+                // ログインしてリダイレクト
+                (<Express.Session>req.session)[StaffUser.AUTH_SESSION_NAME] = owner.toObject();
+                (<Express.Session>req.session)[StaffUser.AUTH_SESSION_NAME].signature = authenticationDoc.get('signature');
+                (<Express.Session>req.session)[StaffUser.AUTH_SESSION_NAME].locale = authenticationDoc.get('locale');
+                res.redirect(req.originalUrl);
+                return;
             }
-
-            // トークン再生成
-            const token = CommonUtil.createToken();
-            await authenticationDoc.update({ token: token }).exec();
-
-            // tslint:disable-next-line:no-cookies
-            res.cookie('remember_staff', token, { path: '/', httpOnly: true, maxAge: 604800000 });
-            const staff = await Models.Staff.findOne({ _id: authenticationDoc.get('staff') }).exec();
-            return {
-                staff: staff,
-                signature: authenticationDoc.get('signature'),
-                locale: authenticationDoc.get('locale')
-            };
         } catch (error) {
-            return null;
+            console.error(error);
         }
-    };
+    }
 
-    const userSession = await checkRemember();
-    if (userSession !== null && req.session !== undefined) {
-        // ログインしてリダイレクト
-        req.session[StaffUser.AUTH_SESSION_NAME] = userSession.staff.toObject();
-        req.session[StaffUser.AUTH_SESSION_NAME].signature = userSession.signature;
-        req.session[StaffUser.AUTH_SESSION_NAME].locale = userSession.locale;
-        res.redirect(req.originalUrl);
+    if (req.xhr) {
+        res.json({
+            success: false,
+            message: 'login required'
+        });
     } else {
-        if (req.xhr) {
-            res.json({
-                success: false,
-                message: 'login required'
-            });
-        } else {
-            res.redirect(`/staff/login?cb=${req.originalUrl}`);
-        }
+        res.redirect(`/staff/login?cb=${req.originalUrl}`);
     }
 };
 

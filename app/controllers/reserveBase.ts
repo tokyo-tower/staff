@@ -347,15 +347,14 @@ export async function processFixSeats(reservationModel: ReservationModel, seatCo
             seat_code: seatCode,
             status: ReservationUtil.STATUS_TEMPORARY,
             expired_at: reservationModel.expiredAt,
-            staff: undefined,
-            window: undefined
+            owner: undefined
         };
         switch (reservationModel.purchaserGroup) {
             case ReservationUtil.PURCHASER_GROUP_STAFF:
-                newReservation.staff = (<Express.StaffUser>req.staffUser).get('_id');
+                newReservation.owner = (<Express.StaffUser>req.staffUser).get('_id');
                 break;
             case ReservationUtil.PURCHASER_GROUP_WINDOW:
-                newReservation.window = (<Express.WindowUser>req.windowUser).get('_id');
+                newReservation.owner = (<Express.WindowUser>req.windowUser).get('_id');
                 break;
             default:
                 break;
@@ -396,11 +395,12 @@ export async function processAllExceptConfirm(reservationModel: ReservationModel
 
     switch (reservationModel.purchaserGroup) {
         case ReservationUtil.PURCHASER_GROUP_STAFF:
-            commonUpdate.staff = (<Express.StaffUser>req.staffUser).get('_id');
-            commonUpdate.staff_user_id = (<Express.StaffUser>req.staffUser).get('user_id');
-            commonUpdate.staff_name = (<Express.StaffUser>req.staffUser).get('name');
-            commonUpdate.staff_email = (<Express.StaffUser>req.staffUser).get('email');
-            commonUpdate.staff_signature = (<Express.StaffUser>req.staffUser).get('signature');
+            commonUpdate.owner = (<Express.StaffUser>req.staffUser).get('_id');
+            commonUpdate.owner_username = (<Express.StaffUser>req.staffUser).get('username');
+            commonUpdate.owner_name = (<Express.StaffUser>req.staffUser).get('name');
+            commonUpdate.owner_email = (<Express.StaffUser>req.staffUser).get('email');
+            commonUpdate.owner_signature = (<Express.StaffUser>req.staffUser).get('signature');
+            commonUpdate.owner_group = (<Express.StaffUser>req.staffUser).get('group');
 
             commonUpdate.purchaser_last_name = '';
             commonUpdate.purchaser_first_name = '';
@@ -412,8 +412,12 @@ export async function processAllExceptConfirm(reservationModel: ReservationModel
             break;
 
         case ReservationUtil.PURCHASER_GROUP_WINDOW:
-            commonUpdate.window = (<Express.WindowUser>req.windowUser).get('_id');
-            commonUpdate.window_user_id = (<Express.WindowUser>req.windowUser).get('user_id');
+            commonUpdate.owner = (<Express.WindowUser>req.windowUser).get('_id');
+            commonUpdate.owner_username = (<Express.WindowUser>req.windowUser).get('username');
+            commonUpdate.owner_name = (<Express.WindowUser>req.windowUser).get('name');
+            commonUpdate.owner_email = (<Express.WindowUser>req.windowUser).get('email');
+            commonUpdate.owner_signature = (<Express.WindowUser>req.windowUser).get('signature');
+            commonUpdate.owner_group = (<Express.WindowUser>req.windowUser).get('group');
 
             commonUpdate.purchaser_last_name = '';
             commonUpdate.purchaser_first_name = '';
@@ -518,7 +522,7 @@ async function createEmailQueue(res: Response, performanceDay: string, paymentNo
     let to = '';
     switch (reservations[0].get('purchaser_group')) {
         case ReservationUtil.PURCHASER_GROUP_STAFF:
-            to = reservations[0].get('staff_email');
+            to = reservations[0].get('owner_email');
             break;
 
         default:

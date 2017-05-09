@@ -70,7 +70,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
         conditions.push(
             {
                 purchaser_group: ReservationUtil.PURCHASER_GROUP_STAFF,
-                staff: req.staffUser.get('_id'),
+                owner: req.staffUser.get('_id'),
                 status: ReservationUtil.STATUS_RESERVED
             }
         );
@@ -100,7 +100,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
         conditions.push({
             $or: [
                 {
-                    staff_signature: { $regex: `${updater}` }
+                    owner_signature: { $regex: `${updater}` }
                 },
                 {
                     watcher_name: { $regex: `${updater}` }
@@ -175,10 +175,8 @@ export async function updateWatcherName(req: Request, res: Response, next: NextF
         status: ReservationUtil.STATUS_RESERVED
     };
 
-    // 管理者でない場合は自分の予約のみ
-    if (req.staffUser.get('is_admin') !== true) {
-        (<any>condition).staff = req.staffUser.get('_id');
-    }
+    // 自分の予約のみ
+    (<any>condition).owner = req.staffUser.get('_id');
 
     try {
         const reservation = await Models.Reservation.findOneAndUpdate(
@@ -186,7 +184,7 @@ export async function updateWatcherName(req: Request, res: Response, next: NextF
             {
                 watcher_name: watcherName,
                 watcher_name_updated_at: Date.now(),
-                staff_signature: req.staffUser.get('signature')
+                owner_signature: req.staffUser.get('signature')
             },
             { new: true }
         ).exec();

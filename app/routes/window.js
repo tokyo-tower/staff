@@ -36,46 +36,40 @@ const authentication = (req, res, next) => __awaiter(this, void 0, void 0, funct
         return;
     }
     // 自動ログインチェック
-    const checkRemember = () => __awaiter(this, void 0, void 0, function* () {
-        if (req.cookies.remember_window === undefined) {
-            return null;
-        }
+    if (req.cookies.remember_window !== undefined) {
         try {
             const authenticationDoc = yield chevre_domain_1.Models.Authentication.findOne({
                 token: req.cookies.remember_window,
-                window: { $ne: null }
+                owner: { $ne: null }
             }).exec();
             if (authenticationDoc === null) {
                 res.clearCookie('remember_window');
-                return null;
             }
-            // トークン再生成
-            const token = chevre_domain_1.CommonUtil.createToken();
-            yield authenticationDoc.update({ token: token }).exec();
-            // tslint:disable-next-line:no-cookies
-            res.cookie('remember_window', token, { path: '/', httpOnly: true, maxAge: 604800000 });
-            return yield chevre_domain_1.Models.Window.findOne({ _id: authenticationDoc.get('window') }).exec();
+            else {
+                // トークン再生成
+                const token = chevre_domain_1.CommonUtil.createToken();
+                yield authenticationDoc.update({ token: token }).exec();
+                // tslint:disable-next-line:no-cookies
+                res.cookie('remember_window', token, { path: '/', httpOnly: true, maxAge: 604800000 });
+                const owner = yield chevre_domain_1.Models.Owner.findOne({ _id: authenticationDoc.get('owner') }).exec();
+                // ログインしてリダイレクト
+                req.session[window_1.default.AUTH_SESSION_NAME] = owner.toObject();
+                res.redirect(req.originalUrl);
+                return;
+            }
         }
         catch (error) {
-            return null;
+            console.error(error);
         }
-    });
-    const user = yield checkRemember();
-    if (user !== null && req.session !== undefined) {
-        // ログインしてリダイレクト
-        req.session[window_1.default.AUTH_SESSION_NAME] = user.toObject();
-        res.redirect(req.originalUrl);
+    }
+    if (req.xhr) {
+        res.json({
+            success: false,
+            message: 'login required'
+        });
     }
     else {
-        if (req.xhr) {
-            res.json({
-                success: false,
-                message: 'login required'
-            });
-        }
-        else {
-            res.redirect(`/window/login?cb=${req.originalUrl}`);
-        }
+        res.redirect(`/window/login?cb=${req.originalUrl}`);
     }
 });
 const base = (req, __, next) => {

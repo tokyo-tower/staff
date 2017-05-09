@@ -72,7 +72,7 @@ function search(req, res, next) {
         else {
             conditions.push({
                 purchaser_group: chevre_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF,
-                staff: req.staffUser.get('_id'),
+                owner: req.staffUser.get('_id'),
                 status: chevre_domain_1.ReservationUtil.STATUS_RESERVED
             });
         }
@@ -96,7 +96,7 @@ function search(req, res, next) {
             conditions.push({
                 $or: [
                     {
-                        staff_signature: { $regex: `${updater}` }
+                        owner_signature: { $regex: `${updater}` }
                     },
                     {
                         watcher_name: { $regex: `${updater}` }
@@ -164,15 +164,13 @@ function updateWatcherName(req, res, next) {
             _id: reservationId,
             status: chevre_domain_1.ReservationUtil.STATUS_RESERVED
         };
-        // 管理者でない場合は自分の予約のみ
-        if (req.staffUser.get('is_admin') !== true) {
-            condition.staff = req.staffUser.get('_id');
-        }
+        // 自分の予約のみ
+        condition.owner = req.staffUser.get('_id');
         try {
             const reservation = yield chevre_domain_1.Models.Reservation.findOneAndUpdate(condition, {
                 watcher_name: watcherName,
                 watcher_name_updated_at: Date.now(),
-                staff_signature: req.staffUser.get('signature')
+                owner_signature: req.staffUser.get('signature')
             }, { new: true }).exec();
             if (reservation === null) {
                 res.json({

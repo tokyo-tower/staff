@@ -36,53 +36,42 @@ const authentication = (req, res, next) => __awaiter(this, void 0, void 0, funct
         return;
     }
     // 自動ログインチェック
-    const checkRemember = () => __awaiter(this, void 0, void 0, function* () {
-        if (req.cookies.remember_staff === undefined) {
-            return null;
-        }
+    if (req.cookies.remember_staff !== undefined) {
         try {
             const authenticationDoc = yield chevre_domain_1.Models.Authentication.findOne({
                 token: req.cookies.remember_staff,
-                staff: { $ne: null }
+                owner: { $ne: null }
             }).exec();
             if (authenticationDoc === null) {
                 res.clearCookie('remember_staff');
-                return null;
             }
-            // トークン再生成
-            const token = chevre_domain_1.CommonUtil.createToken();
-            yield authenticationDoc.update({ token: token }).exec();
-            // tslint:disable-next-line:no-cookies
-            res.cookie('remember_staff', token, { path: '/', httpOnly: true, maxAge: 604800000 });
-            const staff = yield chevre_domain_1.Models.Staff.findOne({ _id: authenticationDoc.get('staff') }).exec();
-            return {
-                staff: staff,
-                signature: authenticationDoc.get('signature'),
-                locale: authenticationDoc.get('locale')
-            };
+            else {
+                // トークン再生成
+                const token = chevre_domain_1.CommonUtil.createToken();
+                yield authenticationDoc.update({ token: token }).exec();
+                // tslint:disable-next-line:no-cookies
+                res.cookie('remember_staff', token, { path: '/', httpOnly: true, maxAge: 604800000 });
+                const owner = yield chevre_domain_1.Models.Owner.findOne({ _id: authenticationDoc.get('owner') }).exec();
+                // ログインしてリダイレクト
+                req.session[staff_1.default.AUTH_SESSION_NAME] = owner.toObject();
+                req.session[staff_1.default.AUTH_SESSION_NAME].signature = authenticationDoc.get('signature');
+                req.session[staff_1.default.AUTH_SESSION_NAME].locale = authenticationDoc.get('locale');
+                res.redirect(req.originalUrl);
+                return;
+            }
         }
         catch (error) {
-            return null;
+            console.error(error);
         }
-    });
-    const userSession = yield checkRemember();
-    if (userSession !== null && req.session !== undefined) {
-        // ログインしてリダイレクト
-        req.session[staff_1.default.AUTH_SESSION_NAME] = userSession.staff.toObject();
-        req.session[staff_1.default.AUTH_SESSION_NAME].signature = userSession.signature;
-        req.session[staff_1.default.AUTH_SESSION_NAME].locale = userSession.locale;
-        res.redirect(req.originalUrl);
+    }
+    if (req.xhr) {
+        res.json({
+            success: false,
+            message: 'login required'
+        });
     }
     else {
-        if (req.xhr) {
-            res.json({
-                success: false,
-                message: 'login required'
-            });
-        }
-        else {
-            res.redirect(`/staff/login?cb=${req.originalUrl}`);
-        }
+        res.redirect(`/staff/login?cb=${req.originalUrl}`);
     }
 });
 const base = (req, __, next) => {

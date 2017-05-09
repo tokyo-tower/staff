@@ -32,50 +32,43 @@ const authentication = async (req: express.Request, res: express.Response, next:
     }
 
     // 自動ログインチェック
-    const checkRemember = async () => {
-        if (req.cookies.remember_window === undefined) {
-            return null;
-        }
-
+    if (req.cookies.remember_window !== undefined) {
         try {
             const authenticationDoc = await Models.Authentication.findOne(
                 {
                     token: req.cookies.remember_window,
-                    window: { $ne: null }
+                    owner: { $ne: null }
                 }
             ).exec();
 
             if (authenticationDoc === null) {
                 res.clearCookie('remember_window');
-                return null;
+            } else {
+                // トークン再生成
+                const token = CommonUtil.createToken();
+                await authenticationDoc.update({ token: token }).exec();
+
+                // tslint:disable-next-line:no-cookies
+                res.cookie('remember_window', token, { path: '/', httpOnly: true, maxAge: 604800000 });
+                const owner = await Models.Owner.findOne({ _id: authenticationDoc.get('owner') }).exec();
+
+                // ログインしてリダイレクト
+                (<Express.Session>req.session)[WindowUser.AUTH_SESSION_NAME] = owner.toObject();
+                res.redirect(req.originalUrl);
+                return;
             }
-
-            // トークン再生成
-            const token = CommonUtil.createToken();
-            await authenticationDoc.update({ token: token }).exec();
-
-            // tslint:disable-next-line:no-cookies
-            res.cookie('remember_window', token, { path: '/', httpOnly: true, maxAge: 604800000 });
-            return await Models.Window.findOne({ _id: authenticationDoc.get('window') }).exec();
         } catch (error) {
-            return null;
+            console.error(error);
         }
-    };
+    }
 
-    const user = await checkRemember();
-    if (user !== null && req.session !== undefined) {
-        // ログインしてリダイレクト
-        req.session[WindowUser.AUTH_SESSION_NAME] = user.toObject();
-        res.redirect(req.originalUrl);
+    if (req.xhr) {
+        res.json({
+            success: false,
+            message: 'login required'
+        });
     } else {
-        if (req.xhr) {
-            res.json({
-                success: false,
-                message: 'login required'
-            });
-        } else {
-            res.redirect(`/window/login?cb=${req.originalUrl}`);
-        }
+        res.redirect(`/window/login?cb=${req.originalUrl}`);
     }
 };
 

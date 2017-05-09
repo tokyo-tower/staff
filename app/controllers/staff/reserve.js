@@ -269,7 +269,7 @@ function complete(req, res, next) {
                 performance_day: req.params.performanceDay,
                 payment_no: req.params.paymentNo,
                 status: chevre.ReservationUtil.STATUS_RESERVED,
-                staff: req.staffUser.get('_id'),
+                owner: req.staffUser.get('_id'),
                 purchased_at: {
                     $gt: moment().add(-30, 'minutes').toISOString() // tslint:disable-line:no-magic-numbers
                 }
@@ -317,7 +317,7 @@ function processCancelSeats(reservationModel) {
                     status: chevre.ReservationUtil.STATUS_KEPT_BY_CHEVRE
                 },
                 $unset: {
-                    staff: ''
+                    owner: ''
                 }
             }, {
                 multi: true
@@ -365,7 +365,7 @@ function processFixSeats(reservationModel, seatCodes, req) {
                     seat_code: seatCode,
                     status: chevre.ReservationUtil.STATUS_TEMPORARY,
                     expired_at: reservationModel.expiredAt,
-                    staff: staffUser.get('_id')
+                    owner: staffUser.get('_id')
                 });
                 // ステータス更新に成功したらセッションに保管
                 reservationModel.seatCodes.push(seatCode);
@@ -393,7 +393,7 @@ function processFixSeats(reservationModel, seatCodes, req) {
                 }, {
                     status: chevre.ReservationUtil.STATUS_TEMPORARY_ON_KEPT_BY_CHEVRE,
                     expired_at: reservationModel.expiredAt,
-                    staff: staffUser.get('_id')
+                    owner: staffUser.get('_id')
                 }, {
                     new: true
                 }).exec();
