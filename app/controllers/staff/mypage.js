@@ -20,11 +20,13 @@ const layout = 'layouts/staff/layout';
 function index(__, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const theaters = yield ttts_domain_1.Models.Theater.find({}, 'name', { sort: { _id: 1 } }).exec();
-            const films = yield ttts_domain_1.Models.Film.find({}, 'name', { sort: { _id: 1 } }).exec();
+            // const theaters = await Models.Theater.find({}, 'name', { sort: { _id: 1 } }).exec();
+            // const films = await Models.Film.find({}, 'name', { sort: { _id: 1 } }).exec();
+            const owners = yield ttts_domain_1.Models.Owner.find({}, '_id name', { sort: { _id: 1 } }).exec();
             res.render('staff/mypage/index', {
-                theaters: theaters,
-                films: films,
+                // theaters: theaters,
+                // films: films,
+                owners: owners,
                 layout: layout
             });
         }
@@ -38,6 +40,7 @@ exports.index = index;
  * マイページ予約検索
  */
 // tslint:disable-next-line:max-func-body-length
+// tslint:disable-next-line:cyclomatic-complexity
 function search(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (req.staffUser === undefined) {
@@ -48,11 +51,19 @@ function search(req, res, next) {
         const limit = (!_.isEmpty(req.query.limit)) ? parseInt(req.query.limit, DEFAULT_RADIX) : 10;
         const page = (!_.isEmpty(req.query.page)) ? parseInt(req.query.page, DEFAULT_RADIX) : 1;
         const day = (!_.isEmpty(req.query.day)) ? req.query.day : null;
-        const startTime = (!_.isEmpty(req.query.start_time)) ? req.query.start_time : null;
-        const theater = (!_.isEmpty(req.query.theater)) ? req.query.theater : null;
-        const film = (!_.isEmpty(req.query.film)) ? req.query.film : null;
-        const updater = (!_.isEmpty(req.query.updater)) ? req.query.updater : null;
+        const startHour1 = (!_.isEmpty(req.query.start_hour1)) ? req.query.start_hour1 : null;
+        const startMinute1 = (!_.isEmpty(req.query.start_minute1)) ? req.query.start_minute1 : null;
+        const startHour2 = (!_.isEmpty(req.query.start_hour2)) ? req.query.start_hour2 : null;
+        const startMinute2 = (!_.isEmpty(req.query.start_minute2)) ? req.query.start_minute2 : null;
         let paymentNo = (!_.isEmpty(req.query.payment_no)) ? req.query.payment_no : null;
+        const owner = (!_.isEmpty(req.query.owner)) ? req.query.owner : null;
+        // 　　名前      reservations.？ ※1
+        // 　　メアド    reservations.？ ※1
+        // 　　電話番号  reservations.？ ※1
+        // 　　メモ      reservations.watcher_name ※2
+        // const theater: string | null = (!_.isEmpty(req.query.theater)) ? req.query.theater : null;
+        // const film: string | null = (!_.isEmpty(req.query.film)) ? req.query.film : null;
+        // const updater: string | null = (!_.isEmpty(req.query.updater)) ? req.query.updater : null;
         // 検索条件を作成
         const conditions = [];
         // 管理者の場合、内部関係者の予約全て&確保中
@@ -76,38 +87,68 @@ function search(req, res, next) {
                 status: ttts_domain_1.ReservationUtil.STATUS_RESERVED
             });
         }
-        if (film !== null) {
-            conditions.push({ film: film });
-        }
-        if (theater !== null) {
-            conditions.push({ theater: theater });
-        }
+        // if (film !== null) {
+        //     conditions.push({ film: film });
+        // }
+        // if (theater !== null) {
+        //     conditions.push({ theater: theater });
+        // }
         if (day !== null) {
             conditions.push({ performance_day: day });
         }
-        if (startTime !== null) {
-            conditions.push({
-                performance_start_time: {
-                    $gte: startTime
-                }
-            });
+        const startTimeFrom = (startHour1 !== null && startMinute1 !== null) ? startHour1 + startMinute1 : null;
+        const startTimeTo = (startHour2 !== null && startMinute2 !== null) ? startHour2 + startMinute2 : null;
+        if (startTimeFrom !== null || startTimeTo !== null) {
+            const conditionsTime = {};
+            // const key: string = 'performance_start_time';
+            // 開始時間From
+            if (startTimeFrom !== null) {
+                // const keyFrom = '$gte';
+                conditionsTime.$gte = startTimeFrom;
+            }
+            // 開始時間To
+            if (startTimeTo !== null) {
+                // const keyFrom = '$lt';
+                conditionsTime.$lt = startTimeTo;
+            }
+            conditions.push({ performance_start_time: conditionsTime });
         }
-        if (updater !== null) {
-            conditions.push({
-                $or: [
-                    {
-                        owner_signature: { $regex: `${updater}` }
-                    },
-                    {
-                        watcher_name: { $regex: `${updater}` }
-                    }
-                ]
-            });
-        }
+        // let startTimeTo: string = '';
+        // if (startHour1 !== null && startMinute1 !== null) {
+        // }
+        // if (startHour1 !== null && startMinute1 !== null) {
+        //     conditions.push({
+        //         performance_start_time: {
+        //             $gte: startHour1 + startMinute1
+        //         }
+        //     });
+        // }
+        // if (startHour2 !== null && startMinute2 !== null) {
+        //     conditions.push({
+        //         performance_end_time: {
+        //             $lte: startHour2 + startMinute2
+        //         }
+        //     });
+        // }
+        // if (updater !== null) {
+        //     conditions.push({
+        //         $or: [
+        //             {
+        //                 owner_signature: { $regex: `${updater}` }
+        //             },
+        //             {
+        //                 watcher_name: { $regex: `${updater}` }
+        //             }
+        //         ]
+        //     });
+        // }
         if (paymentNo !== null) {
             // remove space characters
             paymentNo = ttts_domain_1.CommonUtil.toHalfWidth(paymentNo.replace(/\s/g, ''));
             conditions.push({ payment_no: { $regex: `${paymentNo}` } });
+        }
+        if (owner !== null) {
+            conditions.push({ owner: owner });
         }
         try {
             // 総数検索

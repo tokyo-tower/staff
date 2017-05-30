@@ -14,13 +14,14 @@ const layout: string = 'layouts/staff/layout';
 
 export async function index(__: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const theaters = await Models.Theater.find({}, 'name', { sort: { _id: 1 } }).exec();
-
-        const films = await Models.Film.find({}, 'name', { sort: { _id: 1 } }).exec();
+        // const theaters = await Models.Theater.find({}, 'name', { sort: { _id: 1 } }).exec();
+        // const films = await Models.Film.find({}, 'name', { sort: { _id: 1 } }).exec();
+        const owners = await Models.Owner.find({}, '_id name', { sort: { _id: 1 } }).exec();
 
         res.render('staff/mypage/index', {
-            theaters: theaters,
-            films: films,
+            // theaters: theaters,
+            // films: films,
+            owners: owners,
             layout: layout
         });
     } catch (error) {
@@ -32,6 +33,7 @@ export async function index(__: Request, res: Response, next: NextFunction): Pro
  * マイページ予約検索
  */
 // tslint:disable-next-line:max-func-body-length
+// tslint:disable-next-line:cyclomatic-complexity
 export async function search(req: Request, res: Response, next: NextFunction): Promise<void> {
     if (req.staffUser === undefined) {
         next(new Error(req.__('Message.UnexpectedError')));
@@ -42,11 +44,21 @@ export async function search(req: Request, res: Response, next: NextFunction): P
     const limit: number = (!_.isEmpty(req.query.limit)) ? parseInt(req.query.limit, DEFAULT_RADIX) : 10;
     const page: number = (!_.isEmpty(req.query.page)) ? parseInt(req.query.page, DEFAULT_RADIX) : 1;
     const day: string | null = (!_.isEmpty(req.query.day)) ? req.query.day : null;
-    const startTime: string | null = (!_.isEmpty(req.query.start_time)) ? req.query.start_time : null;
-    const theater: string | null = (!_.isEmpty(req.query.theater)) ? req.query.theater : null;
-    const film: string | null = (!_.isEmpty(req.query.film)) ? req.query.film : null;
-    const updater: string | null = (!_.isEmpty(req.query.updater)) ? req.query.updater : null;
+    const startHour1: string | null = (!_.isEmpty(req.query.start_hour1)) ? req.query.start_hour1 : null;
+    const startMinute1: string | null = (!_.isEmpty(req.query.start_minute1)) ? req.query.start_minute1 : null;
+    const startHour2: string | null = (!_.isEmpty(req.query.start_hour2)) ? req.query.start_hour2 : null;
+    const startMinute2: string | null = (!_.isEmpty(req.query.start_minute2)) ? req.query.start_minute2 : null;
     let paymentNo: string | null = (!_.isEmpty(req.query.payment_no)) ? req.query.payment_no : null;
+    const owner: string | null = (!_.isEmpty(req.query.owner)) ? req.query.owner : null;
+
+// 　　名前      reservations.？ ※1
+// 　　メアド    reservations.？ ※1
+// 　　電話番号  reservations.？ ※1
+// 　　メモ      reservations.watcher_name ※2
+
+    // const theater: string | null = (!_.isEmpty(req.query.theater)) ? req.query.theater : null;
+    // const film: string | null = (!_.isEmpty(req.query.film)) ? req.query.film : null;
+    // const updater: string | null = (!_.isEmpty(req.query.updater)) ? req.query.updater : null;
 
     // 検索条件を作成
     const conditions: any[] = [];
@@ -76,43 +88,76 @@ export async function search(req: Request, res: Response, next: NextFunction): P
         );
     }
 
-    if (film !== null) {
-        conditions.push({ film: film });
-    }
+    // if (film !== null) {
+    //     conditions.push({ film: film });
+    // }
 
-    if (theater !== null) {
-        conditions.push({ theater: theater });
-    }
+    // if (theater !== null) {
+    //     conditions.push({ theater: theater });
+    // }
 
     if (day !== null) {
         conditions.push({ performance_day: day });
     }
 
-    if (startTime !== null) {
-        conditions.push({
-            performance_start_time: {
-                $gte: startTime
-            }
-        });
+    const startTimeFrom: any = (startHour1 !== null && startMinute1 !== null) ? startHour1 + startMinute1 : null;
+    const startTimeTo: any = (startHour2 !== null && startMinute2 !== null) ? startHour2 + startMinute2 : null;
+    if (startTimeFrom !== null || startTimeTo !== null) {
+        const conditionsTime: any = {};
+        // const key: string = 'performance_start_time';
+        // 開始時間From
+        if (startTimeFrom !== null) {
+            // const keyFrom = '$gte';
+            conditionsTime.$gte = startTimeFrom;
+        }
+        // 開始時間To
+        if (startTimeTo !== null) {
+            // const keyFrom = '$lt';
+            conditionsTime.$lt = startTimeTo;
+        }
+        conditions.push({ performance_start_time : conditionsTime });
     }
 
-    if (updater !== null) {
-        conditions.push({
-            $or: [
-                {
-                    owner_signature: { $regex: `${updater}` }
-                },
-                {
-                    watcher_name: { $regex: `${updater}` }
-                }
-            ]
-        });
-    }
+    // let startTimeTo: string = '';
+    // if (startHour1 !== null && startMinute1 !== null) {
+    // }
+    // if (startHour1 !== null && startMinute1 !== null) {
+    //     conditions.push({
+    //         performance_start_time: {
+    //             $gte: startHour1 + startMinute1
+    //         }
+    //     });
+    // }
+
+    // if (startHour2 !== null && startMinute2 !== null) {
+    //     conditions.push({
+    //         performance_end_time: {
+    //             $lte: startHour2 + startMinute2
+    //         }
+    //     });
+    // }
+
+    // if (updater !== null) {
+    //     conditions.push({
+    //         $or: [
+    //             {
+    //                 owner_signature: { $regex: `${updater}` }
+    //             },
+    //             {
+    //                 watcher_name: { $regex: `${updater}` }
+    //             }
+    //         ]
+    //     });
+    // }
 
     if (paymentNo !== null) {
         // remove space characters
         paymentNo = CommonUtil.toHalfWidth(paymentNo.replace(/\s/g, ''));
         conditions.push({ payment_no: { $regex: `${paymentNo}` } });
+    }
+
+    if (owner !== null) {
+        conditions.push({ owner: owner });
     }
 
     try {
@@ -124,6 +169,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
         ).exec();
 
         const reservations = <any[]>await Models.Reservation.find({ $and: conditions })
+        //const reservations = <any[]>await Models.Reservation.find({})
             .skip(limit * (page - 1))
             .limit(limit)
             .lean(true)

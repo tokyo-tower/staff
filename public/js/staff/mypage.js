@@ -35,30 +35,31 @@ $(function () {
             html += ''
                 + '</th>'
                 + '<td class="td-number">' + ((reservation.payment_no) ? reservation.payment_no : '') + '</td>'
-                + '<td class="td-title">'
-                + reservation['film_name'][locale] + '<br>'
-                + startDatetime + '-<br>'
-                + reservation['theater_name'][locale] + ' ' + reservation['screen_name'][locale] + '' + '<br>'
-                + ((reservation.performance_canceled) ? '<div class="alert alert-danger">Canceled</div>' : '')
-                + '</td>'
-                + '<td class="td-seat"><a href="javascript:void(0);" class="show-seat-position" data-screen-id="' + reservation.screen.toString() + '" data-seat-codes="' + reservation.seat_code + '">' + reservation.seat_code + '</a></td>'
-                + '<td class="td-updater">' + ((reservation.staff_signature) ? reservation.staff_signature : '') + '</td>'
-                + '<td class="td-distribution form-inline">';
+                // + '<td class="td-title">'
+                // + reservation['film_name'][locale] + '<br>'
+                // + startDatetime + '-<br>'
+                // + reservation['theater_name'][locale] + ' ' + reservation['screen_name'][locale] + '' + '<br>'
+                // + ((reservation.performance_canceled) ? '<div class="alert alert-danger">Canceled</div>' : '')
+                // + '</td>'
+                + '<td class="td-name">' + reservation.watcher_name + '</td>'
+                + '<td class="td-amemo">' + reservation.watcher_name + '</td>'
+                + '<td class="td-seat">' + reservation.seat_code + '</td>'
+                + '<td class="td-updater">' + reservation['ticket_type_name'][locale] + '</td>';
 
-            // TTTS確保でなければ配布先更新フォームを表示
-            if (reservation.payment_no && !reservation.performance_canceled) {
-                html += ''
-                    + '<div class="form-group">'
-                    + '<input class="form-control" type="text" value="' + ((reservation.watcher_name) ? reservation.watcher_name : '') + '">'
-                    + '</div>'
-                    + '<div class="form-group">'
-                    + '<p class="btn update-watcher-name"><span>Update</span></p>'
-                    + '</div>'
-                    + '<p class="small">'
-                    + '※日本人の場合は「全角カタカナ」外国人の場合は「半角英字」で入力してください。<br>※セイとメイの間に半角スペースを入れないでください。'
-                    + '<br>* Use full-width katakana for the Japanese names and in half-width alphanumeric characters for foreign names.<br>* Do not leave a half-width space between the last name and the first name.'
-                    + '</p>';
-            }
+            // // TTTS確保でなければ配布先更新フォームを表示
+            // if (reservation.payment_no && !reservation.performance_canceled) {
+            //     html += ''
+            //         + '<div class="form-group">'
+            //         + '<input class="form-control" type="text" value="' + ((reservation.watcher_name) ? reservation.watcher_name : '') + '">'
+            //         + '</div>'
+            //         + '<div class="form-group">'
+            //         + '<p class="btn update-watcher-name"><span>Update</span></p>'
+            //         + '</div>'
+            //         + '<p class="small">'
+            //         + '※日本人の場合は「全角カタカナ」外国人の場合は「半角英字」で入力してください。<br>※セイとメイの間に半角スペースを入れないでください。'
+            //         + '<br>* Use full-width katakana for the Japanese names and in half-width alphanumeric characters for foreign names.<br>* Do not leave a half-width space between the last name and the first name.'
+            //         + '</p>';
+            //}
 
             html += ''
                 + '</td>'
@@ -70,8 +71,9 @@ $(function () {
             } else {
                 if (reservation.payment_no && !reservation.performance_canceled) {
                     html += ''
+                        + '<p class="btn detail"><span>Detail</span></p>'
+                        + '<p class="btn print" style="margin-bottom: 12px;"><span>Print</span></p>'
                         + '<p class="btn confirm-cancel"><span>Cancel</span></p>'
-                        + '<p class="btn print"><span>Print</span></p>';
                 }
             }
 

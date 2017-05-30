@@ -2,19 +2,13 @@
     <form class="search-form" action="/staff/mypage/search">
     <input type="hidden" name="limit" value="20">
 
-    <table class="table">
+    <table class="table" bordered>
         <tbody>
             <tr>
-                <td>
-                    <%- __('Label.PaymentNo') %><br>
-                    <div class="form-group">
-                        <input type="text" class="form-control" name="payment_no">
-                    </div>
-                </td>
-                <td>
+                <td colspan="4">
                     <%- __('Label.Day') %><br>
                     <div class="form-group">
-                        <select class="form-control" name="day">
+                        <select class="form-control" name="day" style="width:auto;display:inline-block;" >
                             <option value=""><%- __('Label.AllDay') %></option>
                             <%
                             let now = moment();
@@ -22,46 +16,111 @@
                             let end = moment(conf.get('datetimes.event_end'));
                             let options = '';
                             while (start.format('YYYYMMDD') <= end.format('YYYYMMDD')) {
-                                options += `<option value="${start.format('YYYYMMDD')}">${start.format('MM/DD')}</option>`;
+                                options += `<option value="${start.format('YYYYMMDD')}">${start.format('YYYY/MM/DD')}</option>`;
                                 start = start.add(+1, 'days');
                                 continue;
                             }
                             %>
                             <%- options %>
                         </select>
+                        <%- /* 開始時刻 */ %>
+                        <select class="form-control" name="start_hour1" style="width:auto;display:inline-block;">
+                            <option value=""></option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+                        </select>
+                        <%- __('Label.Hour') %>
+                        <select class="form-control" name="start_minute1" style="width:auto;display:inline-block;">
+                            <option value=""></option>
+                            <option value="00">00</option>
+                            <option value="15">15</option>
+                            <option value="30">30</option>
+                            <option value="45">45</option>
+                        </select>
+                        <%- __('Label.Minute') %>
+                        <%- __('Label.FromTo') %>
+                        <%- /* 終了時刻 */ %>
+                        <select class="form-control" name="start_hour2" style="width:auto;display:inline-block;">
+                            <option value=""></option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+                        </select>
+                        <%- __('Label.Hour') %>
+                        <select class="form-control" name="start_minute2" style="width:auto;display:inline-block;">
+                            <option value=""></option>
+                            <option value="00">00</option>
+                            <option value="15">15</option>
+                            <option value="30">30</option>
+                            <option value="45">45</option>
+                        </select>
+                        <%- __('Label.Minute') %>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    購入番号から検索<br>
+                    <%- __('Label.PaymentNo') %><br>
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="payment_no" style="width:90%;">
                     </div>
                 </td>
                 <td>
-                    Theater<br>
+                    アカウントから検索<br><br>
                     <div class="form-group">
-                        <select class="form-control" name="theater">
-                            <option value="">---</option>
-                            <% for (let theater of theaters) { %>
-                            <option value="<%= theater._id %>"><%= theater.name[locale] %></option>
-                            <% } %>
+                        <select class="form-control" name="owner" style="width:auto;">
+                            <option value=""></option>
+                            <% owners.forEach((owner) => { %>
+                            <option value="<%= owner._id %>"><%= owner['name'][locale] %></option>
+                            <% }) %>
                         </select>
                     </div>
                 </td>
                 <td>
-                    <%- __('Label.FilmName') %><br>
-                    <div class="form-group">
-                        <select class="form-control" name="film">
-                            <option value="">---</option>
-                            <% for (let film of films) { %>
-                            <option value="<%= film._id %>"><%= film.name[locale] %></option>
-                            <% } %>
-                        </select>
-                    </div>
                 </td>
                 <td>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    購入者情報から検索<br>
                     <%- __('Label.UpdatedUser') %>/<%- __('Label.Distribution') %><br>
                     <div class="form-inline">
                         <div class="form-group">
-                            <input type="text" class="form-control" name="updater">
+                            <input type="text" class="form-control" name="updater" style="width:90%;">
                         </div>
+                    </div>
+                </td>
+                <td>
+                    <br>
+                    メールアドレス<br>
+                    <div class="form-inline">
                         <div class="form-group">
-                            <a class="btn" href="javascript:void(0)"><span><%- __('Button.Search') %></span></a>
+                            <input type="text" class="form-control" name="owner_email" style="width:90%;">
                         </div>
+                    </div>
+                </td>
+                <td>
+                    <br>
+                    電話番号<br>
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="owner_tel" style="width:90%;">
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <br>
+                    メモ<br>
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="owner_memol" style="width:90%;">
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <div class="form-group">
+                        <a class="btn" href="javascript:void(0)"><span><%- __('Button.Search') %></span></a>
                     </div>
                 </td>
             </tr>
@@ -78,13 +137,10 @@
             <tr>
                 <th><input type="checkbox" class="check-all"></th>
                 <th><%- __('Label.PaymentNo') %></th>
-                <th><%- __('Label.FilmName') %><br><%- __('Label.PerformanceTime') %><br><%- __('Label.PerformancePlace') %></th>
-                <th><%- __('Label.SeatCode') %></th>
                 <th><%- __('Label.UpdatedUser') %></th>
-                <th>
-                    <%- __('Label.Distribution') %><br>
-                    <p class="small text-left" style="color: yellow;"><%- __('Message.UpdateWatcherNameHelp') %></p>
-                </th>
+                <th>メモ</th>
+                <th><%- __('Label.SeatCode') %></th>
+                <th>券種</th>
                 <th></th>
             </tr>
         </thead>
