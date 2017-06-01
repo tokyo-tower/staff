@@ -17,15 +17,15 @@ const ttts_domain_1 = require("@motionpicture/ttts-domain");
 const _ = require("underscore");
 const DEFAULT_RADIX = 10;
 const layout = 'layouts/staff/layout';
+/**
+ * マイページ(予約一覧)
+ *
+ */
 function index(__, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            // const theaters = await Models.Theater.find({}, 'name', { sort: { _id: 1 } }).exec();
-            // const films = await Models.Film.find({}, 'name', { sort: { _id: 1 } }).exec();
             const owners = yield ttts_domain_1.Models.Owner.find({}, '_id name', { sort: { _id: 1 } }).exec();
             res.render('staff/mypage/index', {
-                // theaters: theaters,
-                // films: films,
                 owners: owners,
                 layout: layout
             });
@@ -38,6 +38,7 @@ function index(__, res, next) {
 exports.index = index;
 /**
  * マイページ予約検索
+ *
  */
 // tslint:disable-next-line:max-func-body-length
 // tslint:disable-next-line:cyclomatic-complexity
@@ -47,6 +48,29 @@ function search(req, res, next) {
             next(new Error(req.__('Message.UnexpectedError')));
             return;
         }
+        // バリデーション
+        const errors = yield validate(req);
+        if (Object.keys(errors).length > 0) {
+            res.json({
+                success: false,
+                results: null,
+                count: 0,
+                errors: errors
+            });
+            return;
+        }
+        //mypageForm(req);
+        // const validatorResult = await req.getValidationResult();
+        // if (!validatorResult.isEmpty()) {
+        //     const errors = req.validationErrors(true);
+        //     res.json({
+        //         success: false,
+        //         results: null,
+        //         count: 0,
+        //         errors: errors
+        //     });
+        //     return;
+        // }
         // tslint:disable-next-line:no-magic-numbers
         const limit = (!_.isEmpty(req.query.limit)) ? parseInt(req.query.limit, DEFAULT_RADIX) : 10;
         const page = (!_.isEmpty(req.query.page)) ? parseInt(req.query.page, DEFAULT_RADIX) : 1;
@@ -61,6 +85,7 @@ function search(req, res, next) {
         // 　　メアド    reservations.？ ※1
         // 　　電話番号  reservations.？ ※1
         // 　　メモ      reservations.watcher_name ※2
+        const watcherName = (!_.isEmpty(req.query.watcher_name)) ? req.query.watcher_name : null;
         // const theater: string | null = (!_.isEmpty(req.query.theater)) ? req.query.theater : null;
         // const film: string | null = (!_.isEmpty(req.query.film)) ? req.query.film : null;
         // const updater: string | null = (!_.isEmpty(req.query.updater)) ? req.query.updater : null;
@@ -87,49 +112,25 @@ function search(req, res, next) {
                 status: ttts_domain_1.ReservationUtil.STATUS_RESERVED
             });
         }
-        // if (film !== null) {
-        //     conditions.push({ film: film });
-        // }
-        // if (theater !== null) {
-        //     conditions.push({ theater: theater });
-        // }
+        // 来塔日
         if (day !== null) {
             conditions.push({ performance_day: day });
         }
+        // 開始時間
         const startTimeFrom = (startHour1 !== null && startMinute1 !== null) ? startHour1 + startMinute1 : null;
         const startTimeTo = (startHour2 !== null && startMinute2 !== null) ? startHour2 + startMinute2 : null;
         if (startTimeFrom !== null || startTimeTo !== null) {
             const conditionsTime = {};
-            // const key: string = 'performance_start_time';
             // 開始時間From
             if (startTimeFrom !== null) {
-                // const keyFrom = '$gte';
                 conditionsTime.$gte = startTimeFrom;
             }
             // 開始時間To
             if (startTimeTo !== null) {
-                // const keyFrom = '$lt';
                 conditionsTime.$lt = startTimeTo;
             }
             conditions.push({ performance_start_time: conditionsTime });
         }
-        // let startTimeTo: string = '';
-        // if (startHour1 !== null && startMinute1 !== null) {
-        // }
-        // if (startHour1 !== null && startMinute1 !== null) {
-        //     conditions.push({
-        //         performance_start_time: {
-        //             $gte: startHour1 + startMinute1
-        //         }
-        //     });
-        // }
-        // if (startHour2 !== null && startMinute2 !== null) {
-        //     conditions.push({
-        //         performance_end_time: {
-        //             $lte: startHour2 + startMinute2
-        //         }
-        //     });
-        // }
         // if (updater !== null) {
         //     conditions.push({
         //         $or: [
@@ -142,19 +143,29 @@ function search(req, res, next) {
         //         ]
         //     });
         // }
+        // 購入番号
         if (paymentNo !== null) {
             // remove space characters
             paymentNo = ttts_domain_1.CommonUtil.toHalfWidth(paymentNo.replace(/\s/g, ''));
             conditions.push({ payment_no: { $regex: `${paymentNo}` } });
         }
+        // アカウント
         if (owner !== null) {
             conditions.push({ owner: owner });
+        }
+        // 　　名前      reservations.？ ※1
+        // 　　メアド    reservations.？ ※1
+        // 　　電話番号  reservations.？ ※1
+        // メモ
+        if (watcherName !== null) {
+            conditions.push({ watcher_name: watcherName });
         }
         try {
             // 総数検索
             const count = yield ttts_domain_1.Models.Reservation.count({
                 $and: conditions
             }).exec();
+            // データ検索
             const reservations = yield ttts_domain_1.Models.Reservation.find({ $and: conditions })
                 .skip(limit * (page - 1))
                 .limit(limit)
@@ -176,7 +187,8 @@ function search(req, res, next) {
             res.json({
                 success: true,
                 results: reservations,
-                count: count
+                count: count,
+                errors: null
             });
         }
         catch (error) {
@@ -184,12 +196,52 @@ function search(req, res, next) {
             res.json({
                 success: false,
                 results: [],
+                errors: null,
                 count: 0
             });
         }
     });
 }
 exports.search = search;
+/**
+ * マイページ予約検索画面検証
+ *
+ * @param {any} req
+ * @return {any}
+ */
+function validate(req) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // 来塔日
+        req.checkQuery('day', req.__('Message.required{{fieldName}}', { fieldName: req.__('Label.Day') })).notEmpty();
+        // 検証
+        const validatorResult = yield req.getValidationResult();
+        const errors = (!validatorResult.isEmpty()) ? req.validationErrors(true) : {};
+        // 片方入力エラーチェック
+        if (!isInputEven(req.query.start_hour1, req.query.start_minute1)) {
+            errors.start_hour1 = { msg: '時分Fromが片方しか指定されていません' };
+        }
+        if (!isInputEven(req.query.start_hour2, req.query.start_minute2)) {
+            errors.start_hour2 = { msg: '時分Toが片方しか指定されていません' };
+        }
+        return errors;
+    });
+}
+/**
+ * 両方入力チェック(両方入力、または両方未入力の時true)
+ *
+ * @param {string} value1
+ * @param {string} value2
+ * @return {boolean}
+ */
+function isInputEven(value1, value2) {
+    if (_.isEmpty(value1) && _.isEmpty(value2)) {
+        return true;
+    }
+    if (!_.isEmpty(value1) && !_.isEmpty(value2)) {
+        return true;
+    }
+    return false;
+}
 /**
  * 配布先を更新する
  */

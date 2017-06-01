@@ -12,15 +12,14 @@ import * as _ from 'underscore';
 const DEFAULT_RADIX = 10;
 const layout: string = 'layouts/staff/layout';
 
+/**
+ * マイページ(予約一覧)
+ *
+ */
 export async function index(__: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        // const theaters = await Models.Theater.find({}, 'name', { sort: { _id: 1 } }).exec();
-        // const films = await Models.Film.find({}, 'name', { sort: { _id: 1 } }).exec();
         const owners = await Models.Owner.find({}, '_id name', { sort: { _id: 1 } }).exec();
-
         res.render('staff/mypage/index', {
-            // theaters: theaters,
-            // films: films,
             owners: owners,
             layout: layout
         });
@@ -31,6 +30,7 @@ export async function index(__: Request, res: Response, next: NextFunction): Pro
 
 /**
  * マイページ予約検索
+ *
  */
 // tslint:disable-next-line:max-func-body-length
 // tslint:disable-next-line:cyclomatic-complexity
@@ -39,6 +39,30 @@ export async function search(req: Request, res: Response, next: NextFunction): P
         next(new Error(req.__('Message.UnexpectedError')));
         return;
     }
+
+    // バリデーション
+    const errors = await validate(req);
+    if (Object.keys(errors).length > 0) {
+        res.json({
+            success: false,
+            results: null,
+            count: 0,
+            errors: errors
+        });
+        return;
+    }
+    //mypageForm(req);
+    // const validatorResult = await req.getValidationResult();
+    // if (!validatorResult.isEmpty()) {
+    //     const errors = req.validationErrors(true);
+    //     res.json({
+    //         success: false,
+    //         results: null,
+    //         count: 0,
+    //         errors: errors
+    //     });
+    //     return;
+    // }
 
     // tslint:disable-next-line:no-magic-numbers
     const limit: number = (!_.isEmpty(req.query.limit)) ? parseInt(req.query.limit, DEFAULT_RADIX) : 10;
@@ -55,6 +79,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
 // 　　メアド    reservations.？ ※1
 // 　　電話番号  reservations.？ ※1
 // 　　メモ      reservations.watcher_name ※2
+    const watcherName: string | null = (!_.isEmpty(req.query.watcher_name)) ? req.query.watcher_name : null;
 
     // const theater: string | null = (!_.isEmpty(req.query.theater)) ? req.query.theater : null;
     // const film: string | null = (!_.isEmpty(req.query.film)) ? req.query.film : null;
@@ -87,55 +112,25 @@ export async function search(req: Request, res: Response, next: NextFunction): P
             }
         );
     }
-
-    // if (film !== null) {
-    //     conditions.push({ film: film });
-    // }
-
-    // if (theater !== null) {
-    //     conditions.push({ theater: theater });
-    // }
-
+    // 来塔日
     if (day !== null) {
         conditions.push({ performance_day: day });
     }
-
+    // 開始時間
     const startTimeFrom: any = (startHour1 !== null && startMinute1 !== null) ? startHour1 + startMinute1 : null;
     const startTimeTo: any = (startHour2 !== null && startMinute2 !== null) ? startHour2 + startMinute2 : null;
     if (startTimeFrom !== null || startTimeTo !== null) {
         const conditionsTime: any = {};
-        // const key: string = 'performance_start_time';
         // 開始時間From
         if (startTimeFrom !== null) {
-            // const keyFrom = '$gte';
             conditionsTime.$gte = startTimeFrom;
         }
         // 開始時間To
         if (startTimeTo !== null) {
-            // const keyFrom = '$lt';
             conditionsTime.$lt = startTimeTo;
         }
         conditions.push({ performance_start_time : conditionsTime });
     }
-
-    // let startTimeTo: string = '';
-    // if (startHour1 !== null && startMinute1 !== null) {
-    // }
-    // if (startHour1 !== null && startMinute1 !== null) {
-    //     conditions.push({
-    //         performance_start_time: {
-    //             $gte: startHour1 + startMinute1
-    //         }
-    //     });
-    // }
-
-    // if (startHour2 !== null && startMinute2 !== null) {
-    //     conditions.push({
-    //         performance_end_time: {
-    //             $lte: startHour2 + startMinute2
-    //         }
-    //     });
-    // }
 
     // if (updater !== null) {
     //     conditions.push({
@@ -150,14 +145,23 @@ export async function search(req: Request, res: Response, next: NextFunction): P
     //     });
     // }
 
+    // 購入番号
     if (paymentNo !== null) {
         // remove space characters
         paymentNo = CommonUtil.toHalfWidth(paymentNo.replace(/\s/g, ''));
         conditions.push({ payment_no: { $regex: `${paymentNo}` } });
     }
-
+    // アカウント
     if (owner !== null) {
         conditions.push({ owner: owner });
+    }
+    // 　　名前      reservations.？ ※1
+    // 　　メアド    reservations.？ ※1
+    // 　　電話番号  reservations.？ ※1
+
+    // メモ
+    if (watcherName !== null) {
+        conditions.push({ watcher_name: watcherName });
     }
 
     try {
@@ -168,8 +172,8 @@ export async function search(req: Request, res: Response, next: NextFunction): P
             }
         ).exec();
 
+        // データ検索
         const reservations = <any[]>await Models.Reservation.find({ $and: conditions })
-        //const reservations = <any[]>await Models.Reservation.find({})
             .skip(limit * (page - 1))
             .limit(limit)
             .lean(true)
@@ -192,16 +196,57 @@ export async function search(req: Request, res: Response, next: NextFunction): P
         res.json({
             success: true,
             results: reservations,
-            count: count
+            count: count,
+            errors: null
         });
     } catch (error) {
         console.error(error);
         res.json({
             success: false,
             results: [],
+            errors: null,
             count: 0
         });
     }
+}
+/**
+ * マイページ予約検索画面検証
+ *
+ * @param {any} req
+ * @return {any}
+ */
+async function validate(req: Request): Promise<any> {
+    // 来塔日
+    req.checkQuery('day', req.__('Message.required{{fieldName}}', { fieldName: req.__('Label.Day') })).notEmpty();
+
+    // 検証
+    const validatorResult = await req.getValidationResult();
+    const errors = (!validatorResult.isEmpty()) ? req.validationErrors(true) : {};
+
+    // 片方入力エラーチェック
+    if (!isInputEven(req.query.start_hour1, req.query.start_minute1)) {
+        (<any>errors).start_hour1 = {msg: '時分Fromが片方しか指定されていません'};
+    }
+    if (!isInputEven(req.query.start_hour2, req.query.start_minute2)) {
+        (<any>errors).start_hour2 = {msg: '時分Toが片方しか指定されていません'};
+    }
+    return errors;
+}
+/**
+ * 両方入力チェック(両方入力、または両方未入力の時true)
+ *
+ * @param {string} value1
+ * @param {string} value2
+ * @return {boolean}
+ */
+function isInputEven( value1: string, value2: string): boolean {
+    if (_.isEmpty(value1) && _.isEmpty(value2)) {
+        return true;
+    }
+    if (!_.isEmpty(value1) && !_.isEmpty(value2)) {
+        return true;
+    }
+    return false;
 }
 
 /**

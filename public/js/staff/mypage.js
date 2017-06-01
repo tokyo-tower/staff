@@ -123,7 +123,13 @@ $(function () {
 
         $('.navigation').html(html);
     }
-
+    function setConditions() {
+        // 検索フォームの値を全て条件に追加
+        var formDatas = $('.search-form').serializeArray();
+        formDatas.forEach(function (formData, index) {
+            conditions[formData.name] = formData.value;
+        });
+    }
     function showConditions() {
         var formDatas = $('.search-form').serializeArray();
         formDatas.forEach(function (formData, index) {
@@ -138,6 +144,7 @@ $(function () {
 
     function search() {
         conditions.searched_at = Date.now(); // ブラウザキャッシュ対策
+        $('.error-message').hide();
 
         $.ajax({
             dataType: 'json',
@@ -149,6 +156,14 @@ $(function () {
                 $('.wrapper-reservations input[type="checkbox"]').prop('checked', false);
             }
         }).done(function (data) {
+            // エラーメッセージ表示
+            if (data.errors) {
+                for (error in data.errors) {
+                    $('[name="error_' + error + '"]').text(data.errors[error].msg);
+                }
+                $('.error-message').show();
+            }
+            // データ表示
             if (data.success) {
                 reservations = data.results;
 
@@ -168,13 +183,8 @@ $(function () {
     // 検索
     $(document).on('click', '.search-form .btn', function () {
         conditions.page = '1';
-
-        // 検索フォームの値を全て条件に追加
-        var formDatas = $('.search-form').serializeArray();
-        formDatas.forEach(function (formData, index) {
-            conditions[formData.name] = formData.value;
-        });
-
+        // 画面から検索条件セット
+        setConditions();
         search();
     });
 
@@ -327,6 +337,10 @@ $(function () {
         $('.td-checkbox input[type="checkbox"]').prop('checked', $(this).is(':checked'));
     });
 
+    // エラー表示クリア
+    $('.error-message').hide();
+    // 画面から検索条件セット
+    setConditions();
     // 予約リスト表示
     search();
 });

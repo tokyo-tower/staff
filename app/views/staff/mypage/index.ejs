@@ -11,12 +11,17 @@
                         <select class="form-control" name="day" style="width:auto;display:inline-block;" >
                             <option value=""><%- __('Label.AllDay') %></option>
                             <%
-                            let now = moment();
-                            let start = moment(conf.get('datetimes.event_start'));
-                            let end = moment(conf.get('datetimes.event_end'));
+                            //let now = moment();
+                            //let start = moment(conf.get('datetimes.event_start'));
+                            //let end = moment(conf.get('datetimes.event_end'));
+                            let start = moment();
+                            let end = (moment(start.toDate())).add(6, 'months');
                             let options = '';
+                            let index = 0;
                             while (start.format('YYYYMMDD') <= end.format('YYYYMMDD')) {
-                                options += `<option value="${start.format('YYYYMMDD')}">${start.format('YYYY/MM/DD')}</option>`;
+                                let selected = (index == 0) ? "selected" : "";
+                                index++;
+                                options += `<option value="${start.format('YYYYMMDD')}" ${selected}>${start.format('YYYY/MM/DD')}</option>`;
                                 start = start.add(+1, 'days');
                                 continue;
                             }
@@ -44,6 +49,9 @@
                             <option value=""></option>
                             <option value="09">09</option>
                             <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
                         </select>
                         <%- __('Label.Hour') %>
                         <select class="form-control" name="start_minute2" style="width:auto;display:inline-block;">
@@ -55,6 +63,13 @@
                         </select>
                         <%- __('Label.Minute') %>
                     </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <p name='error_day' class="error-message" style="color:red;padding:0 0 0 0;"></p>
+                    <p name='error_start_hour1' class="error-message" style="color:red;padding:0 0 0 0;"></p>
+                    <p name='error_start_hour2' class="error-message" style="color:red;padding:0 0 0 0;"></p>
                 </td>
             </tr>
             <tr>
@@ -84,7 +99,7 @@
             <tr>
                 <td>
                     購入者情報から検索<br>
-                    <%- __('Label.UpdatedUser') %>/<%- __('Label.Distribution') %><br>
+                    お名前<br>
                     <div class="form-inline">
                         <div class="form-group">
                             <input type="text" class="form-control" name="updater" style="width:90%;">
@@ -113,7 +128,7 @@
                     <br>
                     メモ<br>
                     <div class="form-group">
-                        <input type="text" class="form-control" name="owner_memol" style="width:90%;">
+                        <input type="text" class="form-control" name="watcher_name" style="width:90%;">
                     </div>
                 </td>
             </tr>
