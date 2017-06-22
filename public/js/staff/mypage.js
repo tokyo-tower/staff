@@ -35,13 +35,7 @@ $(function () {
             html += ''
                 + '</th>'
                 + '<td class="td-number">' + ((reservation.payment_no) ? reservation.payment_no : '') + '</td>'
-                // + '<td class="td-title">'
-                // + reservation['film_name'][locale] + '<br>'
-                // + startDatetime + '-<br>'
-                // + reservation['theater_name'][locale] + ' ' + reservation['screen_name'][locale] + '' + '<br>'
-                // + ((reservation.performance_canceled) ? '<div class="alert alert-danger">Canceled</div>' : '')
-                // + '</td>'
-                + '<td class="td-name">' + reservation.watcher_name + '</td>'
+                + '<td class="td-name">' + reservation.purchaser_last_name + ' ' + reservation.purchaser_first_name + '</td>'
                 + '<td class="td-amemo">' + reservation.watcher_name + '</td>'
                 + '<td class="td-seat">' + reservation.seat_code + '</td>'
                 + '<td class="td-updater">' + reservation['ticket_type_name'][locale] + '</td>';

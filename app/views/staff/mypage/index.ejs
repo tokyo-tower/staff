@@ -5,7 +5,7 @@
     <table class="table" bordered>
         <tbody>
             <tr>
-                <td colspan="4">
+                <td colspan="5">
                     <%- __('Label.Day') %><br>
                     <div class="form-group">
                         <select class="form-control" name="day" style="width:auto;display:inline-block;" >
@@ -14,12 +14,13 @@
                             //let now = moment();
                             //let start = moment(conf.get('datetimes.event_start'));
                             //let end = moment(conf.get('datetimes.event_end'));
-                            let start = moment();
-                            let end = (moment(start.toDate())).add(6, 'months');
+                            let today = moment();
+                            let start = (moment(today.toDate())).add(-3, 'months');
+                            let end = (moment(today.toDate())).add(3, 'months');
                             let options = '';
                             let index = 0;
                             while (start.format('YYYYMMDD') <= end.format('YYYYMMDD')) {
-                                let selected = (index == 0) ? "selected" : "";
+                                let selected = (start.format('YYYYMMDD') == today.format('YYYYMMDD')) ? "selected" : "";
                                 index++;
                                 options += `<option value="${start.format('YYYYMMDD')}" ${selected}>${start.format('YYYY/MM/DD')}</option>`;
                                 start = start.add(+1, 'days');
@@ -66,7 +67,7 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="4">
+                <td colspan="5">
                     <p name='error_day' class="error-message" style="color:red;padding:0 0 0 0;"></p>
                     <p name='error_start_hour1' class="error-message" style="color:red;padding:0 0 0 0;"></p>
                     <p name='error_start_hour2' class="error-message" style="color:red;padding:0 0 0 0;"></p>
@@ -99,10 +100,19 @@
             <tr>
                 <td>
                     購入者情報から検索<br>
-                    お名前<br>
+                    お名前(姓)<br>
                     <div class="form-inline">
                         <div class="form-group">
-                            <input type="text" class="form-control" name="updater" style="width:90%;">
+                            <input type="text" class="form-control" name="purchaser_last_name" style="width:90%;">
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <br>
+                    (名)<br>
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="purchaser_first_name" style="width:90%;">
                         </div>
                     </div>
                 </td>
@@ -111,7 +121,7 @@
                     メールアドレス<br>
                     <div class="form-inline">
                         <div class="form-group">
-                            <input type="text" class="form-control" name="owner_email" style="width:90%;">
+                            <input type="text" class="form-control" name="purchaser_email" style="width:90%;">
                         </div>
                     </div>
                 </td>
@@ -120,7 +130,7 @@
                     電話番号<br>
                     <div class="form-inline">
                         <div class="form-group">
-                            <input type="text" class="form-control" name="owner_tel" style="width:90%;">
+                            <input type="text" class="form-control" name="purchaser_tel" style="width:90%;">
                         </div>
                     </div>
                 </td>
@@ -133,9 +143,9 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="4">
+                <td colspan="5">
                     <div class="form-group">
-                        <a class="btn" href="javascript:void(0)"><span><%- __('Button.Search') %></span></a>
+                        <a class="btn" href="javascript:void(0)" style="float:none;"><span><%- __('Button.Search') %></span></a>
                     </div>
                 </td>
             </tr>
@@ -152,7 +162,7 @@
             <tr>
                 <th><input type="checkbox" class="check-all"></th>
                 <th><%- __('Label.PaymentNo') %></th>
-                <th><%- __('Label.UpdatedUser') %></th>
+                <th>氏名</th>
                 <th>メモ</th>
                 <th><%- __('Label.SeatCode') %></th>
                 <th>券種</th>

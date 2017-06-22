@@ -74,21 +74,25 @@ function search(req, res, next) {
         // tslint:disable-next-line:no-magic-numbers
         const limit = (!_.isEmpty(req.query.limit)) ? parseInt(req.query.limit, DEFAULT_RADIX) : 10;
         const page = (!_.isEmpty(req.query.page)) ? parseInt(req.query.page, DEFAULT_RADIX) : 1;
+        // ご来塔日時
         const day = (!_.isEmpty(req.query.day)) ? req.query.day : null;
         const startHour1 = (!_.isEmpty(req.query.start_hour1)) ? req.query.start_hour1 : null;
         const startMinute1 = (!_.isEmpty(req.query.start_minute1)) ? req.query.start_minute1 : null;
         const startHour2 = (!_.isEmpty(req.query.start_hour2)) ? req.query.start_hour2 : null;
         const startMinute2 = (!_.isEmpty(req.query.start_minute2)) ? req.query.start_minute2 : null;
+        // 購入番号
         let paymentNo = (!_.isEmpty(req.query.payment_no)) ? req.query.payment_no : null;
+        // アカウント
         const owner = (!_.isEmpty(req.query.owner)) ? req.query.owner : null;
-        // 　　名前      reservations.？ ※1
-        // 　　メアド    reservations.？ ※1
-        // 　　電話番号  reservations.？ ※1
-        // 　　メモ      reservations.watcher_name ※2
+        // 名前
+        const purchaserLastName = (!_.isEmpty(req.query.purchaser_last_name)) ? req.query.purchaser_last_name : null;
+        const purchaserFirstName = (!_.isEmpty(req.query.purchaser_first_name)) ? req.query.purchaser_first_name : null;
+        // メアド
+        const purchaserEmail = (!_.isEmpty(req.query.purchaser_email)) ? req.query.purchaser_email : null;
+        // 電話番号
+        const purchaserTel = (!_.isEmpty(req.query.purchaser_tel)) ? req.query.purchaser_tel : null;
+        // メモ
         const watcherName = (!_.isEmpty(req.query.watcher_name)) ? req.query.watcher_name : null;
-        // const theater: string | null = (!_.isEmpty(req.query.theater)) ? req.query.theater : null;
-        // const film: string | null = (!_.isEmpty(req.query.film)) ? req.query.film : null;
-        // const updater: string | null = (!_.isEmpty(req.query.updater)) ? req.query.updater : null;
         // 検索条件を作成
         const conditions = [];
         // 管理者の場合、内部関係者の予約全て&確保中
@@ -96,7 +100,7 @@ function search(req, res, next) {
             conditions.push({
                 $or: [
                     {
-                        purchaser_group: ttts_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF,
+                        //purchaser_group: ReservationUtil.PURCHASER_GROUP_STAFF,
                         status: ttts_domain_1.ReservationUtil.STATUS_RESERVED
                     },
                     {
@@ -107,8 +111,8 @@ function search(req, res, next) {
         }
         else {
             conditions.push({
-                purchaser_group: ttts_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF,
-                owner: req.staffUser.get('_id'),
+                //purchaser_group: ReservationUtil.PURCHASER_GROUP_STAFF,
+                //owner: req.staffUser.get('_id'),
                 status: ttts_domain_1.ReservationUtil.STATUS_RESERVED
             });
         }
@@ -127,22 +131,10 @@ function search(req, res, next) {
             }
             // 開始時間To
             if (startTimeTo !== null) {
-                conditionsTime.$lt = startTimeTo;
+                conditionsTime.$lte = startTimeTo;
             }
             conditions.push({ performance_start_time: conditionsTime });
         }
-        // if (updater !== null) {
-        //     conditions.push({
-        //         $or: [
-        //             {
-        //                 owner_signature: { $regex: `${updater}` }
-        //             },
-        //             {
-        //                 watcher_name: { $regex: `${updater}` }
-        //             }
-        //         ]
-        //     });
-        // }
         // 購入番号
         if (paymentNo !== null) {
             // remove space characters
@@ -153,9 +145,23 @@ function search(req, res, next) {
         if (owner !== null) {
             conditions.push({ owner: owner });
         }
-        // 　　名前      reservations.？ ※1
-        // 　　メアド    reservations.？ ※1
-        // 　　電話番号  reservations.？ ※1
+        // 名前
+        if (purchaserLastName !== null) {
+            conditions.push({ purchaser_last_name: { $regex: purchaserLastName } });
+            //conditions['name.ja'] = { $regex: managementTypeName };
+        }
+        if (purchaserFirstName !== null) {
+            conditions.push({ purchaser_first_name: { $regex: purchaserFirstName } });
+            //conditions.push({ purchaser_first_name: purchaserFirstName });
+        }
+        // メアド
+        if (purchaserEmail !== null) {
+            conditions.push({ purchaser_email: purchaserEmail });
+        }
+        // 電話番号
+        if (purchaserTel !== null) {
+            conditions.push({ purchaser_tel: purchaserTel });
+        }
         // メモ
         if (watcherName !== null) {
             conditions.push({ watcher_name: watcherName });
@@ -171,7 +177,7 @@ function search(req, res, next) {
                 .limit(limit)
                 .lean(true)
                 .exec();
-            // ソート昇順(上映日→開始時刻→スクリーン→座席コード)
+            // ソート昇順(上映日→開始時刻→購入番号→座席コード)
             reservations.sort((a, b) => {
                 if (a.performance_day > b.performance_day) {
                     return 1;
@@ -179,7 +185,10 @@ function search(req, res, next) {
                 if (a.performance_start_time > b.performance_start_time) {
                     return 1;
                 }
-                if (a.screen > b.screen) {
+                if (a.payment_no > b.payment_no) {
+                    return 1;
+                }
+                if (a.seat_code > b.seat_code) {
                     return 1;
                 }
                 return ttts_domain_1.ScreenUtil.sortBySeatCode(a.seat_code, b.seat_code);
