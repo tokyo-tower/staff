@@ -1,9 +1,4 @@
 "use strict";
-/**
- * 内部関係者座席予約コントローラー
- *
- * @namespace controller/staff/reserve
- */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -13,12 +8,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * 内部関係者座席予約コントローラー
+ *
+ * @namespace controller/staff/reserve
+ */
+const GMO = require("@motionpicture/gmo-service");
 const TTTS = require("@motionpicture/ttts-domain");
 const conf = require("config");
 const moment = require("moment");
 const _ = require("underscore");
 const reservePerformanceForm_1 = require("../../forms/reserve/reservePerformanceForm");
-const reserveSeatForm_1 = require("../../forms/reserve/reserveSeatForm");
+//import reserveSeatForm from '../../forms/reserve/reserveSeatForm';
 const session_1 = require("../../models/reserve/session");
 const reserveBaseController = require("../reserveBase");
 const PURCHASER_GROUP = TTTS.ReservationUtil.PURCHASER_GROUP_STAFF;
@@ -34,7 +35,7 @@ function start(req, res, next) {
             const reservationModel = yield reserveBaseController.processStart(PURCHASER_GROUP, req);
             reservationModel.save(req);
             if (reservationModel.performance !== undefined) {
-                const cb = '/staff/reserve/seats';
+                const cb = '/staff/reserve/tickets';
                 res.redirect(`/staff/reserve/terms?cb=${encodeURIComponent(cb)}`);
             }
             else {
@@ -80,7 +81,7 @@ function performances(req, res, next) {
                     // パフォーマンスFIX
                     yield reserveBaseController.processFixPerformance(reservationModel, req.body.performanceId, req);
                     reservationModel.save(req);
-                    res.redirect('/staff/reserve/seats');
+                    res.redirect('/staff/reserve/tickets');
                     return;
                 }
                 catch (error) {
@@ -104,66 +105,89 @@ function performances(req, res, next) {
     });
 }
 exports.performances = performances;
-/**
- * 座席選択
- */
-function seats(req, res, next) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            let reservationModel = session_1.default.FIND(req);
-            if (reservationModel === null) {
-                next(new Error(req.__('Message.Expired')));
-                return;
-            }
-            const limit = reservationModel.getSeatsLimit();
-            if (req.method === 'POST') {
-                reserveSeatForm_1.default(req);
-                const validationResult = yield req.getValidationResult();
-                if (!validationResult.isEmpty()) {
-                    res.redirect('/staff/reserve/seats');
-                    return;
-                }
-                reservationModel = reservationModel;
-                const seatCodes = JSON.parse(req.body.seatCodes);
-                // 追加指定席を合わせて制限枚数を超過した場合
-                if (seatCodes.length > limit) {
-                    const message = req.__('Message.seatsLimit{{limit}}', { limit: limit.toString() });
-                    res.redirect(`/staff/reserve/seats?message=${encodeURIComponent(message)}`);
-                    return;
-                }
-                // 仮予約あればキャンセルする
-                yield processCancelSeats(reservationModel);
-                try {
-                    // 座席FIX
-                    yield processFixSeats(reservationModel, seatCodes, req);
-                    reservationModel.save(req);
-                    // 券種選択へ
-                    res.redirect('/staff/reserve/tickets');
-                    return;
-                }
-                catch (error) {
-                    reservationModel.save(req);
-                    const message = req.__('Message.SelectedSeatsUnavailable');
-                    res.redirect(`/staff/reserve/seats?message=${encodeURIComponent(message)}`);
-                    return;
-                }
-            }
-            else {
-                res.render('staff/reserve/seats', {
-                    reservationModel: reservationModel,
-                    limit: limit,
-                    layout: layout
-                });
-                return;
-            }
-        }
-        catch (error) {
-            next(new Error(req.__('Message.UnexpectedError')));
-            return;
-        }
-    });
-}
-exports.seats = seats;
+//2017/06/23 座席選択削除
+// /**
+//  * 座席選択
+//  */
+// export async function seats(req: Request, res: Response, next: NextFunction): Promise<void> {
+//     try {
+//         let reservationModel = ReservationModel.FIND(req);
+//         if (reservationModel === null) {
+//             next(new Error(req.__('Message.Expired')));
+//             return;
+//         }
+//         const limit = reservationModel.getSeatsLimit();
+//         if (req.method === 'POST') {
+//             reserveSeatForm(req);
+//             const validationResult = await req.getValidationResult();
+//             if (!validationResult.isEmpty()) {
+//                 res.redirect('/staff/reserve/seats');
+//                 return;
+//             }
+//             reservationModel = <ReservationModel>reservationModel;
+//             const seatCodes: string[] = JSON.parse(req.body.seatCodes);
+//             // 追加指定席を合わせて制限枚数を超過した場合
+//             if (seatCodes.length > limit) {
+//                 const message = req.__('Message.seatsLimit{{limit}}', { limit: limit.toString() });
+//                 res.redirect(`/staff/reserve/seats?message=${encodeURIComponent(message)}`);
+//                 return;
+//             }
+//             // 仮予約あればキャンセルする
+//             await processCancelSeats(reservationModel);
+//             try {
+//                 // 座席FIX
+//                 await processFixSeats(reservationModel, seatCodes, req);
+//                 reservationModel.save(req);
+//                 // 券種選択へ
+//                 res.redirect('/staff/reserve/tickets');
+//                 return;
+//             } catch (error) {
+//                 reservationModel.save(req);
+//                 const message = req.__('Message.SelectedSeatsUnavailable');
+//                 res.redirect(`/staff/reserve/seats?message=${encodeURIComponent(message)}`);
+//                 return;
+//             }
+//         } else {
+//             res.render('staff/reserve/seats', {
+//                 reservationModel: reservationModel,
+//                 limit: limit,
+//                 layout: layout
+//             });
+//             return;
+//         }
+//     } catch (error) {
+//         next(new Error(req.__('Message.UnexpectedError')));
+//         return;
+//     }
+// }
+// /**
+//  * 券種選択(旧)
+//  */
+// export async function tickets(req: Request, res: Response, next: NextFunction): Promise<void> {
+//     try {
+//         const reservationModel = ReservationModel.FIND(req);
+//         if (reservationModel === null) {
+//             next(new Error(req.__('Message.Expired')));
+//             return;
+//         }
+//         if (req.method === 'POST') {
+//             try {
+//                 await reserveBaseController.processFixTickets(reservationModel, req);
+//                 reservationModel.save(req);
+//                 res.redirect('/staff/reserve/profile');
+//             } catch (error) {
+//                 res.redirect('/staff/reserve/tickets');
+//             }
+//         } else {
+//             res.render('staff/reserve/tickets', {
+//                 reservationModel: reservationModel,
+//                 layout: layout
+//             });
+//         }
+//     } catch (error) {
+//         next(new Error(req.__('Message.UnexpectedError')));
+//     }
+// }
 /**
  * 券種選択
  */
@@ -175,20 +199,35 @@ function tickets(req, res, next) {
                 next(new Error(req.__('Message.Expired')));
                 return;
             }
+            reservationModel.paymentMethod = '';
             if (req.method === 'POST') {
+                // 仮予約あればキャンセルする
                 try {
-                    yield reserveBaseController.processFixTickets(reservationModel, req);
+                    yield reserveBaseController.processCancelSeats(reservationModel);
+                }
+                catch (error) {
+                    next(error);
+                    return;
+                }
+                try {
+                    // 予約処理
+                    yield reserveBaseController.processFixSeatsAndTickets(reservationModel, req);
                     reservationModel.save(req);
                     res.redirect('/staff/reserve/profile');
                 }
                 catch (error) {
-                    res.redirect('/staff/reserve/tickets');
+                    // "予約可能な席がございません"などのメッセージ表示
+                    res.locals.message = error.message;
+                    res.render('staff/reserve/tickets', {
+                        reservationModel: reservationModel
+                    });
                 }
             }
             else {
+                // 券種選択画面へ遷移
+                res.locals.message = '';
                 res.render('staff/reserve/tickets', {
-                    reservationModel: reservationModel,
-                    layout: layout
+                    reservationModel: reservationModel
                 });
             }
         }
@@ -198,8 +237,24 @@ function tickets(req, res, next) {
     });
 }
 exports.tickets = tickets;
+// /**
+//  * 購入者情報(スキップ)
+//  */
+// export async function profile(req: Request, res: Response, next: NextFunction): Promise<void> {
+//     try {
+//         const reservationModel = ReserveSessionModel.FIND(req);
+//         if (reservationModel === null) {
+//             next(new Error(req.__('Message.Expired')));
+//             return;
+//         }
+//         await reserveBaseController.processAllExceptConfirm(reservationModel, req);
+//         res.redirect('/staff/reserve/confirm');
+//     } catch (error) {
+//         next(new Error(req.__('Message.UnexpectedError')));
+//     }
+// }
 /**
- * 購入者情報(スキップ)
+ * 購入者情報
  */
 function profile(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -209,8 +264,43 @@ function profile(req, res, next) {
                 next(new Error(req.__('Message.Expired')));
                 return;
             }
-            yield reserveBaseController.processAllExceptConfirm(reservationModel, req);
-            res.redirect('/staff/reserve/confirm');
+            if (req.method === 'POST') {
+                try {
+                    yield reserveBaseController.processFixProfile(reservationModel, req, res);
+                    // クレジットカード決済のオーソリ、あるいは、オーダーID発行
+                    //await processFixGMO(reservationModel, req);
+                    // 予約情報確定
+                    yield reserveBaseController.processAllExceptConfirm(reservationModel, req);
+                    reservationModel.save(req);
+                    res.redirect('/staff/reserve/confirm');
+                }
+                catch (error) {
+                    console.error(error);
+                    res.render('staff/reserve/profile', {
+                        reservationModel: reservationModel
+                    });
+                }
+            }
+            else {
+                // セッションに情報があれば、フォーム初期値設定
+                const email = reservationModel.purchaser.email;
+                res.locals.lastName = reservationModel.purchaser.lastName;
+                res.locals.firstName = reservationModel.purchaser.firstName;
+                res.locals.tel = reservationModel.purchaser.tel;
+                res.locals.age = reservationModel.purchaser.age;
+                res.locals.address = reservationModel.purchaser.address;
+                res.locals.gender = reservationModel.purchaser.gender;
+                res.locals.email = (!_.isEmpty(email)) ? email : '';
+                res.locals.emailConfirm = (!_.isEmpty(email)) ? email.substr(0, email.indexOf('@')) : '';
+                res.locals.emailConfirmDomain = (!_.isEmpty(email)) ? email.substr(email.indexOf('@') + 1) : '';
+                res.locals.paymentMethod =
+                    (!_.isEmpty(reservationModel.paymentMethod)) ? reservationModel.paymentMethod : GMO.Util.PAY_TYPE_CREDIT;
+                res.render('staff/reserve/profile', {
+                    reservationModel: reservationModel,
+                    GMO_ENDPOINT: process.env.GMO_ENDPOINT,
+                    GMO_SHOP_ID: process.env.GMO_SHOP_ID
+                });
+            }
         }
         catch (error) {
             next(new Error(req.__('Message.UnexpectedError')));

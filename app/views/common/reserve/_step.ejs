@@ -1,10 +1,23 @@
+<%
+/**
+ *  現在ステップ表示
+ *  @param {string} currentStepName : 現在ステップ
+ */
+%>
 <div class="steps">
-    <div class="container">
-        <div class="step step-performances">STEP1<span class="visible-pc"><br><%- __('Steps.SelectPerformance') %></span></div>
-        <div class="step step-seats">STEP2<span class="visible-pc"><br><%- __('Steps.SelectSeats') %></span></div>
-        <div class="step step-tickets">STEP3<span class="visible-pc"><br><%- __('Steps.SelectTickets') %></span></div>
-        <div class="step step-profile">STEP4<span class="visible-pc"><br><%- __('Steps.EditProfile') %></span></div>
-        <div class="step step-confirm">STEP5<span class="visible-pc"><br><%- __('Steps.Confirm') %></span></div>
-        <div class="step step-complete step-waitingSettlement">STEP6<span class="visible-pc"><br><%- __('Steps.Complete') %></span></div>
-    </div>
+    <%
+        const stepNames = ['performances', 'tickets', 'profile', 'confirm', 'complete'];
+        const currentIndex = (typeof currentStepName !== 'undefined') ? stepNames.indexOf(currentStepName) : -1;
+        stepNames.forEach((stepName, index)=> {
+            let stateClassName = '';
+            if (index < currentIndex) {
+                stateClassName = 'step-done';
+            } else if (index === currentIndex) {
+                stateClassName = 'step-active';
+            }
+    %>
+            <div class="step step-<%= stepName %> <%= stateClassName %>"><span>STEP<%= (index+1) %></span></div>
+    <%
+        });
+    %>
 </div>

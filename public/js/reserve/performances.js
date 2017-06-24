@@ -1,176 +1,159 @@
-String.prototype.splice = function (idx, str) { //※日時整形用(Stringのidx文字目にstrを差し込む)
-    return (this.slice(0, idx) + str + this.slice(idx));
-};
+$(function() {
+    var LOCALE = document.documentElement.getAttribute('lang');
+    var API_ENDPOINT = document.querySelector('input[name="apiEndpoint"]').value;
+    if (!API_ENDPOINT) { return alert('API_ENDPOINT undefined'); }
 
-$(function () {
-    var API_ENDPOINT = $('input[name="apiEndpoint"]').val();
+    // カレンダーを何日先まで表示するか
+    var CALENDER_DAYRANGE = 364;
 
-    var locale = $('html').attr('lang');
-    var performances = [];
-    var conditions = {
-        page: '1'
+    // 空き状況表示切り替え閾値 (以下)
+    var STATUS_THRESHOLD = {
+        CROWDED: 19,
+        LAST: 9
     };
 
 
-    function showPerformances() {
-        // 作品ごとに整形(APiのレスポンスは、上映日昇順)
-        var filmIds = [];
-        var performancesByFilm = {};
-        performances.forEach(function (performance) {
-            var filmId = performance.attributes.film;
-            if (filmIds.indexOf(filmId) < 0) {
-                filmIds.push(filmId);
-                performancesByFilm[filmId] = [];
+    // 空席数からCSSクラス名を得る
+    var getStatusNameByRemainsNum = function(num) {
+        num = parseInt(num, 10);
+        if (num > STATUS_THRESHOLD.CROWDED) {
+            return 'capable'; // 「⚪」
+        } else if (num > STATUS_THRESHOLD.LAST) {
+            return 'crowded'; // 「△」
+        } else if (num > 0) {
+            return 'last'; // 「人間アイコン + 残数」
+        }
+        return 'soldout'; // 「×」
+    };
+
+
+    // 文字列整形用 (Stringのidx文字目にstrを差し込む)
+    var spliceStr = function(targetStr, idx, str) {
+        var ret = targetStr;
+        try {
+            ret = (targetStr.slice(0, idx) + str + targetStr.slice(idx));
+        } catch (e) {
+            console.log(e);
+        }
+        return ret || '';
+    };
+
+
+    // APIから得たパフォーマンス一覧を整形して表示
+    var dom_performances = document.querySelector('.performances');
+    var showPerformances = function(performanceArray) {
+        // 1hごとにまとめる (start_timeの最初2文字を時間とする)
+        var hourArray = [];
+        var performancesByHour = {};
+        performanceArray.forEach(function(performance) {
+            try {
+                var hour = performance.attributes.start_time.slice(0, 2);
+                if (!~hourArray.indexOf(hour)) {
+                    hourArray.push(hour);
+                    performancesByHour[hour] = [];
+                }
+                performancesByHour[hour].push({
+                    id: performance.id,
+                    start_time: performance.attributes.start_time,
+                    end_time: performance.attributes.end_time,
+                    seat_status: performance.attributes.seat_status
+                });
+            } catch (e) {
+                console.log(e);
+                return true;
             }
-
-            performancesByFilm[filmId].push(performance);
         });
-
-
-
-
-        var NAMETABLE_STATUS = { // CSSクラス分けのため変換
-            '◎': 'vacant',
-            '○': 'capable',
-            '△': 'crowded',
-            '×': 'soldout',
-            '?': 'unknown'
-        };
+        // 時間割を念のためソート
+        hourArray.sort(function(a, b) {
+            if (a < b) { return -1; }
+            if (a > b) { return 1; }
+            return 0;
+        });
 
         var html = '';
-
-        filmIds.forEach(function (filmId) {
-            var performancesOnFilm = performancesByFilm[filmId];
-            var longTitleClassName = (performancesOnFilm[0].attributes.film_name.length > 63) ? 'performance-longtitle' : '';
-            html +=
-                '<div class="performance ' + longTitleClassName + ' accordion_mobile_toggle">' +
-                '<div class="performance-image"><img src="/images/film/' + performancesOnFilm[0].attributes.film + '.jpg"></div>' +///images/temp_performance_thumb.jpg"></div>'+
-                '<div class="performance-title"><h3><span>' + $('<div/>').text(performancesOnFilm[0].attributes.film_name).html() + '</span></h3></div>' +
-                '<div class="performance-inner accordion_mobile_inner">' +
-                '<div class="performance-info">' +
-                '<div class="desc">' + performancesOnFilm[0].attributes.film_sections.join(',') + '</div>' +
-                '<div class="genreslength">' +
-                '<div class="genres">' +
-                '</div>';
-
-            if (performancesOnFilm[0].attributes.film_minutes) {
-                html += ((locale === 'ja') ? '<span class="length">本編 ' + performancesOnFilm[0].attributes.film_minutes + '分</span>' : '<span class="length">Running time ' + performancesOnFilm[0].attributes.film_minutes + ' minutes</span>');
-            }
-
-            html +=
-                '</div>' +
-                '</div>' +
-                '<div class="performance-schedule">'
-                ;
-            var scheduleClmCount = 0; //3列ごとにwrapperで括る
-            performancesOnFilm.forEach(function (performance, index) {
-                performance.attributes.day = performance.attributes.day.substr(4).splice(2, '/');//Ymdをm/dに
-                performance.attributes.start_time = performance.attributes.start_time.splice(2, ':');//hiをh:iに
-
-                if (scheduleClmCount === 0) {
-                    html += '<div class="wrapper-scheduleitems">';
-                }
-                console.log(performance)
-                html +=
-                    '<div class="scheduleitem scheduleitem-' + NAMETABLE_STATUS[performance.attributes.seat_status] + ' select-performance" data-performance-id="' + performance.id + '">' +
-                    '<div class="text">' +
-                    '<h3>' + performance.attributes.day + ' ' + performance.attributes.start_time + ' - </h3>' +
-                    '<p>' + performance.attributes.theater_name + '<br class="visible-pc">' + performance.attributes.screen_name.replace(/ /g, '&nbsp;') + '</p>' +
-                    '</div>' +
-                    '<span class="status">' + performance.attributes.seat_status + '</span>' +
-                    '</div>'
-                    ;
-                scheduleClmCount = scheduleClmCount + 1;
-                if (scheduleClmCount === 3 || index === performancesOnFilm.length - 1) {
-                    html += '</div>';
-                    scheduleClmCount = 0;
-                }
+        hourArray.forEach(function(hour) {
+            // 時間割内のパフォーマンスを念のためソート
+            performancesByHour[hour].sort(function(a, b) {
+                if (a.start_time < b.start_time) { return -1; }
+                if (a.start_time === b.start_time) { return 0; }
+                return 1;
             });
-            html +=
-                '</div>' +
-                '<p class="performance-copyrights">' + $('<div/>').text(performancesOnFilm[0].attributes.film_copyright.replace(/<br>/g, '')).html() + '</p>' +
-                '</div>' +
-                '</div>'
-                ;
+
+            html += '<div class="performance">' +
+                        '<div class="hour"><span>' + hour + ':00～</span></div>' +
+                        '<div class="items">';
+            performancesByHour[hour].forEach(function(performance) {
+                html +=     '<div class="item item-' + getStatusNameByRemainsNum(performance.seat_status) + '" data-performance-id="' + performance.id + '">' +
+                                '<p class="time">' + spliceStr(performance.start_time, 2, ':') + ' - ' + spliceStr(performance.end_time, 2, ':') + '</p>' +
+                                '<div class="wrapper-status">' +
+                                    '<p class="status">' + performance.seat_status + '</p>' +
+                                '</div>' +
+                            '</div>';
+            });
+            html +=     '</div>' +
+                    '</div>';
         });
-
-
-        $('.performances').html(html);
-    }
-
-
-
-
-    function showConditions() {
-        var formDatas = $('form').serializeArray();
-        formDatas.forEach(function (formData, index) {
-            var name = formData.name;
-            if (conditions.hasOwnProperty(name)) {
-                $('input[name="' + name + '"], select[name="' + name + '"]', $('form')).val(conditions[name]);
-            } else {
-                $('input[name="' + name + '"], select[name="' + name + '"]', $('form')).val('');
-            }
-        });
-    }
-
-    function search() {
-        $.ajax({
-            dataType: 'json',
-            url: API_ENDPOINT + '/' + locale + '/performance/search',
-            type: 'GET',
-            data: conditions,
-            beforeSend: function () {
-                $('.loading').modal();
-            }
-        }).done(function (body) {
-            performances = body.data;
-            showPerformances();
-            showConditions();
-            $('.total-count').text(body.meta.number_of_films);
-        }).fail(function (jqxhr, textStatus, error) {
-        }).always(function (data) {
-            $('.loading').modal('hide');
-        });
-    }
-
-
-
-
+        dom_performances.innerHTML = html;
+    };
 
 
     // 検索
-    $(document).on('click', '.search', function () {
-        conditions.page = '1';
-
-        // 検索フォームの値を全て条件に追加
-        var formDatas = $('form').serializeArray();
-        formDatas.forEach(function (formData, index) {
-            conditions[formData.name] = formData.value;
+    var $loading = $('.loading');
+    var search = function(condition) {
+        $.ajax({
+            dataType: 'json',
+            url: API_ENDPOINT + '/' + LOCALE + '/performance/search',
+            type: 'GET',
+            data: condition,
+            beforeSend: function() {
+                $loading.modal();
+            }
+        }).done(function(body) {
+            if ($.isArray(body.data) && body.data.length > 0) {
+                showPerformances(body.data);
+            } else {
+                dom_performances.innerHTML = '';
+            }
+        }).fail(function(jqxhr, textStatus, error) {
+            console.log('API Error: /performance/search', error);
+        }).always(function() {
+            $loading.modal('hide');
         });
+    };
 
-        search();
+
+    // 日付選択カレンダー (再読込時のために日付はsessionStorageにキープしておく)
+    window.flatpickr .localize(window.flatpickr.l10ns[LOCALE]);
+    var $modal_calender = $('.modal-calender');
+    var calendar = new window.flatpickr(document.getElementById('input_performancedate'), {
+        appendTo: $('#calendercontainer').on('click', function(e) { e.stopPropagation(); })[0], // モーダル内コンテナに挿入しつつカレンダークリックでモーダルが閉じるのを防止
+        defaultDate: window.sessionStorage.getItem('performance_ymd') || 'today',
+        disableMobile: true, // 端末自前の日付選択UIを使わない
+        locale: LOCALE,
+        minDate: 'today',
+        maxDate: new Date().fp_incr(CALENDER_DAYRANGE),
+        onOpen: function() {
+            $modal_calender.fadeIn(200);
+        },
+        onClose: function() {
+            $modal_calender.hide();
+        },
+        // カレンダーの日付が変更されたら検索を実行
+        onValueUpdate: function(selectedDates, dateStr) {
+            window.setSessionStorage('performance_ymd', dateStr);
+            search({
+                page: 1,
+                day: dateStr.replace(/\-/g, '') // Y-m-dをYmdに整形
+            });
+        }
     });
+    // モーダルを閉じたら中のカレンダーも閉じる
+    $modal_calender.click(function() { calendar.close(); });
 
-    // セレクト変更イベント
-    $(document).on('change', 'form select', function () {
-        conditions.page = '1';
 
-        // 検索フォームの値を全て条件に追加
-        var formDatas = $('form').serializeArray();
-        formDatas.forEach(function (formData, index) {
-            conditions[formData.name] = formData.value;
-        });
-
-        search();
+    // パフォーマンス決定
+    $(document).on('click', '.item', function(e) {
+        document.querySelector('input[name="performanceId"]').value = e.currentTarget.getAttribute('data-performance-id');
+        document.getElementById('form_performanceId').submit();
     });
-
-    // パフォーマンス選択
-    $(document).on('click', '.select-performance', function () {
-        $('input[name="performanceId"]').val($(this).attr('data-performance-id'));
-        $('form').submit();
-    });
-
-
-    // パフォーマンスリスト表示
-    $('.search').click();
 });

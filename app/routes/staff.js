@@ -53,7 +53,7 @@ const authentication = (req, res, next) => __awaiter(this, void 0, void 0, funct
                 res.cookie('remember_staff', token, { path: '/', httpOnly: true, maxAge: 604800000 });
                 const owner = yield ttts_domain_1.Models.Owner.findOne({ _id: authenticationDoc.get('owner') }).exec();
                 // ログインしてリダイレクト
-                req.session[staff_1.default.AUTH_SESSION_NAME] = owner.toObject();
+                req.session[staff_1.default.AUTH_SESSION_NAME] = (owner) ? owner.toObject() : null;
                 req.session[staff_1.default.AUTH_SESSION_NAME].signature = authenticationDoc.get('signature');
                 req.session[staff_1.default.AUTH_SESSION_NAME].locale = authenticationDoc.get('locale');
                 res.redirect(req.originalUrl);
@@ -86,7 +86,7 @@ router.post('/mypage/updateWatcherName', base, authentication, staffMyPageContro
 router.get('/reserve/start', base, authentication, staffReserveController.start);
 router.all('/reserve/terms', base, authentication, staffReserveController.terms);
 router.all('/reserve/performances', base, authentication, staffReserveController.performances);
-router.all('/reserve/seats', base, authentication, staffReserveController.seats);
+//router.all('/reserve/seats', base, authentication, staffReserveController.seats);
 router.all('/reserve/tickets', base, authentication, staffReserveController.tickets);
 router.all('/reserve/profile', base, authentication, staffReserveController.profile);
 router.all('/reserve/confirm', base, authentication, staffReserveController.confirm);

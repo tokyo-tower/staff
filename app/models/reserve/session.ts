@@ -321,6 +321,7 @@ interface ITicketType {
         en: string
     };
     charge: number; // 料金
+    count: number;  // 枚数
 }
 
 interface IReservation {

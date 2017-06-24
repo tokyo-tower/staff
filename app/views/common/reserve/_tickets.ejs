@@ -1,51 +1,49 @@
-<%- include('./_step') %>
+<%- include('./_step', {currentStepName: 'tickets'}) %>
+
+<input type="hidden" id="input_maxq" name="maxq" value="<%= conf.get('reservation_maxq') %>">
 
 <h1 class="pagetitle"><%- __('h1.SelectTickets') %></h1>
 <p class="guidetext"><%- __('Label.SelectTicketsGuideText') %></p>
-
-<% if (reservationModel.purchaserGroup === ReservationUtil.PURCHASER_GROUP_STAFF) { %>
-<p class="row small text-left errmsg"><%- __('Label.NameOfPersonWhoWillSeeFilm') %>:<br><%- __('Message.UpdateWatcherNameHelp') %></p>
+<% if (message) { %>
+<p class="guidetext" style="color:red;"><%= message %></p>
 <% } %>
 
+<a class="link-guide" href="https://www.tokyotower.co.jp/price/" target="_blank">各券種に関してはこちら</a>
 <div class="wrapper-2clm">
-
     <div class="clm-left" data-token="">
-
         <table class="table table-tickets">
-
-            <thead><tr><th><%- __('Label.SeatCode') %></th><th><%- __('Label.TicketType') %></th></tr></thead>
-
+            <thead>
+                <tr>
+                    <% /* 券種 */ %>
+                    <th><%- __('Label.TicketType') %></th>
+                    <% /* 枚数 */ %>
+                    <th><%- __('Label.TicketCount') %></th>
+                </tr>
+            </thead>
             <tbody>
-                <% for (let seatCode of reservationModel.seatCodes) { %>
-                <% let reservation = new Models.Reservation(reservationModel.seatCode2reservationDocument(seatCode)); %>
-                <tr data-seat-code="<%- reservation.seat_code %>" data-seat-extra-charge="<%= reservationModel.getChargeExceptTicketTypeBySeatCode(seatCode) %>">
-
-                    <th><span class="visible-mobile"><%- __('Label.SeatCode') %></span> <%- reservation.get('seat_code') %></th>
+                <% /* 券種分loop */ %>
+                <% reservationModel.ticketTypes.forEach(function(ticketType) { %>
+                <tr data-ticket-code="<%- ticketType._id %>" data-ticket-charge="<%= ticketType.charge %>">
+                    <% /* 券種名+値段 */ %>
+                    <th style="text-align:left;"><span><%- ticketType.name[locale] %> \<%= ticketType.charge %></span></th>
                     <td>
+                        <% /* 枚数選択dropdown */ %>
                         <select class="form-control">
-                            <% reservationModel.ticketTypes.forEach(function(ticketType) { %>
-                            <option value="<%- ticketType._id %>" data-charge="<%= ticketType.charge %>"<%- (reservation.get('ticket_type') === ticketType._id) ? ' selected="selected"' : '' %>>
-                                <%- reservation.set(`ticket_type_name`, ticketType.name).set('ticket_type_charge', ticketType.charge).get('ticket_type_detail_str')[locale].replace(/\\/g, '&yen;') %>
-                            </option>
-                            <% }) %>
+                            <% for (let ticketCount = 0; ticketCount < 11; ticketCount++) { %>
+                                <option value="<%- ticketCount.toString() %>"<% if (ticketCount === ticketType.count) { %> selected="selected"<% } %>><%- ticketCount.toString() %></option>
+                            <% } %>
                         </select>
-
-                        <% if (reservationModel.purchaserGroup === ReservationUtil.PURCHASER_GROUP_STAFF) { %>
-                        <input type="text" name="watcherName" class="form-control" placeholder="<%- __('Label.PleaseEnterWatcherName') %>" value="<%- reservation.get('watcher_name') %>">
-                        <% } %>
                     </td>
                 </tr>
-                <% } %>
+                <% }); %>
             </tbody>
-
+            <% /* 合計金額 */ %>
             <tfoot class="hidden">
                 <tr><td colspan="2">
                     <%- __('Label.TotalCharge') %><span class="price"></span>
                 </td></tr>
             </tfoot>
-
         </table>
-
     </div>
 
     <div class="clm-right">
@@ -57,5 +55,7 @@
 <form method="post">
     <input type="hidden" name="choices">
 </form>
+
+<p class="alert-ticket alert-ticket-overmax">選択出来る枚数は <%= conf.get('reservation_maxq') %>枚 までとなります。</p>
 
 <script src="/js/reserve/tickets.js"></script>

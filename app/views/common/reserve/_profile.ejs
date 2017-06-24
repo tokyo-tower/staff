@@ -1,231 +1,200 @@
-<%- include('./_step') %>
+<%- include('./_step', {currentStepName: 'profile'}) %>
+<% console.log(reservationModel); %>
 
 <h1 class="pagetitle"><%- __('h1.EnterProfile') %></h1>
 
-<p class="guidetext"><%= (reservationModel.purchaserGroup === ReservationUtil.PURCHASER_GROUP_WINDOW) ? __('Label.EnterProfileGuideTextWindow') : __('Label.EnterProfileGuideText') %></p>
+<p class="guidetext"><%= __('Label.EnterProfileGuideText') %></p>
 
-<div class="wrapper-2clm">
+<form id="form_profile" method="post">
 
-    <div class="clm-left">
+    <table class="table table-profile">
 
-        <form method="post">
+        <tbody>
 
-            <table class="table table-profile">
-
-                <tbody>
-
-                    <% if (reservationModel.purchaserGroup === ReservationUtil.PURCHASER_GROUP_WINDOW) { %>
-                        <input type="hidden" name="lastName" value="<%= lastName %>">
-                        <input type="hidden" name="firstName" value="<%= firstName %>">
-                        <input type="hidden" name="tel" value="<%= tel %>">
-                        <input type="hidden" name="email" value="<%= email %>">
-                        <input type="hidden" name="emailConfirm" value="<%= emailConfirm %>">
-                        <input type="hidden" name="emailConfirmDomain" value="<%= emailConfirmDomain %>">
-                        <input type="hidden" name="age" value="<%= age %>">
-                        <input type="hidden" name="address" value="<%= address %>">
-                        <input type="hidden" name="gender" value="<%= gender %>">
-
-                    <% } else { %>
-                        <tr>
-                            <th><%- __('Form.FieldName.name') %><span class="required"><%- __('Label.Required') %></span></th>
-                            <td>
-                                <div class="wrapper-names">
-                                    <div class="wrapper-nameinput">
-                                        <label for="id_lastName"><%- __('Form.FieldName.lastName') %></label>
-                                        <input type="text" name="lastName" id="id_lastName" class="form-control" value="<%= lastName %>">
-                                    </div>
-                                    <div class="wrapper-nameinput">
-                                        <label for="id_firstName"><%- __('Form.FieldName.firstName') %></label>
-                                        <input type="text" name="firstName" id="id_firstName" class="form-control" value="<%= firstName %>">
-                                    </div>
-                                </div>
-                                <p class="notice">※<%- __('Message.EnterInFullWidthKatakana') %></p>
-                                <% if (validation && validation.lastName) { %>
-                                <p class="errmsg"><%- validation.lastName.msg %></p>
-                                <% } %>
-                                <% if (validation && validation.firstName) { %>
-                                <p class="errmsg"><%- validation.firstName.msg %></p>
-                                <% } %>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th><%- __('Form.FieldName.email') %><span class="required"><%- __('Label.Required') %></span></th>
-                            <td>
-                                <input type="text" name="email" id="id_email" class="form-control" value="<%= email %>">
-                                <p class="notice">※<%- __('Message.RetypeToConfirm') %></p>
-                                <div class="wrapper-emailconfirm">
-                                    <input type="text" name="emailConfirm" id="id_emailConfirm" class="form-control" value="<%= emailConfirm %>">
-                                    <span>@</span>
-                                    <input type="text" name="emailConfirmDomain" id="id_emailConfirmDomain" class="form-control" value="<%= emailConfirmDomain %>">
-                                </div>
-                                <p class="notice">※<%- __('Message.SettingForLimitingEmailReception') %></p>
-                                <% if (validation && validation.email) { %>
-                                <p class="errmsg"><%- validation.email.msg %></p>
-                                <% } %>
-                                <% if (validation && validation.emailConfirm) { %>
-                                <p class="errmsg"><%- validation.emailConfirm.msg %></p>
-                                <% } %>
-                                <% if (validation && validation.emailConfirmDomain) { %>
-                                <p class="errmsg"><%- validation.emailConfirmDomain.msg %></p>
-                                <% } %>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th><label for="id_tel"><%- __('Form.FieldName.tel') %></label><span class="required"><%- __('Label.Required') %></span></th>
-                            <td>
-                                <input type="text" name="tel" id="id_tel" class="form-control" value="<%= tel %>">
-                                <p class="notice">※<%- __('Message.UseHalfWidthAlphanumericWithoutHyphens') %></p>
-                                <% if (validation && validation.tel) { %>
-                                <p class="errmsg"><%- validation.tel.msg %></p>
-                                <% } %>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th><label for="id_age"><%- __('Form.FieldName.age') %></label><span class="required"><%- __('Label.Required') %></span></th>
-                            <td>
-                                <%
-                                let ageChoices = [
-                                    {code: '00', name: {ja: '10代未満', en:'younger than 10'}},
-                                    {code: '10', name: {ja: '10代', en:'10s'}},
-                                    {code: '20', name: {ja: '20代', en:'20s'}},
-                                    {code: '30', name: {ja: '30代', en:'30s'}},
-                                    {code: '40', name: {ja: '40代', en:'40s'}},
-                                    {code: '50', name: {ja: '50代', en:'50s'}},
-                                    {code: '60', name: {ja: '60代', en:'60s'}},
-                                    {code: '70', name: {ja: '70代以上', en:'70s or older'}}
-                                ];
-                                %>
-                                <select class="form-control" name="age">
-                                    <option value="">---</option>
-                                    <% for (let choice of ageChoices) { %>
-                                    <option value="<%= choice.code %>"<% if (age === choice.code) { %> selected="selected"<% } %>><%- choice.name[locale] %></option>
-                                    <% } %>
-                                </select>
-                                <% if (validation && validation.age) { %>
-                                <p class="errmsg"><%- validation.age.msg %></p>
-                                <% } %>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th><label for="id_address"><%- __('Form.FieldName.address') %></label></th>
-                            <td>
-                                <%
-                                let addressChoices = [
-                                    {code: '00', name: {ja: '北海道', en:'Hokkaido'}},
-                                    {code: '10', name: {ja: '東北', en:'Tohoku'}},
-                                    {code: '20', name: {ja: '関東・信越', en:'Kanto/Shinetsu'}},
-                                    {code: '30', name: {ja: '東海・北陸', en:'Tokai/Hokuriku'}},
-                                    {code: '40', name: {ja: '近畿', en:'Kinki'}},
-                                    {code: '50', name: {ja: '中国・四国', en:'Chugoku/Shikoku'}},
-                                    {code: '60', name: {ja: '九州・沖縄', en:'Kyushu/Okinawa'}},
-                                    {code: '70', name: {ja: '海外', en:'Overseas'}}
-                                ];
-                                %>
-                                <select class="form-control" name="address">
-                                    <option value="">---</option>
-                                    <% for (let choice of addressChoices) { %>
-                                    <option value="<%= choice.code %>"<% if (address === choice.code) { %> selected="selected"<% } %>><%- choice.name[locale] %></option>
-                                    <% } %>
-                                </select>
-                                <% if (validation && validation.address) { %>
-                                <p class="errmsg"><%- validation.address.msg %></p>
-                                <% } %>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th><label for="id_gender"><%- __('Form.FieldName.gender') %></label></th>
-                            <td>
-                                <div class="wrapper-payment form-inline">
-                                    <label for="radio_gender1" class="form-group payment">
-                                        <input type="radio" id="radio_gender1" name="gender" class="form-control" value="1"<% if (gender === '1') { %> checked="checked"<% } %>><%- __('Label.Male') %>
-                                    </label>
-                                    <label for="radio_gender2" class="form-group payment">
-                                        <input type="radio" id="radio_gender2" name="gender" class="form-control" value="2"<% if (gender === '2') { %> checked="checked"<% } %>><%- __('Label.Female') %>
-                                    </label>
-                                </div>
-
-                                <% if (validation && validation.gender) { %>
-                                <p class="errmsg"><%- validation.gender.msg %></p>
-                                <% } %>
-                            </td>
-                        </tr>
-
-                    <% } %>
-
-
-
-                    <% if (reservationModel.purchaserGroup === ReservationUtil.PURCHASER_GROUP_STAFF) { %>
-                        <input type="hidden" name="paymentMethod" value="<%= GMOUtil.PAY_TYPE_CREDIT %>">
-
-                    <% } else { %>
-                        <tr>
-                            <th><%- __('Form.FieldName.paymentMethod') %><span class="required"><%- __('Label.Required') %></span></th>
-                            <td>
-                                <div class="wrapper-payment form-inline">
-                                    <% for (let choice of reservationModel.paymentMethodChoices) { %>
-                                    <%
-                                    let label = '';
-                                    switch (choice) {
-                                        case GMOUtil.PAY_TYPE_CREDIT:
-                                            label = __('Label.PaymentMethodName.CREDIT');
-                                            break;
-                                        case GMOUtil.PAY_TYPE_CVS:
-                                            label = __('Label.PaymentMethodName.CVS');
-                                            break;
-                                        case GMOUtil.PAY_TYPE_CASH:
-                                            label = __('Label.PaymentMethodName.CASH');
-                                            break;
-                                        defaul:
-                                            break;
-                                    }
-                                    %>
-                                    <label for="radio_<%- choice %>" class="form-group payment">
-                                        <input type="radio" id="radio_<%- choice %>" name="paymentMethod" class="form-control" value="<%= choice %>"<% if (paymentMethod === choice) { %> checked="checked"<% } %>><%- label %>
-                                    </label>
-                                    <% } %>
-                                </div>
-
-                                <% if (reservationModel.paymentMethodChoices.indexOf(GMOUtil.PAY_TYPE_CREDIT) >= 0) { %>
-                                    <p class="notice">
-                                        <%- __('NoticeCredit') %><br>
-                                        <img class="img-responsive" src="/images/common/available_credit_cards.png"><br>
-                                    </p>
-                                <% } %>
-
-                                <% if (reservationModel.paymentMethodChoices.indexOf(GMOUtil.PAY_TYPE_CVS) >= 0) { %>
-                                    <p class="notice"><span class="notice-cvs"><%- __('NoticeCVS') %></span></p>
-                                <% } %>
-
-                                <% if (validation && validation.paymentMethod) { %>
-                                <p class="errmsg"><%- validation.paymentMethod.msg %></p>
-                                <% } %>
-                            </td>
-                        </tr>
+                <tr>
+                    <th><%- __('Form.FieldName.name') %><span class="required">*</span></th>
+                    <td>
+                        <div class="wrapper-names">
+                            <div class="wrapper-nameinput">
+                                <label for="id_lastName"><%- __('Form.FieldName.lastName') %></label>
+                                <input type="text" name="lastName" id="id_lastName" class="form-control" value="<%= lastName %>">
+                            </div>
+                            <div class="wrapper-nameinput">
+                                <label for="id_firstName"><%- __('Form.FieldName.firstName') %></label>
+                                <input type="text" name="firstName" id="id_firstName" class="form-control" value="<%= firstName %>">
+                            </div>
+                        </div>
+                        <p class="notice">※<%- __('Message.EnterInFullWidthKatakana') %></p>
+                        <% if (validation && validation.lastName) { %>
+                        <p class="errmsg"><%- validation.lastName.msg %></p>
                         <% } %>
+                        <% if (validation && validation.firstName) { %>
+                        <p class="errmsg"><%- validation.firstName.msg %></p>
+                        <% } %>
+                    </td>
+                </tr>
 
-                </tbody>
+                <tr>
+                    <th><%- __('Form.FieldName.email') %><span class="required">*</span></th>
+                    <td>
+                        <input type="text" name="email" id="id_email" class="form-control" value="<%= email %>">
+                        <p class="notice">※<%- __('Message.RetypeToConfirm') %></p>
+                        <div class="wrapper-emailconfirm">
+                            <input type="text" name="emailConfirm" id="id_emailConfirm" class="form-control" value="<%= emailConfirm %>">
+                            <span>@</span>
+                            <input type="text" name="emailConfirmDomain" id="id_emailConfirmDomain" class="form-control" value="<%= emailConfirmDomain %>">
+                        </div>
+                        <p class="notice"><%- __('Message.SettingForLimitingEmailReception') %></p>
+                        <% if (validation && validation.email) { %>
+                        <p class="errmsg"><%- validation.email.msg %></p>
+                        <% } %>
+                        <% if (validation && validation.emailConfirm) { %>
+                        <p class="errmsg"><%- validation.emailConfirm.msg %></p>
+                        <% } %>
+                        <% if (validation && validation.emailConfirmDomain) { %>
+                        <p class="errmsg"><%- validation.emailConfirmDomain.msg %></p>
+                        <% } %>
+                    </td>
+                </tr>
 
-            </table>
-            <input type="hidden" name="gmoTokenObject" value="">
-        </form>
+                <tr>
+                    <th><label for="id_tel"><%- __('Form.FieldName.tel') %></label><span class="required">*</span></th>
+                    <td>
+                        <input type="text" name="tel" id="id_tel" class="form-control" value="<%= tel %>">
+                        <p class="notice">※<%- __('Message.UseHalfWidthAlphanumericWithoutHyphens') %></p>
+                        <% if (validation && validation.tel) { %>
+                        <p class="errmsg"><%- validation.tel.msg %></p>
+                        <% } %>
+                    </td>
+                </tr>
 
-    </div>
+                <tr>
+                    <th><label for="id_age"><%- __('Form.FieldName.age') %></label></span></th>
+                    <td>
+                        <%
+                        let ageChoices = [
+                            {code: '00', name: {ja: '10代未満', en:'younger than 10'}},
+                            {code: '10', name: {ja: '10代', en:'10s'}},
+                            {code: '20', name: {ja: '20代', en:'20s'}},
+                            {code: '30', name: {ja: '30代', en:'30s'}},
+                            {code: '40', name: {ja: '40代', en:'40s'}},
+                            {code: '50', name: {ja: '50代', en:'50s'}},
+                            {code: '60', name: {ja: '60代', en:'60s'}},
+                            {code: '70', name: {ja: '70代以上', en:'70s or older'}}
+                        ];
+                        %>
+                        <select class="form-control" name="age">
+                            <option value="">---</option>
+                            <% for (let choice of ageChoices) { %>
+                            <option value="<%= choice.code %>"<% if (age === choice.code) { %> selected="selected"<% } %>><%- choice.name[locale] %></option>
+                            <% } %>
+                        </select>
+                    </td>
+                </tr>
 
-    <div class="clm-right">
-        <%- include('./_reservationModel') %>
-    </div>
+                <tr>
+                    <th><label for="id_gender"><%- __('Form.FieldName.gender') %></label></th>
+                    <td>
+                        <div class="wrapper-gender form-inline">
+                            <label for="radio_gender0" class="form-group payment">
+                                <input type="radio" id="radio_gender0" name="gender" class="form-control" value=""<% if (!gender) { %> checked="checked"<% } %>>非選択
+                            </label>
+                            <label for="radio_gender1" class="form-group payment">
+                                <input type="radio" id="radio_gender1" name="gender" class="form-control" value="1"<% if (gender === '1') { %> checked="checked"<% } %>><%- __('Label.Male') %>
+                            </label>
+                            <label for="radio_gender2" class="form-group payment">
+                                <input type="radio" id="radio_gender2" name="gender" class="form-control" value="2"<% if (gender === '2') { %> checked="checked"<% } %>><%- __('Label.Female') %>
+                            </label>
+                        </div>
+                    </td>
+                </tr>
 
-</div>
+                <tr>
+                    <th><label for="id_address"><%- __('Form.FieldName.address') %></label></th>
+                    <td>
+                        <select class="form-control" name="address">
+                            <option value="">---</option>
+                            <%- include('./_countrySelectOptions.ejs', {selected: address || ''}) %>
+                        </select>
+                    </td>
+                </tr>
 
-<script>
-$(function () {
-    $('.btn-next').on('click', function () {
-        $('form').submit();
-    });
-});
-</script>
+                <tr>
+                    <th><label><%- __('Label.TotalPrice') %></label></th>
+                    <td>
+                        <p><span class="price">&yen;<%- numeral(reservationModel.getTotalCharge()).format('0,0') %></span></p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><label for="cardNumber"><%- __('Form.FieldName.cardNumber') %></label><span class="required">*</span></th>
+                    <td>
+                        <input type="text" name="cardNumber" id="cardNumber" class="form-control" value="" maxlength="16">
+                        <% if (validation && validation.cardNumber) { %>
+                        <p class="errmsg"><%- validation.cardNumber.msg %></p>
+                        <% } %>
+                        <p><img src="/images/common/available_credit_cards.png" alt="available credit cards"></p>
+                        <p>VISA、Master、JCB、AMEX、DINERS をご利用いただけます。</p>
+                        <p class="notice"><%- __('Message.cardNumber') %></p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><label for="holdername"><%- __('Form.FieldName.holdername') %></label><span class="required">*</span></th>
+                    <td>
+                        <input type="text" name="holdername" id="holdername" class="form-control" value="">
+                        <% if (validation && validation.holdername) { %>
+                        <p class="errmsg"><%- validation.holdername.msg %></p>
+                        <% } %>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><label for="expire"><%- __('Form.FieldName.expire') %></label><span class="required">*</span></th>
+                    <td>
+                        <select name="cardExpirationMonth" id="cardExpirationMonth">
+                            <%
+                            for (let i = 0; i < 12; i++) {
+                                let num = i + 1;
+                                let month = (num < 10) ? '0' + String(num) : String(num);
+                            %>
+                                <option value="<%= month %>"><%= month %></option>
+                            <% } %>
+                        </select> <%- __('Form.FieldName.cardExpirationMonth') %> 
+                        <select name="cardExpirationYear" id="cardExpirationYear">
+                            <%
+                            let choices = {};
+                            let year2digits = moment().format('YY');
+                            for (let i = 0; i < 10; i++) {
+                                let key = (parseInt(year2digits) + i).toString();
+                                choices[key] = `20${key}`;
+                            }
+                            %>
+                            <% for (let key in choices) { %>
+                            <option value="20<%- key %>"><%- choices[key] %></option>
+                            <% } %>
+                        </select> <%- __('Form.FieldName.cardExpirationYear') %>
+                        <input type="hidden" name="expire" id="expire" value="">
+                        <% if (validation && validation.expire) { %>
+                        <div class="validation-text expire"><%= validation.expire.msg %></div>
+                        <% } %>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th><label for="securitycode"><%- __('Form.FieldName.securitycode') %></label><span class="required">*</span></th>
+                    <td>
+                        <input type="text" name="securitycode" id="securitycode" class="form-control" value="" maxlength="4">
+                        <p class="notice"><a href="https://en.wikipedia.org/wiki/Card_security_code" target="_blank">※<%- __('Message.securitycode') %></a></p>
+                        <% if (validation && validation.securitycode) { %>
+                        <p class="errmsg"><%- validation.securitycode.msg %></p>
+                        <% } %>
+                    </td>
+                </tr>
+        </tbody>
+
+    </table>
+    <input type="hidden" name="gmoTokenObject" value="">
+</form>
+
+<script src="/js/profile.js"></script>

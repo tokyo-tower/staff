@@ -1,94 +1,39 @@
 <input type="hidden" name="apiEndpoint" value="<%= process.env.API_ENDPOINT %>">
 
+<script src="/js/flatpickr/flatpickr.min.js"></script>
+<script src="/js/flatpickr/flatpickr.locale.<%= locale %>.js"></script>
 <script src="/js/reserve/performances.js"></script>
 
-<%- include('./_step') %>
+<%- include('./_step', {currentStepName: 'performances'}) %>
 
 <h1 class="pagetitle"><%- __('h1.SelectPerformance') %></h1>
 <p class="guidetext"><%- __('Label.SelectPerformanceGuideText') %></p>
 
-<% if (isSponsor) { %>
-<p class="remainingtickets"><%- __('Label.NumberOfTicketsAvailable') %>:<strong><%= parseInt(req.sponsorUser.get('max_reservation_count')) - reservationsCount %><% if (req.locale === 'ja') { %>枚<% } %></strong></p>
-<% } else if (req.preCustomerUser) { %>
-<p class="remainingtickets"><%- __('Label.NumberOfTicketsAvailable') %>:<strong><%= reservableCount %><% if (req.locale === 'ja') { %>枚<% } %></strong></p>
-<% } %>
 
+<h3><span class="redcircle">1</span>希望日選択</h3>
 <div class="performancesearchform">
-    <form class="form-inline">
-        <% if (isTel) { %>
-            <!-- 電話窓口では、開場時間が5日後00:00:00以降 -->
-            <input type="hidden" name="start_from" value="<%- moment(moment().add(5, 'days').format('YYYY-MM-DDT00:00:00+09:00')).valueOf() %>">
-        <% } else { %>
-            <% if (!isStaff && !isWindow) { %>
-            <!-- 内部関係者と当日窓口以外では、上映日当日までが検索対象 -->
-            <input type="hidden" name="start_from" value="<%- moment(moment().format('YYYY-MM-DDT00:00:00+09:00')).valueOf() %>">
-            <% } %>
-        <% } %>
-
-        <div class="form-group">
-            <select class="form-control" name="section">
-                <option value=""><%- __('Label.AllSections') %></option>
-                <% for (let section of FilmUtil.getSections()) { %>
-                <option value="<%- section.code %>"><%- section.name[locale] %></option>
-                <% } %>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <select class="form-control" name="day">
-                <option value=""><%- __('Label.AllDay') %></option>
-                <%
-                let now = moment();
-                let fiveDaysLater = moment().add(+5, 'days');
-                let start = moment(conf.get('datetimes.event_start'));
-                let end = moment(conf.get('datetimes.event_end'));
-                let options = '';
-                while (start.format('YYYYMMDD') <= end.format('YYYYMMDD')) {
-                    // 電話窓口の場合、5日後以降のみ表示
-                    if (isTel && start.format('YYYYMMDD') < fiveDaysLater.format('YYYYMMDD')) {
-                    } else {
-                        options += `<option value="${start.format('YYYYMMDD')}"`;
-                    }
-
-                    if (isWindow && now.format('YYYYMMDD') === start.format('YYYYMMDD')) {
-                        options += ' selected="selected"';
-                    }
-                    options += `>${start.format('MM/DD')}</option>`;
-                    start.add(+1, 'days');
-                    continue;
-                }
-                %>
-                <%- options %>
-            </select>
-        </div>
-
-        <div class="form-group form-seachqueryinput">
-            <input type="text" class="form-control" name="words">
-        </div>
-        
-        <div class="wrapper-btn">
-            <a class="btn btn-search search" href="javascript:void(0)"><span><%- __('Button.Search') %></span></a>
+    <form>
+        <div class="input-date input-group">
+            <input readonly="readonly" class="form-control" id="input_performancedate" type="text">
         </div>
     </form>
 </div>
 
-<p class="searchresult">
-    <%- __('Label.ResultsCount') %> <span class="total-count"></span> films
-</p>
 
-<% if (isStaff || isWindow) { %>
-<% // 内部関係者と当日窓口については、残席0でも次へ進める %>
-<style>
-.page-performances .performance .performance-schedule .scheduleitem-soldout {
-    pointer-events: auto;
-}
-</style>
-<% } %>
+<h3><span class="redcircle">2</span>希望時間選択</h3>
+<p class="icondescription">アイコンの説明:<br class="visible-mobile-block">
+    <img src="/images/common/icon-status-capable.svg" alt="capable"> … 余裕あり
+    <img src="/images/common/icon-status-crowded.svg" alt="crowded"> … 残りわずか
+    <br class="mbr">
+    <img src="/images/common/icon-status-last.svg" alt="last"> … 残り受付数
+    <img src="/images/common/icon-status-soldout.svg" alt="soldout"> … 受付終了
+</p>
 
 <div class="row performances">
 </div>
 
-<form method="post">
+
+<form method="post" id="form_performanceId">
     <input type="hidden" name="performanceId">
 </form>
 
@@ -99,5 +44,11 @@
                 <div class="text-center"><%- __('Message.Searching') %></div>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="modal-calender">
+    <div class="modal-calender-content">
+        <div id="calendercontainer"></div>
     </div>
 </div>

@@ -53,7 +53,7 @@ const authentication = async (req: express.Request, res: express.Response, next:
                 const owner = await Models.Owner.findOne({ _id: authenticationDoc.get('owner') }).exec();
 
                 // ログインしてリダイレクト
-                (<Express.Session>req.session)[StaffUser.AUTH_SESSION_NAME] = owner.toObject();
+                (<Express.Session>req.session)[StaffUser.AUTH_SESSION_NAME] = (owner) ? owner.toObject() : null;
                 (<Express.Session>req.session)[StaffUser.AUTH_SESSION_NAME].signature = authenticationDoc.get('signature');
                 (<Express.Session>req.session)[StaffUser.AUTH_SESSION_NAME].locale = authenticationDoc.get('locale');
                 res.redirect(req.originalUrl);
@@ -87,7 +87,7 @@ router.post('/mypage/updateWatcherName', base, authentication, staffMyPageContro
 router.get('/reserve/start', base, authentication, staffReserveController.start);
 router.all('/reserve/terms', base, authentication, staffReserveController.terms);
 router.all('/reserve/performances', base, authentication, staffReserveController.performances);
-router.all('/reserve/seats', base, authentication, staffReserveController.seats);
+//router.all('/reserve/seats', base, authentication, staffReserveController.seats);
 router.all('/reserve/tickets', base, authentication, staffReserveController.tickets);
 router.all('/reserve/profile', base, authentication, staffReserveController.profile);
 router.all('/reserve/confirm', base, authentication, staffReserveController.confirm);

@@ -1,4 +1,15 @@
 'use strict';
+
+// プライベートブラウジング時のsessionStorage.setItemエラー回避用
+window.setSessionStorage = function(key, value) {
+    if (!window.sessionStorage) return;
+    try {
+        window.sessionStorage.setItem(key, value);
+    } catch (err) {
+        console.log(err);
+    }
+};
+
 $(function(){
   var
     $window = $(window),
@@ -7,7 +18,16 @@ $(function(){
     fn_checkPageWidthIsMobile = function(){return (window.innerWidth <= CSSBREAKPOINT_MOBILE);},
     fn_checkPageWidthIsNotPc = function(){return (window.innerWidth >= CSSBREAKPOINT_TABLET);}
   ;
-
+  // var domurl = new Url();
+  // // 言語切替
+  // var select_locale = document.getElementById('select_locale');
+  // var currentLocale = domurl.query.locale || window.sessionStorage.getItem('locale') || '';
+  // if (currentLocale && select_locale.querySelector('option[value=' + currentLocale + ']')) { select_locale.value = currentLocale; }
+  // select_locale.onchange = function() {
+  //     domurl.query.locale = null;
+  //     window.setSessionStorage('locale', this.value);
+  //     location.replace('/language/update/' + this.value + '?cb=' + domurl.toString());
+  // };
 
   /*
     汎用イベント

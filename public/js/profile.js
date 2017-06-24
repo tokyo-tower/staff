@@ -1,11 +1,12 @@
 $(function () {
     $('.btn-next').on('click', function () {
-        var paymentMethod = $('input[name=paymentMethod]:checked').val();
-        if (paymentMethod === '0') {
-            getToken();
-        } else {
-            $('form').submit();
-        }
+        // var paymentMethod = $('input[name=paymentMethod]:checked').val();
+        // if (paymentMethod === '0') {
+        //     getToken();
+        // } else {
+        //     $('form').submit();
+        // }
+        $('form').submit();
     });
 
     $('input[name=paymentMethod]').on('change', function () {
