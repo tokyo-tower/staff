@@ -53,7 +53,7 @@ const authentication = (req, res, next) => __awaiter(this, void 0, void 0, funct
                 res.cookie('remember_window', token, { path: '/', httpOnly: true, maxAge: 604800000 });
                 const owner = yield ttts_domain_1.Models.Owner.findOne({ _id: authenticationDoc.get('owner') }).exec();
                 // ログインしてリダイレクト
-                req.session[window_1.default.AUTH_SESSION_NAME] = (owner) ? owner.toObject() : null;
+                req.session[window_1.default.AUTH_SESSION_NAME] = (owner !== null) ? owner.toObject() : null;
                 res.redirect(req.originalUrl);
                 return;
             }

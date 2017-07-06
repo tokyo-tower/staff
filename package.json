@@ -17,8 +17,8 @@
     }
   ],
   "dependencies": {
-    "@motionpicture/gmo-service": "^3.0.4",
-    "@motionpicture/ttts-domain": "^10.1.0",
+    "@motionpicture/gmo-service": "^3.6.0",
+    "@motionpicture/ttts-domain": "^11.0.0",
     "basic-auth": "^1.0.4",
     "body-parser": "^1.17.1",
     "config": "^1.26.1",
@@ -81,7 +81,7 @@
     "snyk": "^1.30.0",
     "tslint": "^4.5.1",
     "tslint-microsoft-contrib": "^4.0.1",
-    "typescript": "^2.3.2"
+    "typescript": "^2.3.4"
   },
   "engines": {
     "node": ">=6.9.1",

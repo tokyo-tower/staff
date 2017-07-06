@@ -53,7 +53,7 @@ const authentication = async (req: express.Request, res: express.Response, next:
                 const owner = await Models.Owner.findOne({ _id: authenticationDoc.get('owner') }).exec();
 
                 // ログインしてリダイレクト
-                (<Express.Session>req.session)[WindowUser.AUTH_SESSION_NAME] = (owner) ? owner.toObject() : null;
+                (<Express.Session>req.session)[WindowUser.AUTH_SESSION_NAME] = (owner !== null) ? owner.toObject() : null;
                 res.redirect(req.originalUrl);
                 return;
             }

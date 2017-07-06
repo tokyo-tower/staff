@@ -5,7 +5,8 @@
  */
 
 import * as GMO from '@motionpicture/gmo-service';
-import { EmailQueueUtil, Models, ReservationUtil, ScreenUtil, TicketTypeGroupUtil } from '@motionpicture/ttts-domain';
+//import { EmailQueueUtil, Models, ReservationUtil, ScreenUtil, TicketTypeGroupUtil } from '@motionpicture/ttts-domain';
+import { EmailQueueUtil, Models, ReservationUtil, ScreenUtil } from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import * as createDebug from 'debug';
 import { Request, Response } from 'express';
@@ -492,14 +493,16 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
     // 内部関係者の場合
     switch (reservationModel.purchaserGroup) {
         case ReservationUtil.PURCHASER_GROUP_STAFF:
-            //＠＠＠＠＠
-            //reservationModel.ticketTypes = TicketTypeGroupUtil.getOne4staff();
-            const staffTickets = TicketTypeGroupUtil.getOne4staff();
-            // tslint:disable-next-line:no-empty
-            if (staffTickets) {
-            }
+            // 2017/07/06
+            // //＠＠＠＠＠
+            // //reservationModel.ticketTypes = TicketTypeGroupUtil.getOne4staff();
+            // const staffTickets = TicketTypeGroupUtil.getOne4staff();
+            // // tslint:disable-next-line:no-empty
+            // if (staffTickets) {
+            // }
+            //---
             //const staffTickets = TicketTypeGroupUtil.getOne4staff();
-            if (ticketTypeGroup) {
+            if (ticketTypeGroup !== null) {
                 reservationModel.ticketTypes = ticketTypeGroup.get('ticket_types');
             }
             break;
@@ -508,7 +511,7 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
             // 一般、当日窓口の場合
             // 2017/06/19 upsate node+typesctipt
             //reservationModel.ticketTypes = ticketTypeGroup.get('ticket_types');
-            if (ticketTypeGroup) {
+            if (ticketTypeGroup !== null) {
                 reservationModel.ticketTypes = ticketTypeGroup.get('ticket_types');
             }
             break;

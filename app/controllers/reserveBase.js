@@ -14,6 +14,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const GMO = require("@motionpicture/gmo-service");
+//import { EmailQueueUtil, Models, ReservationUtil, ScreenUtil, TicketTypeGroupUtil } from '@motionpicture/ttts-domain';
 const ttts_domain_1 = require("@motionpicture/ttts-domain");
 const conf = require("config");
 const createDebug = require("debug");
@@ -458,14 +459,16 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
         // 内部関係者の場合
         switch (reservationModel.purchaserGroup) {
             case ttts_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF:
-                //＠＠＠＠＠
-                //reservationModel.ticketTypes = TicketTypeGroupUtil.getOne4staff();
-                const staffTickets = ttts_domain_1.TicketTypeGroupUtil.getOne4staff();
-                // tslint:disable-next-line:no-empty
-                if (staffTickets) {
-                }
+                // 2017/07/06
+                // //＠＠＠＠＠
+                // //reservationModel.ticketTypes = TicketTypeGroupUtil.getOne4staff();
+                // const staffTickets = TicketTypeGroupUtil.getOne4staff();
+                // // tslint:disable-next-line:no-empty
+                // if (staffTickets) {
+                // }
+                //---
                 //const staffTickets = TicketTypeGroupUtil.getOne4staff();
-                if (ticketTypeGroup) {
+                if (ticketTypeGroup !== null) {
                     reservationModel.ticketTypes = ticketTypeGroup.get('ticket_types');
                 }
                 break;
@@ -473,7 +476,7 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
                 // 一般、当日窓口の場合
                 // 2017/06/19 upsate node+typesctipt
                 //reservationModel.ticketTypes = ticketTypeGroup.get('ticket_types');
-                if (ticketTypeGroup) {
+                if (ticketTypeGroup !== null) {
                     reservationModel.ticketTypes = ticketTypeGroup.get('ticket_types');
                 }
                 break;
