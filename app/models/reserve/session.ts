@@ -70,6 +70,10 @@ export default class ReserveSessionModel {
      */
     public seatCodes: string[];
     /**
+     * 予約座席コードリスト(特殊チケット用)
+     */
+    public seatCodesExtra: string[];
+    /**
      * 予約座席コードリスト
      */
     public purchaser: IPurchaser;

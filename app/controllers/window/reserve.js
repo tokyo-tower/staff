@@ -18,7 +18,7 @@ const ttts_domain_1 = require("@motionpicture/ttts-domain");
 const moment = require("moment");
 const _ = require("underscore");
 const reservePerformanceForm_1 = require("../../forms/reserve/reservePerformanceForm");
-const reserveSeatForm_1 = require("../../forms/reserve/reserveSeatForm");
+//import reserveSeatForm from '../../forms/reserve/reserveSeatForm';
 const session_1 = require("../../models/reserve/session");
 const reserveBaseController = require("../reserveBase");
 const PURCHASER_GROUP = ttts_domain_1.ReservationUtil.PURCHASER_GROUP_WINDOW;
@@ -100,64 +100,58 @@ function performances(req, res, next) {
     });
 }
 exports.performances = performances;
-/**
- * 座席選択
- */
-function seats(req, res, next) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const reservationModel = session_1.default.FIND(req);
-            if (reservationModel === null) {
-                next(new Error(req.__('Message.Expired')));
-                return;
-            }
-            const limit = reservationModel.getSeatsLimit();
-            if (req.method === 'POST') {
-                reserveSeatForm_1.default(req);
-                const validationResult = yield req.getValidationResult();
-                if (!validationResult.isEmpty()) {
-                    res.redirect('/window/reserve/seats');
-                    return;
-                }
-                const seatCodes = JSON.parse(req.body.seatCodes);
-                // 追加指定席を合わせて制限枚数を超過した場合
-                if (seatCodes.length > limit) {
-                    const message = req.__('Message.seatsLimit{{limit}}', { limit: limit.toString() });
-                    res.redirect(`/window/reserve/seats?message=${encodeURIComponent(message)}`);
-                    return;
-                }
-                // 仮予約あればキャンセルする
-                yield reserveBaseController.processCancelSeats(reservationModel);
-                try {
-                    // 座席FIX
-                    yield reserveBaseController.processFixSeats(reservationModel, seatCodes, req);
-                    reservationModel.save(req);
-                    // 券種選択へ
-                    res.redirect('/window/reserve/tickets');
-                }
-                catch (error) {
-                    reservationModel.save(req);
-                    const message = req.__('Message.SelectedSeatsUnavailable');
-                    res.redirect(`/window/reserve/seats?message=${encodeURIComponent(message)}`);
-                    return;
-                }
-            }
-            else {
-                res.render('window/reserve/seats', {
-                    reservationModel: reservationModel,
-                    limit: limit,
-                    layout: layout
-                });
-                return;
-            }
-        }
-        catch (error) {
-            next(new Error(req.__('Message.UnexpectedError')));
-            return;
-        }
-    });
-}
-exports.seats = seats;
+// /**
+//  * 座席選択
+//  */
+// export async function seats(req: Request, res: Response, next: NextFunction): Promise<void> {
+//     try {
+//         const reservationModel = ReservationModel.FIND(req);
+//         if (reservationModel === null) {
+//             next(new Error(req.__('Message.Expired')));
+//             return;
+//         }
+//         const limit = reservationModel.getSeatsLimit();
+//         if (req.method === 'POST') {
+//             reserveSeatForm(req);
+//             const validationResult = await req.getValidationResult();
+//             if (!validationResult.isEmpty()) {
+//                 res.redirect('/window/reserve/seats');
+//                 return;
+//             }
+//             const seatCodes: string[] = JSON.parse(req.body.seatCodes);
+//             // 追加指定席を合わせて制限枚数を超過した場合
+//             if (seatCodes.length > limit) {
+//                 const message = req.__('Message.seatsLimit{{limit}}', { limit: limit.toString() });
+//                 res.redirect(`/window/reserve/seats?message=${encodeURIComponent(message)}`);
+//                 return;
+//             }
+//             // 仮予約あればキャンセルする
+//             await reserveBaseController.processCancelSeats(reservationModel);
+//             try {
+//                 // 座席FIX
+//                 await reserveBaseController.processFixSeats(reservationModel, seatCodes, req);
+//                 reservationModel.save(req);
+//                 // 券種選択へ
+//                 res.redirect('/window/reserve/tickets');
+//             } catch (error) {
+//                 reservationModel.save(req);
+//                 const message = req.__('Message.SelectedSeatsUnavailable');
+//                 res.redirect(`/window/reserve/seats?message=${encodeURIComponent(message)}`);
+//                 return;
+//             }
+//         } else {
+//             res.render('window/reserve/seats', {
+//                 reservationModel: reservationModel,
+//                 limit: limit,
+//                 layout: layout
+//             });
+//             return;
+//         }
+//     } catch (error) {
+//         next(new Error(req.__('Message.UnexpectedError')));
+//         return;
+//     }
+// }
 /**
  * 券種選択
  */
@@ -172,7 +166,8 @@ function tickets(req, res, next) {
             reservationModel.paymentMethod = '';
             if (req.method === 'POST') {
                 try {
-                    yield reserveBaseController.processFixTickets(reservationModel, req);
+                    yield reserveBaseController.processFixSeatsAndTickets(reservationModel, req);
+                    //await reserveBaseController.processFixTickets(reservationModel, req);
                     reservationModel.save(req);
                     res.redirect('/window/reserve/profile');
                 }
@@ -264,7 +259,7 @@ function confirm(req, res, next) {
                         throw new Error(req.__('Message.Expired'));
                     }
                     // 予約確定
-                    yield reserveBaseController.processFixReservations(reservationModel.performance.day, reservationModel.paymentNo, {}, res);
+                    yield reserveBaseController.processFixReservations(reservationModel, reservationModel.performance.day, reservationModel.paymentNo, {}, res);
                     session_1.default.REMOVE(req);
                     res.redirect(`/window/reserve/${reservationModel.performance.day}/${reservationModel.paymentNo}/complete`);
                 }

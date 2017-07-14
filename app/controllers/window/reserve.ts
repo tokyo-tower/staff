@@ -11,7 +11,7 @@ import * as moment from 'moment';
 import * as _ from 'underscore';
 
 import reservePerformanceForm from '../../forms/reserve/reservePerformanceForm';
-import reserveSeatForm from '../../forms/reserve/reserveSeatForm';
+//import reserveSeatForm from '../../forms/reserve/reserveSeatForm';
 import ReservationModel from '../../models/reserve/session';
 import * as reserveBaseController from '../reserveBase';
 
@@ -90,64 +90,64 @@ export async function performances(req: Request, res: Response, next: NextFuncti
     }
 }
 
-/**
- * 座席選択
- */
-export async function seats(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-        const reservationModel = ReservationModel.FIND(req);
+// /**
+//  * 座席選択
+//  */
+// export async function seats(req: Request, res: Response, next: NextFunction): Promise<void> {
+//     try {
+//         const reservationModel = ReservationModel.FIND(req);
 
-        if (reservationModel === null) {
-            next(new Error(req.__('Message.Expired')));
-            return;
-        }
+//         if (reservationModel === null) {
+//             next(new Error(req.__('Message.Expired')));
+//             return;
+//         }
 
-        const limit = reservationModel.getSeatsLimit();
+//         const limit = reservationModel.getSeatsLimit();
 
-        if (req.method === 'POST') {
-            reserveSeatForm(req);
-            const validationResult = await req.getValidationResult();
-            if (!validationResult.isEmpty()) {
-                res.redirect('/window/reserve/seats');
-                return;
-            }
-            const seatCodes: string[] = JSON.parse(req.body.seatCodes);
+//         if (req.method === 'POST') {
+//             reserveSeatForm(req);
+//             const validationResult = await req.getValidationResult();
+//             if (!validationResult.isEmpty()) {
+//                 res.redirect('/window/reserve/seats');
+//                 return;
+//             }
+//             const seatCodes: string[] = JSON.parse(req.body.seatCodes);
 
-            // 追加指定席を合わせて制限枚数を超過した場合
-            if (seatCodes.length > limit) {
-                const message = req.__('Message.seatsLimit{{limit}}', { limit: limit.toString() });
-                res.redirect(`/window/reserve/seats?message=${encodeURIComponent(message)}`);
-                return;
-            }
+//             // 追加指定席を合わせて制限枚数を超過した場合
+//             if (seatCodes.length > limit) {
+//                 const message = req.__('Message.seatsLimit{{limit}}', { limit: limit.toString() });
+//                 res.redirect(`/window/reserve/seats?message=${encodeURIComponent(message)}`);
+//                 return;
+//             }
 
-            // 仮予約あればキャンセルする
-            await reserveBaseController.processCancelSeats(reservationModel);
+//             // 仮予約あればキャンセルする
+//             await reserveBaseController.processCancelSeats(reservationModel);
 
-            try {
-                // 座席FIX
-                await reserveBaseController.processFixSeats(reservationModel, seatCodes, req);
-                reservationModel.save(req);
-                // 券種選択へ
-                res.redirect('/window/reserve/tickets');
-            } catch (error) {
-                reservationModel.save(req);
-                const message = req.__('Message.SelectedSeatsUnavailable');
-                res.redirect(`/window/reserve/seats?message=${encodeURIComponent(message)}`);
-                return;
-            }
-        } else {
-            res.render('window/reserve/seats', {
-                reservationModel: reservationModel,
-                limit: limit,
-                layout: layout
-            });
-            return;
-        }
-    } catch (error) {
-        next(new Error(req.__('Message.UnexpectedError')));
-        return;
-    }
-}
+//             try {
+//                 // 座席FIX
+//                 await reserveBaseController.processFixSeats(reservationModel, seatCodes, req);
+//                 reservationModel.save(req);
+//                 // 券種選択へ
+//                 res.redirect('/window/reserve/tickets');
+//             } catch (error) {
+//                 reservationModel.save(req);
+//                 const message = req.__('Message.SelectedSeatsUnavailable');
+//                 res.redirect(`/window/reserve/seats?message=${encodeURIComponent(message)}`);
+//                 return;
+//             }
+//         } else {
+//             res.render('window/reserve/seats', {
+//                 reservationModel: reservationModel,
+//                 limit: limit,
+//                 layout: layout
+//             });
+//             return;
+//         }
+//     } catch (error) {
+//         next(new Error(req.__('Message.UnexpectedError')));
+//         return;
+//     }
+// }
 
 /**
  * 券種選択
@@ -165,7 +165,8 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
 
         if (req.method === 'POST') {
             try {
-                await reserveBaseController.processFixTickets(reservationModel, req);
+                await reserveBaseController.processFixSeatsAndTickets(reservationModel, req);
+                //await reserveBaseController.processFixTickets(reservationModel, req);
                 reservationModel.save(req);
                 res.redirect('/window/reserve/profile');
             } catch (error) {
@@ -253,7 +254,13 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                 }
 
                 // 予約確定
-                await reserveBaseController.processFixReservations(reservationModel.performance.day, reservationModel.paymentNo, {}, res);
+                await reserveBaseController.processFixReservations(
+                    reservationModel,
+                    reservationModel.performance.day,
+                    reservationModel.paymentNo,
+                    {},
+                    res
+                );
                 ReservationModel.REMOVE(req);
                 res.redirect(`/window/reserve/${reservationModel.performance.day}/${reservationModel.paymentNo}/complete`);
             } catch (error) {

@@ -86,7 +86,7 @@ router.get('/mypage/search', base, authentication, windowMyPageController.search
 router.get('/reserve/start', base, authentication, windowReserveController.start);
 router.all('/reserve/terms', base, authentication, windowReserveController.terms);
 router.all('/reserve/performances', base, authentication, windowReserveController.performances);
-router.all('/reserve/seats', base, authentication, windowReserveController.seats);
+//router.all('/reserve/seats', base, authentication, windowReserveController.seats);
 router.all('/reserve/tickets', base, authentication, windowReserveController.tickets);
 router.all('/reserve/profile', base, authentication, windowReserveController.profile);
 router.all('/reserve/confirm', base, authentication, windowReserveController.confirm);

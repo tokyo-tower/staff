@@ -33,7 +33,7 @@ exports.default = (req) => {
     //     req.__('Message.required{{fieldName}}', { fieldName: req.__('Form.FieldName.paymentMethod') })
     // ).notEmpty();
     // age
-    req.checkBody('age', req.__('Message.required{{fieldName}}', { fieldName: req.__('Form.FieldName.age') })).notEmpty();
+    // req.checkBody('age', req.__('Message.required{{fieldName}}', { fieldName: req.__('Form.FieldName.age') })).notEmpty();
     // gender
-    req.checkBody('gender', req.__('Message.required{{fieldName}}', { fieldName: req.__('Form.FieldName.gender') })).notEmpty();
+    // req.checkBody('gender', req.__('Message.required{{fieldName}}', { fieldName: req.__('Form.FieldName.gender') })).notEmpty();
 };
