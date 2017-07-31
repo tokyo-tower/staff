@@ -260,6 +260,7 @@ function saveSessionFixSeatsAndTickets(req, reservationModel, result, choice, st
         ticket_type: ticketType._id,
         ticket_type_name: ticketType.name,
         ticket_type_charge: ticketType.charge,
+        //      watcher_name = choice.watcher_name;
         watcher_name: ''
     });
     // 座席コードのソート(文字列順に)
