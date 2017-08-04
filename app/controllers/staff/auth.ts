@@ -11,7 +11,6 @@ import * as _ from 'underscore';
 import staffLoginForm from '../../forms/staff/staffLoginForm';
 import StaffUser from '../../models/user/staff';
 
-const layout: string = 'layouts/staff/layout';
 
 /**
  * 内部関係者ログイン
@@ -97,7 +96,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
             }
         }
 
-        res.render('staff/auth/login', { layout: layout });
+        res.render('staff/auth/login', { layout: 'layouts/staff/login' });
     } catch (error) {
         next(new Error(req.__('Message.UnexpectedError')));
     }

@@ -1,117 +1,139 @@
-//予約内容確認ページ
-.page-confirm{
-
-  .wrapper-confirm{
-    h2{
-      @include clearfix;
-      background-color:#898989;
-      color:#fff;
-      padding:0 20px;
-      line-height:2;
-      @media screen and (max-width: $breakpoint_tablet){
-        background-color:#cacaca;
-        padding:0 10px;
-        color:#000;
-        font-size:1.25em;
-        margin-bottom:1em;
-      }
-    }
-    .btn-change{
-      float:right;
-      width:80px;
-      height:24px;
-      padding:0;
-      margin-top:4px;
-      >span{
-        font-size:11px;
-        padding-left:8px;
-        &::after{
-          width:12px;
-          height:12px;
-          margin-top:-6px;
-          left:4px;
+// 予約内容確認ページ
+.page-confirm {
+    .wrapper-confirm {
+        h2 {
+            @include clearfix;
+            color: #000;
+            line-height: 2;
+            font-weight: bold;
+            @media screen and (max-width: $breakpoint_tablet) {
+                font-size: 1.25em;
+            }
         }
-      }
-    }
-    .visible-mobile-block{
-      .btn-change{
-        @media screen and (max-width: $breakpoint_tablet){
-          margin-top:2px;
+        .btn-change {
+            float: right;
+            width: 80px;
+            height: 24px;
+            padding: 0;
+            margin-top: 4px;
+            >span {
+                font-size: 11px;
+                padding-left: 8px;
+                &::after {
+                    width: 12px;
+                    height: 12px;
+                    margin-top: -6px;
+                    left: 4px;
+                }
+            }
         }
-      }
+        .visible-mobile-block {
+            .btn-change {
+                @media screen and (max-width: $breakpoint_tablet) {
+                    margin-top:2px;
+                }
+            }
+        }
     }
-
-  }
-  .table-confirm{
-    background-color:#ddd;
-    tr,th,td{
-      @media screen and (max-width: $breakpoint_tablet){
-        display:block;
-      }
+    .table-confirm {
+        background-color: #eee;
+        tr,
+        th,
+        td {
+            @media screen and (max-width: $breakpoint_tablet) {
+                display:block;
+            }
+        }
+        th,
+        td {
+            line-height: 2;
+            padding: 4px 20px;
+            border-top-color: #fff;
+            @media screen and (max-width: $breakpoint_tablet) {
+                padding:4px 10px;
+            }
+        }
+        th {
+            @include clearfix;
+            background-color: #898989;
+            color: #fff;
+            width: 200px;
+            @media screen and (max-width: $breakpoint_tablet) {
+                width:auto;
+            }
+        }
+        p {
+            float: left;
+            @media screen and (max-width: $breakpoint_tablet) {
+                float:none;
+            }
+        }
+        strong {
+            font-weight: bold;
+        }
+        .price {
+            font-weight: bold;
+            color: red;
+            letter-spacing: 1px;
+        }
     }
-    th,td{
-      line-height:2;
-      padding:4px 20px;
-      border-top-color:#fff;
-      @media screen and (max-width: $breakpoint_tablet){
-        padding:4px 10px;
-      }
+    .wrapper-notice {
+        margin-top: 50px;
+        h2 {
+            font-size: 1.5em;
+            text-align: center;
+            margin-bottom: 1em;
+        }
+        p {
+            background-color: #eee;
+            padding: 1em;
+            line-height: 2;
+        }
     }
-    th{
-      @include clearfix;
-      width:250px;
-      @media screen and (max-width: $breakpoint_tablet){
-        width:auto;
-        background-color:#898989;
-        color:#fff;
-      }
-      >.visible-mobile-block{
-        float:right;
-      }
+    .wrapper-agreement {
+        margin: 20px auto 40px;
+        text-align: center;
+        label {
+            position: relative;
+            cursor: pointer;
+            &::before, &::after {
+                content: '';
+                height: 28px;
+                position: absolute;
+                top: 50%;
+                left: 0;
+                margin-top: -10px;
+                cursor: pointer;
+            }
+            &::before {
+                width: 28px;
+                border: 1px solid #ccc;
+                background-color: #FFF;
+            }
+            &::after {
+                width: 0;
+                transition: width 0.1s;
+                background-image: url(/images/common/icon-checkmark.svg);
+                background-size: 28px;                
+            }
+            input {
+                opacity: 0;
+                position: absolute;
+                width: 0px;
+                height: 0px;
+                cursor: pointer;
+            }
+            span {
+                font-size: 20px;
+                margin-top: 10px;
+                margin-left: 36px;
+                display: block;
+            }
+            &.agreed {
+                &::after {
+                    width: 28px;
+                }
+            }
+        }
     }
-    p{
-      float:left;
-      @media screen and (max-width: $breakpoint_tablet){
-        float:none;
-      }
-    }
-    .seatcodes{
-      .separator:last-child{
-        display:none;
-      }
-    }
-    strong{
-      font-weight:bold;
-    }
-    .price{
-      color:red;
-    }
-  }
-
-  .wrapper-notice{
-    margin-top:50px;
-    h2{
-      font-size:1.5em;
-      text-align:center;
-      margin-bottom:1em;
-    }
-    p{
-      border:1px solid #b5b5b6;
-      background-color:#fff;
-      padding:1em;
-      font-size:14px;
-      line-height:2;
-    }
-  }
-
-  .btns2clm{
-    .btn{
-      height:60px;
-      .smalltext{
-        display:block;
-        font-size:12px;
-      }
-    }
-  }
-
 }

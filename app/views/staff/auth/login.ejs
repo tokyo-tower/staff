@@ -1,35 +1,30 @@
-<div class="loginform loginform-mypage">
-    <h2><%- __('h2.LoginForStaffs') %></h2>
+<div class="loginform">
+    
+    <h1><img src="/images/common/logo.png" alt=""></h1>
+    <h2>予約管理ログイン</h2>
 
-
-    <% if (validation) { %>
-    <% validation.forEach(function (error) { %>
-    <p class="errmsg"><%- error.msg %></p>
-    <% }) %>
-    <% } %>
 
     <form method="post">
-        <div class="form-group form-inline">
-            <labeL><%- __('Form.FieldName.userId') %></labeL>
+        <div class="form-group">
+            <labeL for="id_userId">ID</labeL>
             <input type="text" name="userId" id="id_userId" class="form-control" value="<%- userId %>">
         </div>
-        <div class="form-group form-inline">
-            <label><%- __('Form.FieldName.password') %></label>
+        <div class="form-group">
+            <label for="id_password"><%- __('Form.FieldName.password') %></label>
             <input type="password" name="password" id="id_password" class="form-control" value="<%- password %>">
         </div>
-        <div class="form-group form-inline">
-            <label><%- __('Form.FieldName.signature') %></label>
-            <input type="text" name="signature" id="id_signature" class="form-control" value="<%- signature %>">
-            <span class="help-block text-left"><%- __('Message.UpdateWatcherNameHelp') %></span>
-        </div>
-        <div class="form-group form-inline">
-            <label><%- __('Form.FieldName.language') %></label>
-            <select class="form-control" name="language">
-                <option value="ja"<% if (locale === 'ja') { %> selected="selected"<% } %>>日本語</option>
-                <option value="en"<% if (locale === 'en') { %> selected="selected"<% } %>>English</option>
-            </select>
-        </div>
-        <label for="id_remember"><input id="id_remember" name="remember" type="checkbox"><%- __('Form.FieldName.remember') %></label>
+
+        <input type="hidden" name="signature" value="hidden署名" value="ja">
+
+        <input type="hidden" name="language" value="ja">
+        <input type="hidden" id="id_remember" name="remember" value="on">
+
+        <% if (validation) { %>
+            <% validation.forEach(function (error) { %>
+                <p class="errmsg"><%- error.msg %></p>
+            <% }) %>
+        <% } %>
+
         <a class="btn btn-big btn-login" href="javascript:void(0);"><span><%- __('Button.Login') %></span></a>
     </form>
 </div>

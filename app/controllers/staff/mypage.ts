@@ -77,7 +77,11 @@ export async function search(req: Request, res: Response, next: NextFunction): P
     let paymentNo: string | null = (!_.isEmpty(req.query.payment_no)) ? req.query.payment_no : null;
     // アカウント
     const owner: string | null = (!_.isEmpty(req.query.owner)) ? req.query.owner : null;
- 　　// 名前
+    // 予約方法
+    const purchaserGroup: string | null = (!_.isEmpty(req.query.purchaser_group)) ? req.query.purchaser_group : null;
+    // 決済手段
+    const paymentMethod: string | null = (!_.isEmpty(req.query.payment_method)) ? req.query.payment_method : null;
+    // 名前
     const purchaserLastName: string | null = (!_.isEmpty(req.query.purchaser_last_name)) ? req.query.purchaser_last_name : null;
     const purchaserFirstName: string | null = (!_.isEmpty(req.query.purchaser_first_name)) ? req.query.purchaser_first_name : null;
     // メアド
@@ -142,6 +146,14 @@ export async function search(req: Request, res: Response, next: NextFunction): P
     // アカウント
     if (owner !== null) {
         conditions.push({ owner: owner });
+    }
+    // 予約方法
+    if (purchaserGroup !== null) {
+        conditions.push({ purchaser_group: purchaserGroup })
+    }
+    // 決済手段
+    if (paymentMethod !== null) {
+        conditions.push({ payment_method: paymentMethod });
     }
     // 名前
     if (purchaserLastName !== null) {

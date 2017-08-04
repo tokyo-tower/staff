@@ -19,7 +19,7 @@ export default session({
     saveUninitialized: false,
     store: new redisStore({
         client: redis.createClient(
-            process.env.REDIS_PORT,
+            Number(process.env.REDIS_PORT),
             process.env.REDIS_HOST,
             {
                 password: process.env.REDIS_KEY,

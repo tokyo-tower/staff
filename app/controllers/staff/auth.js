@@ -17,7 +17,6 @@ const TTTS = require("@motionpicture/ttts-domain");
 const _ = require("underscore");
 const staffLoginForm_1 = require("../../forms/staff/staffLoginForm");
 const staff_1 = require("../../models/user/staff");
-const layout = 'layouts/staff/layout';
 /**
  * 内部関係者ログイン
  * @method login
@@ -89,7 +88,7 @@ function login(req, res, next) {
                     }
                 }
             }
-            res.render('staff/auth/login', { layout: layout });
+            res.render('staff/auth/login', { layout: 'layouts/staff/login' });
         }
         catch (error) {
             next(new Error(req.__('Message.UnexpectedError')));

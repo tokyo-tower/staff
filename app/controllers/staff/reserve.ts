@@ -209,6 +209,7 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
             try {
                 await reserveBaseController.processCancelSeats(reservationModel);
             } catch (error) {
+                console.log(error);
                 next(error);
 
                 return;
@@ -222,14 +223,16 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
                 // "予約可能な席がございません"などのメッセージ表示
                 res.locals.message = error.message;
                 res.render('staff/reserve/tickets', {
-                    reservationModel: reservationModel
+                    reservationModel: reservationModel,
+                    layout: layout
                 });
             }
         } else {
             // 券種選択画面へ遷移
             res.locals.message = '';
             res.render('staff/reserve/tickets', {
-                reservationModel: reservationModel
+                reservationModel: reservationModel,
+                layout: layout
             });
         }
     } catch (error) {

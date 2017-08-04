@@ -1,5 +1,5 @@
 {
-	"Title": "TTTS_EVENT_NAME（2016）Online Ticket",
+	"Title": "東京タワー TOP DECK Ticket",
 	"Online Ticket Reservation": "オンラインチケット",
 	"Email Magazine Readers": "メルマガ当選者",
 	"Sponsors": "外部関係者",
@@ -24,6 +24,7 @@
 		"Privacy": "プライバシーポリシー",
 		"Policy": "利用規約",
 		"ActOnSpecifiedCommercialTransactions": "特定商取引法に基づく表示",
+		"ContactUs": "お問合せ",
 		"AdvanceTicketSalesWebsite": "システム事故対象のお客様向け先行販売ページ"
 	},
 	"h2": {
@@ -35,13 +36,23 @@
 		"LoginForPreCustomers": "h2.LoginForPreCustomers"
 	},
 	"Label": {
+		"PreferredDate": "希望日選択",
+		"PreferredTime": "希望時間選択",
+		"IconDescription": "アイコンの説明",
+		"Capable": "余裕あり",
+		"Crowded": "残りわずか",
+		"Last": "残り受付数",
+		"Soldout": "受付終了",
+		"NotSelected": "選択しない",
 		"Agree": "同意する",
 		"FilmName": "作品名",
 		"PerformanceTime": "時間",
 		"PerformancePlace": "場所",
 		"DatetimeAndLocation": "日時/場所",
 		"SeatCode": "座席番号",
+		"QRCode": "QRコード",
 		"TicketType": "券種",
+		"TicketCount": "枚数",
 		"TotalPrice": "合計金額",
 		"Email": "メールアドレス",
 		"FullName": "お名前",
@@ -74,6 +85,7 @@
 		"ResultsCount": "検索結果数",
 		"ShowSeats": "座席を表示",
 		"PurchaseContent": "ご購入内容",
+		"PurchaseContentDate": "ご来塔ご予約日時",
 		"DepartmentName": "部署名",
 		"Signature": "署名",
 		"ConfirmCancel": "キャンセル確認",
@@ -81,14 +93,14 @@
 		"TermsGuideText": "利用規約をご確認頂き、問題ないようでしたら「利用規約に同意して次へ」ボタンを押してください",
 		"SelectSeatsGuideText": "ご希望の座席を選択して次へボタンを押してください。",
 		"SelectSeatsGuideTextSP": "画面をタッチすると画面がズームしますので<br>座席を選択してください",
-		"SelectTicketsGuideText": "ご希望の券種を選択して次へボタンを押してください。",
-		"EnterProfileGuideText": "必要情報を入力して次へボタンを押してください。",
+		"SelectTicketsGuideText": "ご希望の券種と枚数を選択し「次へ」ボタンを押してください。",
+		"EnterProfileGuideText": "購入者の情報とお支払い情報を入力し「次へ」ボタンを押してください。",
 		"EnterProfileGuideTextWindow": "お支払い方法を選択して次へボタンを押してください。",
-		"ConfirmReservationGuideText": "内容をご確認のうえ、「決済へ進む」ボタンを押してください。",
+		"ConfirmReservationGuideText": "購入内容をご確認頂き「購入確定」ボタンを押してください。",
 		"ConfirmReservationGuideTextNoPayment": "内容をご確認のうえ、「次へ」ボタンを押してください。",
-		"CompleteReservationGuideText": "ご購入ありがとうございました<br><br>!! 注意事項 !!<br>このページを閉じると再表示できません。<br>ご鑑賞当日はご入場の際にQRコードが必要となりますので、必ずご確認頂き、印刷または保存してください。<br>※QRコードは本ページと、ご入力いただいたメールアドレスにもお送りしています。<br>※メールの送信に時間がかかることがございますので予めご了承ください。",
+		"CompleteReservationGuideText": "ご購入ありがとうございました<br>ご入力いただいたメールアドレス宛に、購入完了メールを送信しました。<br>ご入場方法に関してはメールをご確認ください。",
 		"CompleteTemporaryReservationGuideText": "仮予約が完了しました。<br>仮予約内容は「仮予約完了メール」に記載して送信したしました。<br>まだ購入は完了しておりませんので最寄りのファミリーマートよりお支払いください。<br>※メールの送信に時間がかかることがございますので予めご了承ください。",
-		"SelectPerformanceGuideText": "以下より鑑賞作品の上映スケジュールを選択してください。",
+		"SelectPerformanceGuideText": "ご来塔希望日時を選択してください。",
 		"ReleaseSeatsGuideText": "座席開放を行う日付を選択して、開放するボタンを押してください。",
 		"GMOStartGuideText": "GMO決済へ遷移します...",
 		"NotFoundGuideText": "既に存在しないか、もしくはアドレスの入力が間違っている可能性があります。",
@@ -105,7 +117,11 @@
 		"NumberOfTicketsAvailable": "取得可能残り",
 		"Male": "男性",
 		"Female": "女性",
-		"NameOfPersonWhoWillSeeFilm": "鑑賞者氏名"
+		"NameOfPersonWhoWillSeeFilm": "鑑賞者氏名",
+		"AboutTicket": "各券種に関してはこちら",
+		"AboutTOPDECKTicket": "TOP DECKチケットは、「大展望台」と「TOP DECK」へご入塔いただけます。",
+		"AboutEntry": "ご入塔方法について",
+		"CompleteReservationCautionText": "※以下のQRコードが入場チケットとなります。保存もしくは印刷の上、御持参ください。"
 	},
 	"Button": {
 		"Send": "送信",
@@ -121,7 +137,7 @@
 		"Transfer": "転送",
 		"Login": "ログイン",
 		"Logout": "ログアウト",
-		"GoToPayment": "決済へ進む",
+		"GoToPayment": "購入確定",
 		"InformFriends": "お友達に渡す",
 		"Close": "閉じる",
 		"No": "いいえ",
@@ -137,11 +153,12 @@
 		"AcceptTermsAndLogin": "利用規約に同意してログイン",
 		"ReserveTicketsAnotherMovie": "続けて他の作品を予約する",
 		"ReserveMoreSameShow": "同じ上映回で追加予約する",
-		"ReleaseSeats": "座席解放"
+		"ReleaseSeats": "座席解放",
+		"AboutEntry": "入塔方法について"
 	},
 	"Form": {
 		"FieldName": {
-			"name": "お名前 (カタカナ)",
+			"name": "お名前 (カナまたはアルファベット)",
 			"lastName": "セイ",
 			"firstName": "メイ",
 			"tel": "電話番号",
@@ -176,10 +193,10 @@
 		"invalid{{fieldName}}": "{{fieldName}}が不適切です",
 		"regexTelRange{{fieldName}}{{min}}{{max}}": "{{fieldName}}は{{min}}桁以上{{max}}桁以内で入力してください",
 		"match{{fieldName}}": "{{fieldName}}が一致しません",
-		"EnterInFullWidthKatakana": "全角カタカナでご入力ください",
+		"EnterInFullWidthKatakana": "全角カタカナかアルファベットでご入力ください",
 		"RetypeToConfirm": "確認の為に、もう一度入力してください",
-		"SettingForLimitingEmailReception": "※HTMLメールが受信できるメールアドレスを入力ください<br>【ドメイン指定受信をご利用の場合について】<br>※ 携帯電話のドメイン指定受信をされている場合、「@tiff-ticket.net」を追加設定してください。<br>※ au(@ezweb.ne.jp)をご利用の場合、上記に加え「なりすまし規制回避リスト」にも「@tiff-ticket.net」の追加設定をしてください。",
-		"UseHalfWidthAlphanumericWithoutHyphens": "半角数字、ハイフン「-」なしで入力して下さい",
+		"SettingForLimitingEmailReception": "※HTMLメールが受信できるメールアドレスを入力ください<br>【ドメイン指定受信をご利用の場合について】<br>※ 携帯電話のドメイン指定受信をされている場合、「@tokyotower.co.jp」を追加設定してください。<br>※ au(@ezweb.ne.jp)をご利用の場合、上記に加え「なりすまし規制回避リスト」にも「@tokyotower.co.jp」の追加設定をしてください。",
+		"UseHalfWidthAlphanumericWithoutHyphens": "半角数字、ハイフン「-」なしで入力して下さい。日本国外の方は「+」なしで国番号から入力してください。",
 		"Sending": "送信しています...",
 		"Sent": "送信しました",
 		"Unsent": "送信できませんでした",
@@ -203,14 +220,16 @@
 		"UpdateWatcherNameHelp": "※日本人の場合は「全角カタカナ」外国人の場合は「半角英字」で入力してください。<br>※セイとメイの間に半角スペースを入れないでください。",
 		"invalidPaymentNoOrLast4DigitsOfTel": "購入番号または電話番号下4ケタに誤りがあります",
 		"cardNumber": "※半角数字、ハイフン「-」なしで入力してください",
-		"securitycode": "セキュリティーコードについて"
+		"securitycode": "セキュリティーコードについて",
+		"TransactionNumberDescription": "※予約の照会に必要な番号となりますので必ず忘れないようにしてください。",
+		"AboutEntryDescription": "特別展望台への入場方法に関しましては<br>下記の「入場方法について」ボタンを押してご確認ください。"
 	},
 	"{{price}} yen": "{{price}} 円",
 	"Mr{{name}}": "{{name}} 様",
 	"Steps": {
 		"SelectPerformance": "スケジュール選択",
 		"SelectSeats": "座席選択",
-		"SelectTickets": "券種選択",
+		"SelectTickets": "券種/枚数選択",
 		"EditProfile": "購入者情報入力",
 		"Confirm": "購入内容確認",
 		"Complete": "購入完了"
@@ -254,9 +273,12 @@
 		"Access1" : "お問い合わせはこちら",
 		"Access2" : "TEL",
 		"TotalTicketCount": "合計枚数 $reservations_length$枚",
-		"Leaf": "枚"		
+		"Leaf": "枚",
+		"inquiry": "QRコードは下記URLの予約照会画面より取得、ご確認いただけます。",
+		"inquiry-url": "https://ttts-authentication-d.azurewebsites.net/inquiry/search"		
 	},
-	"ConfirmNotesText": "・チケットの払い戻し・交換・再発行はいたしません。<br>・東京都青少年の健全な育成に関する条例により18歳未満の方は23時から翌朝4時までの劇場への出入りは禁止となっております。<br>保護者同伴の場合も同様です。<br>・ 携帯電話のドメイン指定受信をされている場合、「@tiff-ticket.net」を追加設定してください。<br>・ au(@ezweb.ne.jp)をご利用の場合、上記に加え「なりすまし規制回避リスト」にも「@tiff-ticket.net」の追加設定をしてください。",
+	"ConfirmNotesText": "・チケットの払い戻し・交換・再発行はいたしません。<br>・ 携帯電話のドメイン指定受信をされている場合、「@tokyotower.co.jp」を追加設定してください。<br>・ au(@ezweb.ne.jp)をご利用の場合、上記に加え「なりすまし規制回避リスト」にも「@tokyotower.co.jp」の追加設定をしてください。",
+	"CompleteNotesText": "<購入完了メールが届かない場合><br>・メールアドレスに不備がないか、メールの着信を拒否されていないかをご確認下さい。<br>・プロバイダー及び、携帯キャリア会社のメール設定のフィルタリング機能を有効にしている方は、「削除フォルダ」または「迷惑メールフォルダ」をご確認下さい。<br>※購入完了メールは自動送信のため再送信は致しません。<br>※購入確認は「購入番号」をお控えの上、チケット照会ページよりお願いします。",
 	"NoticeCredit": "※以下のクレジットカードの使用が可能です。",
 	"NoticeCVS": "※コンビニ決済の支払期限は、ご注文完了日を含めて3日間です。<br>※コンビニ決済の場合、手数料としてご購入1席につき150円がかかります。<br>手数料はお支払いいただく料金に含まれます。<br>※コンビニ決済が可能なコンビニは全国のファミリーマートのみとなります。",
 	"NoticeCVSMember": "コンビニ決済をご希望の方は下記電話番号までお問い合わせください。<br>050-3786-8066"

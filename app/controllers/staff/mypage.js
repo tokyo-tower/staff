@@ -84,6 +84,10 @@ function search(req, res, next) {
         let paymentNo = (!_.isEmpty(req.query.payment_no)) ? req.query.payment_no : null;
         // アカウント
         const owner = (!_.isEmpty(req.query.owner)) ? req.query.owner : null;
+        // 予約方法
+        const purchaserGroup = (!_.isEmpty(req.query.purchaser_group)) ? req.query.purchaser_group : null;
+        // 決済手段
+        const paymentMethod = (!_.isEmpty(req.query.payment_method)) ? req.query.payment_method : null;
         // 名前
         const purchaserLastName = (!_.isEmpty(req.query.purchaser_last_name)) ? req.query.purchaser_last_name : null;
         const purchaserFirstName = (!_.isEmpty(req.query.purchaser_first_name)) ? req.query.purchaser_first_name : null;
@@ -144,6 +148,14 @@ function search(req, res, next) {
         // アカウント
         if (owner !== null) {
             conditions.push({ owner: owner });
+        }
+        // 予約方法
+        if (purchaserGroup !== null) {
+            conditions.push({ purchaser_group: purchaserGroup });
+        }
+        // 決済手段
+        if (paymentMethod !== null) {
+            conditions.push({ payment_method: paymentMethod });
         }
         // 名前
         if (purchaserLastName !== null) {

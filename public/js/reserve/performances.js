@@ -1,6 +1,7 @@
 $(function() {
     var LOCALE = document.documentElement.getAttribute('lang');
     var API_ENDPOINT = document.querySelector('input[name="apiEndpoint"]').value;
+    // var API_ENDPOINT = '/temp_performancesearchresult.json?#';
     if (!API_ENDPOINT) { return alert('API_ENDPOINT undefined'); }
 
     // カレンダーを何日先まで表示するか
@@ -11,7 +12,6 @@ $(function() {
         CROWDED: 19,
         LAST: 9
     };
-
 
     // 空席数からCSSクラス名を得る
     var getStatusNameByRemainsNum = function(num) {

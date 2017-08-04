@@ -1,136 +1,172 @@
-//マイページ共通
-.page-mypage{
-
-
-  .wrapper-searchform{
-    background-color:#fff;
-    padding:0 1em;
-    margin:2em auto;
-    td{
-      border-top:none;
-      padding:15px;
+// 管理画面
+.page-mypage {
+    .btn-print {
+        background-color: #4f89e1;
     }
-    .btn{
-      >span{
-        padding:4px 1em;
-      }
+    .btn-thermalprint {
+        background-color: #e1894f;
     }
-  }
-
-
-  .wrapper-reservations{
-
-    thead{
-      background-color:#898989;
-      color:#fff;
-    }
-
-    tbody{
-      background-color:#fff;
-    }
-
-    th,td{
-      vertical-align:middle;
-      padding:1em;
-    }
-    th{
-      font-size:14px;
-      text-align:center;
-    }
-
-    input[type=checkbox]{
-      transform:scale(1.5);
-    }
-
-    .btn{
-      >span{
-        padding:8px;
-      }
-    }
-
-    .td-number,
-    .td-title{
-      font-size:0.8em;
-    }
-
-    .td-seat{
-      text-align:center;
-      a{
-        text-decoration:underline;
-      }
-    }
-
-    .td-updater{
-      text-align:center;
-    }
-
-
-    .td-actions{
-      width:160px;
-      .btn{
-        width:100%;
-        &:first-child{
-          margin-bottom:12px;
+    &.no-thermal{
+        .btn-thermalprint {
+            background-color: #ddd;
+            pointer-events: none;
         }
-        &.confirm-cancel{
-          background-color:#ea5514;
+        option[value=thermalprint] {
+            display: none;
         }
-      }
     }
-
-  }
-
-
-  .wrapper-controls{
-
-    .navigation{
-      text-align:center;
-      span{
-        color:#666;
-        padding:0 4px;
-        >a{
-          color:#666;
-          text-decoration:underline;
+    #msg_bluetooth {
+        text-align: center;
+        margin-bottom: 1em;
+    }
+    .wrapper-searchform {
+        background-color: #f9f9f9;
+        padding: 2em;
+        margin: 0 auto;
+        h3 {
+            margin-bottom: 10px;
         }
-      }
+        select {
+            width: auto;
+        }
+        .wrapper-inputs {
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #dadada;
+            margin-bottom: 20px;
+            .form-group {
+            }
+            label {
+                display: block;
+                margin-bottom: 4px;
+            }
+        }
+        .wrapper-time {
+            #input_performancedate {
+                background-color: #fff;
+                width: 160px;
+                display: inline-block;
+                vertical-align: bottom;
+            }
+            select {
+                display: inline-block;
+            }
+        }
+        .wrapper-purchaser {
+            .form-inline:first-child {
+                margin-bottom: 10px;
+            }
+            input[name=purchaser_email] {
+                width: 400px;
+            }
+            input[name=watcher_name] {
+                width: 400px;
+            }
+        }
     }
-  }
-
-
-}
-
-
-#page_tel_mypage,
-#page_window_mypage{
-  //電話と窓口のマイページはキャンセルボタン無し
-  .confirm-cancel{
-    display:none;
-  }
-  //電話と窓口のマイページはfont-10px
-  #reservations{
-    font-size:10px;
-  }
-}
-#page_staff_mypage,
-#page_sponsor_mypage{
-  header,footer,.container{
-    @media screen and (max-width: 1170px){
-        width:1170px;
+    .total-count {
+        margin-top: 1em;
     }
-  }  
-}
-#page_tel_mypage,
-#page_window_mypage,
-#page_staff_mypage{ 
-  //電話と窓口と内部関係者のマイページは検索ボタン右下端
-  .wrapper-searchform{
-    .form-group:last-child{
-      width:100%;
-      .btn{
-        @include clearfix;
-        float:right;
-        margin:10px 0;
-      }
+    .wrapper-reservations {
+        thead {
+            background-color: #898989;
+            color: #fff;
+        }
+        tbody {
+            background-color: #fff;
+        }
+        th,
+        td {
+            vertical-align: middle;
+            padding: 1em;
+        }
+        th {
+            font-size: 14px;
+            text-align: center;
+        }
+        input[type=checkbox] {
+            transform: scale(1.5);
+        }
+        .btn {
+            >span {
+                padding: 8px;
+            }
+        }
+        .td-number,
+        .td-title {
+            font-size: 0.8em;
+        }
+        .td-number {
+            .paymentno {
+                font-size: 16px;
+                font-weight: bold;
+            }
+            .starttime {
+                display: block;
+            }
+        }
+        .td-seat {
+            text-align: center;
+            width: 90px;
+            a {
+                text-decoration: underline;
+            }
+        }
+        .td-ticket {
+            text-align: center;
+            width: 120px;
+        }
+        .td-route {
+            text-align: center;
+            width: 120px;
+        }
+        .td-checkin {
+            width: 100px;
+            padding: 10px;
+            text-align: center;
+            .entered {
+                color: #d00;
+            }
+        }
+        .td-actions {
+            width: 160px;
+            .btn {
+                width: 100%;
+                margin-bottom: 1em;
+                &:first-child {
+                    margin-bottom: 12px;
+                }
+            }
+        }
     }
-  }
+    .wrapper-controls {
+        .navigation {
+            text-align: center;
+            span {
+                color: #666;
+                padding: 0 4px;
+                >a {
+                    color: #666;
+                    text-decoration: underline;
+                }
+            }
+        }
+    }
+    #modal_cancelcompleted {
+        .modal-body {
+            h3 {
+                max-width: 600px;
+                padding-top: 0;
+                margin-bottom: 1em;
+                >span {
+                    color: #000;
+                    display: block;
+                    margin: 1em 0;
+                    font-size: 14px;
+                }
+            }
+            p {
+                text-align: center;
+            }
+        }
+    }
 }

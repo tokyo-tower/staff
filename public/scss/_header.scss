@@ -1,101 +1,98 @@
+header {
+    @include clearfix;
+    background-color: #f9f9f9;
+    border-bottom: 2px solid #c00;
+    z-index: 128;
+    height: 80px;
+    user-select: none;
+    .container {
+        display: table;
+        height: 100%;
+        @media screen and (max-width: $breakpoint_tablet) {
+            width:100%;
+            padding: 0;
+        }
+    }
+    .header-logo {
+        display: table-cell;
+        vertical-align: middle;
+        padding: 10px;
+        img {
+            width: 160px;
+            @media screen and (max-width: $breakpoint_mobile) {
+                width:120px;
+            }
+        }
+    }
+    .header-menu {
+        float: right;
+        font-size: 12px;
+    }
+    .header-lang {
+        float: right;
+        border-left: 1px solid #ddd;
+        width: 200px;
+        margin: 10px 0;
 
-header{
-  @include clearfix;
-  background-color:#fff;
-  z-index:128;
-  height:70px;
-  user-select:none;
-  .container{
-    display:table;
-    height:100%;
-    @media screen and (max-width: $breakpoint_tablet){
-      width:100%;
-    }
-  }
-  .header-logo{
-    display:table-cell;
-    vertical-align:middle;
-    img{
-      width:300px;
-      @media screen and (max-width: $breakpoint_mobile){
-        width:220px;
-      }
-    }
+        p {
+            font-size:14px;
+            text-align: center;
+        }
 
-  }
-  .header-menu{
-    float:right;
-    font-size: 12px;
-    .myname{
-      margin-top: 6px;
-      margin-bottom: 6px;
-    }
-    .menu-langs{
-      @include clearfix;
-      li{
-        font-size:1em;
-        float:left;
-        line-height:70px;
-        &:first-child::after{
-          content:'/';
-          margin:0 0.5em;
+        select {
+            font-size: 20px;
+            margin: 10px 16px 10px auto;
+            display: block;
+            width: 120px;
+            background-color: transparent;
+            border: none;
+            outline: none;
+            cursor: pointer;
         }
-      }
     }
-    .menu-user{
-
-      text-align:right;
-      .link-cancel{
-        color:#000;
-        text-decoration:underline;
-        &:hover{
-          opacity:0.8;
-        }
-        &::before{
-          content:'';
-          display:inline-block;
-          width:12px;
-          height:12px;
-          background-image:url(/images/common/icon-close.png);
-          background-size:contain;
-        }
-      }
-    }
-    .menu-staff{
-      text-align:right;
-      @media screen and (max-width: $breakpoint_mobile){
-        min-width:174px;
-      }
-      .staff-btns{
-        @include clearfix;
-        .btn{
-          float:right;
-          margin-left:0.5em;
-          @media screen and (max-width: $breakpoint_mobile){
-            font-size:12px;
-            padding:6px;
-          }
-        }
-      }
-    }
-  }
 }
-.page-ja{
-  .menu-langs .langs-ja a{
-    color:#000;
-    text-decoration:none;
-    pointer-events:none;
-  }
+.menu-staff {
+    display: table;
+    height: 78px;
+    float: right;
+    >p, >a {
+        display: table-cell;
+        vertical-align: middle;
+        padding: 0 1em;
+    }
+    >a {
+        font-size: 14px;
+        &::before {
+            display: block;
+            width: 20px;
+            height: 20px;
+            margin: 5px auto;
+        }
+    }
+    .btn-newticket {
+        background-color: #eee;
+        color: #000;
+        &::before {
+            content: url(/images/common/icon-gray-search.svg);
+        }
+    }
+    .btn-mypage {
+        background-color: #eee;
+        color: #000;
+        &::before {
+            content: url(/images/common/icon-gray-search.svg);
+        }
+    }
+    .btn-logout {
+        background-color: #898989;
+        color: #fff;
+        &::before {
+            content: url(/images/common/icon-white-logout.svg);
+        }
+    }
 }
-.page-en{
-  .menu-langs .langs-en a{
-    color:#000;
-    text-decoration:none;
-    pointer-events:none;
-  }
-}
-.page-staff{
-  .menu-langs{
-    display:none;
-  }
+.page-staff {
+    .menu-langs {
+        display: none;
+    }
 }

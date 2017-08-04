@@ -1,76 +1,107 @@
-//券種選択ページ
-.page-tickets{
-
-  .wrapper-2clm{
-    .clm-left{
-      padding-left:260px;
-      margin-left:-260px;
-      width:100%;
-      @media screen and (max-width: $breakpoint_tablet){
-        margin:auto;
-        padding:0;
-      }
-    }
-    .clm-right{
-      width:240px;
-      @media screen and (max-width: $breakpoint_tablet){
-          width:100%;
-      }
-    }
-  }
-
-  .table-tickets{
-    td,th{
-      border-top:2px solid #f2f2f2;
-    }
-    thead{
-      background-color:#898989;
-      color:#fff;
-      @media screen and (max-width: $breakpoint_tablet){
-        display:none;
-      }
-      th:first-child{
-        width:110px;
-      }
-    }
-    thead,tbody{
-      th:first-child{
-        border-right:2px solid #f2f2f2;
-      }      
-    }
-    tbody,tfoot{
-      background-color:#ddd;
-      td{
-        padding:8px 16px;
-      }
-    }
-    tfoot{
-      td{
-        line-height:4em;
-        text-align:right;
-        .price{
-          margin-left:1em;
-          font-weight:bold;
-          color:red;
+// 券種選択ページ
+.page-tickets {
+    .wrapper-2clm {
+        .clm-left {
+            padding-left: 260px;
+            margin-left: -260px;
+            width: 100%;
+            @media screen and (max-width: $breakpoint_tablet) {
+                margin:auto;
+                padding: 0;
+            }
         }
-      }
+        .clm-right {
+            width: 240px;
+            @media screen and (max-width: $breakpoint_tablet) {
+                width:100%;
+            }
+        }
     }
-    tr,th,td{
-      @media screen and (max-width: $breakpoint_tablet){
-        display:block;
-      }
+    .link-guide {
+        color: #71c9ff;
+        display: block;
+        margin-bottom: 1em;
     }
-    th{
-      text-align:center;
-      vertical-align:middle;
-      @media screen and (max-width: $breakpoint_tablet){
-        text-align:left;
-        background-color:#898989;
-        color:#fff;
-      }
+    .alert-ticket {
+        color: #f00;
+        display: none;
+        text-align: center;
+        padding: 1em;
     }
-
-
-  }
-
+    .table-tickets {
+        td,
+        th {
+            border-top: 2px solid #fff;
+            @media screen and (max-width: $breakpoint_tablet) {
+                border-top: none;
+            }
+        }
+        thead {
+            background-color: #898989;
+            color: #fff;
+            @media screen and (max-width: $breakpoint_tablet) {
+                display:none;
+            }
+            th:last-child {
+                width: 110px;
+            }
+        }
+        thead,
+        tbody {
+            th:first-child {
+                border-right: 2px solid #fff;
+                @media screen and (max-width: $breakpoint_tablet) {
+                    border-right: none;
+                }                
+            }
+        }
+        tbody {
+            th {
+                text-align: left;
+                font-size: 20px;
+                padding: 0.5em 1em;
+                @media screen and (max-width: $breakpoint_tablet) {
+                    padding: 10px 1em 0;
+                }
+            }
+        }
+        tbody,
+        tfoot {
+            background-color: #eee;
+            td {
+                padding: 8px 16px;
+                vertical-align: middle;
+            }
+        }
+        tfoot {
+            td {
+                font-size: 16px;
+                line-height: 2em;
+                text-align: right;
+                .price {
+                    font-size: 24px;
+                    margin-left: 1em;
+                    font-weight: bold;
+                    color: red;
+                }
+            }
+        }
+        tr,
+        th,
+        td {
+            @media screen and (max-width: $breakpoint_tablet) {
+                display:block;
+            }
+        }
+        tr {
+            @media screen and (max-width: $breakpoint_tablet) {
+                border-top: 5px solid #fff;
+            }
+        }
+        th {
+            vertical-align: middle;
+            @media screen and (max-width: $breakpoint_tablet) {
+            }
+        }
+    }
 }

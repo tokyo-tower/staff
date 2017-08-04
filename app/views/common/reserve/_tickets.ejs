@@ -8,7 +8,8 @@
 <p class="guidetext" style="color:red;"><%= message %></p>
 <% } %>
 
-<a class="link-guide" href="https://www.tokyotower.co.jp/price/" target="_blank">各券種に関してはこちら</a>
+<a class="link-guide" href="https://www.tokyotower.co.jp/price/" target="_blank"><%- __('Label.AboutTicket') %></a>
+<!--<p class="guidetext"><%- __('Label.AboutTOPDECKTicket') %></p>-->
 <div class="wrapper-2clm">
     <div class="clm-left" data-token="">
         <table class="table table-tickets">
@@ -25,7 +26,12 @@
                 <% reservationModel.ticketTypes.forEach(function(ticketType) { %>
                 <tr data-ticket-code="<%- ticketType._id %>" data-ticket-charge="<%= ticketType.charge %>">
                     <% /* 券種名+値段 */ %>
-                    <th style="text-align:left;"><span><%- ticketType.name[locale] %> \<%= ticketType.charge %></span></th>
+                    <th>
+                        <span><%- ticketType.name[locale] %> \<%= ticketType.charge %></span>
+                        <% if (reservationModel.purchaserGroup === ReservationUtil.PURCHASER_GROUP_STAFF) { %>
+                            <input type="text" name="watcherName" class="form-control" placeholder="予約メモ" value="">
+                        <% } %>
+                    </th>
                     <td>
                         <% /* 枚数選択dropdown */ %>
                         <select class="form-control">

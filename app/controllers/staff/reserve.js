@@ -205,6 +205,7 @@ function tickets(req, res, next) {
                     yield reserveBaseController.processCancelSeats(reservationModel);
                 }
                 catch (error) {
+                    console.log(error);
                     next(error);
                     return;
                 }
@@ -218,7 +219,8 @@ function tickets(req, res, next) {
                     // "予約可能な席がございません"などのメッセージ表示
                     res.locals.message = error.message;
                     res.render('staff/reserve/tickets', {
-                        reservationModel: reservationModel
+                        reservationModel: reservationModel,
+                        layout: layout
                     });
                 }
             }
@@ -226,7 +228,8 @@ function tickets(req, res, next) {
                 // 券種選択画面へ遷移
                 res.locals.message = '';
                 res.render('staff/reserve/tickets', {
-                    reservationModel: reservationModel
+                    reservationModel: reservationModel,
+                    layout: layout
                 });
             }
         }

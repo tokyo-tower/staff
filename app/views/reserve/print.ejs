@@ -2,29 +2,36 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<title>TTTS2016 PRINT TICKET</title>
+<title>Tokyo Tower PRINT TICKET</title>
 <link href="/css/print.css" rel="stylesheet">
 </head>
 <body>
 
-<% for (let reservation of reservations) { %>
+<%
+moment.locale(locale);
+for (let reservation of reservations) {
+%>
 <div class="printcontent">
 
-    <div class="pr-header pr-bg">
-        <img class="pr-bg-image" src="/images/print/header.png">
+    <div class="pr-header">
+        <div class="logo">
+            <img src="/images/common/logo.png">
+        </div>
+        <div class="title">
+            チケット兼領収書
+        </div>
     </div>
 
     <div class="pr-thanks">
         この度はご購入いただき誠にありがとうございます。鑑賞当日はこちらのチケットをご持参してQRコードをご提示頂いてご入場下さい。<br>
-        <span class="smalltext">Thank you very much for your purchase. Please bring this ticket with you on the day of your purchased screening.</span>
     </div>
 
     <div class="pr-qrcode pr-bg">
         <img class="pr-bg-image" src="/images/print/bg_gray.png">
         <div class="pr-bg-content inner">
             <h2>
-                こちらのQRコードを入場時リーダーにかざし、ご入場ください。
-                <span class="smalltext">Please scan this QR code when entering the screen.</span>
+                こちらのQRコードをスタッフにご提示ください。<br>
+                <span class="smalltext">(QR コードは、フットタウンもしくはTOP DECK 入口の2 箇所でご提示していただきます。)</span>
             </h2>
             <div class="wrapper-qrimg pr-bg">
                 <img src="//chart.apis.google.com/chart?chs=150x150&cht=qr&chl=<%= reservation.qr_str %>">
@@ -35,119 +42,116 @@
 
     <div class="pr-paddinglr">
 
-        <div class="pr-title">
-
-            <h3>作品名<span class="smalltext">Title</span></h3>
-
-            <strong class="filmtitle<%- (reservation.get('film_name').ja.length > 63) ? ' filmtitle-long' : '' %>"><%= reservation.get('film_name').ja %></strong>
-
-            <span class="smalltext"><%= reservation.get('film_name').en %></span>
-
-        </div>
-
         <table class="pr-maintable">
-            <tr>
-                <td class="pr-rsrvnum">
-                    <h3>購入番号<span class="smalltext">Transaction number</span></h3>
+            <tbody>
+                <tr>
+                    <td class="main-info">
+                        <div class="pr-rsrvnum">
+                            <h3>購入番号</h3>
+                            <strong><%- reservation.get('payment_no') %></strong>
+                        </div>
 
-                    <strong><%- reservation.get('payment_no') %></strong>
+                        <div class="pr-time">
+                            <h3>ご来塔ご予約日時</h3>
+                            <strong><%- moment(reservation.get('performance_day'), 'YYYYMMDD').format('LL (ddd)') %></strong>
+                            <strong><%- moment(reservation.get('performance_start_time'), 'HHmm').format('HH:mm') %> - <%- moment(reservation.get('performance_end_time'), 'HHmm').format('HH:mm') %>(JST)</strong>
+                            <p class="smalltext timenotice">※混雑する場合がございますので、<br><span class="bold">15分前にお越し下さい。</span></p>
+                        </div>
 
-                </td>
+                        <div class="pr-ticket">
+                            <h3>券種</h3>
+                            <strong><%- reservation.get('ticket_type_name')[locale] %> / &yen;<%- reservation.get('ticket_type_charge') %>&nbsp;(<%- reservation.seat_code %>)</strong>
+                        </div>
 
-                <td class="pr-screen" rowspan="6">
+                        <div class="pr-term">
+                            <h4>ご注意事項</h4>
+                            <p>
+                                ※チケットのキャンセルは、ご来塔日の３日前までにお手続きを行ってください。<br>
+                                ※チケットのキャンセル時に、キャンセル料を徴収させていただきます。<br>
+                                ※入塔受付時間を過ぎた場合、ご入塔いただけない場合があります。<br>
+                                ※ご来塔日当日のご予約時間の変更は、お受付いたしかねます。<br>
+                                ※交通渋滞による来塔遅延、その他いかなる場合でも、当日のチケット変更およびキャンセル・払い戻しはいたしません。<br>
+                                ※購入したチケットの転売は、固く禁止しております。転売が原因となるお客様間の不利益や損害などに対して、一切の責任を負わないものとします。
+                            </p>
+                        </div>
 
-                    <img src="/images/print/screen/<%- reservation.get('screen') %>.png">
+                        <div class="pr-contact">
+                            <h4>チケットのお問い合わせ</h4>
+                            <p>
+                                03-3433-5111 / 9:00 am ～ 17:00 pm ( 年中無休)
+                            </p>
 
-                </td>
-
-            </tr>
-
-            <tr><td class="pr-location">
-
-                <h3>劇場<span class="smalltext">Venue</span></h3>
-
-                <strong><%- reservation.get('theater_name').ja %> <%- reservation.get('screen_name').ja %></strong>
-                <span class="smalltext"><%- reservation.get('theater_name').en %> <%- reservation.get('screen_name').en %></span>
-
-                <p class="theateraddress">
-                    <%= reservation.get('theater_address').ja %>
-                    <span class="smalltext">
-                        <%= reservation.get('theater_address').en %>
-                    </span>
-                </p>
-
-            </td></tr>
-
-
-            <tr><td class="pr-time">
-
-                <h3>時間<span class="smalltext">Screening Date</span></h3>
-                <table class="timetable"><tr>
-
-                    <td><strong><%- reservation.get('performance_day').substr(0, 4) %>/<%- reservation.get('performance_day').substr(4, 2) %>/<%- reservation.get('performance_day').substr(6) %></strong></td>
-
-                    <td>開場<span class="smalltext">(OPEN)</span></td>
-                    <td><strong><%- reservation.get('performance_open_time').substr(0, 2) %>:<%- reservation.get('performance_open_time').substr(2) %></strong></td>
-
-                    <td>開演<span class="smalltext">(START)</span></td>
-                    <td><strong><%- reservation.get('performance_start_time').substr(0, 2) %>:<%- reservation.get('performance_start_time').substr(2) %></strong></td>
-
-                </tr></table>
-
-            </td></tr>
+                            <h4>オフィシャルサイト</h4>
+                            <p>
+                                https://www.tokyotower.co.jp
+                            </p>
+                        </div>
 
 
-            <tr><td class="pr-seat">
+                    </td>
 
-                <h3>座席(全席指定)<span class="smalltext">All seats are specified</span></h3>
+                    <td class="main-map" rowspan="6">
+                        <p class="map">
+                            <img src="/images/print/map/<%- locale %>.svg">
+                        </p>
 
-                <strong><%- reservation.get('seat_code').substr(0, reservation.get('seat_code').lastIndexOf('-')) %> 列 <%- reservation.get('seat_code').substr(reservation.get('seat_code').lastIndexOf('-')) %> 番</strong>
-                <span class="smalltext"><%- reservation.get('seat_code') %></span>
+                        <div class="accesstable">
+                            <h4>地下鉄、JR</h4>
+                            <table>
+                                <tbody>
+                                    <tr><td>
+                                        ① 都営大江戸線 赤羽橋駅 徒歩5 分<br>
+                                        ② 東京メトロ日比谷線 神谷町駅 徒歩７分<br>
+                                        ③ 都営三田線 御成門駅 徒歩6 分<br>
+                                        ④ 都営浅草線 大門駅 徒歩10 分<br>
+                                    </td><td>
+                                        ⑤ JR 山手線 浜松町駅 徒歩15 分<br>
+                                    </td></tr>
+                                </tbody>
+                            </table>
+                        </div>
 
-            </td></tr>
+                        <hr>
+
+                        <div class="stafftable">
+                            <h3>QR認証場所</h3>
+                            <h4><img class="mark" src="/images/print/staff_mark.svg">：QR認証場所</h4>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <img src="/images/print/staff_map_1.svg">
+                                        </td>
+                                        <td>
+                                            <h4>フットタウン 1F</h4>
+                                            <p>フットタウン1Fの展望台直通エレベーター前にて、QRコードの認証を行います。</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <img src="/images/print/staff_map_2.svg">
+                                        </td>
+                                        <td>
+                                            <h4>フットタウン RF</h4>
+                                            <p>フットタウンRFの昇り階段入り口にて、QRコードの認証を行います。</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+
+                </tr>
 
 
-            <tr><td class="pr-ticket">
-
-                <h3>券種・金額<span class="smalltext">Type of ticket / Charge Amount</span></h3>
-
-                <strong><%- reservation.get('ticket_type_detail_str').ja.replace(/\\/g, '&yen;') %></strong>
-                <span class="smalltext"><%- reservation.get('ticket_type_detail_str').en.replace(/\\/g, '&yen;') %></span>
-
-            </td></tr>
-
-
-            <tr><td class="pr-term">
-                <p>
-                    主催:公益財団法人ユニジャパン TTTS_EVENT_NAME実行委員会<br>
-                    Organizer: Foundation UNIJAPAN Tokyo International Film Festival Executive Committee 29th
-                </p>
-
-                <p>
-                    ※学生(小学生は除く)の方は、劇場へのご入場の際に、必ず学生証または生徒手帳のご提示をお願いします。<br>
-                    *Students (excluding elementary school students) are asked to show their student ID card or student handbook before entering the cinema.<br>
-                    ※交通渋滞による来場遅延、その他いかなる場合でも、ご購入後のチケットの変更およびキャンセル・払い戻しはいたしません。<br>
-                    なお不可抗力により表記公演の興行を中止する場合の払い戻しは、所定の期間内に所定の方法にて行います。<br>
-                    *Once tickets are purchased, they cannot be changed, canceled or refunded under any circumstance, including delayed arrival due to traffic congestion. If the event is canceled due to any unforeseen causes, tickets will be refunded by the prescribed methods during the prescribed period of time.<br>
-                    ※本チケットは領収書としてご利用いただけます。<br>
-                    *This ticket can be used as a receipt.
-                </p>
-
-            </td></tr>
+            </tbody>
         </table>
 
     </div>
 
-    <div class="pr-footer pr-bg">
-        <img class="pr-bg-image" src="/images/print/bg_black.png">
-        <div class="pr-bg-content">
-            <h4>チケットのお問合せ</h4>： 050-3786-0368 / 12:00～18:00（休業：土/日/祝日　TTTS_EVENT_NAME開催期間中は無休）<br>
-            <h4>オフィシャルサイト</h4>： http://2016.tiff-jp.net/<br>
-            <h4>For inquiries about tickets</h4>: 050-3786-0368 / 12:00 p.m. to 6:00 p.m. (Closed on Saturdays, Sundays, and national holidays, except during TTTS)<br>
-            <h4>Official website</h4>: http://2016.tiff-jp.net/
-        </div>
+    <div class="pr-footer">
+        <p>©2017 TOKYO TOWER. ALL RIGHTS RESERVED.</p>
     </div>
-
 
 </div>
 <% } %>

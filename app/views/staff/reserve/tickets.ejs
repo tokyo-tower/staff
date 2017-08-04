@@ -1,6 +1,6 @@
-<%- include('../../common/reserve/_tickets') %>
+<%- include('../../common/reserve/_tickets', {isStaff: true}) %>
 
-<div class="btns2clm">
+<div class="navbtns">
     <a class="btn btn-lg btn-next" href="javascript:void(0);"><span><%- __('Button.Next') %></span></a>
     <a class="btn btn-lg btn-back" href="/staff/reserve/seats"><span><%- __('Button.Back') %></span></a>
 </div>

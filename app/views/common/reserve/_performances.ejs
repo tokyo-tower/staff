@@ -7,10 +7,10 @@
 <%- include('./_step', {currentStepName: 'performances'}) %>
 
 <h1 class="pagetitle"><%- __('h1.SelectPerformance') %></h1>
-<p class="guidetext"><%- __('Label.SelectPerformanceGuideText') %></p>
+<p class="guidetext"><%- (isStaff) ? '代理予約を行う日時を指定してください' : __('Label.SelectPerformanceGuideText') %></p>
 
 
-<h3><span class="redcircle">1</span>希望日選択</h3>
+<h3><span class="redcircle">1</span><%- __('Label.PreferredDate') %></h3>
 <div class="performancesearchform">
     <form>
         <div class="input-date input-group">
@@ -20,13 +20,13 @@
 </div>
 
 
-<h3><span class="redcircle">2</span>希望時間選択</h3>
-<p class="icondescription">アイコンの説明:<br class="visible-mobile-block">
-    <img src="/images/common/icon-status-capable.svg" alt="capable"> … 余裕あり
-    <img src="/images/common/icon-status-crowded.svg" alt="crowded"> … 残りわずか
+<h3><span class="redcircle">2</span><%- __('Label.PreferredTime') %></h3>
+<p class="icondescription"><%- __('Label.IconDescription') %>:<br class="visible-mobile-block">
+    <img src="/images/common/icon-status-capable.svg" alt="capable"> … <%- __('Label.Capable') %>
+    <img src="/images/common/icon-status-crowded.svg" alt="crowded"> … <%- __('Label.Crowded') %>
     <br class="mbr">
-    <img src="/images/common/icon-status-last.svg" alt="last"> … 残り受付数
-    <img src="/images/common/icon-status-soldout.svg" alt="soldout"> … 受付終了
+    <img src="/images/common/icon-status-last.svg" alt="last"> … <%- __('Label.Last') %>
+    <img src="/images/common/icon-status-soldout.svg" alt="soldout"> … <%- __('Label.Soldout') %>
 </p>
 
 <div class="row performances">

@@ -13,9 +13,6 @@
 
     <%
     let url4seatStatusesMap = `/reserve/${reservationModel.performance._id}/unavailableSeatCodes`;
-    if (reservationModel.purchaserGroup === ReservationUtil.PURCHASER_GROUP_STAFF) {
-        url4seatStatusesMap = `/reserve/getSeatProperties`;
-    }
     %>
     <div class="clm-left wrapper-seats seatStatusesMap hidden" data-url="<%- url4seatStatusesMap %>" data-seat-codes="<%= (reservationModel.seatCodes) ? JSON.stringify(reservationModel.seatCodes) : '[]' %>">
 

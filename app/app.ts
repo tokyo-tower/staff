@@ -114,7 +114,7 @@ const MONGOLAB_URI = process.env.MONGOLAB_URI;
 // Use native promises
 (<any>mongoose).Promise = global.Promise;
 mongoose.connect(
-    MONGOLAB_URI,
+    <string>MONGOLAB_URI,
     {
         server: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } },
         replset: { socketOptions: { keepAlive: 300000, connectTimeoutMS: 30000 } }

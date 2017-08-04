@@ -1,178 +1,129 @@
-//購入完了ページ
-.page-complete{
-
-  .table-complete{
-    max-width:800px;
-    width:100%;
-    margin:auto;
-    tr,th,td{
-      @media screen and (max-width: $breakpoint_tablet){
-        display:block;
-        width:100%;
-      }
-    }
-    th,td{
-      line-height:2;
-      vertical-align:middle;
-      padding:1rem;
-      border-top:2px solid #fff;
-      @media screen and (max-width: $breakpoint_tablet){
-        border-top:none;
-      }
-    }
-    th{
-      background-color:#898989;
-      border-bottom:none;
-      color:#fff;
-      text-align:center;
-      vertical-align:middle;
-      width:160px;
-      @media screen and (max-width: $breakpoint_tablet){
-        background-color:#898989;
-        color:#fff;
-        text-align:left;
-      }
-    }
-
-    thead{
-      td{
-        background-color:#ddd;
-      }
-    }
-
-    tbody{
-      th{
-        @media screen and (max-width: $breakpoint_tablet){
-          display:none;
-        }
-      }
-      td{
-        padding:0;
-        @media screen and (max-width: $breakpoint_tablet){
-          margin-top:1em;
-        }
-      }
-
-      .wrapper-seatcells{
-        background-color:#ddd;
-        @media screen and (max-width: $breakpoint_tablet){
-          background-color:#e5e5e5;
-        }
-        &:last-child{
-          border-bottom:none;
-        }
-      }
-
-      .accordion_mobile_toggle{
-        display:none;
-        @media screen and (max-width: $breakpoint_tablet){
-          display:block;
-          padding:1em;
-          background-color:#595758;
-          color:#fff;
-          &:before{
-            display:none;
-          }
-        }
-      }
-      .accordion_mobile_inner{
-        @media screen and (max-width: $breakpoint_tablet){
-          padding-bottom:10px;
-        }
-      }
-
-      .innercontent{
-        display:table;
-        width:100%;
-        >div{
-          display:table-cell;
-          vertical-align:middle;
-          text-align: center;
-          padding:1em;
-          border-right:1px solid #ddd;
-          width:25%;
-          @media screen and (max-width: $breakpoint_tablet){
-            display:block;
-            width:100%;
-            padding:10px;
-            border:none;
-          }
-          &:last-child{
-            border-right:none;
-          }
-        }
-        .cell-seatcode{
-          @media screen and (max-width: $breakpoint_tablet){
-            display:none;
-          }
-        }
-        .cell-codeimg{
-          >img{
-            vertical-align:middle;
-          }
-        }
-        .cell-print{
-          @media screen and (max-width: $breakpoint_tablet){
-            display:none;
-          }
-        }
-        .cell-showseat{
-          display:none;
-          @media screen and (max-width: $breakpoint_tablet){
-            display:block;
-          }
-        }
-        .cell-btn{
-          .btn{
-            max-width:200px;
-            width:100%;
-            height:50px;
-            margin:auto;
-            >span{
-              font-size:0.9em;
-              &::after{
-                left:10px;
-              }
+// 購入完了ページ
+.page-complete {
+    .table-complete {
+        max-width: 800px;
+        width: 100%;
+        margin: auto;
+        tr,
+        th,
+        td {
+            @media screen and (max-width: $breakpoint_tablet) {
+                display:block;
+                width: 100%;
             }
-          }
         }
-        .cell-mail{
-          .btn>span{
-            padding-left:1em;
-          }
+        th,
+        td {
+            vertical-align: middle;
+            padding: 0.5rem 1rem;
+            border-top: 2px solid #fff;
+            @media screen and (max-width: $breakpoint_tablet) {
+                border-top:none;
+            }
         }
-
-      }
-
+        th {
+            background-color: #898989;
+            border-bottom: none;
+            color: #fff;
+            text-align: center;
+            vertical-align: middle;
+            width: 160px;
+            @media screen and (max-width: $breakpoint_tablet) {
+                background-color:#898989;
+                color: #fff;
+                text-align: left;
+            }
+        }
+        tbody {
+            td {
+                background-color: #eee;
+                padding: 1em;
+            }
+            .rsrvno {
+                font-size: 20px;
+                font-weight: bold;
+                color: #d00;
+                letter-spacing: 1px;
+            }
+            .wrapper-qrcodes {
+                display: inline-block;
+                width: 50%;
+                float: left;
+                padding: 10px;
+                @media screen and (max-width: $breakpoint_tablet) {
+                    float: none;
+                    width: 100%;
+                }
+                >div {
+                    background-color: #fff;
+                    display: table;
+                    width: 100%;
+                    text-align: center;
+                    @media screen and (max-width: $breakpoint_tablet) {
+                        display: block;
+                        padding-bottom: 10px;
+                        margin-bottom: 10px;
+                    }
+                    >p {
+                        display: table-cell;
+                        width: 50%;
+                        vertical-align: middle;
+                        font-size: 16px;
+                        img {
+                            vertical-align: top;
+                        }
+                        @media screen and (max-width: $breakpoint_tablet) {
+                            display: block;
+                            width: 100%;
+                        }
+                    }
+                }
+            }
+        }
     }
 
-  }
-
-  .btn-showseat{
-    margin:2em auto;
-    background-color:#2490d0;
-    &:hover,&:active,&:focus,&:active:focus,{
-      background-color:#34a0e0;
+    .btn-blue {
+        display: table;
+        width: 260px;
+        height: 45px;
+        margin: 2em auto;
+        background-color: #4f8ae0;
+        &:active, &:focus {
+            background-color: #4f8ae0;
+        }
     }
-  }
 
-}
+    .btn-entering {
+        background-color: transparent !important;
+        border: 1px solid #558ee1;
+        color: #558ee1;
+        box-shadow: none;
+    }
 
-#page_window_reserve_complete{
-  .table-complete .innercontent{
-    .cell-print{
-      display:table-cell;
-      @media screen and (max-width: $breakpoint_tablet){
-        display:block;
-      }
+    .mailnotice {
+        max-width: 800px;
+        width: 100%;
+        margin: 4em auto;
+        font-size: 14px;
     }
-    .cell-mail{
-      display:none;
+
+    .enteringguide {
+        background-color: #eee;
+        padding: 1em;
+        text-align: center;
+        width: 50%;
+        margin: 2em auto;
+        @media screen and (max-width: $breakpoint_tablet) {
+            width: 100%;
+        }
+        h3 {
+            font-weight: normal;
+            font-size: 1.33em;
+            margin-bottom: 1em;
+        }
     }
-  }
-  .btn-thermalprintall{
-    font-size:20px;
-    width:260px;
-    margin:4em auto;
-  }
+
+    .btn-blue {
+        margin-bottom: 0;
+    }
 }

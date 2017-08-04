@@ -69,7 +69,7 @@
     "gulp-autoprefixer": "^3.1.1",
     "gulp-concat": "^2.6.1",
     "gulp-csscomb": "^3.0.8",
-    "gulp-cssnano": "^2.1.2",
+    "gulp-csso": "^3.0.0",
     "gulp-merge-media-queries": "^0.2.1",
     "gulp-plumber": "^1.1.0",
     "gulp-sass": "^3.1.0",

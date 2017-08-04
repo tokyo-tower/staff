@@ -1,5 +1,5 @@
 {
-	"Title": "29th Tokyo International Film Festival (2016) Online Ticket",
+	"Title": "Tokyo Tower TOP DECK Ticket",
 	"Online Ticket Reservation": "Online Ticket",
 	"Email Magazine Readers": "Email Magazine Readers",
 	"Sponsors": "Sponsors",
@@ -24,6 +24,7 @@
 		"Privacy": "Privacy policy",
 		"Policy": "Terms of use",
 		"ActOnSpecifiedCommercialTransactions": "Representation under the Act on Specified Commercial Transactions",
+		"ContactUs": "Contact Us",
 		"AdvanceTicketSalesWebsite": "Advance Ticket Sales Website for customers who were affected by the ticket system trouble."
 	},
 	"h2": {
@@ -35,13 +36,23 @@
 		"LoginForPreCustomers": "h2.LoginForPreCustomers"
 	},
 	"Label": {
+		"PreferredDate": "Select the Preferred Date",
+		"PreferredTime": "Select the Preferred Time",
+		"IconDescription": "Icon Description",
+		"Capable": "Capable",
+		"Crowded": "Crowded",
+		"Last": "The number of remaining",
+		"Soldout": "Soldout",
+		"NotSelected": "Not Selected",
 		"Agree": "Agree",
 		"FilmName": "Film Tiltle",
 		"PerformanceTime": "Date",
 		"PerformancePlace": "Location",
 		"DatetimeAndLocation": "Date, time, and location",
 		"SeatCode": "Seat number",
+		"QRCode": "QR code",
 		"TicketType": "Type of ticket",
+		"TicketCount": "Number of ticket",
 		"TotalPrice": "Total",
 		"Email": "Email",
 		"FullName": "Full Name",
@@ -71,6 +82,7 @@
 		"ResultsCount": "Results",
 		"ShowSeats": "View seats",
 		"PurchaseContent": "Ticket purchase details",
+		"PurchaseContentDate": "Visit reservation date and time",
 		"DepartmentName": "Department",
 		"Signature": "Signature",
 		"ConfirmCancel": "Confirm cancellation",
@@ -78,14 +90,14 @@
 		"TermsGuideText": "Read through the Terms of use. Click the Accept the Terms of Use and click on the Next button to proceed.",
 		"SelectSeatsGuideText": "Select a seat and click on the Next button.",
 		"SelectSeatsGuideTextSP": "The screen will zoom when you touch it.<br>And then, select a seat.",
-		"SelectTicketsGuideText": "Select the type of ticket and click on the Next button.",
-		"EnterProfileGuideText": "Fill in the form and click on the Next button.",
+		"SelectTicketsGuideText": "Please select the type of ticket you want and the number of sheets and click Next button.",
+		"EnterProfileGuideText": "Please enter your information and payment information and click Next button.",
 		"EnterProfileGuideTextWindow": "Select a method of payment and click on the Next button.",
-		"ConfirmReservationGuideText": "Check the purchasing details details and click on the Proceed to Payment button.",
+		"ConfirmReservationGuideText": "Please check the purchase details and push Purchase Confirmation button.",
 		"ConfirmReservationGuideTextNoPayment": "Check the details and click on the Next button.",
-		"CompleteReservationGuideText": "Thank you for your purchase.<br><br>!! Notice !!<br>If you close this page, you cannot return to it later.<br>The QR code is necessary to enter the screen on the day of your movie.<br>Be sure to confirm it and print or save it.<br>*The QR code is displayed on this page and sent to the email address specified by you.<br>*It may take some time to send you an email with QR code. Thank you for your patience.",
+		"CompleteReservationGuideText": "Thank you for your purchase.<br>I sent a purchase completion mail to the mail address you entered.<br>Please confirm e-mail regarding how to enter.",
 		"CompleteTemporaryReservationGuideText": "Now your tentative reservation is complete.<br>An email was sent to you that includes the details of the tentative reservation.<br>Make a payment at the nearest FamilyMart location to complete the purchase.<br>*It may take some time to send you an email with QR code. Thank you for your patience.",
-		"SelectPerformanceGuideText": "Select the show time below.",
+		"SelectPerformanceGuideText": "Please select your desired date of arrival.",
 		"ReleaseSeatsGuideText": "Select the date to release cancelled seats and click on the Release cancelled seats button.",
 		"GMOStartGuideText": "proceeding to GMO payment...",
 		"NotFoundGuideText": "This page does not exist or the input of the URL may be incorrect.",
@@ -102,7 +114,10 @@
 		"NumberOfTicketsAvailable": "Number of tickets available",
 		"Male": "Male",
 		"Female": "Female",
-		"NameOfPersonWhoWillSeeFilm": "The name of the person who will see the film"
+		"NameOfPersonWhoWillSeeFilm": "The name of the person who will see the film",
+		"AboutTicket": "About Ticket",
+		"AboutTOPDECKTicket": "\"TOP DECK TICKET\" can be entered into \"TOP DECK\" and \"Main Observatory\".",
+		"AboutEntry": "About Entry"
 	},
 	"Button": {
 		"Send": "Send",
@@ -118,7 +133,7 @@
 		"Transfer": "Transfer",
 		"Login": "Log in",
 		"Logout": "Log out",
-		"GoToPayment": "Proceed to Payment",
+		"GoToPayment": "Purchase Confirmation",
 		"InformFriends": "Forward<br>to friends",
 		"Close": "Close",
 		"No": "No",
@@ -134,11 +149,13 @@
 		"AcceptTermsAndLogin": "I agree – Login",
 		"ReserveTicketsAnotherMovie": "Reserve tickets<br>for another film.",
 		"ReserveMoreSameShow": "Reserve more tickets<br>for the same show.",
-		"ReleaseSeats": "Release cacelled seats"
+		"ReleaseSeats": "Release cacelled seats",
+		"AboutEntry": "About Entry"
+		
 	},
 	"Form": {
 		"FieldName": {
-			"name": "Name (in half-width alphabets)",
+			"name": "Name (in alphabet or full-width katakana)",
 			"lastName": "Family name",
 			"firstName": "Given name",
 			"tel": "Telephone number",
@@ -155,7 +172,13 @@
 			"remember": "Enable automatic log in<br>from the next time",
 			"age": "Age",
 			"address": "Area of residence",
-			"gender": "Gender"
+			"gender": "Gender",
+			"cardNumber": "Credit card number",
+			"expire": "Expire",
+			"cardExpirationMonth": "Month",
+			"cardExpirationYear": "Year",
+			"securitycode": "Security Code",
+			"holdername": "Holder name"
 		}
 	},
 	"Message": {
@@ -167,10 +190,10 @@
 		"regexTelRange{{fieldName}}{{min}}{{max}}": "Check that the number of digits for {{fieldName}} is {{min}} or more but does not exceed {{max}}.",
 		"invalid{{fieldName}}": "{{fieldName}} is invalid.",
 		"match{{fieldName}}": "{{fieldName}} does not match.",
-		"EnterInFullWidthKatakana": "Enter in half-width alphabets.",
+		"EnterInFullWidthKatakana": "Enter in alphabet or full-width katakana.",
 		"RetypeToConfirm": "Re-type to confirm.",
-		"SettingForLimitingEmailReception": "*Enter an email address that accepts HTML messages.<br>[If you use an email filter or setting for specified domains.]<br>* If you use a filter to limit messages to specified domains for you mobile phone, additionally set the domain \"@tiff-ticket.net\" <br>*If you use au (@ezweb.ne.jp), in addition to the above setting, additionally set the domain \"@tiff-ticket.net\" under the \"list for exemption from spam.\"",
-		"UseHalfWidthAlphanumericWithoutHyphens": "Use half-width alphanumeric. Do not use hyphens.",
+		"SettingForLimitingEmailReception": "*Enter an email address that accepts HTML messages.<br>[If you use an email filter or setting for specified domains.]<br>* If you use a filter to limit messages to specified domains for you mobile phone, additionally set the domain \"@tokyotower.co.jp\" <br>*If you use au (@ezweb.ne.jp), in addition to the above setting, additionally set the domain \"@tokyotower.co.jp\" under the \"list for exemption from spam.\"",
+		"UseHalfWidthAlphanumericWithoutHyphens": "Use half-width alphanumeric. Do not use hyphens.If you are outside of Japan please enter from country code without \"+\".",
 		"Sending": "Now sending...",
 		"Sent": "Sent",
 		"Unsent": "Transmission failed",
@@ -192,14 +215,18 @@
 		"OutOfTerm": "Outside the period of reservation.",
 		"NoAvailableSeats": "No available seats.",
 		"UpdateWatcherNameHelp": "* Use full-width katakana for the Japanese names and in half-width alphanumeric characters for foreign names.<br>* Do not leave a half-width space between the last name and the first name.",
-		"invalidPaymentNoOrLast4DigitsOfTel": "There are some mistakes in a transaction number or last 4 digits of tel."
+		"invalidPaymentNoOrLast4DigitsOfTel": "There are some mistakes in a transaction number or last 4 digits of tel.",
+		"cardNumber": "※Please enter without half-width numeric characters, hyphen \"-\"",
+		"securitycode": "About Security Code",
+		"TransactionNumberDescription": "※Please be sure to remember as it will be the number required for inquiries of reservation.",
+		"AboutEntryDescription": "Regarding how to enter the special observation platform <br> please confirm by clicking \"About the entry method\" button below."
 	},
 	"{{price}} yen": "{{price}} yen",
 	"Mr{{name}}": "Mr./Ms. {{name}}",
 	"Steps": {
 		"SelectPerformance": "Select<br>the show time",
 		"SelectSeats": "Select<br>a seat",
-		"SelectTickets": "Select<br>the type of ticket",
+		"SelectTickets": "Select a bill type / number of sheets",
 		"EditProfile": "Enter<br>your customer<br>information",
 		"Confirm": "Check<br>the purchasing<br>details",
 		"Complete": "Purchase<br>complete"
@@ -227,7 +254,8 @@
 			"Name": "Front-row reclining seat"
 		}
 	},
-	"ConfirmNotesText": " - We will not refund, exchange, or re-issue tickets.<br> - Under the Tokyo Metropolitan Ordinance Regarding the Healthy Development of Youths, persons younger than 18 years old are prohibited to enter cinemas/theaters from 11:00 p.m. to 4:00 a.m.This also applies to cases where they are accompanied by a guardian.<br> - If you use a filter to limit messages to specified domains for you mobile phone, additionally set the domain \"@tiff-ticket.net\" <br> - If you use au (@ezweb.ne.jp), in addition to the above setting, additionally set the domain \"@tiff-ticket.net\" under the \"list for exemption from spam.\"",
+	"ConfirmNotesText": " - We will not refund, exchange, or re-issue tickets.<br> - If you use a filter to limit messages to specified domains for you mobile phone, additionally set the domain \"@tokyotower.co.jp\" <br> - If you use au (@ezweb.ne.jp), in addition to the above setting, additionally set the domain \"@tokyotower.co.jp\" under the \"list for exemption from spam.\"",
+	"CompleteNotesText": "<When the purchase completion mail does not arrive><br>· Please check whether there is any incompleteness in the mail address or not being rejected for incoming mail.<br>· If you have enabled the filtering function of the mail settings of providers and mobile carrier companies, please check \"deleted folder\" or \"spam folder\". * We will not retransmit the purchase completion mail for automatic transmission. <br>* Please make purchase confirmation on \"Ticket inquiry page\" after refraining \"purchase number\".",
 	"NoticeCredit": "*The following credit cards are available.",
 	"NoticeCVS": "*The time allotted for payment at the convenience store is three (3) days from the date of the completion of your order.<br>*In the case of payment at the convenience store, each seat purchased is subject to a processing fee of 150 yen per seat. This fee is included in the total price.<br>*Payment at a convenience store can be only made at FamilyMart locations in Japan.",
 	"NoticeCVSMember": "コンビニ決済をご希望の方は下記電話番号までお問い合わせください。<br>050-3786-8066"
