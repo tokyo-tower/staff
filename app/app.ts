@@ -27,7 +27,6 @@ import setLocals from './middlewares/setLocals';
 
 import router from './routes/router';
 import staffRouter from './routes/staff';
-import windowRouter from './routes/window';
 
 const app = express();
 
@@ -97,7 +96,6 @@ app.use(setLocals); // ローカル変数セット
 
 // ルーティング登録の順序に注意！
 app.use('/staff', staffRouter);
-app.use('/window', windowRouter);
 app.use('/', router);
 
 // 404
