@@ -34,7 +34,9 @@ $(function () {
 
             html += ''
                 + '</th>'
-                + '<td class="td-number">' + ((reservation.payment_no) ? reservation.payment_no : '') + '</td>'
+                //+ '<td class="td-number">' + ((reservation.payment_no) ? reservation.payment_no : '') + '</td>'
+                + '<td class="td-number">' + ((reservation.payment_no) ? reservation.payment_no : '')
+                +'<br>' + startDatetime + '</td>'
                 + '<td class="td-name">' + reservation.purchaser_last_name + ' ' + reservation.purchaser_first_name + '</td>'
                 + '<td class="td-amemo">' + reservation.watcher_name + '</td>'
                 + '<td class="td-seat">' + reservation.seat_code + '</td>'

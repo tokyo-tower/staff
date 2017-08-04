@@ -185,14 +185,20 @@ export async function search(req: Request, res: Response, next: NextFunction): P
             if (a.performance_day > b.performance_day) {
                 return 1;
             }
+            if (a.performance_day < b.performance_day) {
+                return -1;
+            }
             if (a.performance_start_time > b.performance_start_time) {
                 return 1;
+            }
+            if (a.performance_start_time < b.performance_start_time) {
+                return -1;
             }
             if (a.payment_no > b.payment_no) {
                 return 1;
             }
-            if (a.seat_code > b.seat_code) {
-                return 1;
+            if (a.payment_no < b.payment_no) {
+                return -1;
             }
             return ScreenUtil.sortBySeatCode(a.seat_code, b.seat_code);
         });
