@@ -1,11 +1,16 @@
 /* global moment */
+'use strict';
 $(function() {
     var userName = document.querySelector('input[name=username]').value;
 
-    var can_thermalprint = false;
+    // _idごとにまとめた予約ドキュメントリスト
+    var reservationsById = {};
 
+    /*
+      サーマル印刷
+    */
+    var can_thermalprint = false;
     window.starThermalPrint.init({
-        bluetooth: true,
         publisher: userName,
         timeout: 10000
     }).then(function() {
@@ -13,6 +18,19 @@ $(function() {
         $('body').removeClass('no-thermal');
     }).catch(function(errMsg) {
         $('.wrapper-searchform').prepend('<p id="msg_bluetooth">サーマルプリンタと接続できませんでした (' + errMsg + ')</p>');
+    });
+    // サーマル印刷実行ボタン
+    $(document).on('click', '.btn-thermalprint', function(e) {
+        var id = e.currentTarget.getAttribute('data-targetid');
+        if (!can_thermalprint) {
+            return alert('サーマルプリンタと接続できていません。ペアリング状態を確認してください。');
+        }
+        if (!reservationsById[id]) {
+            return alert('印刷の準備に失敗しました。ページを再読込して再度試してください。');
+        }
+        return window.starThermalPrint.printReservation(reservationsById[id]).catch(function(errmsg) {
+            alert(errmsg);
+        });
     });
 
     // 日付選択カレンダー (再読込時のために日付はsessionStorageにキープしておく)
@@ -42,9 +60,6 @@ $(function() {
         '04': '窓口代理予約',
         '06': 'POS'
     };
-
-    // _idごとにまとめた予約ドキュメントリスト
-    var reservationsById = {};
 
     var conditions = {
         limit: $('.search-form input[name="limit"]').val(),
@@ -88,8 +103,8 @@ $(function() {
             if (reservation.payment_no && !reservation.performance_canceled) {
                 html += ''
                     + '<p class="btn call-modal"><span>詳細</span></p>'
-                    + '<p class="btn btn-print"><span>A4チケット印刷</span></p>'
-                    + '<p class="btn btn-thermalprint"><span>サーマル印刷</span></p>';
+                    + '<p class="btn btn-print" data-targetid="' + reservation._id + '"><span>A4チケット印刷</span></p>'
+                    + '<p class="btn btn-thermalprint" data-targetid="' + reservation._id + '"><span>サーマル印刷</span></p>';
             }
             html += ''
                 + '</td>'
@@ -245,10 +260,10 @@ $(function() {
         search();
     });
 
-    // 印刷
-    $(document).on('click', '.td-actions .btn-print', function() {
-        var ids = [$(this).parent().parent().attr('data-reservation-id')];
-        window.open('/reserve/print?ids=' + JSON.stringify(ids));
+    // A4印刷
+    $(document).on('click', '.btn-print', function(e) {
+        var id = e.currentTarget.getAttribute('data-targetid');
+        window.open('/reserve/print?ids=' + JSON.stringify([id]));
     });
 
     // 予約詳細モーダル呼び出し
@@ -260,9 +275,9 @@ $(function() {
         document.getElementById('echo_detailmodal__date').innerHTML = reservationNode.getAttribute('data-performance-start-datetime');
         document.getElementById('echo_detailmodal__info').innerHTML = reservationNode.getAttribute('data-seat-code') + ' / ' + reservationNode.getAttribute('data-ticketname') + ' / ' + reservationNode.getAttribute('data-watcher-name');
         document.getElementById('echo_detailmodal__purchaseinfo').innerHTML = reservationNode.getAttribute('data-purchase-route');
-        modal_detail.querySelector('.btn-print').onclick = function() { window.open('/reserve/print?ids=["' + reservation_id + '"]'); };
+        modal_detail.querySelector('.btn-print').setAttribute('data-targetid', reservation_id);
+        modal_detail.querySelector('.btn-thermalprint').setAttribute('data-targetid', reservation_id);
         modal_detail.querySelector('.btn-cancelrsrv').onclick = function() { cancel([reservation_id]); };
-        modal_detail.querySelector('.btn-thermalprint').onclick = function() { can_thermalprint && window.starThermalPrint.printReservation(reservationsById[reservation_id]); };
         $(modal_detail).modal();
     });
 

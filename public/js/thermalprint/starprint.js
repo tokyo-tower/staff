@@ -1,15 +1,15 @@
-﻿/*  global Promise, StarWebPrintBuilder, StarWebPrintTrader */
+﻿/*  global Promise, moment, StarWebPrintBuilder, StarWebPrintTrader */
 /*!
 *  スター精密社製サーマルプリンタで入場券を印刷する用モジュール (操作にはPromiseを返す。重大な処理エラーのみその場でalertを出す)
 *  StarWebPRNT = http://www.star-m.jp/products/s_print/solutions/sdk/webprnt.html
 */
-window.starThermalPrint = (function(StarWebPrintBuilder, StarWebPrintTrader) {
+window.starThermalPrint = (function(d, moment, StarWebPrintBuilder, StarWebPrintTrader) {
     'use strict';
 
-    var port = /https/.test(window.location.protocol) ? 443 : 80;
+    // 印刷ボタンを連打させないための「印刷中...」モーダル
+    d.body.insertAdjacentHTML('afterbegin', '<div id="modal_thermalprinting"><div><span>印刷中...</span></div></div>');
 
-    // 発行署名
-    var publisher = '';
+    var modal = d.getElementById('modal_thermalprinting');
 
     // 印刷内容生成インスタンス
     var builder = new StarWebPrintBuilder();
@@ -63,10 +63,11 @@ window.starThermalPrint = (function(StarWebPrintBuilder, StarWebPrintTrader) {
         return msg;
     };
 
+    // 発行署名
+    var publisher = '';
 
-    // 打刻用ゼロパディング
-    var zp = function(num) { return (parseInt(num, 10) < 10) ? '0' + num : num; };
-
+    // 印刷用ロゴ画像(画像ファイルをCanvasで読んでContextをStarWebPrintBuilder.createBitImageElementで変換して得た印刷データ文字列)
+    var ttts_logo = '<bitimage width="240" height="76">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKqqqqoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEREREQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKqqqqoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFFQUVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKqqqqoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEREREQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKqoqqoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFVUVVQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAKqqKqoAACgAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAABEQAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAKgAAAAoKAAAACoAAAAAAAAAAAAAAAAAAAAAAAAAAFAAAAAQEAAAABAAAAAAAAAAAAAAAAAAAAAAqAAAAKgAAAAqKAAAACoAAAAAAAAAAAAAAAAAAAAAQAAAAEAAAABAAAAAAAQAAAAEAAAAAAAAAAAAAAAAqAAAAKgAAAAoKAAAAAgAAAAqAAAAAAAAAAAAAAABEAAAAAAAAAAQEAAAAAAAAAAVAAAAAAAAAACgAAAAqAAAAAAAAAAqKAAAAAAAAAAqAAAAAAAAAABAAAAAAAAAAAAAAABAAAAAAAAAAAAEAAAAAAAAAACoAAAAAAAAAAAAAAAoqAAAAAAAAAAKAAAAAAAAAAFQAAAAAAAAAAAAAAAQEAAAAAAAAAAAAAAAAAAAAAKoAAAAAAAAAAAAAAAqKAAAAAAAAAAAAAAAKgAAAABAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAABAAAAACgAAAAAAAAAAAKoAAoqAAKqAAAAAAAAAAAKoAAAAAAAAAAAAAAAUAVUAAQEAAVVAAAAAAAAAAAFQAAAAAAAAAAAAKoCqCqqgAqKACqqgKoAAAAAAAAKgAAAAAAAAAAAAFABUFFRABAAABFRQFAAAAAAAAAAAAAAAAAAAAAAqioCoKqqoAoiAKqqoCoCoCAAAAAAAAAAAAAAAAEAVFUBUFVVQAAAAFVFUFQFQFQAAAAAAAAAAAAAAAqAqCqCoKoKoAqqAKoKqKoKoKoAqAAAAAAAAAABABUBUBUFQVABUBAAAVQBUBQVQFQBVAAAAAAAAAAqqAqCqCqCoqgCoAoqAqgAqCoqoKoKqoAAAAAAAABVVAVBUBVFQVABUAAAAVAAVBQVQFQVVUAAAAAAAICqqgqCoAqKgqgCqAqqAqgAqCoqoKgqqqAAAAAAAQFRUQFBQAFBAVABUBAAAVAAUBAQUVBRAVAAAAAAKoKqqoqioAKqgqACoAqqAqgAqCoooqCqAqgAAAAAVUVQVQVFQAVVAVABUABAAVQBVBRUUVBUAFAAVAAKqqqgKoqqoAKqgqgKoAqqAKoCqCqoqqCqgKgCqoAVVQVABQVFUAFVAVQFQBAAAFUFUBVQVUFVUFQFVUCqqgqgCoKiqAKqAKqqoAqqAKqqqCqgqqCqqqoKqoFVUAVABUVBVAFVAFVVQAREAFVVQBVAVUFVVVQVVUCqqAqACoKgqgCqAKqqgAqqACqqoAqgqoCoqqgqqoBRUAFAAUFAUQBQABFRABAQABFRABFAUQBQAVARAACiqAqgCoKgKoCqAAqqAAKiAAKqAAqgKoCoAKgqAAABVAVAFUFQFUBUAABAAAAAAABAAABAVQBUAABUAAAAqgKoqoKgCqCoAAAAAAAAAAAAAAAAKgCqioCqAAAAVAFVVQFQAABUAAAAAAAAAAAAAAAAAAAVVVBUAAAAqgKqqgKgAACoAAAAAAAAAAAAAAAAAAAqqqCqAAAAVAFVVAAAAAFQAAAAAAAAAAAAAAAAAAAFVUBUAAAAqgCqqAAAAAKoAAAAAAAAAAAAAAAAAAAKqoCoKAAAUQARUAAAAAAAAAAAAAAAAAAAAAAAAAAAEAFQAAAAKoACoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKoqgAAFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQAAAAKoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoqgAAFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKgAAAAAoAAAKAAAAKiIACAAAAIAAAAgAAAAAKAAAAAAAAAAQAAABAABARAQAAAAAAAAAAAQAAAAAAAAAAAAAAAAAqKAIigiggiqCCAiKCoooqKiAAAAAAAAAAAAAAAAQEBARERBAAABAABEREREQEEAAAAAAAAAAAAAAAAAgiAgKIKAAgCIiCCIgIIiIiIoAAAAAAAAAAAAAAAAQAUABEBRAAAAEAEEBAAABBAQAAAAAAAAAAAAAAAAgiKgIqoqAgCIoCCCgoIiIiIoAAAAAAAAAAAAAAAARAQAREQBAAQAQAAERERABAAEAAAAAAAAAAAAAAAAgiKAKCioAKiIICiogCoiIqIiAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</bitimage>';
 
     // 印刷命令組み立て
     var genRequestByReservationObj = function(reservation) {
@@ -76,22 +77,19 @@ window.starThermalPrint = (function(StarWebPrintBuilder, StarWebPrintTrader) {
         try {
             // 印刷に必要な情報が欠けていないか確認
             var missings = [
-                'reserve_no',
-                'film_name_ja',
-                'film_name_en',
-                'theater_name',
-                'screen_name',
+                'payment_no',
+                'payment_seat_index',
                 'performance_day',
                 'performance_start_time',
+                'performance_end_time',
                 'seat_code',
-                'ticket_name',
-                'ticket_sale_price',
-                'qr_str'
+                'ticket_type_name',
+                'ticket_type_charge'
             ].filter(function(item) {
-                return (!reservation[item]);
+                return (typeof reservation[item] === 'undefined');
             });
             if (missings[0]) {
-                throw new Error('[!] 予約番号' + reservation.reserve_no + 'の以下の情報が見つかりませんでした\n' + missings.join('\n'));
+                throw new Error('[!] 購入番号' + reservation.payment_no + 'の以下の情報が見つかりませんでした\n' + missings.join('\n'));
             }
 
             // 念のため書式を初期化
@@ -102,7 +100,7 @@ window.starThermalPrint = (function(StarWebPrintBuilder, StarWebPrintTrader) {
                 height: 1,
                 emphasis: false,
                 undelline: false,
-                data: '\n' // １行目で改行しておかないと文字が見切れる (TSP743II)
+                data: ''
             });
 
             // 中央揃え開始
@@ -110,25 +108,25 @@ window.starThermalPrint = (function(StarWebPrintBuilder, StarWebPrintTrader) {
                 position: 'center'
             });
 
+            // ロゴ画像
+            request += ttts_logo;
+
             // 一行目
             request += builder.createTextElement({
                 data: 'チケット兼領収書\n\n'
             });
 
-            // ロゴ画像
-            // request += cs_logo;
-
             // 案内文言
             request += builder.createTextElement({
-                data: '\nこちらのQRコードを入場時リーダーにかざし、ご入場ください\n\n'
+                data: 'こちらのQRコードを入場時リーダーにかざし、ご入場ください\n\n'
             });
 
-            // 予約IDからQRコードを生成して配置
+            // QRコードを生成して配置
             request += builder.createQrCodeElement({
                 model: 'model2',
                 level: 'level_m',
                 cell: 8,
-                data: reservation.qr_str
+                data: reservation.performance_day + '-' + reservation.payment_no + '-' + reservation.payment_seat_index
             });
 
             // 中央揃え解除
@@ -136,117 +134,83 @@ window.starThermalPrint = (function(StarWebPrintBuilder, StarWebPrintTrader) {
                 position: 'left'
             });
 
-            // // 作品名見出し
-            // request += builder.createTextElement({
-            //     data: '\n作品名-TITLE-\n'
-            // });
-
-            // // 日英作品名を強調で
-            // request += builder.createTextElement({
-            //     emphasis: true,
-            //     data: reservation.film_name_ja + '\n' + reservation.film_name_en + '\n'
-            // });
-
-            // // 強調を解除して日時見出し
-            // request += builder.createTextElement({
-            //     emphasis: false,
-            //     data: '鑑賞日時\n'
-            // });
-
-            // // 日付と上映時刻を強調で
-            // request += builder.createTextElement({
-            //     emphasis: true,
-            //     data: reservation.performance_day + ' ' + reservation.performance_start_time + '\n'
-            // });
-
-            // // 強調を解除して座席位置の見出し
-            // request += builder.createTextElement({
-            //     emphasis: false,
-            //     data: '座席位置-スクリーン\n'
-            // });
-
-            // // 中央揃え開始
-            // request += builder.createAlignmentElement({
-            //     position: 'center'
-            // });
-
-            // // 文字サイズ2でスクリーン名
-            // request += builder.createTextElement({
-            //     width: 2,
-            //     height: 2,
-            //     data: reservation.screen_name + '\n'
-            // });
-
-            // // 文字サイズ3で座席コード
-            // request += builder.createTextElement({
-            //     width: 3,
-            //     height: 3,
-            //     data: reservation.seat_code + '\n'
-            // });
-
-            // // 中央揃え解除
-            // request += builder.createAlignmentElement({
-            //     position: 'left'
-            // });
-
-            // // 文字サイズを戻して劇場名見出し
-            // request += builder.createTextElement({
-            //     width: 1,
-            //     height: 1,
-            //     data: '劇場\n'
-            // });
-
-            // // 劇場名を強調で
-            // request += builder.createTextElement({
-            //     emphasis: true,
-            //     data: reservation.theater_name + '\n'
-            // });
-
-            // // 強調解除して券種金額見出し
-            // request += builder.createTextElement({
-            //     emphasis: false,
-            //     data: '券種・金額\n'
-            // });
-
-            // // 券種と金額を強調で
-            // request += builder.createTextElement({
-            //     emphasis: true,
-            //     data: reservation.ticket_name + ' ' + reservation.ticket_sale_price + '\n'
-            // });
-
-            // // 強調解除して購入番号見出し
-            // request += builder.createTextElement({
-            //     emphasis: false,
-            //     data: '\n購入番号 '
-            // });
-
-            // // 予約番号を強調で
-            // request += builder.createTextElement({
-            //     emphasis: true,
-            //     data: reservation.reserve_no + '\n'
-            // });
-
-            // 強調解除して端末名見出し
+            // 強調解除して購入番号見出し
             request += builder.createTextElement({
                 emphasis: false,
-                data: '端末ID '
+                data: '\n購入番号-PAYMENT NUMBER-\n'
             });
 
-            // 発行署名を強調で
+            // 予約番号を強調で
             request += builder.createTextElement({
                 emphasis: true,
-                data: publisher + '\n\n'
+                data: reservation.payment_no + '\n'
             });
 
-            // 最後右端に印刷時刻(Y/m/d H:i:s)を入れる
+            // 日時見出し
+            request += builder.createTextElement({
+                data: '\nご来塔ご予約日時-DATE-\n\n'
+            });
+
+            // 中央揃え開始
+            request += builder.createAlignmentElement({
+                position: 'center'
+            });
+
+            // 日付と時刻を強調で
+            request += builder.createTextElement({
+                emphasis: true,
+                width: 2,
+                height: 2,
+                data:
+                    moment(reservation.performance_day, 'YYYYMMDD').format('YYYY/MM/DD') + '\n' +
+                    moment(reservation.performance_start_time, 'HHmm').format('HH:mm') + '-' + moment(reservation.performance_end_time, 'HHmm').format('HH:mm')
+            });
+
+            // 強調を解除して案内
+            request += builder.createTextElement({
+                emphasis: false,
+                width: 1,
+                height: 1,
+                data:
+                    '\n\n※混雑する場合がございますので、15分前にお越し下さい。\n' +
+                    'please come 15 min before\nto avoid the crowds.\n\n'
+            });
+
+            // 中央揃え解除
+            request += builder.createAlignmentElement({
+                position: 'left'
+            });
+
+            // 券種金額見出し
+            request += builder.createTextElement({
+                data: '券種・金額-TICKET-\n'
+            });
+
+            // 券種と金額を強調で
+            request += builder.createTextElement({
+                emphasis: true,
+                data:
+                    reservation.ticket_type_name.ja + '\n' +
+                    reservation.ticket_type_name.en + '\n' +
+                    '￥' + reservation.ticket_type_charge + ' (' + reservation.seat_code + ')\n\n'
+            });
+
+            // 最後右端に発行者と印刷時刻を入れる
             request += builder.createAlignmentElement({
                 position: 'right'
             });
-            var dateObj = new Date();
-            var dateStr = dateObj.getFullYear() + '/' + zp(dateObj.getMonth() + 1) + '/' + zp(dateObj.getDate()) + ' ' + zp(dateObj.getHours()) + ':' + zp(dateObj.getMinutes()) + ':' + zp(dateObj.getSeconds());
+
+            // 強調解除して端末名見出し
+            request += builder.createTextElement({
+                width: 1,
+                height: 1,
+                emphasis: false,
+                data: '発行者: ' + publisher + '\n'
+            });
+
             request += builder.createTextElement({
                 emphasis: false,
-                data: dateStr
+                data: moment().format('YYYY/MM/DD HH:mm:ss') + '\n'
             });
 
             // 紙を切断
@@ -269,6 +233,8 @@ window.starThermalPrint = (function(StarWebPrintBuilder, StarWebPrintTrader) {
             if (!bool_initialized) {
                 return reject('プリンターが初期化されていません ( window.starThermalPrint.init() してください )');
             }
+            // 印刷中モーダル表示
+            modal.style.display = 'block';
             try {
                 // 念のためクリア
                 trader.onReceive = function() {};
@@ -279,7 +245,7 @@ window.starThermalPrint = (function(StarWebPrintBuilder, StarWebPrintTrader) {
                 reservations.forEach(function(reservation) {
                     var temp = genRequestByReservationObj(reservation);
                     if (!temp) {
-                        alert('[!] 予約番号' + reservation.reserve_no + 'の印刷は印刷データ作成エラーが起きたためスキップされました');
+                        alert('[!] 購入番号' + reservation.payment_no + 'の印刷は印刷データ作成エラーが起きたためスキップされました');
                     } else {
                         request += temp;
                     }
@@ -298,6 +264,7 @@ window.starThermalPrint = (function(StarWebPrintBuilder, StarWebPrintTrader) {
                         console.log('StarWebPRNT: 印刷成功');
                         resolve();
                     }
+                    modal.style.display = 'none';
                 };
 
                 // 印刷命令失敗処理 (ajax:errorの意味であって印刷のエラーで着火するものではない)
@@ -305,6 +272,7 @@ window.starThermalPrint = (function(StarWebPrintBuilder, StarWebPrintTrader) {
                     var errorMsg = 'プリンターとの通信に失敗しました [' + trader.url + '] ErrorStatus:' + response.status + ' ResponseText:' + response.responseText;
                     console.log('StarWebPRNT: ' + errorMsg);
                     reject(errorMsg);
+                    modal.style.display = 'none';
                 };
 
                 // プリンターに送信
@@ -313,6 +281,7 @@ window.starThermalPrint = (function(StarWebPrintBuilder, StarWebPrintTrader) {
                 trader.sendMessage({ request: request });
             } catch (e) {
                 reject(e.message);
+                modal.style.display = 'none';
             }
         });
     };
@@ -324,44 +293,41 @@ window.starThermalPrint = (function(StarWebPrintBuilder, StarWebPrintTrader) {
     // 初期化
     var init = function(args) {
         return new Promise(function(resolve, reject) {
-            if (!args || (!args.bluetooth && (!args.ipAddress || typeof args.ipAddress !== 'string'))) {
-                reject('プリンターのIPアドレスが正しく指定されていません');
-            }
             if (!args.publisher || typeof args.publisher !== 'string') {
-                reject('発行署名が正しく指定されていません');
+                reject('発行署名が指定されていません');
             }
-            args.ipAddress = (args.bluetooth) ? 'localhost' : args.ipAddress;
-            args.port = (args.bluetooth) ? '80' : port;
             console.log('StarWebPRNT: StarWebPrintTrader初期化中...', args);
 
-            var url_endpoint = '//' + args.ipAddress + ':' + port + '/StarWebPRNT/SendMessage';
+            var printer_endpoint = '//localhost:8001/StarWebPRNT/SendMessage';
 
-            var testreq = new XMLHttpRequest();
-            testreq.open('GET', url_endpoint, true);
-            testreq.onreadystatechange = function() {
-                if (testreq.readyState !== 4 || testreq.status !== 200) {
-                    reject('Bluetooth接続状況を確認してください');
-                }
-                // ※設定が入ったtraderオブジェクトが作られるだけでここで非同期処理は起きない
-                trader = new StarWebPrintTrader({
-                    url: url_endpoint,
-                    papertype: 'normal',
-                    blackmark_sensor: 'front_side'
-                });
+            trader = new StarWebPrintTrader({
+                url: printer_endpoint,
+                papertype: 'normal',
+                blackmark_sensor: 'front_side'
+            });
+            // プリンター通信タイムアウトms (sendMessageしてからonReceiveイベント発生(プリンタが印刷を終えた時)までの時間)
+            var timeout = parseInt(args.timeout, 10);
+            trader.timeout = isNaN(timeout) ? 10000 : timeout;
+            publisher = args.publisher;
 
-                // プリンター通信タイムアウトms (sendMessageしてからonReceiveイベント発生(プリンタが印刷を終えた時)までの時間)
-                var timeout = parseInt(args.timeout, 10);
-                trader.timeout = isNaN(timeout) ? 10000 : timeout;
-
-                publisher = args.publisher;
-
+            /*
+              空の命令を送ってみて通信エラーが起きないか確認する
+            */
+            trader.onReceive = function() {
                 // 初期化完了とする
                 bool_initialized = true;
                 console.log('StarWebPRNT: StarWebPrintTrader初期化OK', trader);
 
                 resolve();
             };
-            testreq.send();
+            trader.onError = function() {
+                reject('Bluetoothのペアリング状況を確認してください\n\n');
+            };
+            trader.sendMessage(
+                {
+                    request: '' // 何も起きない
+                }
+            );
         });
     };
 
@@ -373,4 +339,4 @@ window.starThermalPrint = (function(StarWebPrintBuilder, StarWebPrintTrader) {
         printReservation: printReservation,
         printReservationArray: printReservationArray
     };
-})(StarWebPrintBuilder, StarWebPrintTrader);
+})(window.document, window.moment, window.StarWebPrintBuilder, window.StarWebPrintTrader);
