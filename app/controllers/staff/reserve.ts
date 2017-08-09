@@ -56,11 +56,11 @@ async function getToken(): Promise<any> {
     return new Promise((resolve, reject) => {
         request.post(`${process.env.API_ENDPOINT}oauth/token`, {
             body: {
-                grant_type: 'client_credencials',
+                grant_type: 'client_credentials',
                 client_id: 'motionpicture',
                 client_secret: 'motionpicture',
                 state: 'state123456789',
-                scope: [
+                scopes: [
                     'performances.read-only'
                 ]
             },
@@ -121,8 +121,8 @@ export async function performances(req: Request, res: Response, next: NextFuncti
             reservationModel.save(req);
 
             res.render('staff/reserve/performances', {
-                FilmUtil: TTTS.FilmUtil,
-                token: JSON.stringify(token),
+                // FilmUtil: TTTS.FilmUtil,
+                token: token,
                 layout: layout
             });
         }

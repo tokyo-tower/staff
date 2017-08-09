@@ -143,11 +143,11 @@ function getToken() {
         return new Promise((resolve, reject) => {
             request.post(`${process.env.API_ENDPOINT}oauth/token`, {
                 body: {
-                    grant_type: 'client_credencials',
+                    grant_type: 'client_credentials',
                     client_id: 'motionpicture',
                     client_secret: 'motionpicture',
                     state: 'state123456789',
-                    scope: [
+                    scopes: [
                         'performances.read-only'
                     ]
                 },

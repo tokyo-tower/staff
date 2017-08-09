@@ -1,6 +1,7 @@
 $(function() {
     var LOCALE = document.documentElement.getAttribute('lang');
     var API_ENDPOINT = document.querySelector('input[name="apiEndpoint"]').value;
+    var API_TOKEN = document.getElementById('input_apiToken').value;
     // var API_ENDPOINT = '/temp_performancesearchresult.json?#';
     if (!API_ENDPOINT) { return alert('API_ENDPOINT undefined'); }
 
@@ -102,10 +103,11 @@ $(function() {
     var search = function(condition) {
         $.ajax({
             dataType: 'json',
-            url: API_ENDPOINT + '/' + LOCALE + '/performance/search',
+            url: API_ENDPOINT + 'performances',
             type: 'GET',
             data: condition,
-            beforeSend: function() {
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + API_TOKEN);
                 $loading.modal();
             }
         }).done(function(body) {
