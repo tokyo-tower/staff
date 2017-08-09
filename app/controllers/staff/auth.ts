@@ -6,11 +6,11 @@
 
 import * as TTTS from '@motionpicture/ttts-domain';
 import { NextFunction, Request, Response } from 'express';
+import * as request from 'request'; // for token
 import * as _ from 'underscore';
 
 import staffLoginForm from '../../forms/staff/staffLoginForm';
 import StaffUser from '../../models/user/staff';
-
 
 /**
  * 内部関係者ログイン
@@ -117,4 +117,47 @@ export async function logout(req: Request, res: Response, next: NextFunction): P
     } catch (error) {
         next(error);
     }
+}
+
+export async function auth(req: Request, res: Response): Promise<void> {
+    try {
+        if (req.session === undefined) {
+            throw new Error('session undefined.');
+        }
+        const token: string = await getToken();
+        res.json({
+            success: true,
+            token: token,
+            errors: null
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            token: null,
+            errors: error
+        });
+    }
+}
+async function getToken(): Promise<any> {
+    return new Promise((resolve, reject) => {
+        request.post(`${process.env.API_ENDPOINT}oauth/token`, {
+            body: {
+                grant_type: 'client_credencials',
+                client_id: 'motionpicture',
+                client_secret: 'motionpicture',
+                state: 'state123456789',
+                scope: [
+                    'performances.read-only'
+                ]
+            },
+            json: true
+            },       (error, response, body) => {
+            // tslint:disable-next-line:no-magic-numbers
+            if (response.statusCode === 200) {
+                resolve(body);
+            } else {
+                reject(error);
+            }
+        });
+    });
 }

@@ -17,6 +17,7 @@ const GMO = require("@motionpicture/gmo-service");
 const TTTS = require("@motionpicture/ttts-domain");
 const conf = require("config");
 const moment = require("moment");
+const request = require("request"); // for token
 const _ = require("underscore");
 const reservePerformanceForm_1 = require("../../forms/reserve/reservePerformanceForm");
 const session_1 = require("../../models/reserve/session");
@@ -57,6 +58,35 @@ function terms(req, res, __) {
 }
 exports.terms = terms;
 /**
+ * token取得(いずれはttts-domainへ移動)
+ */
+function getToken() {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            request.post(`${process.env.API_ENDPOINT}oauth/token`, {
+                body: {
+                    grant_type: 'client_credencials',
+                    client_id: 'motionpicture',
+                    client_secret: 'motionpicture',
+                    state: 'state123456789',
+                    scope: [
+                        'performances.read-only'
+                    ]
+                },
+                json: true
+            }, (error, response, body) => {
+                // tslint:disable-next-line:no-magic-numbers
+                if (response.statusCode === 200) {
+                    resolve(body);
+                }
+                else {
+                    reject(error);
+                }
+            });
+        });
+    });
+}
+/**
  * スケジュール選択
  * @method performances
  * @returns {Promise<void>}
@@ -69,6 +99,9 @@ function performances(req, res, next) {
                 next(new Error(req.__('Message.Expired')));
                 return;
             }
+            const token = yield getToken();
+            // tslint:disable-next-line:no-console
+            console.log('token=' + JSON.stringify(token));
             if (req.method === 'POST') {
                 reservePerformanceForm_1.default(req);
                 const validationResult = yield req.getValidationResult();
@@ -94,6 +127,7 @@ function performances(req, res, next) {
                 reservationModel.save(req);
                 res.render('staff/reserve/performances', {
                     FilmUtil: TTTS.FilmUtil,
+                    token: JSON.stringify(token),
                     layout: layout
                 });
             }
@@ -205,6 +239,7 @@ function tickets(req, res, next) {
                     yield reserveBaseController.processCancelSeats(reservationModel);
                 }
                 catch (error) {
+                    // tslint:disable-next-line:no-console
                     console.log(error);
                     next(error);
                     return;

@@ -8,6 +8,7 @@ import * as TTTS from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import { NextFunction, Request, Response } from 'express';
 import * as moment from 'moment';
+import * as request from 'request'; // for token
 import * as _ from 'underscore';
 
 import reservePerformanceForm from '../../forms/reserve/reservePerformanceForm';
@@ -49,6 +50,33 @@ export function terms(req: Request, res: Response, __: NextFunction): void {
 }
 
 /**
+ * token取得(いずれはttts-domainへ移動)
+ */
+async function getToken(): Promise<any> {
+    return new Promise((resolve, reject) => {
+        request.post(`${process.env.API_ENDPOINT}oauth/token`, {
+            body: {
+                grant_type: 'client_credencials',
+                client_id: 'motionpicture',
+                client_secret: 'motionpicture',
+                state: 'state123456789',
+                scope: [
+                    'performances.read-only'
+                ]
+            },
+            json: true
+            },       (error, response, body) => {
+            // tslint:disable-next-line:no-magic-numbers
+            if (response.statusCode === 200) {
+                resolve(body);
+            } else {
+                reject(error);
+            }
+        });
+    });
+}
+
+/**
  * スケジュール選択
  * @method performances
  * @returns {Promise<void>}
@@ -61,6 +89,10 @@ export async function performances(req: Request, res: Response, next: NextFuncti
             next(new Error(req.__('Message.Expired')));
             return;
         }
+
+        const token: string = await getToken();
+        // tslint:disable-next-line:no-console
+        console.log('token=' + JSON.stringify(token));
 
         if (req.method === 'POST') {
             reservePerformanceForm(req);
@@ -90,6 +122,7 @@ export async function performances(req: Request, res: Response, next: NextFuncti
 
             res.render('staff/reserve/performances', {
                 FilmUtil: TTTS.FilmUtil,
+                token: JSON.stringify(token),
                 layout: layout
             });
         }
@@ -209,6 +242,7 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
             try {
                 await reserveBaseController.processCancelSeats(reservationModel);
             } catch (error) {
+                // tslint:disable-next-line:no-console
                 console.log(error);
                 next(error);
 

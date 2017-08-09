@@ -93,4 +93,5 @@ router.all('/reserve/confirm', base, authentication, staffReserveController.conf
 router.get('/reserve/:performanceDay/:paymentNo/complete', base, authentication, staffReserveController.complete);
 router.post('/cancel/execute', base, authentication, staffCancelController.execute);
 router.all('/mypage/release', base, authentication, staffMyPageController.release);
+router.get('/auth', base, staffAuthController.auth);
 exports.default = router;

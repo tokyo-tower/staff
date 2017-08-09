@@ -95,4 +95,6 @@ router.get('/reserve/:performanceDay/:paymentNo/complete', base, authentication,
 router.post('/cancel/execute', base, authentication, staffCancelController.execute);
 router.all('/mypage/release', base, authentication, staffMyPageController.release);
 
+router.get('/auth', base, staffAuthController.auth);
+
 export default router;

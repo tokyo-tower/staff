@@ -149,7 +149,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
     }
     // 予約方法
     if (purchaserGroup !== null) {
-        conditions.push({ purchaser_group: purchaserGroup })
+        conditions.push({ purchaser_group: purchaserGroup });
     }
     // 決済手段
     if (paymentMethod !== null) {

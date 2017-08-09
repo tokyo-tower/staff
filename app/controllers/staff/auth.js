@@ -14,6 +14,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const TTTS = require("@motionpicture/ttts-domain");
+const request = require("request"); // for token
 const _ = require("underscore");
 const staffLoginForm_1 = require("../../forms/staff/staffLoginForm");
 const staff_1 = require("../../models/user/staff");
@@ -114,3 +115,52 @@ function logout(req, res, next) {
     });
 }
 exports.logout = logout;
+function auth(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            if (req.session === undefined) {
+                throw new Error('session undefined.');
+            }
+            const token = yield getToken();
+            res.json({
+                success: true,
+                token: token,
+                errors: null
+            });
+        }
+        catch (error) {
+            res.json({
+                success: false,
+                token: null,
+                errors: error
+            });
+        }
+    });
+}
+exports.auth = auth;
+function getToken() {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            request.post(`${process.env.API_ENDPOINT}oauth/token`, {
+                body: {
+                    grant_type: 'client_credencials',
+                    client_id: 'motionpicture',
+                    client_secret: 'motionpicture',
+                    state: 'state123456789',
+                    scope: [
+                        'performances.read-only'
+                    ]
+                },
+                json: true
+            }, (error, response, body) => {
+                // tslint:disable-next-line:no-magic-numbers
+                if (response.statusCode === 200) {
+                    resolve(body);
+                }
+                else {
+                    reject(error);
+                }
+            });
+        });
+    });
+}
