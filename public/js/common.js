@@ -3,7 +3,9 @@
 
 // プライベートブラウジング時のsessionStorage.setItemエラー回避用
 window.setSessionStorage = function(key, value) {
-    if (!window.sessionStorage) return;
+    if 
+        
+        (!window.sessionStorage) return;
     try {
         window.sessionStorage.setItem(key, value);
     } catch (err) {
@@ -17,11 +19,14 @@ $(function() {
     // var CSSBREAKPOINT_TABLET = 800;
     var fn_checkPageWidthIsMobile = function() { return (window.innerWidth <= CSSBREAKPOINT_MOBILE); };
     // var fn_checkPageWidthIsNotPc = function () { return (window.innerWidth >= CSSBREAKPOINT_TABLET); };
-    var domurl = new Url();
 
     // 言語切替
+    // 2017/08/16 なぜかprofileでnew Url()がエラーになってしまうので…
+    //var domurl = new Url();
     var select_locale = document.getElementById('select_locale');
+    //---
     if (select_locale) {
+        var domurl = new Url();
         var currentLocale = domurl.query.locale || window.sessionStorage.getItem('locale') || '';
         if (currentLocale && select_locale.querySelector('option[value=' + currentLocale + ']')) { select_locale.value = currentLocale; }
         select_locale.onchange = function() {

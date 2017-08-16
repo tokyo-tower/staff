@@ -13,7 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *
  * @namespace controller/staff/reserve
  */
-const GMO = require("@motionpicture/gmo-service");
+//import * as GMO from '@motionpicture/gmo-service';
 const TTTS = require("@motionpicture/ttts-domain");
 const conf = require("config");
 const moment = require("moment");
@@ -24,6 +24,7 @@ const session_1 = require("../../models/reserve/session");
 const reserveBaseController = require("../reserveBase");
 const PURCHASER_GROUP = TTTS.ReservationUtil.PURCHASER_GROUP_STAFF;
 const layout = 'layouts/staff/layout';
+const PAY_TYPE_FREE = 'F';
 function start(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         // 期限指定
@@ -331,7 +332,7 @@ function profile(req, res, next) {
                 res.locals.emailConfirm = (!_.isEmpty(email)) ? email.substr(0, email.indexOf('@')) : '';
                 res.locals.emailConfirmDomain = (!_.isEmpty(email)) ? email.substr(email.indexOf('@') + 1) : '';
                 res.locals.paymentMethod =
-                    (!_.isEmpty(reservationModel.paymentMethod)) ? reservationModel.paymentMethod : GMO.Util.PAY_TYPE_CREDIT;
+                    (!_.isEmpty(reservationModel.paymentMethod)) ? reservationModel.paymentMethod : PAY_TYPE_FREE;
                 res.render('staff/reserve/profile', {
                     reservationModel: reservationModel,
                     GMO_ENDPOINT: process.env.GMO_ENDPOINT,

@@ -62,9 +62,8 @@
 		"AllDay": "すべての上映日",
 		"Tel": "電話番号",
 		"PaymentMethodName": {
-			"CREDIT": "クレジットカード",
-			"CVS": "コンビニ決済",
-			"CASH": "現金"
+			"FREE": "無料招待券",
+			"INVOICE": "請求書支払い"
 		},
 		"PaymentMethod": "お支払い方法",
 		"TotalCharge": "合計金額",
@@ -166,7 +165,7 @@
 			"emailConfirm": "メールアドレス(確認)",
 			"emailConfirmDomain": "メールアドレス(確認)ドメイン",
 			"password": "パスワード",
-			"paymentMethod": "決済方法",
+			"paymentMethod": "決済手段",
 			"userId": "ユーザー番号",
 			"signature": "署名",
 			"language": "使用言語",

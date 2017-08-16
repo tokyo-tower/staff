@@ -3,7 +3,7 @@
  *
  * @namespace controller/staff/reserve
  */
-import * as GMO from '@motionpicture/gmo-service';
+//import * as GMO from '@motionpicture/gmo-service';
 import * as TTTS from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import { NextFunction, Request, Response } from 'express';
@@ -17,6 +17,8 @@ import * as reserveBaseController from '../reserveBase';
 
 const PURCHASER_GROUP: string = TTTS.ReservationUtil.PURCHASER_GROUP_STAFF;
 const layout: string = 'layouts/staff/layout';
+
+const PAY_TYPE_FREE: string = 'F';
 
 export async function start(req: Request, res: Response, next: NextFunction): Promise<void> {
     // 期限指定
@@ -332,7 +334,7 @@ export async function profile(req: Request, res: Response, next: NextFunction): 
             res.locals.emailConfirm = (!_.isEmpty(email)) ? email.substr(0, email.indexOf('@')) : '';
             res.locals.emailConfirmDomain = (!_.isEmpty(email)) ? email.substr(email.indexOf('@') + 1) : '';
             res.locals.paymentMethod =
-                (!_.isEmpty(reservationModel.paymentMethod)) ? reservationModel.paymentMethod : GMO.Util.PAY_TYPE_CREDIT;
+                (!_.isEmpty(reservationModel.paymentMethod)) ? reservationModel.paymentMethod : PAY_TYPE_FREE;
 
             res.render('staff/reserve/profile', {
                 reservationModel: reservationModel,

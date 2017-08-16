@@ -111,6 +111,7 @@ function checkFixSeatsAndTickets(req) {
                 // 選択チケット本体分セット(選択枚数分)
                 checkInfo.choicesAll.push({
                     ticket_type: choice.ticket_type,
+                    watcher_name: choice.watcher_name,
                     ticketCount: 1,
                     updated: false
                 });
@@ -121,6 +122,7 @@ function checkFixSeatsAndTickets(req) {
                     for (let indexExtra = 0; indexExtra < extraCount; indexExtra += 1) {
                         checkInfo.choicesExtra.push({
                             ticket_type: choice.ticket_type,
+                            watcher_name: choice.watcher_name,
                             ticketCount: 1,
                             updated: false
                         });
@@ -260,8 +262,8 @@ function saveSessionFixSeatsAndTickets(req, reservationModel, result, choice, st
         ticket_type: ticketType._id,
         ticket_type_name: ticketType.name,
         ticket_type_charge: ticketType.charge,
-        //      watcher_name = choice.watcher_name;
-        watcher_name: ''
+        watcher_name: choice.watcher_name
+        //watcher_name: ''
     });
     // 座席コードのソート(文字列順に)
     reservationModel.seatCodes.sort(ttts_domain_1.ScreenUtil.sortBySeatCode);
@@ -308,47 +310,47 @@ function processFixProfile(reservationModel, req, res) {
         reserveProfileForm_1.default(req);
         const validationResult = yield req.getValidationResult();
         res.locals.validation = validationResult.mapped();
-        res.locals.lastName = req.body.lastName;
-        res.locals.firstName = req.body.firstName;
-        res.locals.email = req.body.email;
-        res.locals.emailConfirm = req.body.emailConfirm;
-        res.locals.emailConfirmDomain = req.body.emailConfirmDomain;
-        res.locals.tel = req.body.tel;
-        res.locals.age = req.body.age;
-        res.locals.address = req.body.address;
-        res.locals.gender = req.body.gender;
-        //res.locals.paymentMethod = req.body.paymentMethod;
+        // res.locals.lastName = req.body.lastName;
+        // res.locals.firstName = req.body.firstName;
+        // res.locals.email = req.body.email;
+        // res.locals.emailConfirm = req.body.emailConfirm;
+        // res.locals.emailConfirmDomain = req.body.emailConfirmDomain;
+        // res.locals.tel = req.body.tel;
+        // res.locals.age = req.body.age;
+        // res.locals.address = req.body.address;
+        // res.locals.gender = req.body.gender;
+        res.locals.paymentMethod = req.body.paymentMethod;
         if (!validationResult.isEmpty()) {
             throw new Error(req.__('Message.Invalid'));
         }
         // 購入者情報を保存して座席選択へ
-        reservationModel.purchaser = {
-            lastName: req.body.lastName,
-            firstName: req.body.firstName,
-            tel: req.body.tel,
-            email: req.body.email,
-            age: req.body.age,
-            address: req.body.address,
-            gender: req.body.gender
-        };
-        //reservationModel.paymentMethod = req.body.paymentMethod;
+        // reservationModel.purchaser = {
+        //     lastName: req.body.lastName,
+        //     firstName: req.body.firstName,
+        //     tel: req.body.tel,
+        //     email: req.body.email,
+        //     age: req.body.age,
+        //     address: req.body.address,
+        //     gender: req.body.gender
+        // };
+        reservationModel.paymentMethod = req.body.paymentMethod;
         // 主体によっては、決済方法を強制的に固定で
-        switch (reservationModel.purchaserGroup) {
-            case ttts_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF:
-                reservationModel.paymentMethod = '';
-                break;
-            default:
-                break;
-        }
+        // switch (reservationModel.purchaserGroup) {
+        //     case ReservationUtil.PURCHASER_GROUP_STAFF:
+        //         reservationModel.paymentMethod = '';
+        //         break;
+        //     default:
+        //         break;
+        // }
         // セッションに購入者情報格納
         req.session.purchaser = {
-            lastName: req.body.lastName,
-            firstName: req.body.firstName,
-            tel: req.body.tel,
-            email: req.body.email,
-            age: req.body.age,
-            address: req.body.address,
-            gender: req.body.gender
+            lastName: reservationModel.purchaser.lastName,
+            firstName: reservationModel.purchaser.firstName,
+            tel: reservationModel.purchaser.tel,
+            email: reservationModel.purchaser.email,
+            age: reservationModel.purchaser.age,
+            address: reservationModel.purchaser.address,
+            gender: reservationModel.purchaser.gender
         };
     });
 }
@@ -421,7 +423,7 @@ function initializePayment(reservationModel, req) {
                 address: '',
                 gender: '1'
             };
-            reservationModel.paymentMethodChoices = [GMO.Util.PAY_TYPE_CREDIT, GMO.Util.PAY_TYPE_CASH];
+            //reservationModel.paymentMethodChoices = [GMO.Util.PAY_TYPE_CREDIT, GMO.Util.PAY_TYPE_CASH];
             break;
         default:
             break;
@@ -547,12 +549,12 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
             .filter((seatCode, index, seatCodes) => seatCodes.indexOf(seatCode) === index);
         // コンビニ決済はパフォーマンス上映の5日前まで
         // tslint:disable-next-line:no-magic-numbers
-        const day5DaysAgo = parseInt(moment().add(+5, 'days').format('YYYYMMDD'), DEFAULT_RADIX);
-        if (parseInt(reservationModel.performance.day, DEFAULT_RADIX) < day5DaysAgo) {
-            if (reservationModel.paymentMethodChoices.indexOf(GMO.Util.PAY_TYPE_CVS) >= 0) {
-                reservationModel.paymentMethodChoices.splice(reservationModel.paymentMethodChoices.indexOf(GMO.Util.PAY_TYPE_CVS), 1);
-            }
-        }
+        // const day5DaysAgo = parseInt(moment().add(+5, 'days').format('YYYYMMDD'), DEFAULT_RADIX);
+        // if (parseInt(reservationModel.performance.day, DEFAULT_RADIX) < day5DaysAgo) {
+        //     if (reservationModel.paymentMethodChoices.indexOf(GMO.Util.PAY_TYPE_CVS) >= 0) {
+        //         reservationModel.paymentMethodChoices.splice(reservationModel.paymentMethodChoices.indexOf(GMO.Util.PAY_TYPE_CVS), 1);
+        //     }
+        // }
         // スクリーン座席表HTMLを保管(TTTS未使用)
         reservationModel.screenHtml = '';
         // この時点でトークンに対して購入番号発行(上映日が決まれば購入番号を発行できる)

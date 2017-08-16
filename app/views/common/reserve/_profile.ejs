@@ -9,6 +9,34 @@
 <form id="form_profile" method="post">
 
     <table class="table table-profile">
+        <tbody>
+            <% /*ご利用金額*/ %>
+            <tr class="tr-price">
+                <th><label><%- __('Label.TotalPrice') %></label></th>
+                <td>
+                    <p><span class="price">&yen;<%- numeral(reservationModel.getTotalCharge()).format('0,0') %></span></p>
+                </td>
+            </tr>
+            <% /*決済手段*/ %>
+            <tr class="tr-name">
+                <th><%- __('Form.FieldName.paymentMethod') %><span class="required">*</span></th>
+                <td>
+                    <div class="wrapper-gender form-inline">
+                        <label for="radio_paymentMethod" class="form-group payment">
+                            <input type="radio" id="radio_payment_method0" name="paymentMethod" class="form-control" value="F"<% if (!paymentMethod !== 'I') { %> checked="checked"<% } %>><%- __('Label.PaymentMethodName.FREE') %>
+                        </label>
+                        <br/>
+                        <label for="radio_gender1" class="form-group payment">
+                            <input type="radio" id="radio_payment_method1" name="paymentMethod" class="form-control" value="I"<% if (paymentMethod === 'I') { %> checked="checked"<% } %>><%- __('Label.PaymentMethodName.INVOICE') %>
+                        </label>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+<!--
+    <table class="table table-profile">
 
         <tbody>
             <tr class="tr-name">
@@ -71,21 +99,6 @@
             <tr class="tr-id_gender">
                 <th><label for="id_gender"><%- __('Form.FieldName.gender') %></label></th>
                 <td>
-                    <!--
-                    <div class="wrapper-gender form-inline">
-                        <label for="radio_gender0" class="form-group payment">
-                            <input type="radio" id="radio_gender0" name="gender" class="form-control" value=""<% if (!gender) { %> checked="checked"<% } %>><%- __('Label.NotSelected') %>
-                        </label>
-                        <label for="radio_gender1" class="form-group payment">
-                            <input type="radio" id="radio_gender1" name="gender" class="form-control" value="1"<% if (gender === '1') { %> checked="checked"<% } %>><%- __('Label.Male') %>
-                        </label>
-                        <label for="radio_gender2" class="form-group payment">
-                            <input type="radio" id="radio_gender2" name="gender" class="form-control" value="2"<% if (gender === '2') { %> checked="checked"<% } %>><%- __('Label.Female') %>
-                        </label>
-                    </div>
-                    -->
-
-                    
                     <%
                     let genderChoices = [
                         {code: '', name: {ja: __('Label.NotSelected'), en:__('Label.NotSelected')}},
@@ -103,7 +116,7 @@
             </tr>
 
             <tr class="tr-id_age">
-                <th><label for="id_age"><%- __('Form.FieldName.age') %></label></span></th>
+                <th><label for="id_age"><%- __('Form.FieldName.age') %></label></th>
                 <td>
                     <%
                     let ageChoices = [
@@ -141,13 +154,6 @@
                         <option value="">---</option>
                         <%- include('./_countrySelectOptions.ejs', {selected: address || ''}) %>
                     </select>
-                </td>
-            </tr>
-
-            <tr class="tr-price">
-                <th><label><%- __('Label.TotalPrice') %></label></th>
-                <td>
-                    <p><span class="price">&yen;<%- numeral(reservationModel.getTotalCharge()).format('0,0') %></span></p>
                 </td>
             </tr>
 
@@ -210,7 +216,7 @@
                 <th><label for="securitycode"><%- __('Form.FieldName.securitycode') %></label><span class="required">*</span></th>
                 <td>
                     <input type="text" name="securitycode" id="securitycode" class="form-control" value="" maxlength="4">
-                    <p class="btn-securitycode" id="modalbtn_cardsecurirycode"><%- __('Message.securitycode') %></a></p>
+                    <p class="btn-securitycode" id="modalbtn_cardsecurirycode"><%- __('Message.securitycode') %></p>
                     <% if (validation && validation.securitycode) { %>
                     <p class="errmsg"><%- validation.securitycode.msg %></p>
                     <% } %>
@@ -219,6 +225,7 @@
         </tbody>
 
     </table>
+-->
     <input type="hidden" name="gmoTokenObject" value="">
 </form>
 
