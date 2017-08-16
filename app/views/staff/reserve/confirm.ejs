@@ -33,7 +33,6 @@
                     </p>
                 </td>
             </tr>
-
             <tr>
                 <th>
                     <%- __('Label.SeatCode') %>/<%- __('Label.TicketType') %>
@@ -55,7 +54,21 @@
                     </a>
                 </td>
             </tr>
-
+            <%- /* 券種/枚数/メモ */ %>
+            <tr>
+                <th>
+                    <%- __('Label.TicketType') %> / <%- __('Label.TicketCount') %> / <%- __('Label.WatcherName') %>
+                </th>
+                <td>
+                <% Object.keys(ticketInfos).forEach(function(key) { %>
+                <p><%- ticketInfos[key].info %></p>
+                <br/>
+                <p><%- __('Label.WatcherName') %> : <%- ticketInfos[key].watcher_name %></p>
+                <br/>
+                <% }); %>
+                </td>
+            </tr>
+            <%- /* 合計金額 */ %>
             <% if (reservationModel.getTotalCharge() > 0) { %>
             <tr>
                 <th>
@@ -68,7 +81,15 @@
                 </td>
             </tr>
             <% } %>
-
+            <%- /* 決算手段 */ %>
+            <tr>
+                <th>
+                    <%- __('Label.HowToPayStaff') %>
+                </th>
+                <td>
+                <p><%- paymentMethodName %></p>
+                </td>
+            </tr>
         </tbody>
     </table>
 

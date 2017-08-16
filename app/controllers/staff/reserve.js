@@ -25,6 +25,7 @@ const reserveBaseController = require("../reserveBase");
 const PURCHASER_GROUP = TTTS.ReservationUtil.PURCHASER_GROUP_STAFF;
 const layout = 'layouts/staff/layout';
 const PAY_TYPE_FREE = 'F';
+const paymentMethodNames = { F: '無料招待券', I: '請求書支払い' };
 function start(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         // 期限指定
@@ -374,8 +375,19 @@ function confirm(req, res, next) {
                 }
             }
             else {
+                const reservations = reserveBaseController.getReservations(reservationModel);
+                const ticketInfos = reserveBaseController.getTicketInfos(reservations);
+                // 券種ごとの表示情報編集
+                const leaf = res.__('Email.Leaf');
+                Object.keys(ticketInfos).forEach((key) => {
+                    const ticketInfo = ticketInfos[key];
+                    ticketInfos[key].info =
+                        `${ticketInfo.ticket_type_name[res.locale]} ${ticketInfo.charge} × ${ticketInfo.count}${leaf}`;
+                });
                 res.render('staff/reserve/confirm', {
                     reservationModel: reservationModel,
+                    ticketInfos: ticketInfos,
+                    paymentMethodName: paymentMethodNames[reservationModel.paymentMethod],
                     layout: layout
                 });
             }

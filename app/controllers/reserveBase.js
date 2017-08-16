@@ -813,3 +813,34 @@ function createEmailQueue(reservationModel, res, performanceDay, paymentNo) {
         });
     });
 }
+function getTicketInfos(reservations) {
+    // 券種ごとに合計枚数算出
+    const keyName = 'ticket_type';
+    const ticketInfos = {};
+    for (const reservation of reservations) {
+        // チケットタイプセット
+        const dataValue = reservation[keyName];
+        // チケットタイプごとにチケット情報セット
+        if (!ticketInfos.hasOwnProperty(dataValue)) {
+            ticketInfos[dataValue] = {
+                ticket_type_name: reservation.ticket_type_name,
+                charge: `\\${numeral(reservation.charge).format('0,0')}`,
+                watcher_name: reservation.watcher_name,
+                count: 1
+            };
+        }
+        else {
+            ticketInfos[dataValue].count += 1;
+        }
+    }
+    return ticketInfos;
+}
+exports.getTicketInfos = getTicketInfos;
+function getReservations(reservationModel) {
+    const reservations = [];
+    reservationModel.seatCodes.forEach((seatCode) => {
+        reservations.push(new ttts_domain_1.Models.Reservation(reservationModel.seatCode2reservationDocument(seatCode)));
+    });
+    return reservations;
+}
+exports.getReservations = getReservations;

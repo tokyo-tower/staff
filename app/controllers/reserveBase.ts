@@ -929,3 +929,33 @@ async function createEmailQueue(reservationModel: ReserveSessionModel,
             });
     });
 }
+export function getTicketInfos(reservations: any[]): any {
+    // 券種ごとに合計枚数算出
+    const keyName: string = 'ticket_type';
+    const ticketInfos: {} = {};
+    for ( const reservation of reservations) {
+        // チケットタイプセット
+        const dataValue = reservation[keyName];
+        // チケットタイプごとにチケット情報セット
+        if (!ticketInfos.hasOwnProperty(dataValue)) {
+            (<any>ticketInfos)[dataValue] = {
+                ticket_type_name: reservation.ticket_type_name,
+                charge: `\\${numeral(reservation.charge).format('0,0')}`,
+                watcher_name: reservation.watcher_name,
+                count: 1
+            };
+        } else {
+            (<any>ticketInfos)[dataValue].count += 1;
+        }
+    }
+
+    return ticketInfos;
+}
+export  function getReservations(reservationModel: ReserveSessionModel): any[] {
+    const reservations: any[] = [];
+    reservationModel.seatCodes.forEach((seatCode) => {
+        reservations.push(new Models.Reservation(reservationModel.seatCode2reservationDocument(seatCode)));
+    });
+
+    return reservations;
+}

@@ -19,6 +19,7 @@ const PURCHASER_GROUP: string = TTTS.ReservationUtil.PURCHASER_GROUP_STAFF;
 const layout: string = 'layouts/staff/layout';
 
 const PAY_TYPE_FREE: string = 'F';
+const paymentMethodNames: any = {F: '無料招待券', I: '請求書支払い'};
 
 export async function start(req: Request, res: Response, next: NextFunction): Promise<void> {
     // 期限指定
@@ -380,8 +381,19 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                 next(error);
             }
         } else {
+            const reservations: any[] = reserveBaseController.getReservations(reservationModel);
+            const ticketInfos: any = reserveBaseController.getTicketInfos(reservations);
+            // 券種ごとの表示情報編集
+            const leaf: string = res.__('Email.Leaf');
+            Object.keys(ticketInfos).forEach((key) => {
+                const ticketInfo = (<any>ticketInfos)[key];
+                (<any>ticketInfos)[key].info =
+                    `${ticketInfo.ticket_type_name[res.locale]} ${ticketInfo.charge} × ${ticketInfo.count}${leaf}`;
+            });
             res.render('staff/reserve/confirm', {
                 reservationModel: reservationModel,
+                ticketInfos: ticketInfos,
+                paymentMethodName: paymentMethodNames[reservationModel.paymentMethod],
                 layout: layout
             });
         }
