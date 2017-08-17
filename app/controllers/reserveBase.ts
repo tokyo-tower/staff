@@ -29,7 +29,6 @@ const DEFAULT_RADIX = 10;
  * @param {ReserveSessionModel} reservationModel
  * @returns {Promise<void>}
  */
-// tslint:disable-next-line:max-func-body-length
 export async function processFixSeatsAndTickets(reservationModel: ReserveSessionModel,
                                                 req: Request): Promise<void> {
     // 検証(券種が選択されていること)+チケット枚数合計計算
@@ -292,41 +291,6 @@ function saveSessionFixSeatsAndTickets(req: Request,
     return;
 }
 
-// /**
-//  * 券種FIXプロセス
-//  *
-//  * @param {ReservationModel} reservationModel
-//  * @returns {Promise<void>}
-//  */
-// export async function processFixTickets(reservationModel: ReserveSessionModel, req: Request): Promise<void> {
-//     reserveTicketForm(req);
-//     const validationResult = await req.getValidationResult();
-//     if (!validationResult.isEmpty()) {
-//         throw new Error(req.__('Message.Invalid'));
-//     }
-
-//     // 座席選択情報を保存して座席選択へ
-//     const choices = JSON.parse(req.body.choices);
-//     if (!Array.isArray(choices)) {
-//         throw new Error(req.__('Message.UnexpectedError'));
-//     }
-
-//     choices.forEach((choice: any) => {
-//         const ticketType = reservationModel.ticketTypes.find((ticketTypeInArray) => (ticketTypeInArray._id === choice.ticket_type));
-//         if (ticketType === undefined) {
-//             throw new Error(req.__('Message.UnexpectedError'));
-//         }
-
-//         const reservation = reservationModel.getReservation(choice.seat_code);
-//         reservation.ticket_type = ticketType._id;
-//         reservation.ticket_type_name = ticketType.name;
-//         reservation.ticket_type_charge = ticketType.charge;
-//         reservation.watcher_name = choice.watcher_name;
-
-//         reservationModel.setReservation(reservation.seat_code, reservation);
-//     });
-// }
-
 /**
  * 購入者情報FIXプロセス
  *
@@ -338,42 +302,13 @@ export async function processFixProfile(reservationModel: ReserveSessionModel, r
 
     const validationResult = await req.getValidationResult();
     res.locals.validation = validationResult.mapped();
-    // res.locals.lastName = req.body.lastName;
-    // res.locals.firstName = req.body.firstName;
-    // res.locals.email = req.body.email;
-    // res.locals.emailConfirm = req.body.emailConfirm;
-    // res.locals.emailConfirmDomain = req.body.emailConfirmDomain;
-    // res.locals.tel = req.body.tel;
-    // res.locals.age = req.body.age;
-    // res.locals.address = req.body.address;
-    // res.locals.gender = req.body.gender;
     res.locals.paymentMethod = req.body.paymentMethod;
-
     if (!validationResult.isEmpty()) {
         throw new Error(req.__('Message.Invalid'));
     }
 
-    // 購入者情報を保存して座席選択へ
-    // reservationModel.purchaser = {
-    //     lastName: req.body.lastName,
-    //     firstName: req.body.firstName,
-    //     tel: req.body.tel,
-    //     email: req.body.email,
-    //     age: req.body.age,
-    //     address: req.body.address,
-    //     gender: req.body.gender
-    // };
+    // 購入情報を保存
     reservationModel.paymentMethod = req.body.paymentMethod;
-
-    // 主体によっては、決済方法を強制的に固定で
-    // switch (reservationModel.purchaserGroup) {
-    //     case ReservationUtil.PURCHASER_GROUP_STAFF:
-    //         reservationModel.paymentMethod = '';
-    //         break;
-
-    //     default:
-    //         break;
-    // }
 
     // セッションに購入者情報格納
     (<any>req.session).purchaser = {
@@ -616,71 +551,6 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
     // この時点でトークンに対して購入番号発行(上映日が決まれば購入番号を発行できる)
     reservationModel.paymentNo = await ReservationUtil.publishPaymentNo(reservationModel.performance.day);
 }
-
-// /**
-//  * 座席をFIXするプロセス
-//  * 新規仮予約 ここが今回の肝です！！！
-//  *
-//  * @param {ReservationModel} reservationModel
-//  * @param {Array<string>} seatCodes
-//  */
-// export async function processFixSeats(reservationModel: ReserveSessionModel, seatCodes: string[], req: Request): Promise<void> {
-//     // セッション中の予約リストを初期化
-//     reservationModel.seatCodes = [];
-//     reservationModel.expiredAt = moment().add(conf.get<number>('temporary_reservation_valid_period_seconds'), 'seconds').valueOf();
-
-//     // 新たな座席指定と、既に仮予約済みの座席コードについて
-//     const promises = seatCodes.map(async (seatCode) => {
-//         const seatInfo = reservationModel.performance.screen.sections[0].seats.find((seat) => (seat.code === seatCode));
-
-//         // 万が一、座席が存在しなかったら
-//         if (seatInfo === undefined) {
-//             throw new Error(req.__('Message.InvalidSeatCode'));
-//         }
-
-//         const newReservation = {
-//             performance: reservationModel.performance._id,
-//             seat_code: seatCode,
-//             status: ReservationUtil.STATUS_TEMPORARY,
-//             expired_at: reservationModel.expiredAt,
-//             owner: undefined
-//         };
-//         switch (reservationModel.purchaserGroup) {
-//             case ReservationUtil.PURCHASER_GROUP_STAFF:
-//                 newReservation.owner = (<Express.StaffUser>req.staffUser).get('_id');
-//                 break;
-//             case ReservationUtil.PURCHASER_GROUP_WINDOW:
-//                 newReservation.owner = (<Express.WindowUser>req.windowUser).get('_id');
-//                 break;
-//             default:
-//                 break;
-//         }
-
-//         // 予約データを作成(同時作成しようとしたり、既に予約があったとしても、unique indexではじかれる)
-//         const reservation = await Models.Reservation.create(newReservation);
-
-//         // ステータス更新に成功したらセッションに保管
-//         reservationModel.seatCodes.push(seatCode);
-//         reservationModel.setReservation(seatCode, {
-//             _id: reservation.get('_id'),
-//             status: reservation.get('status'),
-//             seat_code: reservation.get('seat_code'),
-//             seat_grade_name: seatInfo.grade.name,
-//             seat_grade_additional_charge: seatInfo.grade.additional_charge,
-//             ticket_type: '', // この時点では券種未決定
-//             ticket_type_name: {
-//                 ja: '',
-//                 en: ''
-//             },
-//             ticket_type_charge: 0,
-//             watcher_name: ''
-//         });
-//     });
-
-//     await Promise.all(promises);
-//     // 座席コードのソート(文字列順に)
-//     reservationModel.seatCodes.sort(ScreenUtil.sortBySeatCode);
-// }
 
 /**
  * 確定以外の全情報を確定するプロセス
@@ -929,6 +799,13 @@ async function createEmailQueue(reservationModel: ReserveSessionModel,
             });
     });
 }
+
+/**
+ * チケット情報(券種ごとの枚数)取得
+ *
+ * @param {any[]} reservations
+ * @returns {any}
+ */
 export function getTicketInfos(reservations: any[]): any {
     // 券種ごとに合計枚数算出
     const keyName: string = 'ticket_type';
@@ -951,6 +828,13 @@ export function getTicketInfos(reservations: any[]): any {
 
     return ticketInfos;
 }
+
+/**
+ * 予約情報取得(reservationModelから)
+ *
+ * @param {ReserveSessionModel} reservationModel
+ * @returns {any[]}
+ */
 export  function getReservations(reservationModel: ReserveSessionModel): any[] {
     const reservations: any[] = [];
     reservationModel.seatCodes.forEach((seatCode) => {
