@@ -1,5 +1,10 @@
 // 購入完了ページ
 .page-complete {
+    .rednotice {
+        color: red;
+        text-align: center;
+    }
+
     .table-complete {
         max-width: 800px;
         width: 100%;
@@ -125,5 +130,20 @@
 
     .btn-blue {
         margin-bottom: 0;
+    }
+}
+
+#page_staff_reserve_complete {
+    .guidetext-customer,
+    .tr-email,
+    .tr-price,
+    .numbernotice,
+    .qrnotice,
+    .mailnotice,
+    .enteringguide {
+        display: none;
+    }
+    .thermalprint {
+        margin: 2em;
     }
 }

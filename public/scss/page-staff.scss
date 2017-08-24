@@ -1,17 +1,3 @@
-.page-staff.page-reserve {
-    .pagetitle {
-        &::before {
-            content: '代理予約';
-            font-size: 16px;
-            color: #777;
-            border: 1px solid #777;
-            display: block;
-            width: 100px;
-            padding: 5px;
-            margin: 10px auto;
-        }
-    }
-}
 #page_staff_login {
     background-color: #fff;
     .loginform {
@@ -49,5 +35,29 @@
                 margin-bottom: 5px;
             }
         }
+    }
+}
+
+.page-staff.page-reserve {
+    .pagetitle {
+        &::before {
+            content: '代理予約';
+            font-size: 16px;
+            color: #777;
+            border: 1px solid #777;
+            display: block;
+            width: 100px;
+            padding: 5px;
+            margin: 10px auto;
+        }
+    }
+    .is-customer {
+        display: none;
+    }
+    .is-staff-inline {
+        display: inline;
+    }
+    .is-staff-block {
+        display: block;
     }
 }

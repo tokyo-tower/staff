@@ -3,12 +3,10 @@
     .btn-print {
         background-color: #4f89e1;
     }
-    .btn-thermalprint {
-        background-color: #e1894f;
-    }
     &.no-thermal{
         .btn-thermalprint {
             background-color: #ddd;
+            box-shadow: none;
             pointer-events: none;
         }
         option[value=thermalprint] {

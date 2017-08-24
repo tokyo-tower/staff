@@ -1,57 +1,20 @@
 <%- include('../../common/reserve/_step') %>
 
-<h1 class="pagetitle"><%- __('h1.ConfirmReservation') %></h1>
-<p class="guidetext"><%- __('Label.ConfirmReservationGuideTextNoPayment') %></p>
+<h1 class="pagetitle">代理予約内容確認</h1>
+<p class="guidetext">代理予約内容をご確認いただき、「代理予約確定」ボタンを押してください。</p>
 
 <div class="wrapper-confirm">
 
     <h2><%- __('h2.SeatInformation') %></h2>
     <table class="table table-confirm">
         <tbody>
-
-            <tr>
-                <th><%- __('Label.FilmName') %>
-                    <p class="visible-mobile-block">
-                        <a class="btn btn-default btn-change btn-icon-back" href="/staff/reserve/performances">
-                            <span><%- __('Button.Change') %></span>
-                        </a>
-                    </p>
-                </th>
-                <td>
-                    <p><%- reservationModel.performance.film.name[locale] %></p>
-                    <a class="btn btn-default btn-change btn-icon-back visible-pc" href="/staff/reserve/performances">
-                        <span><%- __('Button.Change') %></span>
-                    </a>
-                </td>
-            </tr>
-
+            <%- /* 日時/場所 */ %>
             <tr>
                 <th><%- __('Label.DatetimeAndLocation') %></th>
                 <td>
                     <p>
-                        <%- reservationModel.performance[`start_str`][locale] %>&nbsp;&nbsp;<%- reservationModel.performance[`location_str`][locale] %> 
+                        <%- reservationModel.performance[`start_str`][locale] %>
                     </p>
-                </td>
-            </tr>
-            <tr>
-                <th>
-                    <%- __('Label.SeatCode') %>/<%- __('Label.TicketType') %>
-                    <p class="visible-mobile-block">
-                        <a class="btn btn-default btn-change btn-icon-back" href="/staff/reserve/seats"><span><%- __('Button.Change') %></span></a>
-                    </p>
-                </th>
-                <td>
-                    <p>
-                        <% reservationModel.seatCodes.forEach((seatCode) => { %>
-                            <% let reservation = new Models.Reservation(reservationModel.seatCode2reservationDocument(seatCode)); %>
-                            <%- reservation.get('seat_code') %> / <%- reservation.get(`ticket_type_detail_str`)[locale].replace(/\\/g, '&yen;') %>
-                            <%- reservation.get('watcher_name') %>
-                            <br>
-                        <% }) %>
-                    </p>
-                    <a class="btn btn-default btn-change btn-icon-back visible-pc" href="/staff/reserve/seats">
-                        <span><%- __('Button.Change') %></span>
-                    </a>
                 </td>
             </tr>
             <%- /* 券種/枚数/メモ */ %>
@@ -61,76 +24,33 @@
                 </th>
                 <td>
                 <% Object.keys(ticketInfos).forEach(function(key) { %>
-                <p><%- ticketInfos[key].info %></p>
-                <br/>
-                <p><%- __('Label.WatcherName') %> : <%- ticketInfos[key].watcher_name %></p>
-                <br/>
+                    <p><%= ticketInfos[key].info %></p>
+                    <p><%- __('Label.WatcherName') %>: <strong><%= ticketInfos[key].watcher_name %></strong></p>
                 <% }); %>
                 </td>
             </tr>
-            <%- /* 合計金額 */ %>
-            <% if (reservationModel.getTotalCharge() > 0) { %>
-            <tr>
-                <th>
-                    <%- __('Label.TotalPrice') %>
-                </th>
-                <td>
-                    <p>
-                        <span class="price"><%- __('{{price}} yen', {price: numeral(reservationModel.getTotalCharge()).format('0,0')}) %></span>
-                    </p>
-                </td>
-            </tr>
-            <% } %>
+        </tbody>
+    </table>
+
+    <h2>お支払情報</h2>
+    <table class="table table-confirm">
+        <tbody>
             <%- /* 決算手段 */ %>
             <tr>
                 <th>
                     <%- __('Label.HowToPayStaff') %>
                 </th>
                 <td>
-                <p><%- paymentMethodName %></p>
+                    <p><%- paymentMethodName %></p>
                 </td>
             </tr>
         </tbody>
     </table>
-
-
-    <h2>
-        <%- __('h2.Profile') %>
-    </h2>
-    <table class="table table-confirm">
-        <tbody>
-
-            <tr>
-                <th><%- __('Label.DepartmentName') %></th>
-                <td>
-                    <p><%= req.staffUser.name[locale] %></p>
-                </td>
-            </tr>
-            <tr>
-                <th><%- __('Label.Signature') %></th>
-                <td>
-                    <p><%= req.staffUser.signature %></p>
-                </td>
-            </tr>
-            <tr>
-                <th><%- __('Label.Email') %></th>
-                <td>
-                    <p><%= req.staffUser.email %></p>
-                </td>
-            </tr>
-
-        </tbody>
-    </table>
 </div>
 
-<div class="wrapper-notice">
-    <h2><%- __('Label.ConfirmNotes') %></h2>
-    <p><%- __('ConfirmNotesText') %></p>
-</div>
-
-<div class="btns2clm">
-    <a class="btn btn-lg btn-next" href="javascript:void(0);"><span><%- __('Button.Next') %></span></a>
-    <a class="btn btn-lg btn-back" href="/staff/reserve/profile"><span><%- __('Button.Back') %></span></a>
+<div class="navbtns">
+    <a class="btn btn-lg btn-next" href="javascript:void(0);"><span>代理予約確定</span></a>
+    <a class="btn-back" href="/staff/reserve/profile"><span><%- __('Button.Back') %></span></a>
 </div>
 
 <script>

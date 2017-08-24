@@ -8,6 +8,10 @@
 
 <form id="form_profile" method="post">
 
+<% if (reservationModel.purchaserGroup === ReservationUtil.PURCHASER_GROUP_STAFF) {
+    // 代理予約
+%>
+
     <table class="table table-profile">
         <tbody>
             <% /*ご利用金額*/ %>
@@ -18,16 +22,19 @@
                 </td>
             </tr>
             <% /*決済手段*/ %>
-            <tr class="tr-name">
+            <tr class="tr-payment">
                 <th><%- __('Form.FieldName.paymentMethod') %><span class="required">*</span></th>
                 <td>
-                    <div class="wrapper-gender form-inline">
-                        <label for="radio_paymentMethod" class="form-group payment">
-                            <input type="radio" id="radio_payment_method0" name="paymentMethod" class="form-control" value="F"<% if (!paymentMethod !== 'I') { %> checked="checked"<% } %>><%- __('Label.PaymentMethodName.FREE') %>
+                    <div class="wrapper-payment form-inline">
+                        <label for="radio_payment_method0" class="form-group payment">
+                            <input type="radio" id="radio_payment_method0" name="paymentMethod" class="form-control" value="F"<% if (!paymentMethod !== 'I') { %> checked="checked"<% } %>>
+                            <%- __('Label.PaymentMethodName.FREE') %>
+                            <div class="checkedbg"></div>
                         </label>
-                        <br/>
-                        <label for="radio_gender1" class="form-group payment">
-                            <input type="radio" id="radio_payment_method1" name="paymentMethod" class="form-control" value="I"<% if (paymentMethod === 'I') { %> checked="checked"<% } %>><%- __('Label.PaymentMethodName.INVOICE') %>
+                        <label for="radio_payment_method1" class="form-group payment">
+                            <input type="radio" id="radio_payment_method1" name="paymentMethod" class="form-control" value="I"<% if (!paymentMethod === 'I') { %> checked="checked"<% } %>>
+                            <%- __('Label.PaymentMethodName.INVOICE') %>
+                            <div class="checkedbg"></div>
                         </label>
                     </div>
                 </td>
@@ -35,9 +42,11 @@
         </tbody>
     </table>
 
-<!--
-    <table class="table table-profile">
+<% } else {
+    // 一般予約    
+%>
 
+    <table class="table table-profile">
         <tbody>
             <tr class="tr-name">
                 <th><%- __('Form.FieldName.name') %><span class="required">*</span></th>
@@ -157,6 +166,13 @@
                 </td>
             </tr>
 
+            <tr class="tr-price">
+                <th><label><%- __('Label.TotalPrice') %></label></th>
+                <td>
+                    <p><span class="price">&yen;<%- numeral(reservationModel.getTotalCharge()).format('0,0') %></span></p>
+                </td>
+            </tr>
+
             <tr class="tr-cardNumber">
                 <th><label for="cardNumber"><%- __('Form.FieldName.cardNumber') %></label><span class="required">*</span></th>
                 <td>
@@ -225,10 +241,9 @@
         </tbody>
 
     </table>
--->
     <input type="hidden" name="gmoTokenObject" value="">
+<% } %>
 </form>
-
 
 <div class="modal fade" id="modal_cardsecurirycode" tabindex="-1">
 	<div class="modal-dialog">
@@ -250,14 +265,12 @@
 		</div>
 	</div>
 </div>
-
-
-
-<script src="<%= GMO_ENDPOINT %>/ext/js/token.js"></script>
-<script>Multipayment.init('<%= GMO_SHOP_ID %>');</script>
-<script src="/js/profile.js"></script>
 <script>
     $('#modalbtn_cardsecurirycode').click(function() {
         $('#modal_cardsecurirycode').modal();
     });
 </script>
+
+<script src="<%= GMO_ENDPOINT %>/ext/js/token.js"></script>
+<script>Multipayment.init('<%= GMO_SHOP_ID %>');</script>
+<script src="/js/profile.js"></script>

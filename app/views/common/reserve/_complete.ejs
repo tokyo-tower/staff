@@ -1,47 +1,40 @@
 <%
 const printIds = [];
-let reservationsById = {};
+let reservations = [];
 for (let reservation of reservationDocuments) {
     let _reservation = reservation.toObject();
-    _reservation['ticket_type_detail_str'] = reservation.get('ticket_type_detail_str');
-    _reservation['qr_str'] = reservation.get('qr_str');
-    reservationsById[reservation._id.toString()] = _reservation;
+    reservations.push(_reservation);
     printIds.push(`\"${reservation._id.toString()}\"`);
 }
 %>
-<input type="hidden" name="reservationsById" value="<%= JSON.stringify(reservationsById) %>">
+<input type="hidden" id="input_reservations" value="<%= JSON.stringify(reservations) %>">
 <script src="/js/reserve/complete.js"></script>
-
-<!-- StarWebPRNTライブラリ　= http://sp-support.star-m.jp/SDKDocumentation.aspx -->
-<script src="/js/thermalprint/StarWebPrintBuilder.js"></script>
-<script src="/js/thermalprint/StarWebPrintTrader.js"></script>
-<!-- 当日入場券サーマル印刷用モジュール -->
-<script src="/js/thermalprint/tiffThermalPrint.js"></script>
-
 
 <%- include('./_step', {currentStepName: 'complete'}) %>
 
 <h1 class="pagetitle"><%- __('h1.CompleteReservation') %></h1>
-<p class="guidetext"><%- __('Label.CompleteReservationGuideText') %></p>
-<p class="guidetext" style="color:red;"><%- __('Label.CompleteReservationCautionText') %></p>
-
+<p class="guidetext guidetext-customer"><%- __('Label.CompleteReservationGuideText') %></p>
+<p class="rednotice qrnotice"><%- __('Label.CompleteReservationCautionText') %></p>
+<% if (reservationDocuments[0].purchaser_group === ReservationUtil.PURCHASER_GROUP_STAFF) { %>
+<p class="guidetext">代理予約が完了いたしました。<br>「印刷」ボタンを押してチケットを発見してください。</p>
+<% } %>
 
 <table class="table table-complete">
     <tbody>
-        <tr>
+        <tr class="tr-number">
             <th><%- __('Label.PaymentNo') %></th>
             <td>
-                <span class="rsrvno"><%- reservationDocuments[0].get('payment_no') %></span><br>
-                <%- __('Message.TransactionNumberDescription') %>
+                <span class="rsrvno"><%- reservationDocuments[0].get('payment_no') %></span>
+                <p class="numbernotice"><%- __('Message.TransactionNumberDescription') %></p>
             </td>
         </tr>
-        <tr>
+        <tr class="tr-date">
             <th><%- __('Label.PurchaseContentDate') %></th>
             <td>
                 <%= moment(reservationDocuments[0].performance_day).format('Y-MM-DD') %>&nbsp;&nbsp;<%= `${moment(reservationDocuments[0].performance_start_time, 'hmm').format('HH:mm')} - ${moment(reservationDocuments[0].performance_end_time, 'hmm').format('HH:mm')}` %> 
             </td>
         </tr>
-        <tr>
+        <tr class="tr-qr">
             <th><%- __('Label.QRCode') %></th>
             <td>
                 <% reservationDocuments.forEach((reservation, index) => { %>
@@ -60,28 +53,52 @@ for (let reservation of reservationDocuments) {
                 <% }) %>
             </td>
         </tr>
-        <tr>
+        <tr class="tr-email">
             <th><%- __('Label.Email') %> %></th>
             <td>
                 <%= reservationDocuments[0].get('purchaser_email') %>
             </td>
         </tr>
-        <tr>
+        <tr class="tr-price">
             <th><%- __('Label.TotalPrice') %> %></th>
             <td>
                 <span class="price">&yen;<%= reservationDocuments[0].get('gmo_amount') %></span>
             </td>
         </tr>
-
     </tbody>
-
 </table>
+
 
 <a class="btn btn-blue" id="btn_print_a4" target="_blank" href='/reserve/print/?ids=[<%- printIds.join(',') %>]'><span><%- __('Label.Print') %></span></a>
 
-<p class="mailnotice">
-<%- __('CompleteNotesText') %>
-</p>
+<% if (reservationDocuments[0].purchaser_group === ReservationUtil.PURCHASER_GROUP_STAFF) { %>
+<div class="thermalprint">
+    <p class="btn btn-big btn-thermalprint btn-disabled" id="btn_thermalprint"><span>サーマル印刷</span></p>
+    <script src="/js/thermalprint/StarWebPrintBuilder.js"></script>
+    <script src="/js/thermalprint/StarWebPrintTrader.js"></script>
+    <script src="/js/thermalprint/starprint.js"></script>
+    <script>
+        // サーマル印刷
+        window.starThermalPrint.init({
+            publisher: '<%= reservationDocuments[0].owner_name.ja %>',
+            timeout: 10000
+        }).then(function() {
+            $('#btn_thermalprint').removeClass('btn-disabled').click(function() {
+                var reservations = JSON.parse(document.getElementById('input_reservations').value);
+                return window.starThermalPrint.printReservationArray(reservations).catch(function(errmsg) {
+                    alert(errmsg);
+                });
+            });
+        }).catch(function(errMsg) {
+            alert('サーマルプリンタと接続できませんでした');
+            $('.thermalprint').append('<p class="rednotice">サーマルプリンタと接続できませんでした (' + errMsg + ')</p>');
+        });
+    </script>
+</div>
+<% } %>
+
+
+<p class="mailnotice"><%- __('CompleteNotesText') %></p>
 
 <div class="enteringguide">
     <h3><%- __('Label.AboutEntry') %></h3>

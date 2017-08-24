@@ -120,4 +120,40 @@
         text-decoration: underline;
         margin-top: 1em;
     }
+    .wrapper-payment {
+        margin-bottom: 1em;
+        .payment {
+            display: block;
+            background-color: #fff;
+            padding: 1em;
+            font-size: 24px;
+            margin-bottom: 2em;
+            position: relative;
+            z-index: 0;
+            cursor: pointer;
+            input[type=radio] {
+                box-shadow: none;
+                margin-right: 8px;
+                width: 24px;
+                height: 24px;
+                vertical-align: text-top;
+                display: inline-block;
+                cursor: pointer;
+            }
+            .checkedbg {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: -1;
+                background-color: yellow;
+                border: 4px solid #000;
+                display: none;
+            }
+            input[type=radio]:checked + .checkedbg {
+                display: block;
+            }
+        }
+    }
 }

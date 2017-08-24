@@ -62,12 +62,6 @@
                 width:auto;
             }
         }
-        p {
-            float: left;
-            @media screen and (max-width: $breakpoint_tablet) {
-                float:none;
-            }
-        }
         strong {
             font-weight: bold;
         }

@@ -2,7 +2,6 @@ $(function() {
     var LOCALE = document.documentElement.getAttribute('lang');
     var API_ENDPOINT = document.querySelector('input[name="apiEndpoint"]').value;
     var API_TOKEN = document.getElementById('input_apiToken').value;
-    // var API_ENDPOINT = '/temp_performancesearchresult.json?#';
     if (!API_ENDPOINT) { return alert('API_ENDPOINT undefined'); }
 
     // カレンダーを何日先まで表示するか
