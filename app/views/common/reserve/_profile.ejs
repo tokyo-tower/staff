@@ -150,7 +150,7 @@
                     <select class="form-control" name="age">
                         <option value="">---</option>
                         <% for (let choice of ageChoices) { %>
-                        <option value="<%= choice.code %>"<% if (age === choice.code) { %> selected="selected"<% } %>><%- choice.name[locale] || choice.name.en %></option>
+                        <option value="<%= choice.code %>"<% if (age === choice.code) { %> selected="selected"<% } %>><%- choice.name %></option>
                         <% } %>
                     </select>
                 </td>

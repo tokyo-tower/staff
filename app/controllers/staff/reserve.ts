@@ -95,7 +95,7 @@ export async function performances(req: Request, res: Response, next: NextFuncti
         //const token: string = await getToken();
         const token: string = await TTTS.CommonUtil.getToken(process.env.API_ENDPOINT);
         // tslint:disable-next-line:no-console
-        console.log('token=' + JSON.stringify(token));
+        // console.log('token=' + JSON.stringify(token));
 
         if (req.method === 'POST') {
             reservePerformanceForm(req);

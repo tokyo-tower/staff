@@ -100,7 +100,7 @@ function performances(req, res, next) {
             //const token: string = await getToken();
             const token = yield TTTS.CommonUtil.getToken(process.env.API_ENDPOINT);
             // tslint:disable-next-line:no-console
-            console.log('token=' + JSON.stringify(token));
+            // console.log('token=' + JSON.stringify(token));
             if (req.method === 'POST') {
                 reservePerformanceForm_1.default(req);
                 const validationResult = yield req.getValidationResult();

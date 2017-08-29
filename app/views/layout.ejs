@@ -9,11 +9,14 @@ let pageId = (routeName) ? 'page_'+routeName.replace(/\//,'').replace(/:[^\/]*\/
 let pageClassName = (routeName) ? 'page-'+routeName.replace(/\//,'').replace(/:[^\/]*\//g,'').replace(/\//g,' page-') : '';
 pageClassName = pageClassName + ' page-'+currentLang;
 %>
+
 <!DOCTYPE html>
 <html lang="<%- currentLang %>">
 <head>
 <meta charset="utf-8">
 <title><%= __('Title') %></title>
+<meta name="description" content="<%= conf.get('meta.description') %>">
+<meta name="keywords" content="<%= conf.get('meta.keywords') %>">
 <meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1">
 <meta name="format-detection" content="telephone=no">
 
@@ -21,6 +24,8 @@ pageClassName = pageClassName + ' page-'+currentLang;
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="/js/lib/url.min.js"></script>
+<script src="/js/lib/moment.min.js"></script>
 <script src="/js/common.js"></script>
 
 <%- include('./layouts/_ga') %>
