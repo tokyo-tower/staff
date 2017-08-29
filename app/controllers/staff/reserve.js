@@ -16,7 +16,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const TTTS = require("@motionpicture/ttts-domain");
 const conf = require("config");
 const moment = require("moment");
-const request = require("request"); // for token
+//import * as request from 'request'; // for token
 const _ = require("underscore");
 const reservePerformanceForm_1 = require("../../forms/reserve/reservePerformanceForm");
 const session_1 = require("../../models/reserve/session");
@@ -61,32 +61,29 @@ exports.terms = terms;
 /**
  * token取得(いずれはttts-domainへ移動)
  */
-function getToken() {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise((resolve, reject) => {
-            request.post(`${process.env.API_ENDPOINT}oauth/token`, {
-                body: {
-                    grant_type: 'client_credentials',
-                    client_id: 'motionpicture',
-                    client_secret: 'motionpicture',
-                    state: 'state123456789',
-                    scopes: [
-                        'performances.read-only'
-                    ]
-                },
-                json: true
-            }, (error, response, body) => {
-                // tslint:disable-next-line:no-magic-numbers
-                if (response.statusCode === 200) {
-                    resolve(body);
-                }
-                else {
-                    reject(error);
-                }
-            });
-        });
-    });
-}
+// async function getToken(): Promise<any> {
+//     return new Promise((resolve, reject) => {
+//         request.post(`${process.env.API_ENDPOINT}oauth/token`, {
+//             body: {
+//                 grant_type: 'client_credentials',
+//                 client_id: 'motionpicture',
+//                 client_secret: 'motionpicture',
+//                 state: 'state123456789',
+//                 scopes: [
+//                     'performances.read-only'
+//                 ]
+//             },
+//             json: true
+//             },       (error, response, body) => {
+//             // tslint:disable-next-line:no-magic-numbers
+//             if (response.statusCode === 200) {
+//                 resolve(body);
+//             } else {
+//                 reject(error);
+//             }
+//         });
+//     });
+// }
 /**
  * スケジュール選択
  * @method performances
@@ -100,7 +97,8 @@ function performances(req, res, next) {
                 next(new Error(req.__('Message.Expired')));
                 return;
             }
-            const token = yield getToken();
+            //const token: string = await getToken();
+            const token = yield TTTS.CommonUtil.getToken(process.env.API_ENDPOINT);
             // tslint:disable-next-line:no-console
             console.log('token=' + JSON.stringify(token));
             if (req.method === 'POST') {

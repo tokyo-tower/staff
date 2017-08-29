@@ -282,8 +282,9 @@ function saveSessionFixSeatsAndTickets(req: Request,
         ticket_type : ticketType._id,
         ticket_type_name : ticketType.name,
         ticket_type_charge : ticketType.charge,
-        watcher_name : choice.watcher_name
-        //watcher_name: ''
+        watcher_name : choice.watcher_name,
+        ticket_cancel_charge: ticketType.cancel_charge,
+        ticket_ttts_extension: ticketType.ttts_extension
     });
     // 座席コードのソート(文字列順に)
     reservationModel.seatCodes.sort(ScreenUtil.sortBySeatCode);

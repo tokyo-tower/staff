@@ -6,7 +6,7 @@
 
 import * as TTTS from '@motionpicture/ttts-domain';
 import { NextFunction, Request, Response } from 'express';
-import * as request from 'request'; // for token
+// import * as request from 'request'; // for token
 import * as _ from 'underscore';
 
 import staffLoginForm from '../../forms/staff/staffLoginForm';
@@ -124,7 +124,8 @@ export async function auth(req: Request, res: Response): Promise<void> {
         if (req.session === undefined) {
             throw new Error('session undefined.');
         }
-        const token: string = await getToken();
+        //const token: string = await getToken();
+        const token: string = await TTTS.CommonUtil.getToken(process.env.API_ENDPOINT);
         res.json({
             success: true,
             token: token,
@@ -138,26 +139,26 @@ export async function auth(req: Request, res: Response): Promise<void> {
         });
     }
 }
-async function getToken(): Promise<any> {
-    return new Promise((resolve, reject) => {
-        request.post(`${process.env.API_ENDPOINT}oauth/token`, {
-            body: {
-                grant_type: 'client_credentials',
-                client_id: 'motionpicture',
-                client_secret: 'motionpicture',
-                state: 'state123456789',
-                scopes: [
-                    'performances.read-only'
-                ]
-            },
-            json: true
-            },       (error, response, body) => {
-            // tslint:disable-next-line:no-magic-numbers
-            if (response.statusCode === 200) {
-                resolve(body);
-            } else {
-                reject(error);
-            }
-        });
-    });
-}
+// async function getToken(): Promise<any> {
+//     return new Promise((resolve, reject) => {
+//         request.post(`${process.env.API_ENDPOINT}oauth/token`, {
+//             body: {
+//                 grant_type: 'client_credentials',
+//                 client_id: 'motionpicture',
+//                 client_secret: 'motionpicture',
+//                 state: 'state123456789',
+//                 scopes: [
+//                     'performances.read-only'
+//                 ]
+//             },
+//             json: true
+//             },       (error, response, body) => {
+//             // tslint:disable-next-line:no-magic-numbers
+//             if (response.statusCode === 200) {
+//                 resolve(body);
+//             } else {
+//                 reject(error);
+//             }
+//         });
+//     });
+// }

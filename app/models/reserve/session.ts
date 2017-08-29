@@ -10,10 +10,7 @@ interface ISeat {
     code: string; // 座席コード
     grade: {
         code: string;
-        name: {
-            ja: string;
-            en: string;
-        };
+        name: IMultilingualString;
         additional_charge: number; // 追加料金
     };
 }
@@ -234,6 +231,8 @@ export default class ReserveSessionModel {
             ticket_type: reservation.ticket_type,
             ticket_type_name: reservation.ticket_type_name,
             ticket_type_charge: reservation.ticket_type_charge,
+            ticket_cancel_charge: reservation.ticket_cancel_charge,
+            ticket_ttts_extension: reservation.ticket_ttts_extension,
             charge: this.getChargeBySeatCode(seatCode),
             payment_no: this.paymentNo,
             purchaser_group: this.purchaserGroup,
@@ -272,78 +271,61 @@ export default class ReserveSessionModel {
         };
     }
 }
-
+/**
+ * パフォーマンス情報インターフェース
+ */
 interface IPerformance {
     _id: string;
     day: string;
     open_time: string;
     start_time: string;
     end_time: string;
-    start_str: {
-        ja: string,
-        en: string
-    };
-    location_str: {
-        ja: string,
-        en: string
-    };
+    start_str: IMultilingualString;
+    location_str: IMultilingualString;
     theater: {
         _id: string,
-        name: {
-            ja: string,
-            en: string
-        },
-        address: {
-            ja: string,
-            en: string
-        }
+        name: IMultilingualString,
+        address: IMultilingualString
     };
     screen: {
         _id: string,
-        name: {
-            ja: string,
-            en: string
-        },
+        name: IMultilingualString,
         sections: ISection[]
     };
     film: {
         _id: string,
-        name: {
-            ja: string,
-            en: string
-        },
+        name: IMultilingualString,
         image: string,
         is_mx4d: boolean,
         copyright: string
     };
 }
-
+/**
+ * チケット情報インターフェース
+ */
 interface ITicketType {
     _id: string;
-    name: {
-        ja: string,
-        en: string
-    };
+    name: IMultilingualString;
     charge: number; // 料金
     count: number;  // 枚数
+    cancel_charge: [ICancelCharge];
+    ttts_extension: IExtensionTiket;
 }
-
+/**
+ * 予約情報インターフェース
+ */
 interface IReservation {
     _id: string;
     status: string;
     seat_code: string;
-    seat_grade_name: {
-        ja: string;
-        en: string;
-    };
+    seat_grade_name: IMultilingualString;
     seat_grade_additional_charge: number;
     ticket_type: string;
-    ticket_type_name: {
-        ja: string;
-        en: string;
-    };
+    ticket_type_name: IMultilingualString;
     ticket_type_charge: number;
     watcher_name: string;
+    ticket_cancel_charge: [ICancelCharge];
+    ticket_ttts_extension: IExtensionTiket;
 }
 
 /**
@@ -366,4 +348,29 @@ interface ITransactionGMO {
     amount: number;
     count: number;
     status: string;
+}
+/**
+ * キャンセル料情報インターフェース
+ */
+interface ICancelCharge {
+    days: number;
+    charge: number;
+}
+/**
+ * チケット拡張情報インターフェース
+ */
+interface IExtensionTiket {
+    category: string;
+    required_seat_num: number;
+    csv_code: string;
+}
+/**
+ * 多言語情報インターフェース
+ */
+interface IMultilingualString {
+    ja: string;
+    en: string;
+    kr: string;
+    tc: string;
+    sc: string;
 }

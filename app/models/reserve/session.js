@@ -134,6 +134,8 @@ class ReserveSessionModel {
             ticket_type: reservation.ticket_type,
             ticket_type_name: reservation.ticket_type_name,
             ticket_type_charge: reservation.ticket_type_charge,
+            ticket_cancel_charge: reservation.ticket_cancel_charge,
+            ticket_ttts_extension: reservation.ticket_ttts_extension,
             charge: this.getChargeBySeatCode(seatCode),
             payment_no: this.paymentNo,
             purchaser_group: this.purchaserGroup,

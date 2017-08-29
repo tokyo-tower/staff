@@ -14,7 +14,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const TTTS = require("@motionpicture/ttts-domain");
-const request = require("request"); // for token
+// import * as request from 'request'; // for token
 const _ = require("underscore");
 const staffLoginForm_1 = require("../../forms/staff/staffLoginForm");
 const staff_1 = require("../../models/user/staff");
@@ -121,7 +121,8 @@ function auth(req, res) {
             if (req.session === undefined) {
                 throw new Error('session undefined.');
             }
-            const token = yield getToken();
+            //const token: string = await getToken();
+            const token = yield TTTS.CommonUtil.getToken(process.env.API_ENDPOINT);
             res.json({
                 success: true,
                 token: token,
@@ -138,29 +139,26 @@ function auth(req, res) {
     });
 }
 exports.auth = auth;
-function getToken() {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise((resolve, reject) => {
-            request.post(`${process.env.API_ENDPOINT}oauth/token`, {
-                body: {
-                    grant_type: 'client_credentials',
-                    client_id: 'motionpicture',
-                    client_secret: 'motionpicture',
-                    state: 'state123456789',
-                    scopes: [
-                        'performances.read-only'
-                    ]
-                },
-                json: true
-            }, (error, response, body) => {
-                // tslint:disable-next-line:no-magic-numbers
-                if (response.statusCode === 200) {
-                    resolve(body);
-                }
-                else {
-                    reject(error);
-                }
-            });
-        });
-    });
-}
+// async function getToken(): Promise<any> {
+//     return new Promise((resolve, reject) => {
+//         request.post(`${process.env.API_ENDPOINT}oauth/token`, {
+//             body: {
+//                 grant_type: 'client_credentials',
+//                 client_id: 'motionpicture',
+//                 client_secret: 'motionpicture',
+//                 state: 'state123456789',
+//                 scopes: [
+//                     'performances.read-only'
+//                 ]
+//             },
+//             json: true
+//             },       (error, response, body) => {
+//             // tslint:disable-next-line:no-magic-numbers
+//             if (response.statusCode === 200) {
+//                 resolve(body);
+//             } else {
+//                 reject(error);
+//             }
+//         });
+//     });
+// }
