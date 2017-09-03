@@ -216,6 +216,14 @@ export default class ReserveSessionModel {
     }
 
     /**
+     * フロー中の予約IDリスト(特殊チケット用)を取得する
+     */
+    public getReservationIdsExtra(): string[] {
+        return (this.seatCodesExtra !== undefined) ?
+            this.seatCodesExtra.map((seatCodesExtra) => this.getReservation(seatCodesExtra)._id) : [];
+    }
+
+    /**
      * 座席コードから予約(確定)ドキュメントを作成する
      *
      * @param {string} seatCode 座席コード

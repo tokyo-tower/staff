@@ -25,7 +25,7 @@ const _ = require("underscore");
 const reserveProfileForm_1 = require("../forms/reserve/reserveProfileForm");
 const reserveTicketForm_1 = require("../forms/reserve/reserveTicketForm");
 const session_1 = require("../models/reserve/session");
-const extraSeatNum = conf.get('extra_seat_num');
+//const extraSeatNum: any = conf.get<any>('extra_seat_num');
 const debug = createDebug('ttts-staff:controller:reserveBase');
 const DEFAULT_RADIX = 10;
 /**
@@ -37,7 +37,7 @@ const DEFAULT_RADIX = 10;
 function processFixSeatsAndTickets(reservationModel, req) {
     return __awaiter(this, void 0, void 0, function* () {
         // 検証(券種が選択されていること)+チケット枚数合計計算
-        const checkInfo = yield checkFixSeatsAndTickets(req);
+        const checkInfo = yield checkFixSeatsAndTickets(reservationModel, req);
         if (checkInfo.status === false) {
             throw new Error(checkInfo.message);
         }
@@ -74,10 +74,11 @@ exports.processFixSeatsAndTickets = processFixSeatsAndTickets;
 /**
  * 座席・券種FIXプロセス/検証処理
  *
+ * @param {ReservationModel} reservationModel
  * @param {Request} req
  * @returns {Promise<void>}
  */
-function checkFixSeatsAndTickets(req) {
+function checkFixSeatsAndTickets(reservationModel, req) {
     return __awaiter(this, void 0, void 0, function* () {
         const checkInfo = {
             status: false,
@@ -102,6 +103,13 @@ function checkFixSeatsAndTickets(req) {
             return checkInfo;
         }
         checkInfo.choices = choices;
+        // 特殊チケット情報
+        const extraSeatNum = {};
+        reservationModel.ticketTypes.forEach((ticketTypeInArray) => {
+            if (ticketTypeInArray.ttts_extension.category !== '0') {
+                extraSeatNum[ticketTypeInArray._id] = ticketTypeInArray.ttts_extension.required_seat_num;
+            }
+        });
         // チケット枚数合計計算
         choices.forEach((choice) => {
             // チケットセット(選択枚数分)
@@ -381,6 +389,8 @@ function initializePayment(reservationModel, req) {
 function processCancelSeats(reservationModel) {
     return __awaiter(this, void 0, void 0, function* () {
         const ids = reservationModel.getReservationIds();
+        const idsExtra = reservationModel.getReservationIdsExtra();
+        Array.prototype.push.apply(ids, idsExtra);
         if (ids.length > 0) {
             // セッション中の予約リストを初期化
             reservationModel.seatCodes = [];
