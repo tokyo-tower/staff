@@ -1,7 +1,8 @@
 /* global moment */
 'use strict';
 $(function() {
-    var userName = document.querySelector('input[name=username]').value;
+    // サーマル印刷の挙動 ('pc' = Windows, 'mobile' = 専用ブラウザ)
+    var mode_thermalprint = 'pc';
 
     // _idごとにまとめた予約ドキュメントリスト
     var reservationsById = {};
@@ -9,28 +10,35 @@ $(function() {
     /*
       サーマル印刷
     */
-    var can_thermalprint = false;
-    window.starThermalPrint.init({
-        publisher: userName,
-        timeout: 10000
-    }).then(function() {
-        can_thermalprint = true;
+    if (mode_thermalprint !== 'pc') {
+        var can_thermalprint = false;
+        window.starThermalPrint.init({
+            publisher: document.querySelector('input[name=username]').value,
+            timeout: 10000
+        }).then(function() {
+            can_thermalprint = true;
+            $('body').removeClass('no-thermal');
+        }).catch(function(errMsg) {
+            $('.wrapper-searchform').prepend('<p id="msg_bluetooth">サーマルプリンタと接続できませんでした (' + errMsg + ')</p>');
+        });
+    } else {
         $('body').removeClass('no-thermal');
-    }).catch(function(errMsg) {
-        $('.wrapper-searchform').prepend('<p id="msg_bluetooth">サーマルプリンタと接続できませんでした (' + errMsg + ')</p>');
-    });
+    }
     // サーマル印刷実行ボタン
     $(document).on('click', '.btn-thermalprint', function(e) {
         var id = e.currentTarget.getAttribute('data-targetid');
-        if (!can_thermalprint) {
-            return alert('サーマルプリンタと接続できていません。ペアリング状態を確認してください。');
+        if (mode_thermalprint !== 'pc') {
+            if (!can_thermalprint) {
+                return alert('サーマルプリンタと接続できていません。ペアリング状態を確認してください。');
+            }
+            if (!reservationsById[id]) {
+                return alert('印刷の準備に失敗しました。ページを再読込して再度試してください。');
+            }
+            return window.starThermalPrint.printReservation(reservationsById[id]).catch(function(errmsg) {
+                alert(errmsg);
+            });
         }
-        if (!reservationsById[id]) {
-            return alert('印刷の準備に失敗しました。ページを再読込して再度試してください。');
-        }
-        return window.starThermalPrint.printReservation(reservationsById[id]).catch(function(errmsg) {
-            alert(errmsg);
-        });
+        window.open('/reserve/print_pcthermal?ids=' + JSON.stringify([id]));
     });
 
     // 日付選択カレンダー (再読込時のために日付はsessionStorageにキープしておく)
@@ -324,10 +332,14 @@ $(function() {
         } else if (action === 'print') {
             window.open('/reserve/print?ids=' + JSON.stringify(ids));
         } else if (action === 'thermalprint') {
-            if (!can_thermalprint) {
-                return alert('サーマルプリンタが利用できません');
+            if (mode_thermalprint !== 'pc') {
+                if (!can_thermalprint) {
+                    return alert('サーマルプリンタが利用できません');
+                }
+                window.starThermalPrint.printReservationArray(ids.map(function(id) { return reservationsById[id]; }));
+            } else {
+                window.open('/reserve/print_pcthermal?ids=' + JSON.stringify(ids));
             }
-            window.starThermalPrint.printReservationArray(ids.map(function(id) { return reservationsById[id]; }));
         } else {
             alert('操作を選択してください');
         }

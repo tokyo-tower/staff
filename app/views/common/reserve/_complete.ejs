@@ -73,26 +73,28 @@ for (let reservation of reservationDocuments) {
 
 <% if (reservationDocuments[0].purchaser_group === ReservationUtil.PURCHASER_GROUP_STAFF) { %>
 <div class="thermalprint">
-    <p class="btn btn-big btn-thermalprint btn-disabled" id="btn_thermalprint"><span>サーマル印刷</span></p>
-    <script src="/js/thermalprint/StarWebPrintBuilder.js"></script>
-    <script src="/js/thermalprint/StarWebPrintTrader.js"></script>
-    <script src="/js/thermalprint/starprint.js"></script>
+    <a class="btn btn-big btn-thermalprint" id="btn_thermalprint" target="_blank" href='/reserve/print_pcthermal/?ids=[<%- printIds.join(',') %>]'><span>サーマル印刷</span></a>
+
+    <!--p class="btn btn-big btn-thermalprint btn-disabled" id="btn_thermalprint"><span>サーマル印刷(専用ブラウザ)</span></p-->
+    <!--script src="/js/thermalprint/StarWebPrintBuilder.js"></script-->
+    <!--script src="/js/thermalprint/StarWebPrintTrader.js"></script-->
+    <!--script src="/js/thermalprint/starprint.js"></script-->
     <script>
-        // サーマル印刷
-        window.starThermalPrint.init({
-            publisher: '<%= reservationDocuments[0].owner_name.ja %>',
-            timeout: 10000
-        }).then(function() {
-            $('#btn_thermalprint').removeClass('btn-disabled').click(function() {
-                var reservations = JSON.parse(document.getElementById('input_reservations').value);
-                return window.starThermalPrint.printReservationArray(reservations).catch(function(errmsg) {
-                    alert(errmsg);
-                });
-            });
-        }).catch(function(errMsg) {
-            alert('サーマルプリンタと接続できませんでした');
-            $('.thermalprint').append('<p class="rednotice">サーマルプリンタと接続できませんでした (' + errMsg + ')</p>');
-        });
+        // // サーマル印刷
+        // window.starThermalPrint.init({
+        //     publisher: '<%= reservationDocuments[0].owner_name.ja %>',
+        //     timeout: 10000
+        // }).then(function() {
+        //     $('#btn_thermalprint').removeClass('btn-disabled').click(function() {
+        //         var reservations = JSON.parse(document.getElementById('input_reservations').value);
+        //         return window.starThermalPrint.printReservationArray(reservations).catch(function(errmsg) {
+        //             alert(errmsg);
+        //         });
+        //     });
+        // }).catch(function(errMsg) {
+        //     alert('サーマルプリンタと接続できませんでした');
+        //     $('.thermalprint').append('<p class="rednotice">サーマルプリンタと接続できませんでした (' + errMsg + ')</p>');
+        // });
     </script>
 </div>
 <% } %>

@@ -14,4 +14,5 @@ router.get('/language/update/:locale', languageController.update);
 router.get('/reserve/getSeatProperties', reserveController.getSeatProperties);
 router.get('/reserve/:performanceId/unavailableSeatCodes', reserveController.getUnavailableSeatCodes);
 router.get('/reserve/print', reserveController.print);
+router.get('/reserve/print_pcthermal', reserveController.pcthermalprint);
 exports.default = router;

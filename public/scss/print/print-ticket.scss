@@ -1,8 +1,3 @@
-@page {
-    size: 297mm 210mm;
-    margin: 0;
-}
-
 @mixin clearfix {
     &:before,
     &:after {
@@ -17,14 +12,11 @@
 * {
     box-sizing: border-box!important;
 }
-
 html,
 body {
     background-color: white;
     margin: 0;
     padding: 0;
-    width: 210mm;
-    height: 297mm;
 }
 
 .printcontent {
@@ -250,4 +242,65 @@ body {
     .smalltext {
         font-size: 10px;
     }
+}
+
+.pcthermarlprintcontent {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    width: 50.8mm;
+    font-family: '游ゴシック', meiryo, sans-serif;
+    overflow: hidden;
+    page-break-after: always!important;
+    -webkit-print-color-adjust: exact;
+    text-align: center;
+
+    strong {
+        font-weight: bold;
+        font-size: 1.25em;
+        line-height: 1.5;
+    }
+
+    .pr-header {
+        img {
+            max-width: 40mm;
+        }
+    }
+
+    .pr-guide {
+        margin: 1em 1em 0 1em;
+    }
+
+    .pr-qrcode {
+    }
+
+    .pr-paymentno {
+        margin-bottom: 1em;
+    }
+
+    .pr-date {
+        p {
+            font-size: 1.5em;
+            font-weight: bold;
+            line-height: 1.5;
+        }
+    }
+
+    .pr-notice {
+        margin: 1em;
+        font-size: 0.9em;
+    }
+
+    .pr-ticket {
+        margin-bottom: 1em;
+        p {
+            font-size: 1.25em;
+            font-weight: bold;
+        }
+    }
+
+    .pr-publish {
+        text-align: right;
+    }
+    
 }
