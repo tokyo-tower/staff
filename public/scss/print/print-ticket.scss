@@ -248,7 +248,7 @@ body {
     position: relative;
     margin: 0;
     padding: 0;
-    width: 50.8mm;
+    width: 48mm;
     font-family: '游ゴシック', meiryo, sans-serif;
     overflow: hidden;
     page-break-after: always!important;
@@ -301,6 +301,7 @@ body {
 
     .pr-publish {
         text-align: right;
+        padding-right: 1em;
     }
     
 }

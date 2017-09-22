@@ -3,17 +3,18 @@
 <head>
 <meta charset="utf-8">
 <title>Tokyo Tower PRINT TICKET</title>
+<link href="/css/print.css" rel="stylesheet">
 <style>
 @page {
-    size: 50.8mm auto;
+    size: 48mm auto;
     margin: 0;
 }
 html,
 body {
-    width: 50.8mm;
+    width: 48mm;
+    margin: 0 auto;
 }
 </style>
-<link href="/css/print.css" rel="stylesheet">
 </head>
 <body>
 
@@ -49,7 +50,7 @@ for (let reservation of reservations) {
 
     <p class="pr-notice">
         ※混雑する場合がございますので、15分前にお越し下さい。<br>
-        please come 15 min before\nto avoid the crowds.
+        please come 15 min before to avoid the crowds.
     </p>
                        
     <div class="pr-ticket">
