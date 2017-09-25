@@ -1,4 +1,5 @@
 <%
+const locales = conf.get('locales');
 let routeName = '';
 if (req.hasOwnProperty('route')) {
     routeName = req.route.path;
@@ -11,6 +12,15 @@ if (req.hasOwnProperty('route')) {
 
         <div class="header-menu">
     
+        </div>
+
+        <div class="header-lang">
+            <p>Language</p>
+            <select name="locale" id="select_locale">
+                <% Object.keys(locales).forEach(function (locale) { %>
+                    <option value="<%= locale %>"><%= locales[locale] %></option>
+                <% }); %>
+            </select>
         </div>
     </div>
 </header>
