@@ -1,4 +1,11 @@
 {
+    "locales": {
+        "ja": "日本語",
+        "en": "ENGLISH",
+        "cs": "中文(简体)",
+        "ct": "中文(繁體)",
+        "kr": "한국어"
+    },
     "official_website_url": "http://motionpicture.jp",
     "official_tel_number": "03-1234-5678",
     "meta": {
