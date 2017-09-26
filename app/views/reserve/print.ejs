@@ -18,154 +18,165 @@ body {
 </head>
 <body>
 
-<%
-moment.locale(locale);
-for (let reservation of reservations) {
-%>
-<div class="printcontent">
-
-    <div class="pr-header">
-        <div class="logo">
-            <img src="/images/common/logo.png">
-        </div>
-        <div class="title">
-            チケット兼領収書
-        </div>
-    </div>
-
-    <div class="pr-thanks">
-        この度はご購入いただき誠にありがとうございます。当日はこちらのチケットをご持参してQRコードをご提示頂いてご入場下さい。<br>
-    </div>
-
-    <div class="pr-qrcode pr-bg">
-        <img class="pr-bg-image" src="/images/print/bg_gray.png">
-        <div class="pr-bg-content inner">
-            <h2>
-                こちらのQRコードをスタッフにご提示ください。<br>
-                <span class="smalltext">(QR コードは、フットタウンもしくはTOP DECK 入口の2 箇所でご提示していただきます。)</span>
-            </h2>
-            <div class="wrapper-qrimg pr-bg">
-                <img src="//chart.apis.google.com/chart?chs=150x150&cht=qr&chl=<%= reservation.qr_str %>">
+    <%
+    moment.locale(locale);
+    for (let reservation of reservations) {
+    %>
+    <div class="printcontent">
+    
+        <div class="pr-header">
+            <div class="logo">
+                <img src="/images/common/logo.png">
+            </div>
+            <div class="title">
+                <%- __('Label.TicketAndReceipt') %>
             </div>
         </div>
-    </div>
-
-
-    <div class="pr-paddinglr">
-
-        <table class="pr-maintable">
-            <tbody>
-                <tr>
-                    <td class="main-info">
-                        <div class="pr-rsrvnum">
-                            <h3>購入番号</h3>
-                            <strong><%- reservation.get('payment_no') %></strong>
-                        </div>
-
-                        <div class="pr-time">
-                            <h3>ご来塔ご予約日時</h3>
-                            <strong><%- moment(reservation.get('performance_day'), 'YYYYMMDD').format('LL (ddd)') %></strong>
-                            <strong><%- moment(reservation.get('performance_start_time'), 'HHmm').format('HH:mm') %> - <%- moment(reservation.get('performance_end_time'), 'HHmm').format('HH:mm') %>(JST)</strong>
-                            <p class="smalltext timenotice">※混雑する場合がございますので、<br><span class="bold">15分前にお越し下さい。</span></p>
-                        </div>
-
-                        <div class="pr-ticket">
-                            <h3>券種</h3>
-                            <strong><%- reservation.get('ticket_type_name')[locale] %> / &yen;<%- reservation.get('ticket_type_charge') %>&nbsp;(<%- reservation.seat_code %>)</strong>
-                        </div>
-
-                        <div class="pr-term">
-                            <h4>ご注意事項</h4>
-                            <p>
-                                ※チケットのキャンセルは、ご来塔日の３日前までにお手続きを行ってください。<br>
-                                ※チケットのキャンセル時に、キャンセル料を徴収させていただきます。<br>
-                                ※入塔受付時間を過ぎた場合、ご入塔いただけない場合があります。<br>
-                                ※ご来塔日当日のご予約時間の変更は、お受付いたしかねます。<br>
-                                ※交通渋滞による来塔遅延、その他いかなる場合でも、当日のチケット変更およびキャンセル・払い戻しはいたしません。<br>
-                                ※購入したチケットの転売は、固く禁止しております。転売が原因となるお客様間の不利益や損害などに対して、一切の責任を負わないものとします。
+    
+        <div class="pr-thanks">
+            <%- __('Message.TicketInfoMsg') %><br>
+        </div>
+    
+        <div class="pr-qrcode pr-bg">
+            <img class="pr-bg-image" src="/images/print/bg_gray.png">
+            <div class="pr-bg-content inner">
+                <h2>
+                    <%- __('Message.TicketQRInfo') %><br>
+                    <span class="smalltext"><%- __('Message.TicketQRAuthInfo') %></span>
+                </h2>
+                <div class="wrapper-qrimg pr-bg">
+                    <img src="//chart.apis.google.com/chart?chs=150x150&cht=qr&chl=<%= reservation.qr_str %>">
+                </div>
+            </div>
+        </div>
+    
+    
+        <div class="pr-paddinglr">
+    
+            <table class="pr-maintable">
+                <tbody>
+                    <tr>
+                        <td class="main-info">
+                            <div class="pr-rsrvnum">
+                            <h3><%- __('Label.PaymentNo') %></h3>
+                                <strong><%- reservation.get('payment_no') %></strong>
+                            </div>
+    
+                            <div class="pr-time">
+                                <h3><%- __('Label.PurchaseContentDay') %></h3>
+                                <strong><%- moment(reservation.get('performance_day'), 'YYYYMMDD').format('LL (ddd)') %></strong>
+                            </div>
+    
+                            <div class="pr-time">
+                                <h3><%- __('Label.PurchaseContentTime') %></h3>
+                                <strong><%- moment(reservation.get('performance_start_time'), 'HHmm').format('HH:mm') %> - <%- moment(reservation.get('performance_end_time'), 'HHmm').format('HH:mm') %>(JST)</strong>
+                            </div>
+    
+                            <div class="pr-time">
+                                <h3><%- __('Label.PurchaseEntryTime') %></h3>
+                                <strong><%- moment(reservation.get('performance_start_time'), 'HHmm').format('HH:mm') %> - <%- moment(reservation.get('performance_end_time'), 'HHmm').format('HH:mm') %>(JST)</strong>
+                                <%
+                                var time = moment(reservation.get('performance_start_time'), 'HHmm').format('HH:mm');
+                                var timeEarly = moment(reservation.get('performance_start_time'), 'HHmm').add(-30, 'minutes').format('HH:mm');
+                                if (moment(reservation.get('performance_start_time'), 'HHmm').format('HH:mm') !== "09:00") { %>
+                                    <p class="smalltext timenotice">※<%- __('Message.EntryFootTown') %><br><%- timeEarly %>～<%- time %></p>
+                                <% } %>
+                            </div>
+    
+                            <div class="pr-ticket">
+                                <h3><%- __('Label.TicketType') %></h3>
+                                <strong><%- reservation.get('ticket_type_name')[locale] %> / &yen;<%- reservation.get('ticket_type_charge') %>&nbsp;(<%- reservation.seat_code %>)</strong>
+                            </div>
+    
+                            <div class="pr-term">
+                                <h4><%- __('Label.ImportantNotes') %></h4>
+                                <p>
+                                    <%- __('Message.TicketNotesContents') %>
+                                </p>
+                            </div>
+    
+                            <div class="pr-contact">
+                                <h4><%- __('Label.ContactUsForTickets') %></h4>
+                                <p>
+                                    03-3433-5111 / 9:00 am ～ 17:00 pm (<%- __('Label.ContactAvailableDay') %>)
+                                </p>
+    
+                                <h4><%- __('Label.OfficialSite') %></h4>
+                                <p>
+                                    https://www.tokyotower.co.jp
+                                </p>
+                            </div>
+    
+    
+                        </td>
+    
+                        <td class="main-map" rowspan="6">
+                            <p class="map">
+                                <img src="/images/print/map/<%- locale %>.svg">
                             </p>
-                        </div>
-
-                        <div class="pr-contact">
-                            <h4>チケットのお問い合わせ</h4>
-                            <p>
-                                03-3433-5111 / 9:00 am ～ 17:00 pm ( 年中無休)
-                            </p>
-
-                            <h4>オフィシャルサイト</h4>
-                            <p>
-                                https://www.tokyotower.co.jp
-                            </p>
-                        </div>
-
-
-                    </td>
-
-                    <td class="main-map" rowspan="6">
-                        <p class="map">
-                            <img src="/images/print/map/<%- locale %>.svg">
-                        </p>
-
-                        <div class="accesstable">
-                            <h4>地下鉄、JR</h4>
-                            <table>
-                                <tbody>
-                                    <tr><td>
-                                        ① 都営大江戸線 赤羽橋駅 徒歩5 分<br>
-                                        ② 東京メトロ日比谷線 神谷町駅 徒歩７分<br>
-                                        ③ 都営三田線 御成門駅 徒歩6 分<br>
-                                        ④ 都営浅草線 大門駅 徒歩10 分<br>
-                                    </td><td>
-                                        ⑤ JR 山手線 浜松町駅 徒歩15 分<br>
-                                    </td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <hr>
-
-                        <div class="stafftable">
-                            <h3>QR認証場所</h3>
-                            <h4><img class="mark" src="/images/print/staff_mark.svg">：QR認証場所</h4>
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <img src="/images/print/staff_map_1.svg">
-                                        </td>
-                                        <td>
-                                            <h4>フットタウン 1F</h4>
-                                            <p>フットタウン1Fの展望台直通エレベーター前にて、QRコードの認証を行います。</p>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <img src="/images/print/staff_map_2.svg">
-                                        </td>
-                                        <td>
-                                            <h4>フットタウン RF</h4>
-                                            <p>フットタウンRFの昇り階段入り口にて、QRコードの認証を行います。</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </td>
-
-                </tr>
-
-
-            </tbody>
-        </table>
-
+    
+                            <div class="accesstable">
+                                <h4>地下鉄、JR</h4>
+                                <table>
+                                    <tbody>
+                                        <tr><td>
+                                            ① 都営大江戸線 赤羽橋駅 徒歩5 分<br>
+                                            ② 東京メトロ日比谷線 神谷町駅 徒歩７分<br>
+                                            ③ 都営三田線 御成門駅 徒歩6 分<br>
+                                            ④ 都営浅草線 大門駅 徒歩10 分<br>
+                                        </td><td>
+                                            ⑤ JR 山手線 浜松町駅 徒歩15 分<br>
+                                        </td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+    
+                            <hr>
+    
+                            <div class="stafftable">
+                                <h3><%- __('Label.StaffPosition') %></h3>
+                                <h4><img class="mark" src="/images/print/staff_mark.svg">：<%- __('Label.StaffPosition') %></h4>
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <img src="/images/print/staff_map_1.svg">
+                                            </td>
+                                            <td>
+                                                <h4><%- __('Label.FootTown') %></h4>
+                                                <p><%- __('Message.FootTownInfo') %></p>
+                                            </td>
+                                        </tr>
+                                        <!--
+                                        <tr>
+                                            <td>
+                                                <img src="/images/print/staff_map_2.svg">
+                                            </td>
+                                            <td>
+                                                <h4>フットタウン RF</h4>
+                                                <p>フットタウンRFの昇り階段入り口にて、QRコードの認証を行います。</p>
+                                            </td>
+                                        </tr>
+                                        -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+    
+                    </tr>
+    
+    
+                </tbody>
+            </table>
+    
+        </div>
+    
+        <div class="pr-footer">
+            <p>©2017 TOKYO TOWER. ALL RIGHTS RESERVED.</p>
+        </div>
+    
     </div>
-
-    <div class="pr-footer">
-        <p>©2017 TOKYO TOWER. ALL RIGHTS RESERVED.</p>
-    </div>
-
-</div>
-<% } %>
-
-</body>
-</html>
+    <% } %>
+    
+    </body>
+    </html>
