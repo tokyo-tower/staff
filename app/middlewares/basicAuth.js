@@ -7,12 +7,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const basicAuth = require("basic-auth");
 const http_status_1 = require("http-status");
-const BASIC_AUTH_NAME = 'motionpicture';
-const BASIC_AUTH_PASS = '4_CS/T|YG*Lz';
+const BASIC_AUTH_NAME = 'tower333';
+const BASIC_AUTH_PASS = 'TTTS!2017';
 exports.default = (req, res, next) => {
     if (process.env.NODE_ENV === 'development' ||
         process.env.NODE_ENV === 'production' ||
-        process.env.NODE_ENV === 'test' ||
         process.env.NODE_ENV === 'dev4gmo' ||
         process.env.NODE_ENV === 'test4gmo' ||
         process.env.NODE_ENV === 'prod4gmo') {

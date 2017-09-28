@@ -8,13 +8,12 @@ import * as basicAuth from 'basic-auth';
 import { NextFunction, Request, Response } from 'express';
 import { UNAUTHORIZED } from 'http-status';
 
-const BASIC_AUTH_NAME = 'motionpicture';
-const BASIC_AUTH_PASS = '4_CS/T|YG*Lz';
+const BASIC_AUTH_NAME = 'tower333';
+const BASIC_AUTH_PASS = 'TTTS!2017';
 
 export default (req: Request, res: Response, next: NextFunction) => {
     if (process.env.NODE_ENV === 'development' ||
         process.env.NODE_ENV === 'production' ||
-        process.env.NODE_ENV === 'test' ||
         process.env.NODE_ENV === 'dev4gmo' ||
         process.env.NODE_ENV === 'test4gmo' ||
         process.env.NODE_ENV === 'prod4gmo') {
