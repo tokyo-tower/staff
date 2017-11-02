@@ -62,12 +62,21 @@ async function cancelById(reservationId: string) : Promise<boolean> {
     try {
         // idから予約データ取得
         const reservation: any = await Models.Reservation.findById(reservationId).exec();
-        // 予約データ解放(AVAILABLEに変更)
-        await Models.Reservation.findByIdAndUpdate(
-            reservation._id,
+        // seat_code_baseから本体分+余分確保分チケットを取得
+        const conditions: any = {
+            performance: reservation.performance,
+            performance_day: reservation.performance_day
+        };
+        conditions['reservation_ttts_extension.seat_code_base'] = reservation.seat_code;
+        // 同じseat_code_baseのチケット一式を'予約可能'に更新
+        await Models.Reservation.update(
+            conditions,
             {
                 $set: { status: ReservationUtil.STATUS_AVAILABLE },
                 $unset: getUnsetFields(reservation._doc)
+            },
+            {
+                multi: true
             }
         ).exec();
     } catch (error) {
