@@ -3,7 +3,7 @@
  *
  * @namespace controller/staff/cancel
  */
-import { Models } from '@motionpicture/ttts-domain';
+import { Models, TicketTypeGroupUtil } from '@motionpicture/ttts-domain';
 import { ReservationUtil } from '@motionpicture/ttts-domain';
 import { NextFunction, Request, Response } from 'express';
 
@@ -79,6 +79,19 @@ async function cancelById(reservationId: string) : Promise<boolean> {
                 multi: true
             }
         ).exec();
+        // 2017/11 時間ごとの予約レコードのSTATUS初期化
+        if (reservation.ticket_ttts_extension !== TicketTypeGroupUtil.TICKET_TYPE_CATEGORY_NORMAL) {
+            await Models.ReservationPerHour.findOneAndUpdate(
+                { reservation_id: reservationId },
+                {
+                    $set: { status: ReservationUtil.STATUS_AVAILABLE },
+                    $unset: { expired_at: 1, reservation_id: 1}
+                },
+                {
+                    new: true
+                }
+            ).exec();
+        }
     } catch (error) {
 
         return false;

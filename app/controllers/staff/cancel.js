@@ -88,6 +88,15 @@ function cancelById(reservationId) {
             }, {
                 multi: true
             }).exec();
+            // 2017/11 時間ごとの予約レコードのSTATUS初期化
+            if (reservation.ticket_ttts_extension !== ttts_domain_1.TicketTypeGroupUtil.TICKET_TYPE_CATEGORY_NORMAL) {
+                yield ttts_domain_1.Models.ReservationPerHour.findOneAndUpdate({ reservation_id: reservationId }, {
+                    $set: { status: ttts_domain_2.ReservationUtil.STATUS_AVAILABLE },
+                    $unset: { expired_at: 1, reservation_id: 1 }
+                }, {
+                    new: true
+                }).exec();
+            }
         }
         catch (error) {
             return false;

@@ -22,6 +22,7 @@ import ReserveSessionModel from '../models/reserve/session';
 //const extraSeatNum: any = conf.get<any>('extra_seat_num');
 const debug = createDebug('ttts-staff:controller:reserveBase');
 const DEFAULT_RADIX = 10;
+const LENGTH_HOUR: number = 2;
 
 /**
  * 座席・券種FIXプロセス
@@ -42,6 +43,9 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
     if (infos.status === false) {
         throw new Error(infos.message);
     }
+
+    // tslint:disable-next-line:no-console
+    console.log(`reservationModel.performance=${reservationModel.performance._id}`);
 
     // チケット情報に枚数セット(画面で選択された枚数<画面再表示用)
     reservationModel.ticketTypes.forEach((ticketType) => {
@@ -125,7 +129,7 @@ async function checkFixSeatsAndTickets(reservationModel: ReserveSessionModel,
                 updated: false
             };
             // 特殊の時、必要枚数分セット
-            if (extraSeatNum.hasOwnProperty((<any>choice).ticket_type)) {
+            if (extraSeatNum.hasOwnProperty((<any>choice).ticket_type) === true) {
                 const extraCount: number = Number(extraSeatNum[(<any>choice).ticket_type]) - 1;
                 for (let indexExtra = 0; indexExtra < extraCount; indexExtra += 1) {
                     choiceInfo.choicesExtra.push({
@@ -238,6 +242,25 @@ async function saveDbFixSeatsAndTickets(reservationModel: ReserveSessionModel,
     if (reservation === null) {
         return 0;
     }
+
+    // 2017/11 時間ごとの予約情報更新
+    if (ticketType.ttts_extension.category !== TicketTypeGroupUtil.TICKET_TYPE_CATEGORY_NORMAL) {
+        if (!(await updateReservationPerHour(reservation._id.toString(),
+                                             reservationModel.expiredAt,
+                                             ticketType,
+                                             reservationModel.performance))) {
+            // 更新済の予約データクリア
+            await Models.Reservation.findByIdAndUpdate(
+                { _id: reservation._id },
+                { $set: { status: ReservationUtil.STATUS_AVAILABLE },
+                  $unset: { payment_no: 1, ticket_type: 1, expired_at: 1, ticket_ttts_extension: 1, reservation_ttts_extension: 1}},
+                { new: true }
+            ).exec();
+
+            return 0;
+        }
+    }
+
     // チケット情報+座席情報をセッションにsave
     saveSessionFixSeatsAndTickets(req,
                                   reservationModel,
@@ -268,6 +291,54 @@ async function saveDbFixSeatsAndTickets(reservationModel: ReserveSessionModel,
     await Promise.all(promises);
 
     return updateCount;
+}
+/**
+ * 座席・券種FIXプロセス/予約情報をDBにsave(仮予約)
+ *
+ * @param {string} reservationId
+ * @param {any} expiredAt
+ * @param {string} ticketType
+ * @param {string} performance
+ * @returns {Promise<boolean>}
+ */
+async function updateReservationPerHour (reservationId: string,
+                                         expiredAt: any,
+                                         ticketType: any,
+                                         performance: any): Promise<boolean> {
+    // 更新キー(入塔日＋時間帯)
+    const updateKey = {
+        performance_day: performance.day,
+        performance_hour: performance.start_time.slice(0, LENGTH_HOUR),
+        ticket_category: ticketType.ttts_extension.category,
+        status: ReservationUtil.STATUS_AVAILABLE
+    };
+
+    // 更新内容セット
+    const updateData: any = {
+        status: ReservationUtil.STATUS_TEMPORARY,
+        expired_at: expiredAt,
+        reservation_id: reservationId
+    };
+
+    // '予約可能'を'仮予約'に変更
+    const reservation = await Models.ReservationPerHour.findOneAndUpdate(
+        updateKey,
+        updateData,
+        {
+        new: true
+        }
+    ).exec();
+    // 更新エラー(対象データなし):既に予約済
+    if (reservation === null) {
+        debug('update hour error');
+        // tslint:disable-next-line:no-console
+        console.log('update hour error');
+    } else {
+        // tslint:disable-next-line:no-console
+        console.log((<any>reservation)._id);
+    }
+
+    return reservation !== null;
 }
 /**
  * 座席・券種FIXプロセス/予約情報をDBにsave(仮予約)
@@ -497,9 +568,31 @@ export async function processCancelSeats(reservationModel: ReserveSessionModel):
                 ).exec();
             } catch (error) {
                 //失敗したとしても時間経過で消るので放置
+                // tslint:disable-next-line:no-console
+                console.log(`clear error id=${id}`);
             }
         });
         await Promise.all(promises);
+        // 2017/11 時間ごとの予約レコードのSTATUS初期化
+        const promisesHour = ids.map(async (id: any) => {
+            if (idsExtra.indexOf(id) < 0) {
+                try {
+                    await Models.ReservationPerHour.findOneAndUpdate(
+                        { reservation_id: id },
+                        {
+                             $set: { status: ReservationUtil.STATUS_AVAILABLE },
+                             $unset: { expired_at: 1, reservation_id: 1}
+                        },
+                        {
+                            new: true
+                        }
+                    ).exec();
+                } catch (error) {
+                    //失敗したとしても時間経過で消るので放置
+                }
+            }
+        });
+        await Promise.all(promisesHour);
     }
 }
 
@@ -673,7 +766,6 @@ export async function processAllExceptConfirm(reservationModel: ReserveSessionMo
         // update = Object.assign(update, commonUpdate);
         update = {...update, ...commonUpdate};
         (<any>update).payment_seat_index = index;
-
         const reservation = await Models.Reservation.findByIdAndUpdate(
             update._id,
             update,
@@ -721,6 +813,20 @@ export async function processFixReservations(reservationModel: ReserveSessionMod
         update,
         { multi: true }
     ).exec();
+
+    // 2017/11 本体チケット予約情報取得
+    const reservations = getReservations(reservationModel);
+    await Promise.all(reservations.map(async (reservation) => {
+        // 2017/11 本体チケットかつ特殊(車椅子)チケットの時
+        if (reservation.ticket_ttts_extension.category !== TicketTypeGroupUtil.TICKET_TYPE_CATEGORY_NORMAL) {
+            // 時間ごとの予約情報更新('仮予約'を'予約'に変更)
+            await Models.ReservationPerHour.findOneAndUpdate(
+                { reservation_id: reservation._id.toString() },
+                { status: ReservationUtil.STATUS_RESERVED },
+                { new: true }
+            ).exec();
+        }
+    }));
 
     try {
         // 完了メールキュー追加(あれば更新日時を更新するだけ)
