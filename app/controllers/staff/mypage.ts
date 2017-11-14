@@ -3,8 +3,8 @@
  *
  * @namespace controller/staff/mypage
  */
-
-import { CommonUtil, Models, ReservationUtil, ScreenUtil } from '@motionpicture/ttts-domain';
+//, ScreenUtil
+import { CommonUtil, Models, ReservationUtil } from '@motionpicture/ttts-domain';
 import { NextFunction, Request, Response } from 'express';
 import * as mongoose from 'mongoose';
 import * as _ from 'underscore';
@@ -185,35 +185,50 @@ export async function search(req: Request, res: Response, next: NextFunction): P
             }
         ).exec();
 
+        // 2017/11/14 データ検索、切り取り、ソートの順を変更
         // データ検索
-        const reservations = <any[]>await Models.Reservation.find({ $and: conditions })
+        // const reservations = <any[]>await Models.Reservation.find({ $and: conditions })
+        //     .skip(limit * (page - 1))
+        //     .limit(limit)
+        //     .lean(true)
+        //     .exec();
+
+        // // ソート昇順(上映日→開始時刻→購入番号→座席コード)
+        // reservations.sort((a, b) => {
+        //     if (a.performance_day > b.performance_day) {
+        //         return 1;
+        //     }
+        //     if (a.performance_day < b.performance_day) {
+        //         return -1;
+        //     }
+        //     if (a.performance_start_time > b.performance_start_time) {
+        //         return 1;
+        //     }
+        //     if (a.performance_start_time < b.performance_start_time) {
+        //         return -1;
+        //     }
+        //     if (a.payment_no > b.payment_no) {
+        //         return 1;
+        //     }
+        //     if (a.payment_no < b.payment_no) {
+        //         return -1;
+        //     }
+        //     return ScreenUtil.sortBySeatCode(a.seat_code, b.seat_code);
+        // });
+
+        // データ検索(検索→ソート→指定ページ分切取り)
+        const reservations = <any[]>await Models.Reservation
+            .find({$and: conditions})
+            .sort({
+                performance_day: 1,
+                performance_start_time: 1,
+                payment_no: 1,
+                seat_code: 1
+            })
             .skip(limit * (page - 1))
             .limit(limit)
-            .lean(true)
             .exec();
-
-        // ソート昇順(上映日→開始時刻→購入番号→座席コード)
-        reservations.sort((a, b) => {
-            if (a.performance_day > b.performance_day) {
-                return 1;
-            }
-            if (a.performance_day < b.performance_day) {
-                return -1;
-            }
-            if (a.performance_start_time > b.performance_start_time) {
-                return 1;
-            }
-            if (a.performance_start_time < b.performance_start_time) {
-                return -1;
-            }
-            if (a.payment_no > b.payment_no) {
-                return 1;
-            }
-            if (a.payment_no < b.payment_no) {
-                return -1;
-            }
-            return ScreenUtil.sortBySeatCode(a.seat_code, b.seat_code);
-        });
+        //---
 
         res.json({
             success: true,

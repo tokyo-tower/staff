@@ -1,9 +1,4 @@
 "use strict";
-/**
- * 内部関係者マイページコントローラー
- *
- * @namespace controller/staff/mypage
- */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -13,6 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * 内部関係者マイページコントローラー
+ *
+ * @namespace controller/staff/mypage
+ */
+//, ScreenUtil
 const ttts_domain_1 = require("@motionpicture/ttts-domain");
 const _ = require("underscore");
 const DEFAULT_RADIX = 10;
@@ -183,34 +184,48 @@ function search(req, res, next) {
             const count = yield ttts_domain_1.Models.Reservation.count({
                 $and: conditions
             }).exec();
+            // 2017/11/14 データ検索、切り取り、ソートの順を変更
             // データ検索
-            const reservations = yield ttts_domain_1.Models.Reservation.find({ $and: conditions })
+            // const reservations = <any[]>await Models.Reservation.find({ $and: conditions })
+            //     .skip(limit * (page - 1))
+            //     .limit(limit)
+            //     .lean(true)
+            //     .exec();
+            // // ソート昇順(上映日→開始時刻→購入番号→座席コード)
+            // reservations.sort((a, b) => {
+            //     if (a.performance_day > b.performance_day) {
+            //         return 1;
+            //     }
+            //     if (a.performance_day < b.performance_day) {
+            //         return -1;
+            //     }
+            //     if (a.performance_start_time > b.performance_start_time) {
+            //         return 1;
+            //     }
+            //     if (a.performance_start_time < b.performance_start_time) {
+            //         return -1;
+            //     }
+            //     if (a.payment_no > b.payment_no) {
+            //         return 1;
+            //     }
+            //     if (a.payment_no < b.payment_no) {
+            //         return -1;
+            //     }
+            //     return ScreenUtil.sortBySeatCode(a.seat_code, b.seat_code);
+            // });
+            // データ検索(検索→ソート→指定ページ分切取り)
+            const reservations = yield ttts_domain_1.Models.Reservation
+                .find({ $and: conditions })
+                .sort({
+                performance_day: 1,
+                performance_start_time: 1,
+                payment_no: 1,
+                seat_code: 1
+            })
                 .skip(limit * (page - 1))
                 .limit(limit)
-                .lean(true)
                 .exec();
-            // ソート昇順(上映日→開始時刻→購入番号→座席コード)
-            reservations.sort((a, b) => {
-                if (a.performance_day > b.performance_day) {
-                    return 1;
-                }
-                if (a.performance_day < b.performance_day) {
-                    return -1;
-                }
-                if (a.performance_start_time > b.performance_start_time) {
-                    return 1;
-                }
-                if (a.performance_start_time < b.performance_start_time) {
-                    return -1;
-                }
-                if (a.payment_no > b.payment_no) {
-                    return 1;
-                }
-                if (a.payment_no < b.payment_no) {
-                    return -1;
-                }
-                return ttts_domain_1.ScreenUtil.sortBySeatCode(a.seat_code, b.seat_code);
-            });
+            //---
             res.json({
                 success: true,
                 results: reservations,
