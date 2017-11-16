@@ -1,6 +1,7 @@
 <input type="hidden" name="apiEndpoint" value="<%= process.env.API_ENDPOINT %>">
 <input type="hidden" id="input_apiToken" value="<%= token.access_token %>">
 <input type="hidden" id="input_apiTokenExpire" value="<%= token.expires_in %>">
+<input type="hidden" name="reserveMaxDate" value="<%= reserveMaxDate %>">
 
 <script src="/js/flatpickr/flatpickr.min.js"></script>
 <script src="/js/flatpickr/flatpickr.locale.<%= locale %>.js"></script>

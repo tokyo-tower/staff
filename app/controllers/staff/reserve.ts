@@ -19,6 +19,7 @@ const layout: string = 'layouts/staff/layout';
 
 const PAY_TYPE_FREE: string = 'F';
 const paymentMethodNames: any = {F: '無料招待券', I: '請求書支払い'};
+const reserveMaxDateInfo: any = conf.get<any>('reserve_max_date');
 
 export async function start(req: Request, res: Response, next: NextFunction): Promise<void> {
     // 期限指定
@@ -96,6 +97,11 @@ export async function performances(req: Request, res: Response, next: NextFuncti
         const token: string = await TTTS.CommonUtil.getToken(process.env.API_ENDPOINT);
         // tslint:disable-next-line:no-console
         // console.log('token=' + JSON.stringify(token));
+        const maxDate = moment();
+        Object.keys(reserveMaxDateInfo).forEach((key: any) => {
+            maxDate.add(key, reserveMaxDateInfo[key]);
+        });
+        const reserveMaxDate: string = maxDate.format('YYYY/MM/DD');
 
         if (req.method === 'POST') {
             reservePerformanceForm(req);
@@ -126,6 +132,7 @@ export async function performances(req: Request, res: Response, next: NextFuncti
             res.render('staff/reserve/performances', {
                 // FilmUtil: TTTS.FilmUtil,
                 token: token,
+                reserveMaxDate: reserveMaxDate,
                 layout: layout
             });
         }

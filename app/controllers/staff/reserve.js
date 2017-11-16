@@ -25,6 +25,7 @@ const PURCHASER_GROUP = TTTS.ReservationUtil.PURCHASER_GROUP_STAFF;
 const layout = 'layouts/staff/layout';
 const PAY_TYPE_FREE = 'F';
 const paymentMethodNames = { F: '無料招待券', I: '請求書支払い' };
+const reserveMaxDateInfo = conf.get('reserve_max_date');
 function start(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         // 期限指定
@@ -101,6 +102,11 @@ function performances(req, res, next) {
             const token = yield TTTS.CommonUtil.getToken(process.env.API_ENDPOINT);
             // tslint:disable-next-line:no-console
             // console.log('token=' + JSON.stringify(token));
+            const maxDate = moment();
+            Object.keys(reserveMaxDateInfo).forEach((key) => {
+                maxDate.add(key, reserveMaxDateInfo[key]);
+            });
+            const reserveMaxDate = maxDate.format('YYYY/MM/DD');
             if (req.method === 'POST') {
                 reservePerformanceForm_1.default(req);
                 const validationResult = yield req.getValidationResult();
@@ -127,6 +133,7 @@ function performances(req, res, next) {
                 res.render('staff/reserve/performances', {
                     // FilmUtil: TTTS.FilmUtil,
                     token: token,
+                    reserveMaxDate: reserveMaxDate,
                     layout: layout
                 });
             }
