@@ -250,6 +250,7 @@ export default class ReserveSessionModel {
             performance_open_time: this.performance.open_time,
             performance_start_time: this.performance.start_time,
             performance_end_time: this.performance.end_time,
+            performance_ttts_extension: this.performance.ttts_extension, //2017/11/16
             theater: this.performance.theater._id,
             theater_name: this.performance.theater.name,
             theater_address: this.performance.theater.address,
@@ -307,6 +308,7 @@ interface IPerformance {
         is_mx4d: boolean,
         copyright: string
     };
+    ttts_extension: IExtensionPerformance;
 }
 /**
  * チケット情報インターフェース
@@ -334,6 +336,7 @@ interface IReservation {
     watcher_name: string;
     ticket_cancel_charge: [ICancelCharge];
     ticket_ttts_extension: IExtensionTiket;
+    performance_ttts_extension: IExtensionPerformance; //2017/11/16
 }
 
 /**
@@ -371,6 +374,12 @@ interface IExtensionTiket {
     category: string;
     required_seat_num: number;
     csv_code: string;
+}
+/**
+ * パフォーマンス拡張情報インターフェース
+ */
+interface IExtensionPerformance {
+    tour_number: string;
 }
 /**
  * 多言語情報インターフェース

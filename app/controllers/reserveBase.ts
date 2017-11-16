@@ -419,7 +419,8 @@ function saveSessionFixSeatsAndTickets(req: Request,
         ticket_type_charge : ticketType.charge,
         watcher_name: '',
         ticket_cancel_charge: ticketType.cancel_charge,
-        ticket_ttts_extension: ticketType.ttts_extension
+        ticket_ttts_extension: ticketType.ttts_extension,
+        performance_ttts_extension: reservationModel.performance.ttts_extension // 2017/11/16
     });
     // 座席コードのソート(文字列順に)
     reservationModel.seatCodes.sort(ScreenUtil.sortBySeatCode);
@@ -605,12 +606,12 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
     // パフォーマンス取得
     const performance = await Models.Performance.findById(
         perfomanceId,
-        'day open_time start_time end_time canceled film screen screen_name theater theater_name ticket_type_group' // 必要な項目だけ指定すること
+        'day open_time start_time end_time canceled film screen screen_name theater theater_name ticket_type_group ttts_extension'
     )
-        .populate('film', 'name is_mx4d copyright') // 必要な項目だけ指定すること
-        .populate('screen', 'name sections') // 必要な項目だけ指定すること
-        .populate('theater', 'name address') // 必要な項目だけ指定すること
-        .exec();
+    .populate('film', 'name is_mx4d copyright') // 必要な項目だけ指定すること
+    .populate('screen', 'name sections') // 必要な項目だけ指定すること
+    .populate('theater', 'name address') // 必要な項目だけ指定すること
+    .exec();
 
     if (performance === null) {
         throw new Error(req.__('Message.NotFound'));
@@ -688,7 +689,8 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
             image: `${req.protocol}://${req.hostname}/images/film/${performance.get('film').get('_id')}.jpg`,
             is_mx4d: performance.get('film').get('is_mx4d'),
             copyright: performance.get('film').get('copyright')
-        }
+        },
+        ttts_extension: performance.get('ttts_extension')
     };
 
     // 座席グレードリスト抽出

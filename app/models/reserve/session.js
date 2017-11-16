@@ -151,6 +151,7 @@ class ReserveSessionModel {
             performance_open_time: this.performance.open_time,
             performance_start_time: this.performance.start_time,
             performance_end_time: this.performance.end_time,
+            performance_ttts_extension: this.performance.ttts_extension,
             theater: this.performance.theater._id,
             theater_name: this.performance.theater.name,
             theater_address: this.performance.theater.address,
