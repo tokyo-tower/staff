@@ -218,7 +218,7 @@ function saveDbFixSeatsAndTickets(reservationModel, req, choiceInfo) {
         }
         // 座席番号取得＆Save
         const seatCodeBase = reservation.seat_code;
-        reservation = yield ttts_domain_1.Models.Reservation.findByIdAndUpdate({ _id: reservation._id }, { $set: { reservation_ttts_extension: { seat_code_base: seatCodeBase } } }, { new: true }).exec();
+        reservation = yield ttts_domain_1.Models.Reservation.findByIdAndUpdate({ _id: reservation._id }, { $set: { reservation_ttts_extension: getReservationExtension(seatCodeBase) } }, { new: true }).exec();
         if (reservation === null) {
             return 0;
         }
@@ -248,6 +248,19 @@ function saveDbFixSeatsAndTickets(reservationModel, req, choiceInfo) {
         yield Promise.all(promises);
         return updateCount;
     });
+}
+/**
+ * 予約拡張情報の更新情報取得
+ *
+ * @param {string} seatCodeBase
+ * @returns {any}
+ */
+function getReservationExtension(seatCodeBase) {
+    return {
+        seat_code_base: seatCodeBase,
+        refund_status: ttts_domain_1.ReservationUtil.REFUND_STATUS.NONE,
+        refund_update_user: ''
+    };
 }
 /**
  * 座席・券種FIXプロセス/予約情報をDBにsave(仮予約)
@@ -305,9 +318,7 @@ function updateReservation(updateKey, status, expiredAt, seatCodeBase, ticketTyp
             status: status,
             expired_at: expiredAt,
             ticket_ttts_extension: ticketType.ttts_extension,
-            reservation_ttts_extension: {
-                seat_code_base: seatCodeBase
-            }
+            reservation_ttts_extension: getReservationExtension(seatCodeBase)
         };
         // '予約可能'を'仮予約'に変更
         const reservation = yield ttts_domain_1.Models.Reservation.findOneAndUpdate(updateKey, updateData, {
