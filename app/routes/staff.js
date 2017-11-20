@@ -19,6 +19,7 @@ const staffAuthController = require("../controllers/staff/auth");
 const staffCancelController = require("../controllers/staff/cancel");
 const staffMyPageController = require("../controllers/staff/mypage");
 const staffReserveController = require("../controllers/staff/reserve");
+const staffSuspensionSettingController = require("../controllers/staff/suspensionSetting");
 const staff_1 = require("../models/user/staff");
 const router = express.Router();
 const authentication = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -93,5 +94,9 @@ router.all('/reserve/confirm', base, authentication, staffReserveController.conf
 router.get('/reserve/:performanceDay/:paymentNo/complete', base, authentication, staffReserveController.complete);
 router.post('/cancel/execute', base, authentication, staffCancelController.execute);
 router.all('/mypage/release', base, authentication, staffMyPageController.release);
+// 運行・オンライン販売停止設定コントローラー
+router.all('/suspension/setting/performances', base, authentication, staffSuspensionSettingController.performances);
+router.get('/suspension/setting/start', base, authentication, staffSuspensionSettingController.start);
+router.post('/suspension/setting/execute', base, authentication, staffSuspensionSettingController.execute);
 router.get('/auth', base, staffAuthController.auth);
 exports.default = router;

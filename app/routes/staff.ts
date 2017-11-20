@@ -10,6 +10,7 @@ import * as staffAuthController from '../controllers/staff/auth';
 import * as staffCancelController from '../controllers/staff/cancel';
 import * as staffMyPageController from '../controllers/staff/mypage';
 import * as staffReserveController from '../controllers/staff/reserve';
+import * as staffSuspensionSettingController from '../controllers/staff/suspensionSetting';
 import StaffUser from '../models/user/staff';
 
 const router = express.Router();
@@ -94,6 +95,11 @@ router.all('/reserve/confirm', base, authentication, staffReserveController.conf
 router.get('/reserve/:performanceDay/:paymentNo/complete', base, authentication, staffReserveController.complete);
 router.post('/cancel/execute', base, authentication, staffCancelController.execute);
 router.all('/mypage/release', base, authentication, staffMyPageController.release);
+
+// 運行・オンライン販売停止設定コントローラー
+router.all('/suspension/setting/performances', base, authentication, staffSuspensionSettingController.performances);
+router.get('/suspension/setting/start', base, authentication, staffSuspensionSettingController.start);
+router.post('/suspension/setting/execute', base, authentication, staffSuspensionSettingController.execute);
 
 router.get('/auth', base, staffAuthController.auth);
 
