@@ -75,7 +75,8 @@ function execute(req, res, next) {
         }
         try {
             // パフォーマンスIDリストをjson形式で受け取る
-            const performanceIds = JSON.parse(req.body.performanceIds);
+            //const performanceIds = JSON.parse(req.body.performanceIds);
+            const performanceIds = ['59f4a9c5fca1c8737f6c16c8', '59f4a9c4fca1c8737f6c1695'];
             if (!Array.isArray(performanceIds)) {
                 throw new Error(req.__('Message.UnexpectedError'));
             }
@@ -113,6 +114,7 @@ function suspendById(staffUser, performanceIds, onlineStatus, evStatus, notice) 
             return new mongoose.Types.ObjectId(id);
         });
         try {
+            const now = moment().format('YYYY/MM/DD HH:mm:ss');
             // パフォーマンス更新
             yield ttts_domain_1.Models.Performance.update({
                 _id: { $in: ids }
@@ -120,8 +122,10 @@ function suspendById(staffUser, performanceIds, onlineStatus, evStatus, notice) 
                 $set: {
                     'ttts_extension.online_sales_status': onlineStatus,
                     'ttts_extension.online_sales_update_user': staffUser,
+                    'ttts_extension.online_sales_update_at': now,
                     'ttts_extension.ev_service_status': evStatus,
-                    'ttts_extension.ev_service_update_user': staffUser
+                    'ttts_extension.ev_service_update_user': staffUser,
+                    'ttts_extension.ev_service_update_at': now
                 }
             }, {
                 multi: true

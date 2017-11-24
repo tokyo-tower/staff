@@ -170,7 +170,9 @@ export async function search(req: Request, res: Response, next: NextFunction): P
     }
     // 電話番号
     if (purchaserTel !== null) {
-        conditions.push({ purchaser_tel: purchaserTel });
+        //conditions.push({ purchaser_tel: purchaserTel });
+        conditions.push({ $or: [{ purchaser_international_tel: purchaserTel },
+                                { purchaser_tel: purchaserTel }]});
     }
     // メモ
     if (watcherName !== null) {

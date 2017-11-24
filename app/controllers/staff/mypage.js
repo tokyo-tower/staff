@@ -173,7 +173,9 @@ function search(req, res, next) {
         }
         // 電話番号
         if (purchaserTel !== null) {
-            conditions.push({ purchaser_tel: purchaserTel });
+            //conditions.push({ purchaser_tel: purchaserTel });
+            conditions.push({ $or: [{ purchaser_international_tel: purchaserTel },
+                    { purchaser_tel: purchaserTel }] });
         }
         // メモ
         if (watcherName !== null) {

@@ -19,6 +19,7 @@ const staffAuthController = require("../controllers/staff/auth");
 const staffCancelController = require("../controllers/staff/cancel");
 const staffMyPageController = require("../controllers/staff/mypage");
 const staffReserveController = require("../controllers/staff/reserve");
+const staffSuspensionListController = require("../controllers/staff/suspensionList");
 const staffSuspensionSettingController = require("../controllers/staff/suspensionSetting");
 const staff_1 = require("../models/user/staff");
 const router = express.Router();
@@ -98,5 +99,8 @@ router.all('/mypage/release', base, authentication, staffMyPageController.releas
 router.all('/suspension/setting/performances', base, authentication, staffSuspensionSettingController.performances);
 router.get('/suspension/setting/start', base, authentication, staffSuspensionSettingController.start);
 router.post('/suspension/setting/execute', base, authentication, staffSuspensionSettingController.execute);
+// 運行・オンライン販売停止一覧コントローラー
+router.all('/suspension/list', base, authentication, staffSuspensionListController.index);
+router.get('/suspension/list/search', base, authentication, staffSuspensionListController.search);
 router.get('/auth', base, staffAuthController.auth);
 exports.default = router;

@@ -10,6 +10,7 @@ import * as staffAuthController from '../controllers/staff/auth';
 import * as staffCancelController from '../controllers/staff/cancel';
 import * as staffMyPageController from '../controllers/staff/mypage';
 import * as staffReserveController from '../controllers/staff/reserve';
+import * as staffSuspensionListController from '../controllers/staff/suspensionList';
 import * as staffSuspensionSettingController from '../controllers/staff/suspensionSetting';
 import StaffUser from '../models/user/staff';
 
@@ -100,6 +101,9 @@ router.all('/mypage/release', base, authentication, staffMyPageController.releas
 router.all('/suspension/setting/performances', base, authentication, staffSuspensionSettingController.performances);
 router.get('/suspension/setting/start', base, authentication, staffSuspensionSettingController.start);
 router.post('/suspension/setting/execute', base, authentication, staffSuspensionSettingController.execute);
+// 運行・オンライン販売停止一覧コントローラー
+router.all('/suspension/list', base, authentication, staffSuspensionListController.index);
+router.get('/suspension/list/search', base, authentication, staffSuspensionListController.search);
 
 router.get('/auth', base, staffAuthController.auth);
 
