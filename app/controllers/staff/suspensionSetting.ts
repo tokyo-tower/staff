@@ -60,8 +60,7 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
     }
     try {
         // パフォーマンスIDリストをjson形式で受け取る
-        //const performanceIds = JSON.parse(req.body.performanceIds);
-        const performanceIds = ['59f4a9c5fca1c8737f6c16c8', '59f4a9c4fca1c8737f6c1695'];
+        const performanceIds = JSON.parse(req.body.performanceIds);
         if (!Array.isArray(performanceIds)) {
             throw new Error(req.__('Message.UnexpectedError'));
         }
