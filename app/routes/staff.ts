@@ -104,6 +104,7 @@ router.post('/suspension/setting/execute', base, authentication, staffSuspension
 // 運行・オンライン販売停止一覧コントローラー
 router.all('/suspension/list', base, authentication, staffSuspensionListController.index);
 router.get('/suspension/list/search', base, authentication, staffSuspensionListController.search);
+router.post('/suspension/list/refund/process', base, authentication, staffSuspensionListController.refundProcess);
 
 router.get('/auth', base, staffAuthController.auth);
 

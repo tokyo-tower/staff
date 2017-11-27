@@ -74,51 +74,62 @@ $(function() {
         page: '1'
     };
 
-    function showReservations(reservations) {
+    function showReservations(suspensions) {
         var html = '';
 
-        reservations.forEach(function(reservation) {
-            var startDatetime = reservation.performance_day.substr(0, 4)
-                + '/' + reservation.performance_day.substr(4, 2)
-                + '/' + reservation.performance_day.substr(6)
-                + ' ' + reservation.performance_start_time.substr(0, 2) + ':' + reservation.performance_start_time.substr(2);
+        suspensions.forEach(function(suspension) {
+            // var startDatetime = suspension.performance_day.substr(0, 4)
+            //     + '/' + suspension.performance_day.substr(4, 2)
+            //     + '/' + suspension.performance_day.substr(6)
+            //     + ' ' + suspension.performance_start_time.substr(0, 2) + ':' + suspension.performance_start_time.substr(2);
             html += ''
-                + '<tr data-seat-code="' + reservation.seat_code + '"'
-                + ' data-reservation-id="' + reservation._id + '"'
-                + ' data-payment-no="' + reservation.payment_no + '"'
-                + ' data-performance-start-datetime="' + startDatetime + '"'
-                + ' data-watcher-name="' + reservation.watcher_name + '"'
-                + ' data-ticketname="' + reservation.ticket_type_name.ja + '"'
-                + ' data-purchase-route="' + purchaseRoute[reservation.purchaser_group] + '"'
+                + '<tr performanceIds="' + suspension.performanceIds + '"'
                 + '>'
-                + '<th class="td-checkbox">';
+            // html += ''
+            //     + '<tr data-seat-code="' + suspension.seat_code + '"'
+            //     + ' data-reservation-id="' + suspension._id + '"'
+            //     + ' data-payment-no="' + suspension.payment_no + '"'
+            //     + ' data-performance-start-datetime="' + startDatetime + '"'
+            //     + ' data-watcher-name="' + suspension.watcher_name + '"'
+            //     + ' data-ticketname="' + suspension.ticket_type_name.ja + '"'
+            //     + ' data-purchase-route="' + purchaseRoute[suspension.purchaser_group] + '"'
+            //     + '>'
+            //    + '<th class="td-checkbox">';
 
-            if (reservation.payment_no && !reservation.performance_canceled) {
-                html += ''
-                    + '<input type="checkbox" value="">';
-            }
+            // if (suspension.payment_no && !suspension.performance_canceled) {
+            //     html += ''
+            //         + '<input type="checkbox" value="">';
+            // }
             html += ''
-                + '</th>'
-                + '<td class="td-number">'
-                    + '<span class="paymentno">' + reservation.payment_no + '</span><span class="starttime">' + moment(reservation.performance_day + ' ' + reservation.performance_start_time, 'YYYYMMDD HHmm').format('YYYY/MM/DD HH:mm') + '</span></td>'
-                + '<td class="td-name">' + reservation.purchaser_last_name + ' ' + reservation.purchaser_first_name + '</td>'
-                + '<td class="td-amemo">' + reservation.watcher_name + '</td>'
-                + '<td class="td-seat">' + reservation.seat_code + '</td>'
-                + '<td class="td-ticket">' + reservation.ticket_type_name.ja + '</td>'
-                + '<td class="td-route">' + purchaseRoute[reservation.purchaser_group] + '</td>'
-                + '<td class="td-checkin">' + ((reservation.checkins.length) ? '<span class="entered">入場済み</span>' : '<span class="unentered">未入場</span>') + '</td>'
-                + '<td class="td-actions">';
-            if (reservation.payment_no && !reservation.performance_canceled) {
-                html += ''
-                    + '<p class="btn call-modal"><span>詳細</span></p>'
-                    + '<p class="btn btn-print" data-targetid="' + reservation._id + '"><span>A4チケット印刷</span></p>'
-                    + '<p class="btn btn-thermalprint" data-targetid="' + reservation._id + '"><span>サーマル印刷</span></p>';
+                //+ '</th>'
+                + '<td class="td-number">' + suspension.online_sales_update_at + '</td>'
+                + '<td class="td-name">' + suspension.online_sales_update_user + '</td>' 
+                + '<td class="td-amemo">' + suspension.performance_day + '</td>'
+                + '<td class="td-ticket">' + suspension.tour_number + '</td>'
+                + '<td class="td-route">' + suspension.ev_service_status_name + '</td>'
+                + '<td class="td-checkin">' + suspension.canceled + '</td>'
+                + '<td class="td-checkin">' + suspension.arrived + '</td>'
+                + '<td class="td-checkin">' + suspension.refund_status_name + '</td>'
+                + '<td class="td-checkin">' + suspension.refunded + '</td>';
+            
+            // 処理実行リンク
+            html += '<td class="td-actions">'
+            if (suspension.allow_refund_process) {
+                html +=  '<p class="btn btn-refund_process"><span>処理実行</span></p>'
             }
-            html += ''
-                + '</td>'
-                + '</tr>';
+            html += '</td>';
+            // 完了通知リンク
+            html += '<td class="td-actions">'
+            if (suspension.allow_refund_notice) {
+                html +=  '<p class="btn btn-refund_process"><span>完了通知</span></p>'
+            }
+            html += '</td>';
+            // 販売中止解除リンク
+            html += '<td class="td-actions">'
+            html +=  '<p class="btn btn-online_sales_resume"><span>解除</span></p>'
+            html += '</td>';
+            + '</tr>';
         });
-
         $('#reservations').html(html);
     }
 
@@ -182,9 +193,6 @@ $(function() {
         conditions.input_performancedate2 = conditions.input_performancedate2.replace(/\-/g, '');
         conditions.searched_at = Date.now(); // ブラウザキャッシュ対策
         $('.error-message').hide();
-
-        alert(JSON.stringify(conditions));
-
         $.ajax({
             dataType: 'json',
             url: $('.search-form').attr('action'),
@@ -206,9 +214,9 @@ $(function() {
             }
             // データ表示
             if (data.success) {
-                data.results.forEach(function(reservation) {
-                    reservationsById[reservation._id] = reservation;
-                });
+                // data.results.forEach(function(reservation) {
+                //     reservationsById[reservation._id] = reservation;
+                // });
                 showReservations(data.results);
                 showPager(parseInt(data.count, 10));
                 showConditions();
@@ -221,6 +229,41 @@ $(function() {
         });
     }
 
+    // 返金処理実行
+    $(document).on('click', '.btn-refund_process', function(e) {
+        var ids = $(e.currentTarget).closest('tr').attr('performanceIds');
+        var performanceIds = ids.split(",");
+        alert(performanceIds);
+        $.ajax({
+            dataType: 'json',
+            url: '/staff/suspension/list/refund/process',
+            type: 'POST',
+            data: {
+                performanceIds: JSON.stringify(performanceIds)
+            },
+            beforeSend: function() {
+                //$('#modal_detail').modal('hide');
+            }
+        }).done(function(data) {
+            if (data.success) {
+                // var tempHTML = '';
+                // reservationsIds4cancel.forEach(function(_id) {
+                //     tempHTML += '<h3><span>購入番号:</span>' + reservationsById[_id].payment_no + '<span>座席 / 券種:</span>' + reservationsById[_id].seat_code + '/' + reservationsById[_id].ticket_type_name.ja + '</h3>';
+                // });
+                // document.getElementById('echo_canceledreservations').innerHTML = tempHTML;
+                // $('#modal_cancelcompleted').modal();
+                // // 再検索して表示を更新
+                // search();
+            } else {
+                alert('返金処理の実行でエラーが発生しました');
+            }
+        }).fail(function(jqxhr, textStatus, error) {
+            alert(error);
+        }).always(function() {
+        });
+    });
+        
+    
     function cancel(reservationsIds4cancel) {
         if (!confirm('指定した予約のキャンセル処理を実行してよろしいですか？\n\n'
             + reservationsIds4cancel.map(function(id) {
