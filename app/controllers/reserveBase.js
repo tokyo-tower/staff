@@ -258,7 +258,7 @@ function saveDbFixSeatsAndTickets(reservationModel, req, choiceInfo) {
 function getReservationExtension(seatCodeBase) {
     return {
         seat_code_base: seatCodeBase,
-        refund_status: ttts_domain_1.ReservationUtil.REFUND_STATUS.NONE,
+        refund_status: ttts_domain_1.PerformanceUtil.REFUND_STATUS.NONE,
         refund_update_user: ''
     };
 }

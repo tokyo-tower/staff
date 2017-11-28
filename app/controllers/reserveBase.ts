@@ -6,7 +6,7 @@
 
 import * as GMO from '@motionpicture/gmo-service';
 //import { EmailQueueUtil, Models, ReservationUtil, ScreenUtil, TicketTypeGroupUtil } from '@motionpicture/ttts-domain';
-import { EmailQueueUtil, Models, ReservationUtil, ScreenUtil, TicketTypeGroupUtil } from '@motionpicture/ttts-domain';
+import { EmailQueueUtil, Models, PerformanceUtil, ReservationUtil, ScreenUtil, TicketTypeGroupUtil } from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import * as createDebug from 'debug';
 import { Request, Response } from 'express';
@@ -302,7 +302,7 @@ function getReservationExtension (seatCodeBase: string): any {
 
     return {
         seat_code_base : seatCodeBase,
-        refund_status: ReservationUtil.REFUND_STATUS.NONE,
+        refund_status: PerformanceUtil.REFUND_STATUS.NONE,
         refund_update_user: ''
     };
 }

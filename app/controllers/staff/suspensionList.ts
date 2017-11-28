@@ -278,11 +278,11 @@ function getSuspensionList(infoP: any,
             suspension.refund_status_name = REFUND_STATUS_NAMES[reservationTop.reservation_ttts_extension.refund_status];
             // 返金処理可能フラグ(返金状態が未指示の時true)
             suspension.allow_refund_process =
-                (reservationTop.reservation_ttts_extension.refund_status === ReservationUtil.REFUND_STATUS.NONE ||
-                 reservationTop.reservation_ttts_extension.refund_status === ReservationUtil.REFUND_STATUS.NOT_INSTRUCTED);
+                (reservationTop.reservation_ttts_extension.refund_status === PerformanceUtil.REFUND_STATUS.NONE ||
+                 reservationTop.reservation_ttts_extension.refund_status === PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED);
             // 返金済通知(返金状態が返金済の時true)
             suspension.allow_refund_notice =
-                reservationTop.reservation_ttts_extension.refund_status === ReservationUtil.REFUND_STATUS.COMPLETE;
+                reservationTop.reservation_ttts_extension.refund_status === PerformanceUtil.REFUND_STATUS.COMPLETE;
         }
         suspensionList.push(suspension);
     }
@@ -329,7 +329,7 @@ function getArrivedCount(reservations: any[]): number {
 function getRefundedCount(reservations: any[]): number {
     let cnt: number = 0;
     for (const reservation of reservations) {
-        if (reservation.reservation_ttts_extension.refund_status === ReservationUtil.REFUND_STATUS.COMPLETE) {
+        if (reservation.reservation_ttts_extension.refund_status === PerformanceUtil.REFUND_STATUS.COMPLETE) {
             cnt += 1;
         }
     }
