@@ -3,7 +3,7 @@
  *
  * @namespace controller/staff/suspensionSetting
  */
-import { CommonUtil, Models } from '@motionpicture/ttts-domain';
+import { CommonUtil, Models, PerformanceUtil } from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import { NextFunction, Request, Response } from 'express';
 import * as moment from 'moment';
@@ -64,11 +64,17 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
         if (!Array.isArray(performanceIds)) {
             throw new Error(req.__('Message.UnexpectedError'));
         }
-        await suspendById((<any>req).staffUser.username,
-                          performanceIds,
-                          req.body.onlineStatus,
-                          req.body.evStatus,
-                          req.body.notice);
+        const executeType: string = req.body.executeType;
+        const onlineStatus: string =  executeType === '1' ? req.body.onlineStatus : PerformanceUtil.ONLINE_SALES_STATUS.NORMAL;
+        const evStatus: string =  executeType === '1' ? req.body.evStatus : PerformanceUtil.EV_SERVICE_STATUS.NORMAL;
+        await suspendByIds((<any>req).staffUser.username,
+                           performanceIds,
+                           onlineStatus,
+                           evStatus);
+        // 運行停止の時、メール作成
+        // if (req.body.ev_service_status === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
+        //     await createEmails((<any>req).staffUser, performanceIds);
+        // }
         res.json({
             success: true,
             message: null
@@ -87,18 +93,12 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
  * @param {string[]} performanceIds
  * @param {string} onlineStatus
  * @param {string} evStatus
- * @param {string} notice
  * @return {Promise<boolean>}
  */
-async function suspendById(staffUser: string,
-                           performanceIds: string[],
-                           onlineStatus: string,
-                           evStatus: string,
-                           notice: string) : Promise<boolean> {
-
-    // tslint:disable-next-line:no-console
-    console.log(notice);
-
+async function suspendByIds(staffUser: string,
+                            performanceIds: string[],
+                            onlineStatus: string,
+                            evStatus: string) : Promise<boolean> {
     // パフォーマンスIDをObjectIdに変換
     const ids = performanceIds.map((id) => {
         return new mongoose.Types.ObjectId(id);

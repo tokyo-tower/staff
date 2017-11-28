@@ -184,6 +184,8 @@ $(function() {
         // for test 固定でセット
         var performanceIds = ['59f41042fca1c8737f4c45b5','59f41042fca1c8737f4c45a8'];
         //---
+        // '0': 解除 '1': 停止
+        var executeType = '1';
         // オンライン販売状況
         var onlineStatus = $('input[name="online"]:checked').val();
         // 運行状況
@@ -195,6 +197,7 @@ $(function() {
             url: $('input[name="urlSuspend"]').val(),
             type: 'POST',
             data: {
+                executeType: executeType,
                 performanceIds: JSON.stringify(performanceIds),
                 onlineStatus: onlineStatus,
                 evStatus: evStatus,

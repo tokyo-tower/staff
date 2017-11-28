@@ -79,7 +79,14 @@ function execute(req, res, next) {
             if (!Array.isArray(performanceIds)) {
                 throw new Error(req.__('Message.UnexpectedError'));
             }
-            yield suspendById(req.staffUser.username, performanceIds, req.body.onlineStatus, req.body.evStatus, req.body.notice);
+            const executeType = req.body.executeType;
+            const onlineStatus = executeType === '1' ? req.body.onlineStatus : ttts_domain_1.PerformanceUtil.ONLINE_SALES_STATUS.NORMAL;
+            const evStatus = executeType === '1' ? req.body.evStatus : ttts_domain_1.PerformanceUtil.EV_SERVICE_STATUS.NORMAL;
+            yield suspendByIds(req.staffUser.username, performanceIds, onlineStatus, evStatus);
+            // 運行停止の時、メール作成
+            // if (req.body.ev_service_status === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
+            //     await createEmails((<any>req).staffUser, performanceIds);
+            // }
             res.json({
                 success: true,
                 message: null
@@ -101,13 +108,10 @@ exports.execute = execute;
  * @param {string[]} performanceIds
  * @param {string} onlineStatus
  * @param {string} evStatus
- * @param {string} notice
  * @return {Promise<boolean>}
  */
-function suspendById(staffUser, performanceIds, onlineStatus, evStatus, notice) {
+function suspendByIds(staffUser, performanceIds, onlineStatus, evStatus) {
     return __awaiter(this, void 0, void 0, function* () {
-        // tslint:disable-next-line:no-console
-        console.log(notice);
         // パフォーマンスIDをObjectIdに変換
         const ids = performanceIds.map((id) => {
             return new mongoose.Types.ObjectId(id);
