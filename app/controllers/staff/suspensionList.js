@@ -94,20 +94,19 @@ function search(req, res, next) {
         }
         try {
             // データ検索(検索→ソート→指定ページ分切取り)
-            // infoP.dicPerformances{ 2017/11/11/12:00:00 : [performance1, performancen] }
-            // infoR.dicResevations { 2017/11/11/12:00:00 : [resevation1, resevationn] }
-            const infoP = yield getPerformances(conditions, limit, page);
-            const count = infoP.count;
+            const performances = yield getPerformances(conditions, limit, page);
+            const cntPerformances = performances.length;
             let infoR = {};
-            if (count > 0) {
-                infoR = yield getResevations(conditionsR, infoP.dicPerformances);
+            if (cntPerformances > 0) {
+                // infoR.dicResevations { performance_id : [resevation1, resevationn] }
+                infoR = yield getResevations(conditionsR, performances);
             }
             // データから表示用の一覧を作成
-            const suspensionList = getSuspensionList(infoP, infoR);
+            const suspensionList = getSuspensionList(performances, infoR);
             res.json({
                 success: true,
                 results: suspensionList,
-                count: Object.keys(infoP.dicPerformances).length,
+                count: cntPerformances,
                 errors: null
             });
         }
@@ -153,78 +152,37 @@ function getConditionsFromTo(value1, value2, convert = false) {
  */
 function getPerformances(conditions, limit, page) {
     return __awaiter(this, void 0, void 0, function* () {
-        // info {
-        //    dicP: { "2017/11/01 12:00:00": [p1,p2,,,pn]}
-        // }
-        const info = { count: 0, dicPerformances: {} };
-        // 総数検索
-        info.count = yield ttts_domain_1.Models.Performance.count({ $and: conditions }).exec();
-        if (info.count <= 0) {
-            return info;
-        }
-        // データ検索
+        // tslint:disable-next-line:no-unnecessary-local-variable
         const performances = yield ttts_domain_1.Models.Performance
-            .find({
-            $and: conditions
-        })
+            .find({ $and: conditions })
             .sort({
-            'ttts_extension.online_sales_update_at': -1,
-            day: 1,
+            day: -1,
             start_time: 1
         })
+            .skip(limit * (page - 1))
+            .limit(limit)
             .exec();
-        // { 2017/11/11/12:00:00 : [performance1,performancen] }
-        const dicPerformances = {};
-        let updateAtArray = [];
-        for (const performance of performances) {
-            const key = performance.ttts_extension.online_sales_update_at;
-            if (dicPerformances.hasOwnProperty(key) === false) {
-                dicPerformances[key] = [];
-                updateAtArray.push(key);
-            }
-            dicPerformances[key].push(performance);
-        }
-        // 対象ページ分を切り取る
-        // @@@@データ3行と4行、psge=1と2でテスト！！@@@
-        const start = limit * (page - 1);
-        if (start >= updateAtArray.length) {
-            return info;
-        }
-        updateAtArray = updateAtArray.splice(start, limit);
-        // 対象ページのパフォーマンス情報をセット
-        for (const updateAt of updateAtArray) {
-            info.dicPerformances[updateAt] = dicPerformances[updateAt];
-        }
-        return info;
+        return performances;
     });
 }
 /**
  * 予約情報取得
  *
  * @param {any} conditions
- * @param {any} dicPerformances
+ * @param {any} performances
  * @return {any}
  */
-function getResevations(conditions, dicPerformances) {
+function getResevations(conditions, performances) {
     return __awaiter(this, void 0, void 0, function* () {
         const info = { dicReservations: {} };
         // 予約情報取得
         // { 2017/11/11/12:00:00 : [reservation1,reservationn] }
         conditions.status = ttts_domain_1.ReservationUtil.STATUS_RESERVED;
         const dicReservations = {};
-        const promises = Object.keys(dicPerformances).map((key) => __awaiter(this, void 0, void 0, function* () {
-            // 販売停止日時ごとにidをセット
-            const ids = getPerformanceIds(dicPerformances[key]);
-            // // 販売停止日時ごとにidをセット
-            // const performances = dicPerformances[key];
-            // for (const performance of performances) {
-            //     ids.push(performance._id.toString());
-            // }
-            conditions.performance = { $in: ids };
-            if (dicReservations.hasOwnProperty(key) === false) {
-                dicReservations[key] = [];
-            }
-            // 販売停止日時ごとに予約情報取得
+        const promises = performances.map((performance) => __awaiter(this, void 0, void 0, function* () {
+            // パフォーマンスごとに予約情報取得
+            const key = performance._id.toString();
+            conditions.performance = key;
             dicReservations[key] = yield ttts_domain_1.Models.Reservation.find(conditions).exec();
         }));
         yield Promise.all(promises);
@@ -235,77 +193,211 @@ function getResevations(conditions, dicPerformances) {
 /**
  * 表示一覧取得
  *
- * @param {any} infoP
+ * @param {any} performances
  * @param {any} infoR
  * @return {any}
  */
-function getSuspensionList(infoP, infoR) {
+function getSuspensionList(performances, infoR) {
     const suspensionList = [];
-    for (const key of Object.keys(infoP.dicPerformances)) {
+    for (const performance of performances) {
         // 予約情報がない時のため、予約関連項目はここで初期化
-        const suspension = {
-            refund_status: '',
-            refund_status_name: EMPTY_STRING,
-            allow_refund_process: false,
-            allow_refund_notice: false
-        };
-        const performanceTop = infoP.dicPerformances[key][0];
-        const reservationTop = infoR.dicReservations[key].length > 0 ?
-            infoR.dicReservations[key][0] : null;
+        const suspension = {};
+        const performanceId = performance._id.toString();
         // パフォーマンスIDの並列
-        suspension.performanceIds = getPerformanceIds(infoP.dicPerformances[key]);
-        // 販売停止処理日時
-        suspension.online_sales_update_at = key;
-        // 処理実施者
-        suspension.online_sales_update_user = performanceTop.ttts_extension.online_sales_update_user;
+        suspension.performance_id = performanceId;
         // 対象ツアー年月日
-        suspension.performance_day = moment(performanceTop.day, 'YYYYMMDD').format('YYYY/MM/DD');
+        suspension.performance_day = moment(performance.day, 'YYYYMMDD').format('YYYY/MM/DD');
         // 対象ツアーNo
-        suspension.tour_number = getTourNumberString(infoP.dicPerformances[key]);
+        suspension.tour_number = performance.ttts_extension.tour_number === '' ?
+            EMPTY_STRING : performance.ttts_extension.tour_number;
         // 運転状況
-        suspension.ev_service_status = performanceTop.ttts_extension.ev_service_status;
+        suspension.ev_service_status = performance.ttts_extension.ev_service_status;
         // 運転状況(名称)
-        suspension.ev_service_status_name = EV_SERVICE_STATUS_NAMES[performanceTop.ttts_extension.ev_service_status];
-        // キャンセル対象予約数
-        suspension.canceled = infoR.dicReservations[key].length;
+        suspension.ev_service_status_name = EV_SERVICE_STATUS_NAMES[performance.ttts_extension.ev_service_status];
+        // 販売停止処理日時
+        suspension.online_sales_update_at = performance.ttts_extension.online_sales_update_at;
+        // 処理実施者
+        suspension.online_sales_update_user = performance.ttts_extension.online_sales_update_user;
+        // 一般予約数
+        suspension.canceled = infoR.dicReservations[performanceId].length;
         // 来塔数
-        suspension.arrived = getArrivedCount(infoR.dicReservations[key]);
+        suspension.arrived = getArrivedCount(infoR.dicReservations[performanceId]);
+        // 返金状態
+        suspension.refund_status = performance.ttts_extension.refund_status;
+        // 返金状態(名称)
+        suspension.refund_status_name = REFUND_STATUS_NAMES[performance.ttts_extension.refund_status];
         // 返金済数
-        suspension.refunded = getRefundedCount(infoR.dicReservations[key]);
-        // 予約情報よりセット
-        if (reservationTop !== null) {
-            // 返金状態
-            suspension.refund_status = reservationTop.reservation_ttts_extension.refund_status;
-            // 返金状態(名称)
-            suspension.refund_status_name = REFUND_STATUS_NAMES[reservationTop.reservation_ttts_extension.refund_status];
-            // 返金処理可能フラグ(返金状態が未指示の時true)
-            suspension.allow_refund_process =
-                (reservationTop.reservation_ttts_extension.refund_status === ttts_domain_1.PerformanceUtil.REFUND_STATUS.NONE ||
-                    reservationTop.reservation_ttts_extension.refund_status === ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED);
-            // 返金済通知(返金状態が返金済の時true)
-            suspension.allow_refund_notice =
-                reservationTop.reservation_ttts_extension.refund_status === ttts_domain_1.PerformanceUtil.REFUND_STATUS.COMPLETE;
-        }
+        suspension.refunded = performance.ttts_extension.refunded_count;
+        // 一覧に追加
         suspensionList.push(suspension);
     }
     return suspensionList;
 }
-/**
- * ツアーナンバー編集
- * 例：'91,92'
- *
- * @param {any} performances
- * @return {any}
- */
-function getTourNumberString(performances) {
-    const tourNumbers = [];
-    for (const performance of performances) {
-        const tourNumber = isNaN(performance.ttts_extension.tour_number) ?
-            EMPTY_STRING : Number(performance.ttts_extension.tour_number).toString();
-        tourNumbers.push(tourNumber);
-    }
-    return tourNumbers.join(',');
-}
+// /**
+//  * パフォーマンス情報取得
+//  *
+//  * @param {any} conditions
+//  * @param {number} limit
+//  * @param {number} page
+//  * @return {any}
+//  */
+// async function getPerformances(conditions: any[],
+//                                limit: number,
+//                                page: number): Promise<any> {
+//     // info {
+//     //    dicP: { "2017/11/01 12:00:00": [p1,p2,,,pn]}
+//     // }
+//     const info: any = { count: 0, dicPerformances: {}};
+//     // 総数検索
+//     info.count = await Models.Performance.count({ $and: conditions }).exec();
+//     if (info.count <= 0) {
+//         return info;
+//     }
+//     // データ検索
+//     const performances = <any[]>await Models.Performance
+//         .find({
+//             $and: conditions
+//         })
+//         .sort({
+//             'ttts_extension.online_sales_update_at': -1,
+//             day: 1,
+//             start_time: 1
+//         })
+//         .exec();
+//     // { 2017/11/11/12:00:00 : [performance1,performancen] }
+//     const dicPerformances: any = {};
+//     let updateAtArray: string[] = [];
+//     for (const performance of performances) {
+//         const key: string = performance.ttts_extension.online_sales_update_at;
+//         if (dicPerformances.hasOwnProperty(key) === false) {
+//             dicPerformances[key] = [];
+//             updateAtArray.push(key);
+//         }
+//         dicPerformances[key].push(performance);
+//     }
+//     // 対象ページ分を切り取る
+//     // @@@@データ3行と4行、psge=1と2でテスト！！@@@
+//     const start: number =  limit * (page - 1);
+//     if ( start >= updateAtArray.length) {
+//         return info;
+//     }
+//     updateAtArray = updateAtArray.splice(start, limit);
+//     // 対象ページのパフォーマンス情報をセット
+//     for (const updateAt of updateAtArray) {
+//         info.dicPerformances[updateAt] = dicPerformances[updateAt];
+//     }
+//     return info;
+// }
+// /**
+//  * 予約情報取得
+//  *
+//  * @param {any} conditions
+//  * @param {any} dicPerformances
+//  * @return {any}
+//  */
+// async function getResevations(conditions: any,
+//                               dicPerformances: any): Promise<any> {
+//     const info: any = { dicReservations: {}};
+//     // 予約情報取得
+//     // { 2017/11/11/12:00:00 : [reservation1,reservationn] }
+//     conditions.status = ReservationUtil.STATUS_RESERVED;
+//     const dicReservations: any = {};
+//     const promises = Object.keys(dicPerformances).map(async(key: string) => {
+//         // 販売停止日時ごとにidをセット
+//         const ids: string[] = getPerformanceIds(dicPerformances[key]);
+//         // // 販売停止日時ごとにidをセット
+//         // const performances = dicPerformances[key];
+//         // for (const performance of performances) {
+//         //     ids.push(performance._id.toString());
+//         // }
+//         conditions.performance = {$in: ids};
+//         if (dicReservations.hasOwnProperty(key) === false) {
+//             dicReservations[key] = [];
+//         }
+//         // 販売停止日時ごとに予約情報取得
+//         dicReservations[key] = await Models.Reservation.find(
+//             conditions
+//         ).exec();
+//     });
+//     await Promise.all(promises);
+//     info.dicReservations = dicReservations;
+//     return info;
+// }
+// /**
+//  * 表示一覧取得
+//  *
+//  * @param {any} infoP
+//  * @param {any} infoR
+//  * @return {any}
+//  */
+// function getSuspensionList(infoP: any,
+//                            infoR: any): any {
+//     const suspensionList: any[] = [];
+//     for (const key of Object.keys(infoP.dicPerformances)) {
+//         // 予約情報がない時のため、予約関連項目はここで初期化
+//         const suspension: any = {
+//             refund_status: '',
+//             refund_status_name: EMPTY_STRING,
+//             allow_refund_process: false,
+//             allow_refund_notice: false
+//         };
+//         const performanceTop: any = infoP.dicPerformances[key][0];
+//         const reservationTop: any | null  = infoR.dicReservations[key].length > 0 ?
+//                                             infoR.dicReservations[key][0] : null;
+//         // パフォーマンスIDの並列
+//         suspension.performanceIds = getPerformanceIds(infoP.dicPerformances[key]);
+//         // 販売停止処理日時
+//         suspension.online_sales_update_at = key;
+//         // 処理実施者
+//         suspension.online_sales_update_user = performanceTop.ttts_extension.online_sales_update_user;
+//         // 対象ツアー年月日
+//         suspension.performance_day = moment(performanceTop.day, 'YYYYMMDD').format('YYYY/MM/DD');
+//         // 対象ツアーNo
+//         suspension.tour_number = getTourNumberString(infoP.dicPerformances[key]);
+//         // 運転状況
+//         suspension.ev_service_status = performanceTop.ttts_extension.ev_service_status;
+//         // 運転状況(名称)
+//         suspension.ev_service_status_name = EV_SERVICE_STATUS_NAMES[performanceTop.ttts_extension.ev_service_status];
+//         // キャンセル対象予約数
+//         suspension.canceled = infoR.dicReservations[key].length;
+//         // 来塔数
+//         suspension.arrived = getArrivedCount(infoR.dicReservations[key]);
+//         // 返金済数
+//         suspension.refunded = getRefundedCount(infoR.dicReservations[key]);
+//         // 予約情報よりセット
+//         if (reservationTop !== null) {
+//             // 返金状態
+//             suspension.refund_status = reservationTop.reservation_ttts_extension.refund_status;
+//             // 返金状態(名称)
+//             suspension.refund_status_name = REFUND_STATUS_NAMES[reservationTop.reservation_ttts_extension.refund_status];
+//             // 返金処理可能フラグ(返金状態が未指示の時true)
+//             suspension.allow_refund_process =
+//                 (reservationTop.reservation_ttts_extension.refund_status === PerformanceUtil.REFUND_STATUS.NONE ||
+//                  reservationTop.reservation_ttts_extension.refund_status === PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED);
+//             // 返金済通知(返金状態が返金済の時true)
+//             suspension.allow_refund_notice =
+//                 reservationTop.reservation_ttts_extension.refund_status === PerformanceUtil.REFUND_STATUS.COMPLETE;
+//         }
+//         suspensionList.push(suspension);
+//     }
+//     return suspensionList;
+// }
+// /**
+//  * ツアーナンバー編集
+//  * 例：'91,92'
+//  *
+//  * @param {any} performances
+//  * @return {any}
+//  */
+// function getTourNumberString(performances: any[]): string {
+//     const tourNumbers: string[] = [];
+//     for (const performance of performances) {
+//         const tourNumber: string = isNaN((<any>performance).ttts_extension.tour_number) ?
+//             EMPTY_STRING : Number((<any>performance).ttts_extension.tour_number).toString();
+//         tourNumbers.push(tourNumber);
+//     }
+//     return tourNumbers.join(',');
+// }
 /**
  * 来塔数取得
  *
@@ -321,34 +413,34 @@ function getArrivedCount(reservations) {
     }
     return cnt;
 }
-/**
- * 返金済数取得
- *
- * @param {any} reservations
- * @return {number}
- */
-function getRefundedCount(reservations) {
-    let cnt = 0;
-    for (const reservation of reservations) {
-        if (reservation.reservation_ttts_extension.refund_status === ttts_domain_1.PerformanceUtil.REFUND_STATUS.COMPLETE) {
-            cnt += 1;
-        }
-    }
-    return cnt;
-}
-/**
- * パフォーマンスID配列取得
- *
- * @param {any[]} performances
- * @return {string[]}
- */
-function getPerformanceIds(performances) {
-    const ids = [];
-    for (const performance of performances) {
-        ids.push(performance._id.toString());
-    }
-    return ids;
-}
+// /**
+//  * 返金済数取得
+//  *
+//  * @param {any} reservations
+//  * @return {number}
+//  */
+// function getRefundedCount(reservations: any[]): number {
+//     let cnt: number = 0;
+//     for (const reservation of reservations) {
+//         if (reservation.reservation_ttts_extension.refund_status === PerformanceUtil.REFUND_STATUS.COMPLETE) {
+//             cnt += 1;
+//         }
+//     }
+//     return cnt;
+// }
+// /**
+//  * パフォーマンスID配列取得
+//  *
+//  * @param {any[]} performances
+//  * @return {string[]}
+//  */
+// function getPerformanceIds(performances: any[]): string[] {
+//     const ids: string[] = [];
+//     for (const performance of performances) {
+//         ids.push(performance._id.toString());
+//     }
+//     return ids;
+// }
 // /**
 //  * 運行・オンライン販売停止一覧検索画面検証
 //  *
@@ -372,7 +464,7 @@ function getPerformanceIds(performances) {
 //     // return errors;
 // }
 /**
- * 販売中止一覧検索(api)
+ * 返金処理(api)
  *
  */
 function refundProcess(req, res, next) {
@@ -381,15 +473,16 @@ function refundProcess(req, res, next) {
             next(new Error(req.__('Message.UnexpectedError')));
             return;
         }
-        let successIds = [];
-        const errorIds = [];
         try {
             // 予約IDリストをjson形式で受け取る
-            const performanceIds = JSON.parse(req.body.performanceIds);
-            if (!Array.isArray(performanceIds)) {
-                throw new Error(req.__('Message.UnexpectedError'));
+            const performanceId = (!_.isEmpty(req.body.performanceId)) ? req.body.performanceId : null;
+            if (performanceId === null) {
+                res.json({
+                    success: false,
+                    message: 'req.body.performanceId is empty.'
+                });
+                return;
             }
-            successIds = performanceIds;
             // const promises = performanceIds.map(async (id) => {
             //     // 予約データの解放
             //     const result: boolean = await cancelById(id);
@@ -402,17 +495,13 @@ function refundProcess(req, res, next) {
             // await Promise.all(promises);
             res.json({
                 success: true,
-                message: null,
-                successIds: successIds,
-                errorIds: errorIds
+                message: null
             });
         }
         catch (error) {
             res.json({
                 success: false,
-                message: error.message,
-                successIds: successIds,
-                errorIds: errorIds
+                message: error.message
             });
         }
     });

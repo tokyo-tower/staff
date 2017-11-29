@@ -83,7 +83,7 @@ $(function() {
             //     + '/' + suspension.performance_day.substr(6)
             //     + ' ' + suspension.performance_start_time.substr(0, 2) + ':' + suspension.performance_start_time.substr(2);
             html += ''
-                + '<tr performanceIds="' + suspension.performanceIds + '"'
+                + '<tr performance_id="' + suspension.performance_id + '"'
                 + '>'
             // html += ''
             //     + '<tr data-seat-code="' + suspension.seat_code + '"'
@@ -102,11 +102,11 @@ $(function() {
             // }
             html += ''
                 //+ '</th>'
-                + '<td class="td-number">' + suspension.online_sales_update_at + '</td>'
-                + '<td class="td-name">' + suspension.online_sales_update_user + '</td>' 
                 + '<td class="td-amemo">' + suspension.performance_day + '</td>'
                 + '<td class="td-ticket">' + suspension.tour_number + '</td>'
                 + '<td class="td-route">' + suspension.ev_service_status_name + '</td>'
+                + '<td class="td-number">' + suspension.online_sales_update_at + '</td>'
+                + '<td class="td-name">' + suspension.online_sales_update_user + '</td>' 
                 + '<td class="td-checkin">' + suspension.canceled + '</td>'
                 + '<td class="td-checkin">' + suspension.arrived + '</td>'
                 + '<td class="td-checkin">' + suspension.refund_status_name + '</td>'
@@ -114,21 +114,18 @@ $(function() {
             
             // 処理実行リンク
             html += '<td class="td-actions">'
-            if (suspension.allow_refund_process) {
-                html +=  '<p class="btn btn-refund_process"><span>処理実行</span></p>'
+            switch (suspension.refund_status) {
+                case '1': // 指示済
+                    html +=  '<p class="btn"><span>処理完了</span></p>'
+                    break;
+                case '2': // 返金済
+                    html +=  '<p class="btn"><span>処理中</span></p>'
+                    break;
+                default: // 未指示
+                    html +=  '<p class="btn  btn-refund_process"><span>処理実行</span></p>'
+                    break;
             }
-            html += '</td>';
-            // 完了通知リンク
-            html += '<td class="td-actions">'
-            if (suspension.allow_refund_notice) {
-                html +=  '<p class="btn btn-refund_process"><span>完了通知</span></p>'
-            }
-            html += '</td>';
-            // 販売中止解除リンク
-            html += '<td class="td-actions">'
-            html +=  '<p class="btn btn-online_sales_resume"><span>解除</span></p>'
-            html += '</td>';
-            + '</tr>';
+            html += '</td>'  + '</tr>';
         });
         $('#reservations').html(html);
     }
@@ -231,15 +228,14 @@ $(function() {
 
     // 返金処理実行
     $(document).on('click', '.btn-refund_process', function(e) {
-        var ids = $(e.currentTarget).closest('tr').attr('performanceIds');
-        var performanceIds = ids.split(",");
-        alert(performanceIds);
+        var performanceId = $(e.currentTarget).closest('tr').attr('performance_id');
+        alert(performanceId);
         $.ajax({
             dataType: 'json',
             url: '/staff/suspension/list/refund/process',
             type: 'POST',
             data: {
-                performanceIds: JSON.stringify(performanceIds)
+                performanceId: performanceId
             },
             beforeSend: function() {
                 //$('#modal_detail').modal('hide');
