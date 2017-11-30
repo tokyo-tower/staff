@@ -182,7 +182,9 @@ $(function() {
         // }
 
         // for test 固定でセット
-        var performanceIds = ['59f41042fca1c8737f4c45b5','59f41042fca1c8737f4c45a8'];
+        //var performanceIds = ['59f41042fca1c8737f4c45b5','59f41042fca1c8737f4c45a8'];
+        //var performanceIds = ['59f4a9c5fca1c8737f6c16c8','59f4a9c4fca1c8737f6c1695'];
+        var performanceIds = ['59fc92c3fca1c8737f068a98'];
         //---
         // '0': 解除 '1': 停止
         var executeType = '1';

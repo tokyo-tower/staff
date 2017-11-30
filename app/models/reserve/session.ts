@@ -380,6 +380,8 @@ interface IExtensionTiket {
  */
 interface IExtensionPerformance {
     tour_number: string;
+    refund_update_user : string;
+    refund_status : string;
 }
 /**
  * 多言語情報インターフェース

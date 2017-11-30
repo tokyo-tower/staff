@@ -257,9 +257,9 @@ function saveDbFixSeatsAndTickets(reservationModel, req, choiceInfo) {
  */
 function getReservationExtension(seatCodeBase) {
     return {
-        seat_code_base: seatCodeBase,
-        refund_status: ttts_domain_1.PerformanceUtil.REFUND_STATUS.NONE,
-        refund_update_user: ''
+        seat_code_base: seatCodeBase //,
+        // refund_status: PerformanceUtil.REFUND_STATUS.NONE,
+        // refund_update_user: ''
     };
 }
 /**
@@ -588,6 +588,7 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
                 break;
         }
         // パフォーマンス情報を保管
+        const tttsExtension = performance.get('ttts_extension');
         reservationModel.performance = {
             _id: performance.get('_id'),
             day: performance.get('day'),
@@ -613,7 +614,11 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
                 is_mx4d: performance.get('film').get('is_mx4d'),
                 copyright: performance.get('film').get('copyright')
             },
-            ttts_extension: performance.get('ttts_extension')
+            ttts_extension: {
+                tour_number: tttsExtension.tour_number,
+                refund_update_user: tttsExtension.refund_update_user,
+                refund_status: tttsExtension.refund_status
+            }
         };
         // 座席グレードリスト抽出
         reservationModel.seatGradeCodesInScreen = reservationModel.performance.screen.sections[0].seats

@@ -6,7 +6,7 @@
 
 import * as GMO from '@motionpicture/gmo-service';
 //import { EmailQueueUtil, Models, ReservationUtil, ScreenUtil, TicketTypeGroupUtil } from '@motionpicture/ttts-domain';
-import { EmailQueueUtil, Models, PerformanceUtil, ReservationUtil, ScreenUtil, TicketTypeGroupUtil } from '@motionpicture/ttts-domain';
+import { EmailQueueUtil, Models, ReservationUtil, ScreenUtil, TicketTypeGroupUtil } from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import * as createDebug from 'debug';
 import { Request, Response } from 'express';
@@ -301,9 +301,9 @@ async function saveDbFixSeatsAndTickets(reservationModel: ReserveSessionModel,
 function getReservationExtension (seatCodeBase: string): any {
 
     return {
-        seat_code_base : seatCodeBase,
-        refund_status: PerformanceUtil.REFUND_STATUS.NONE,
-        refund_update_user: ''
+        seat_code_base : seatCodeBase //,
+        // refund_status: PerformanceUtil.REFUND_STATUS.NONE,
+        // refund_update_user: ''
     };
 }
 /**
@@ -677,6 +677,7 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
     }
 
     // パフォーマンス情報を保管
+    const tttsExtension: any = performance.get('ttts_extension');
     reservationModel.performance = {
         _id: performance.get('_id'),
         day: performance.get('day'),
@@ -702,7 +703,11 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
             is_mx4d: performance.get('film').get('is_mx4d'),
             copyright: performance.get('film').get('copyright')
         },
-        ttts_extension: performance.get('ttts_extension')
+        ttts_extension: {
+            tour_number: tttsExtension.tour_number,
+            refund_update_user : tttsExtension.refund_update_user,
+            refund_status : tttsExtension.refund_status
+        }
     };
 
     // 座席グレードリスト抽出

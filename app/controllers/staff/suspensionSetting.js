@@ -133,6 +133,22 @@ function suspendByIds(staffUser, performanceIds, onlineStatus, evStatus) {
             }, {
                 multi: true
             }).exec();
+            // 予約情報返金ステータスを未指示に更新(入塔記録のないもの)
+            yield ttts_domain_1.Models.Reservation.update({
+                status: { $in: [ttts_domain_1.ReservationUtil.STATUS_RESERVED,
+                        ttts_domain_1.ReservationUtil.STATUS_ON_KEPT_FOR_SECURE_EXTRA] },
+                performance: { $in: performanceIds },
+                purchaser_group: ttts_domain_1.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
+                'checkins.0': { $exists: false }
+            }, {
+                $set: {
+                    'performance_ttts_extension.refund_status': ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+                    'performance_ttts_extension.refund_update_user': staffUser,
+                    'performance_ttts_extension.refund_update__at': now
+                }
+            }, {
+                multi: true
+            }).exec();
         }
         catch (error) {
             return false;

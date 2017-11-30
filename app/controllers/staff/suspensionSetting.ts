@@ -3,7 +3,7 @@
  *
  * @namespace controller/staff/suspensionSetting
  */
-import { CommonUtil, Models, PerformanceUtil } from '@motionpicture/ttts-domain';
+import { CommonUtil, Models, PerformanceUtil, ReservationUtil } from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import { NextFunction, Request, Response } from 'express';
 import * as moment from 'moment';
@@ -124,6 +124,27 @@ async function suspendByIds(staffUser: string,
                 multi: true
             }
         ).exec();
+        // 予約情報返金ステータスを未指示に更新(入塔記録のないもの)
+        await Models.Reservation.update(
+            {
+                status: { $in: [ReservationUtil.STATUS_RESERVED,
+                                ReservationUtil.STATUS_ON_KEPT_FOR_SECURE_EXTRA] },
+                performance: { $in: performanceIds },
+                purchaser_group: ReservationUtil.PURCHASER_GROUP_CUSTOMER,
+                'checkins.0' : { $exists: false }
+            },
+            {
+                $set: {
+                    'performance_ttts_extension.refund_status': PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+                    'performance_ttts_extension.refund_update_user': staffUser,
+                    'performance_ttts_extension.refund_update__at': now
+                }
+            },
+            {
+                multi: true
+            }
+        ).exec();
+
     } catch (error) {
 
         return false;
