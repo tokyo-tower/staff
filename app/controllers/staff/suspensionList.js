@@ -16,6 +16,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ttts_domain_1 = require("@motionpicture/ttts-domain");
 const moment = require("moment");
 const _ = require("underscore");
+const suspensionCommon = require("./suspensionCommon");
 const DEFAULT_RADIX = 10;
 const VIEW_PATH = 'staff/suspension';
 const layout = 'layouts/staff/layout';
@@ -176,6 +177,7 @@ function getResevations(conditions, performances) {
         // 予約情報取得
         // { performanceId : [reservation1,reservationn] }
         conditions.status = ttts_domain_1.ReservationUtil.STATUS_RESERVED;
+        conditions.purchaser_group = ttts_domain_1.ReservationUtil.PURCHASER_GROUP_CUSTOMER;
         const dicReservations = {};
         const promises = performances.map((performance) => __awaiter(this, void 0, void 0, function* () {
             // パフォーマンスごとに予約情報取得
@@ -290,48 +292,12 @@ exports.refundProcess = refundProcess;
  */
 function updateRefundStatus(performanceId, staffUser) {
     return __awaiter(this, void 0, void 0, function* () {
-        // パフォーマンスに紐づく予約情報取得
-        const reservations = yield ttts_domain_1.Models.Reservation.find({
-            purchaser_group: ttts_domain_1.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
-            status: { $in: [ttts_domain_1.ReservationUtil.STATUS_RESERVED, ttts_domain_1.ReservationUtil.STATUS_ON_KEPT_FOR_SECURE_EXTRA] },
-            performance: performanceId
-        }, '_id performance_day payment_no checkins performance_ttts_extension').exec();
-        // 入塔済、返金済の予約情報セット
-        const arrivedInfos = [];
-        const refundedInfo = {};
-        reservations.map((reservation) => {
-            if (reservation.checkins.length > 0) {
-                arrivedInfos.push({ performance_day: reservation.performance_day,
-                    payment_no: reservation.payment_no });
-            }
-            const key = `${reservation.performance_day}_${reservation.payment_no}`;
-            if (refundedInfo.hasOwnProperty(key) === false) {
-                if (reservation.performance_ttts_extension.refund_status === ttts_domain_1.PerformanceUtil.REFUND_STATUS.COMPLETE) {
-                    refundedInfo[key] = reservation._id.toString();
-                }
-            }
-        });
-        // 入塔済判定
-        const isArrived = (reservation) => {
-            for (const arrivedInfo of arrivedInfos) {
-                if (arrivedInfo.performance_day === reservation.performance_day &&
-                    arrivedInfo.payment_no === reservation.payment_no) {
-                    return true;
-                }
-            }
-            return false;
-        };
-        // 更新対象の予約IDセット
-        const ids = [];
-        reservations.map((reservation) => {
-            if (isArrived(reservation) === false) {
-                ids.push(reservation._id);
-            }
-        });
+        // 返金対象予約情報取得(入塔記録のない、未指示データ)
+        const info = yield suspensionCommon.getTargetReservationsForRefund([performanceId], ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED);
         //対象予約(checkinsのない購入番号)の返金ステータスを更新する。
         const now = moment().format('YYYY/MM/DD HH:mm:ss');
         yield ttts_domain_1.Models.Reservation.update({
-            _id: { $in: ids }
+            _id: { $in: info.reservationIds }
         }, {
             $set: {
                 'performance_ttts_extension.refund_status': ttts_domain_1.PerformanceUtil.REFUND_STATUS.INSTRUCTED,
@@ -346,7 +312,7 @@ function updateRefundStatus(performanceId, staffUser) {
             _id: performanceId
         }, {
             $set: {
-                'ttts_extension.refunded_count': Object.keys(refundedInfo).length,
+                'ttts_extension.refunded_count': Object.keys(info.refundedInfo).length,
                 'ttts_extension.refund_status': ttts_domain_1.PerformanceUtil.REFUND_STATUS.INSTRUCTED,
                 'ttts_extension.refund_update_user': staffUser,
                 'ttts_extension.refund_update_at': now

@@ -17,6 +17,7 @@ const ttts_domain_1 = require("@motionpicture/ttts-domain");
 const conf = require("config");
 const moment = require("moment");
 const mongoose = require("mongoose");
+const suspensionCommon = require("./suspensionCommon");
 const SETTING_PATH = '/staff/suspension/setting';
 const VIEW_PATH = 'staff/suspension';
 const layout = 'layouts/staff/layout';
@@ -79,10 +80,11 @@ function execute(req, res, next) {
             if (!Array.isArray(performanceIds)) {
                 throw new Error(req.__('Message.UnexpectedError'));
             }
+            //59fc92c3fca1c8737f068a
             const executeType = req.body.executeType;
             const onlineStatus = executeType === '1' ? req.body.onlineStatus : ttts_domain_1.PerformanceUtil.ONLINE_SALES_STATUS.NORMAL;
             const evStatus = executeType === '1' ? req.body.evStatus : ttts_domain_1.PerformanceUtil.EV_SERVICE_STATUS.NORMAL;
-            yield suspendByIds(req.staffUser.username, performanceIds, onlineStatus, evStatus);
+            yield updateStatusByIds(req.staffUser.username, performanceIds, onlineStatus, evStatus);
             // 運行停止の時、メール作成
             // if (req.body.ev_service_status === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
             //     await createEmails((<any>req).staffUser, performanceIds);
@@ -110,49 +112,47 @@ exports.execute = execute;
  * @param {string} evStatus
  * @return {Promise<boolean>}
  */
-function suspendByIds(staffUser, performanceIds, onlineStatus, evStatus) {
+function updateStatusByIds(staffUser, performanceIds, onlineStatus, evStatus) {
     return __awaiter(this, void 0, void 0, function* () {
         // パフォーマンスIDをObjectIdに変換
         const ids = performanceIds.map((id) => {
             return new mongoose.Types.ObjectId(id);
         });
-        try {
-            const now = moment().format('YYYY/MM/DD HH:mm:ss');
-            // パフォーマンス更新
-            yield ttts_domain_1.Models.Performance.update({
-                _id: { $in: ids }
-            }, {
-                $set: {
-                    'ttts_extension.online_sales_status': onlineStatus,
-                    'ttts_extension.online_sales_update_user': staffUser,
-                    'ttts_extension.online_sales_update_at': now,
-                    'ttts_extension.ev_service_status': evStatus,
-                    'ttts_extension.ev_service_update_user': staffUser,
-                    'ttts_extension.ev_service_update_at': now
-                }
-            }, {
-                multi: true
-            }).exec();
-            // 予約情報返金ステータスを未指示に更新(入塔記録のないもの)
+        const now = moment().format('YYYY/MM/DD HH:mm:ss');
+        // 返金対象予約情報取得(入塔記録のないもの)
+        const info = yield suspensionCommon.getTargetReservationsForRefund(performanceIds, ttts_domain_1.PerformanceUtil.REFUND_STATUS.NONE);
+        // 予約情報返金ステータスを未指示に更新
+        if (info.reservationIds.length > 0) {
             yield ttts_domain_1.Models.Reservation.update({
-                status: { $in: [ttts_domain_1.ReservationUtil.STATUS_RESERVED,
-                        ttts_domain_1.ReservationUtil.STATUS_ON_KEPT_FOR_SECURE_EXTRA] },
-                performance: { $in: performanceIds },
-                purchaser_group: ttts_domain_1.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
-                'checkins.0': { $exists: false }
+                _id: { $in: info.reservationIds }
             }, {
                 $set: {
                     'performance_ttts_extension.refund_status': ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
                     'performance_ttts_extension.refund_update_user': staffUser,
-                    'performance_ttts_extension.refund_update__at': now
+                    'performance_ttts_extension.refund_update_at': now
                 }
             }, {
                 multi: true
             }).exec();
         }
-        catch (error) {
-            return false;
-        }
-        return true;
+        // パフォーマンス更新
+        yield ttts_domain_1.Models.Performance.update({
+            _id: { $in: ids }
+        }, {
+            $set: {
+                'ttts_extension.online_sales_status': onlineStatus,
+                'ttts_extension.online_sales_update_user': staffUser,
+                'ttts_extension.online_sales_update_at': now,
+                'ttts_extension.ev_service_status': evStatus,
+                'ttts_extension.ev_service_update_user': staffUser,
+                'ttts_extension.ev_service_update_at': now,
+                'ttts_extension.refund_status': ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+                'ttts_extension.refund_update_user': staffUser,
+                'ttts_extension.refund_update_at': now
+            }
+        }, {
+            multi: true
+        }).exec();
+        return;
     });
 }

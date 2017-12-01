@@ -7,6 +7,7 @@ import { Models, PerformanceUtil, ReservationUtil } from '@motionpicture/ttts-do
 import { NextFunction, Request, Response } from 'express';
 import * as moment from 'moment';
 import * as _ from 'underscore';
+import * as suspensionCommon from './suspensionCommon';
 
 const DEFAULT_RADIX = 10;
 const VIEW_PATH: string = 'staff/suspension';
@@ -173,6 +174,7 @@ async function getResevations(conditions: any,
     // 予約情報取得
     // { performanceId : [reservation1,reservationn] }
     conditions.status = ReservationUtil.STATUS_RESERVED;
+    conditions.purchaser_group = ReservationUtil.PURCHASER_GROUP_CUSTOMER;
     const dicReservations: any = {};
     const promises = performances.map(async(performance: any) => {
         // パフォーマンスごとに予約情報取得
@@ -289,56 +291,17 @@ export async function refundProcess(req: Request, res: Response, next: NextFunct
  */
 async function updateRefundStatus(performanceId: string,
                                   staffUser: string): Promise<void> {
-    // パフォーマンスに紐づく予約情報取得
-    const reservations = <any[]>await Models.Reservation.find(
-        {
-            purchaser_group: ReservationUtil.PURCHASER_GROUP_CUSTOMER,
-            status: { $in: [ReservationUtil.STATUS_RESERVED, ReservationUtil.STATUS_ON_KEPT_FOR_SECURE_EXTRA]},
-            performance: performanceId
-        },
-        '_id performance_day payment_no checkins performance_ttts_extension'
-    ).exec();
 
-    // 入塔済、返金済の予約情報セット
-    const arrivedInfos: any[] = [];
-    const refundedInfo: any = {};
-    reservations.map((reservation: any) => {
-        if (reservation.checkins.length > 0) {
-            arrivedInfos.push({ performance_day: reservation.performance_day,
-                                payment_no: reservation.payment_no});
-        }
-        const key : string = `${reservation.performance_day}_${reservation.payment_no}`;
-        if (refundedInfo.hasOwnProperty(key) === false) {
-            if (reservation.performance_ttts_extension.refund_status === PerformanceUtil.REFUND_STATUS.COMPLETE) {
-                refundedInfo[key] = reservation._id.toString();
-            }
-        }
-    });
-
-    // 入塔済判定
-    const isArrived = (reservation: any): boolean => {
-        for (const arrivedInfo of arrivedInfos) {
-            if (arrivedInfo.performance_day === reservation.performance_day &&
-                arrivedInfo.payment_no === reservation.payment_no) {
-                    return true;
-            }
-        }
-        return false;
-    };
-
-    // 更新対象の予約IDセット
-    const ids: any = [];
-    reservations.map((reservation: any) => {
-        if (isArrived(reservation) === false) {
-            ids.push(reservation._id);
-        }
-    });
+    // 返金対象予約情報取得(入塔記録のない、未指示データ)
+    const info = await suspensionCommon.getTargetReservationsForRefund(
+                    [performanceId],
+                    PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED);
 
     //対象予約(checkinsのない購入番号)の返金ステータスを更新する。
     const now = moment().format('YYYY/MM/DD HH:mm:ss');
     await Models.Reservation.update(
         {
-            _id: { $in: ids}
+            _id: { $in: info.reservationIds}
         },
         {
             $set: {
@@ -359,7 +322,7 @@ async function updateRefundStatus(performanceId: string,
         },
         {
             $set: {
-                'ttts_extension.refunded_count' : Object.keys(refundedInfo).length,
+                'ttts_extension.refunded_count' : Object.keys(info.refundedInfo).length,
                 'ttts_extension.refund_status': PerformanceUtil.REFUND_STATUS.INSTRUCTED,
                 'ttts_extension.refund_update_user': staffUser,
                 'ttts_extension.refund_update_at': now

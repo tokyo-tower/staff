@@ -3,11 +3,12 @@
  *
  * @namespace controller/staff/suspensionSetting
  */
-import { CommonUtil, Models, PerformanceUtil, ReservationUtil } from '@motionpicture/ttts-domain';
+import { CommonUtil, Models, PerformanceUtil } from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import { NextFunction, Request, Response } from 'express';
 import * as moment from 'moment';
 import * as mongoose from 'mongoose';
+import * as suspensionCommon from './suspensionCommon';
 
 const SETTING_PATH: string = '/staff/suspension/setting';
 const VIEW_PATH: string = 'staff/suspension';
@@ -64,13 +65,15 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
         if (!Array.isArray(performanceIds)) {
             throw new Error(req.__('Message.UnexpectedError'));
         }
+
+        //59fc92c3fca1c8737f068a
         const executeType: string = req.body.executeType;
         const onlineStatus: string =  executeType === '1' ? req.body.onlineStatus : PerformanceUtil.ONLINE_SALES_STATUS.NORMAL;
         const evStatus: string =  executeType === '1' ? req.body.evStatus : PerformanceUtil.EV_SERVICE_STATUS.NORMAL;
-        await suspendByIds((<any>req).staffUser.username,
-                           performanceIds,
-                           onlineStatus,
-                           evStatus);
+        await updateStatusByIds((<any>req).staffUser.username,
+                                performanceIds,
+                                onlineStatus,
+                                evStatus);
         // 運行停止の時、メール作成
         // if (req.body.ev_service_status === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
         //     await createEmails((<any>req).staffUser, performanceIds);
@@ -95,60 +98,61 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
  * @param {string} evStatus
  * @return {Promise<boolean>}
  */
-async function suspendByIds(staffUser: string,
-                            performanceIds: string[],
-                            onlineStatus: string,
-                            evStatus: string) : Promise<boolean> {
+async function updateStatusByIds(staffUser: string,
+                                 performanceIds: string[],
+                                 onlineStatus: string,
+                                 evStatus: string) : Promise<void> {
     // パフォーマンスIDをObjectIdに変換
     const ids = performanceIds.map((id) => {
         return new mongoose.Types.ObjectId(id);
     });
-    try {
-        const now = moment().format('YYYY/MM/DD HH:mm:ss');
-        // パフォーマンス更新
-        await Models.Performance.update(
-            {
-                _id: { $in: ids }
-            },
-            {
-                $set: {
-                    'ttts_extension.online_sales_status': onlineStatus,
-                    'ttts_extension.online_sales_update_user': staffUser,
-                    'ttts_extension.online_sales_update_at': now,
-                    'ttts_extension.ev_service_status': evStatus,
-                    'ttts_extension.ev_service_update_user': staffUser,
-                    'ttts_extension.ev_service_update_at': now
-                }
-            },
-            {
-                multi: true
-            }
-        ).exec();
-        // 予約情報返金ステータスを未指示に更新(入塔記録のないもの)
+    const now = moment().format('YYYY/MM/DD HH:mm:ss');
+
+    // 返金対象予約情報取得(入塔記録のないもの)
+    const info = await suspensionCommon.getTargetReservationsForRefund(
+                                            performanceIds,
+                                            PerformanceUtil.REFUND_STATUS.NONE);
+    // 予約情報返金ステータスを未指示に更新
+    if (info.reservationIds.length > 0) {
         await Models.Reservation.update(
             {
-                status: { $in: [ReservationUtil.STATUS_RESERVED,
-                                ReservationUtil.STATUS_ON_KEPT_FOR_SECURE_EXTRA] },
-                performance: { $in: performanceIds },
-                purchaser_group: ReservationUtil.PURCHASER_GROUP_CUSTOMER,
-                'checkins.0' : { $exists: false }
+                _id: { $in: info.reservationIds}
             },
             {
                 $set: {
                     'performance_ttts_extension.refund_status': PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
                     'performance_ttts_extension.refund_update_user': staffUser,
-                    'performance_ttts_extension.refund_update__at': now
+                    'performance_ttts_extension.refund_update_at': now
                 }
             },
             {
                 multi: true
             }
         ).exec();
-
-    } catch (error) {
-
-        return false;
     }
 
-    return true;
+    // パフォーマンス更新
+    await Models.Performance.update(
+        {
+            _id: { $in: ids }
+        },
+        {
+            $set: {
+                'ttts_extension.online_sales_status': onlineStatus,
+                'ttts_extension.online_sales_update_user': staffUser,
+                'ttts_extension.online_sales_update_at': now,
+                'ttts_extension.ev_service_status': evStatus,
+                'ttts_extension.ev_service_update_user': staffUser,
+                'ttts_extension.ev_service_update_at': now,
+                'ttts_extension.refund_status': PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+                'ttts_extension.refund_update_user': staffUser,
+                'ttts_extension.refund_update_at': now
+            }
+        },
+        {
+            multi: true
+        }
+    ).exec();
+
+    return;
 }
