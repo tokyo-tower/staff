@@ -119,6 +119,7 @@ function checkFixSeatsAndTickets(reservationModel, req) {
                 const choiceInfo = {
                     ticket_type: choice.ticket_type,
                     ticketCount: 1,
+                    watcher_name: (choice.watcher_name) ? choice.watcher_name : '',
                     choicesExtra: [],
                     updated: false
                 };
@@ -205,6 +206,8 @@ function saveDbFixSeatsAndTickets(reservationModel, req, choiceInfo) {
         if (ticketType === undefined) {
             throw new Error(req.__('Message.UnexpectedError'));
         }
+        // 予約メモ(券種単位)
+        ticketType.watcher_name = choiceInfo.watcher_name;
         // 予約情報更新キーセット(パフォーマンス,'予約可能')
         const updateKey = {
             performance: reservationModel.performance._id,
@@ -367,7 +370,7 @@ function saveSessionFixSeatsAndTickets(req, reservationModel, result, ticketType
         ticket_type: ticketType._id,
         ticket_type_name: ticketType.name,
         ticket_type_charge: ticketType.charge,
-        watcher_name: '',
+        watcher_name: ticketType.watcher_name,
         ticket_cancel_charge: ticketType.cancel_charge,
         ticket_ttts_extension: ticketType.ttts_extension,
         performance_ttts_extension: reservationModel.performance.ttts_extension // 2017/11/16
