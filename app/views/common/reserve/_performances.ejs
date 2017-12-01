@@ -1,3 +1,6 @@
+<%
+    const cate = (typeof category === 'string') ? category : 'general';
+%>
 <input type="hidden" name="apiEndpoint" value="<%= process.env.API_ENDPOINT %>">
 <input type="hidden" id="input_apiToken" value="<%= token.access_token %>">
 <input type="hidden" id="input_apiTokenExpire" value="<%= token.expires_in %>">
@@ -13,6 +16,9 @@
 <p class="guidetext is-customer"><%- __('Label.SelectPerformanceGuideText') %></p>
 <p class="guidetext is-staff-block">代理予約を行う日時を指定してください</p>
 
+<%  if (cate == "wheelchair") { %>
+    <p class="guidetext is-customer" style="color:red">〇〇〇車椅子〇〇〇</p>
+<%  } %>
 
 <h3><span class="redcircle">1</span><%- __('Label.PreferredDate') %></h3>
 <div class="performancesearchform">
@@ -39,6 +45,7 @@
 
 <form method="post" id="form_performanceId">
     <input type="hidden" name="performanceId">
+    <input type="hidden" name="category" value="<%= cate %>">
 </form>
 
 <div class="modal fade loading" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">

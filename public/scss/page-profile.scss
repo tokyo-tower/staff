@@ -78,6 +78,18 @@
         }
     }
 
+    .tr-tel {
+        label {
+            cursor: pointer;
+        }
+        input:disabled {
+            color: #ccc;
+        }
+        #wrapper_tel_otherregion {
+            display: none;
+        }
+    }
+
     .wrapper-gender {
         label {
             margin-right: 10px;

@@ -1,3 +1,9 @@
+@media print {
+    .noprint {
+        display: none !important;
+    }
+}
+
 @mixin clearfix {
     &:before,
     &:after {

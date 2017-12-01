@@ -1,10 +1,20 @@
 $(function() {
     var LOCALE = document.documentElement.getAttribute('lang');
 
+    var isSubmitting = false;    
+
+    var isAgreed = function() {
+        if (window.ttts.mode === 'customer') {
+            return document.getElementById('checkbox_agreed').checked;
+        }
+        return true;
+    };
+
     // 購入上限数
     var MAX_Q = document.getElementById('input_maxq').value;
 
     // 合計金額の更新
+    var isValidTicketsSelected = false;
     var dom_tickets_tr = document.querySelectorAll('.table-tickets tbody tr');
     var dom_tfoot = document.querySelector('tfoot');
     var dom_price = document.querySelector('.price');
@@ -25,14 +35,18 @@ $(function() {
             if (count > MAX_Q) {
                 $alertTicketOvermax.show();
             }
+            isValidTicketsSelected = false;
             return dom_btnnext.classList.add('btn-disabled');
         }
+        isValidTicketsSelected = true;
 
         // 数字をコンマ区切りに
         var text = total.toString().replace(/(\d)(?=(\d{3})+$)/g, '$1,') + ((LOCALE === 'ja') ? '円' : 'yen');
         dom_price.innerText = text;
         dom_tfoot.classList.remove('hidden');
-        dom_btnnext.classList.remove('btn-disabled');
+        if (isAgreed()) {
+            dom_btnnext.classList.remove('btn-disabled');
+        }
         return false;
     };
     // 合計金額初期表示
@@ -43,15 +57,30 @@ $(function() {
         reloadTotalCharge();
     });
 
+    // 規約同意
+    $('#checkbox_agreed').on('change', function() {
+        if (isSubmitting) { return false; }
+        this.parentNode.className = (this.checked) ? 'agreed' : '';
+        if (this.checked && isValidTicketsSelected) {
+            document.getElementById('btn_next').classList.remove('btn-disabled');
+        } else {
+            document.getElementById('btn_next').classList.add('btn-disabled');
+        }
+    });
 
     // 次へ
-    var submitted = false;
-    $(document).on('click', '.btn-next', function() {
-        if (submitted) {
-            alert('already submitted.');
+    $(document).on('click', '.btn-next', function(e) {
+        // 予約メモ欄を無視して買おうとしている券があったらアラート
+        if (Array.prototype.some.call(document.querySelectorAll('input[name="watcherName"]'), function(input_watcherName) {
+            var qselect = document.getElementById('select_ticketq_' + input_watcherName.getAttribute('data-ticket-code'));
+            return ((parseInt(qselect.value, 10) > 0) && !input_watcherName.value);
+        })) {
+            alert('購入するチケットの予約メモは必ず入力してください');
             return false;
         }
-        submitted = true;
+        if (!isAgreed() || isSubmitting) {
+            return false;
+        }
         $('form input[name="choices"]').val('');
         // 座席コードリストを取得
         var choices = [];
@@ -68,6 +97,9 @@ $(function() {
         if (choices.length > 0) {
             $('form input[name="choices"]').val(JSON.stringify(choices));
         }
+        isSubmitting = true;
+        e.currentTarget.querySelector('span').innerText = window.ttts.commonlocales.Sending;
+        e.currentTarget.classList.add('btn-disabled');
         return $('form').submit();
     });
 });

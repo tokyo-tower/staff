@@ -6,5 +6,9 @@
             <%= moment(reservationModel.performance.day).format('Y-MM-DD') %><br>
             <%= `${moment(reservationModel.performance.start_time, 'hmm').format('HH:mm')} - ${moment(reservationModel.performance.end_time, 'hmm').format('HH:mm')}` %>
         </div>
+        <p class="reservationstatus-title">ツアーナンバー</p>
+        <div class="reservationstatus-info">
+            <%- reservationModel.performance.ttts_extension.tour_number %>
+        </div>
     </div>
 </div>

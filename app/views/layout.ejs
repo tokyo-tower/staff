@@ -1,7 +1,7 @@
 <%
 let routeName = '';
 if (req.hasOwnProperty('route')) {
-    routeName = req.route.path;
+    routeName = req.path;
 }
 
 let currentLang = locale;

@@ -104,4 +104,18 @@
             }
         }
     }
+    .wrapper-terms {
+        h2 {
+            font-size: 1.2em;
+            text-align: center;
+            margin: 10px auto;
+        }
+        .lawtext {
+            max-height: 300px;
+            overflow: scroll;
+            @media screen and (max-width: $breakpoint_tablet) {
+                max-height: 200px;
+            }
+        }
+    }
 }

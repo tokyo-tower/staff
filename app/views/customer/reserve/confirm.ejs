@@ -1,0 +1,150 @@
+<%- include('../../common/reserve/_step', {currentStepName: 'confirm'}) %>
+
+<h1 class="pagetitle"><%- __('h1.ConfirmReservation') %></h1>
+<p class="guidetext"><%- __('Label.ConfirmReservationGuideText') %></p>
+
+<div class="wrapper-confirm">
+
+    <h2>
+        <span>予約内容確認</span>
+        <a class="btn btn-default btn-change btn-icon-back" href="/customer/reserve/performances">
+            <span><%- __('Button.Change') %></span>
+        </a>
+    </h2>
+    <table class="table table-confirm">
+        <tbody>
+            <tr>
+                <th><%- __('Label.PurchaseContentDate') %></th>
+                <td>
+                    <p>
+                        <%= moment(reservationModel.performance.day).format('Y-MM-DD') %>&nbsp;&nbsp;<%= `${moment(reservationModel.performance.start_time, 'hmm').format('HH:mm')} - ${moment(reservationModel.performance.end_time, 'hmm').format('HH:mm')}` %> 
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <th>ツアーナンバー</th>
+                <td>
+                    <p>
+                        <%- reservationModel.performance.ttts_extension.tour_number %> 
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <th>
+                    <%- __('Label.TicketType') %>/<%- __('Label.TicketCount') %>
+                </th>
+                <td>
+                    <p>
+                        <% reservationModel.seatCodes.forEach((seatCode) => { %>
+                            <% let reservation = new Models.Reservation(reservationModel.seatCode2reservationDocument(seatCode)); %>
+                            <%- reservation.get(`ticket_type_detail_str`)[locale].replace(/\\/g, '&yen;') %>
+                            <br>
+                        <% }) %>
+                    </p>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+
+
+    <h2>
+        <span><%- __('h2.Profile') %></span>
+        <a class="btn btn-default btn-change btn-icon-back" href="/customer/reserve/profile">
+            <span><%- __('Button.Change') %></span>
+        </a>
+    </h2>
+    <table class="table table-confirm">
+        <tbody>
+
+            <tr>
+                <th><%- __('Label.FullName') %></th>
+                <td>
+                    <p><%= reservationModel.purchaser.lastName %> <%= reservationModel.purchaser.firstName %></p>
+                </td>
+            </tr>
+
+
+            <tr>
+                <th><%- __('Label.Email') %></th>
+                <td>
+                    <p><%= reservationModel.purchaser.email %></p>
+                </td>
+            </tr>
+
+            <tr>
+                <th><%- __('Label.Tel') %></th>
+                <td>
+                    <p><%= reservationModel.purchaser.tel %></p>
+                </td>
+            </tr>
+
+            <% if (reservationModel.getTotalCharge() > 0) { %>
+            <tr>
+                <th>
+                    <%- __('Label.TotalPrice') %>
+                </th>
+                <td>
+                    <p>
+                        <span class="price"><%- __('{{price}} yen', {price: numeral(reservationModel.getTotalCharge()).format('0,0')}) %></span>
+                    </p>
+                </td>
+            </tr>
+            <% } %>
+
+            <tr>
+                <th><%- __('Label.PaymentMethod') %></th>
+                <td>
+                    <p>
+                    <% if (reservationModel.paymentMethod === GMOUtil.PAY_TYPE_CREDIT) { %>
+                    <%- __('Label.PaymentMethodName.0') %>
+                    <% } else if (reservationModel.paymentMethod === GMOUtil.PAY_TYPE_CVS) {%>
+                    <%- __('Label.PaymentMethodName.CVS') %>
+                    <% } %>
+                    </p>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+</div>
+
+<div class="wrapper-notice">
+    <h2><%- __('Label.ConfirmNotes') %></h2>
+    <p><%- __('ConfirmNotesText') %></p>
+</div>
+
+<div class="wrapper-agreement">
+    <label for="checkbox_agreed"><input id="checkbox_agreed" type="checkbox"> <span><%- __('Label.Agree') %></span></label>
+</div>
+
+<div class="natbtns">
+    <a class="btn btn-next btn-disabled" id="btn_next" href="javascript:void(0);"><span><%- __('Button.GoToPayment') %></span></a>
+    <a class="btn-back" href="/customer/reserve/profile"><span><%- __('Button.Back') %></span></a>
+</div>
+
+<script>
+$(function() {
+    var comfirmed = false;
+    var btn_next = document.getElementById('btn_next');
+
+    document.getElementById('checkbox_agreed').onchange = function() {
+        this.parentNode.className = (this.checked) ? 'agreed' : '';
+        if (this.checked) {
+            btn_next.classList.remove('btn-disabled');
+        } else {
+            btn_next.classList.add('btn-disabled');
+        }
+    };
+
+    btn_next.onclick = function() {
+        if (~this.className.indexOf('disabled') || comfirmed) { return false; }
+        comfirmed = true;
+        btn_next.querySelector('span').innerText = window.ttts.commonlocales.Sending;
+        btn_next.classList.add('btn-disabled');
+        $('<form/>', {'method': 'post'}).appendTo(document.body).submit(); // location.hrefにpostする
+    };
+});
+</script>

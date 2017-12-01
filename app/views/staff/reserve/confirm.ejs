@@ -17,6 +17,14 @@
                     </p>
                 </td>
             </tr>
+            <tr>
+                <th>ツアーナンバー</th>
+                <td>
+                    <p>
+                        <%- reservationModel.performance.ttts_extension.tour_number %>
+                    </p>
+                </td>
+            </tr>
             <%- /* 券種/枚数/メモ */ %>
             <tr>
                 <th>
@@ -37,11 +45,11 @@
         <tbody>
             <%- /* 決算手段 */ %>
             <tr>
-                <th>
+                <th><% console.log(); %>
                     <%- __('Label.HowToPayStaff') %>
                 </th>
                 <td>
-                    <p><%- paymentMethodName %></p>
+                    <p><%- __(`Label.PaymentMethodName.${reservationModel.paymentMethod}`) %></p>
                 </td>
             </tr>
         </tbody>

@@ -111,8 +111,17 @@
                 <label>決済手段</label>
                 <select class="form-control" name="payment_method">
                     <option value="">指定無し</option>
-                    <option value="01">クレジットカード</option>
-                    <option value="Z">現金</option>                    
+                    <%
+                        const paymentMethodsForCustomer = conf.get('paymentMethodsForCustomer');
+                        Object.keys(paymentMethodsForCustomer).forEach((methodCode) => {
+                    %>
+                            <option value="<%- methodCode %>"><%- paymentMethodsForCustomer[methodCode] %></option>
+                    <%  });
+                        const paymentMethodsForStaff = conf.get('paymentMethodsForStaff');
+                        Object.keys(paymentMethodsForStaff).forEach((methodCode) => {
+                    %>
+                            <option value="<%- methodCode %>"><%- paymentMethodsForStaff[methodCode] %></option>
+                    <%  }); %>
                     <option value="-">POS</option>
                 </select>
             </div>
@@ -279,6 +288,7 @@
 <input type="hidden" name="urlUpdateWatcherName" value="/staff/mypage/updateWatcherName">
 <input type="hidden" name="messageAreYouSureCancel" value="<%- __('Message.AreYouSureCancel') %>">
 <input type="hidden" name="messageConfirmCancelSelectedTickets" value="<%- __('Message.ConfirmCancelSelectedTickets') %>">
+<input type="hidden" id="INQUIRY_SITE_URL" value="<%- process.env.INQUIRY_SITE_URL %>">
 
 <script src="/js/thermalprint/StarWebPrintTrader.js"></script>
 <script src="/js/thermalprint/StarWebPrintBuilder.js"></script>

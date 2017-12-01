@@ -31,23 +31,31 @@ header {
     .header-lang {
         float: right;
         border-left: 1px solid #ddd;
-        width: 200px;
+        padding-left: 10px;
         margin: 10px 0;
 
         p {
             font-size:14px;
             text-align: center;
+            margin-bottom: 4px;
         }
 
-        select {
-            font-size: 20px;
-            margin: 10px 16px 10px auto;
-            display: block;
-            width: 120px;
-            background-color: transparent;
-            border: none;
-            outline: none;
+        label {
             cursor: pointer;
+        }
+
+        .dd-select, .dd-option {
+            height: 48px!important;
+            padding: 0 10px;
+            font-size: 14.5px;
+        }
+        .dd-selected {
+            padding: 0;
+            font-size: 14.5px;
+        }
+        .dd-option-image, .dd-selected-image {
+            max-width: 32px;
+            float: none;
         }
     }
 }

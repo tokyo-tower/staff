@@ -1,18 +1,25 @@
 <footer>
+    <ul class="is-customer">
+        <li><a href="/terms" target="_blank"><%- __('h1.Policy') %></a></li>
+        <li><a href="/privacypolicy" target="_blank"><%- __('h1.Privacy') %></a></li>
+        <li><a href="/contact" target="_blank"><%- __('h1.ContactUs') %></a></li>
+    </ul>
     <div class="copyrights">
         <div class="inner">
-            <!-- 購入フロー中で、パフォーマンスが確定していれば作品著作権をフッターに追加 -->
-            <% if (typeof(reservationModel) !== 'undefined' && reservationModel.performance) { %>
-            <p class="film-copyright"><%- reservationModel.performance.film.copyright %></p>
-            <% } %>
+            ©<%- new Date().getFullYear() %> TOKYO TOWER. ALL RIGHTS RESERVED.
         </div>
     </div>
 </footer>
 
 <script>
-$(function(){
+    window.ttts = window.ttts || {};
+    window.ttts.commonlocales = {
+        Next: '<%- __('Button.Next') %>',
+        Sending: '<%- __('Message.Sending') %>',
+        UnexpectedError: '<%- __('Message.UnexpectedError') %>'
+    };
+
     $(document).on('click', '.update-locale', function(){
         location.href = '/language/update/' + $(this).attr('data-locale') + '?cb=' + location.href;
     })
-});
 </script>
