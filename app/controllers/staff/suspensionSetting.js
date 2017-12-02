@@ -80,15 +80,18 @@ function execute(req, res, next) {
             if (!Array.isArray(performanceIds)) {
                 throw new Error(req.__('Message.UnexpectedError'));
             }
-            //59fc92c3fca1c8737f068a
-            const executeType = req.body.executeType;
-            const onlineStatus = executeType === '1' ? req.body.onlineStatus : ttts_domain_1.PerformanceUtil.ONLINE_SALES_STATUS.NORMAL;
-            const evStatus = executeType === '1' ? req.body.evStatus : ttts_domain_1.PerformanceUtil.EV_SERVICE_STATUS.NORMAL;
-            yield updateStatusByIds(req.staffUser.username, performanceIds, onlineStatus, evStatus);
+            // const executeType: string = req.body.executeType;
+            // const onlineStatus: string =  executeType === '1' ? req.body.onlineStatus : PerformanceUtil.ONLINE_SALES_STATUS.NORMAL;
+            // const evStatus: string =  executeType === '1' ? req.body.evStatus : PerformanceUtil.EV_SERVICE_STATUS.NORMAL;
+            const onlineStatus = req.body.onlineStatus;
+            const evStatus = req.body.evStatus;
+            const notice = req.body.notice;
+            const info = yield updateStatusByIds(req.staffUser.username, performanceIds, onlineStatus, evStatus);
             // 運行停止の時、メール作成
-            // if (req.body.ev_service_status === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
-            //     await createEmails((<any>req).staffUser, performanceIds);
-            // }
+            if (evStatus === ttts_domain_1.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
+                // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
+                yield createEmails(res, info.targrtInfo, notice);
+            }
             res.json({
                 success: true,
                 message: null
@@ -120,11 +123,11 @@ function updateStatusByIds(staffUser, performanceIds, onlineStatus, evStatus) {
         });
         const now = moment().format('YYYY/MM/DD HH:mm:ss');
         // 返金対象予約情報取得(入塔記録のないもの)
-        const info = yield suspensionCommon.getTargetReservationsForRefund(performanceIds, ttts_domain_1.PerformanceUtil.REFUND_STATUS.NONE);
+        const info = yield suspensionCommon.getTargetReservationsForRefund(performanceIds, ttts_domain_1.PerformanceUtil.REFUND_STATUS.NONE, evStatus === ttts_domain_1.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
         // 予約情報返金ステータスを未指示に更新
-        if (info.reservationIds.length > 0) {
+        if (info.targrtIds.length > 0) {
             yield ttts_domain_1.Models.Reservation.update({
-                _id: { $in: info.reservationIds }
+                _id: { $in: info.targrtIds }
             }, {
                 $set: {
                     'performance_ttts_extension.refund_status': ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
@@ -153,6 +156,63 @@ function updateStatusByIds(staffUser, performanceIds, onlineStatus, evStatus) {
         }, {
             multi: true
         }).exec();
+        return info;
+    });
+}
+/**
+ * 運行・オンライン販売停止メール作成
+ *
+ * @param {Response} res
+ * @param {any[]} targrtInfos
+ * @param {any} notice
+ * @return {Promise<void>}
+ */
+function createEmails(res, targrtInfo, notice) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
+        if (Object.keys(targrtInfo).length === 0) {
+            return;
+        }
+        // 購入単位ごとにメール作成
+        const promises = (Object.keys(targrtInfo).map((key) => __awaiter(this, void 0, void 0, function* () {
+            if (targrtInfo[key].length > 0) {
+                yield createEmail(res, targrtInfo[key][0], notice);
+            }
+        })));
+        yield Promise.all(promises);
         return;
+    });
+}
+/**
+ * 運行・オンライン販売停止メール作成(1通)
+ *
+ * @param {Response} res
+ * @param {an} reservation
+ * @param {any} notice
+ * @return {Promise<void>}
+ */
+function createEmail(res, reservation, notice) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // タイトル編集
+        const title = res.__('Title');
+        const titleEmail = res.__('Email.Title');
+        // メール編集
+        const emailQueue = {
+            from: {
+                address: conf.get('email.from'),
+                name: conf.get('email.fromname')
+            },
+            to: {
+                address: reservation.purchaser_email
+            },
+            subject: `${title} ${titleEmail}`,
+            content: {
+                mimetype: 'text/plain',
+                text: notice
+            },
+            status: ttts_domain_1.EmailQueueUtil.STATUS_UNSENT
+        };
+        // メール作成
+        yield ttts_domain_1.Models.EmailQueue.create(emailQueue);
     });
 }

@@ -13,6 +13,7 @@ import { Models, PerformanceUtil, ReservationUtil } from '@motionpicture/ttts-do
  *
  *  info: {
  *     reservationIds: [id1,id2,,,idn]
+ *     targrtInfos: [{performance_day:'20171201', payment_no:'67890'}]
  *     arrivedInfos: [{performance_day:'20171201', payment_no:'12345'}]
  *     refundedInfo: [{'20171201_12345': [r1,r2,,,rn]}]
  * }
@@ -21,7 +22,8 @@ import { Models, PerformanceUtil, ReservationUtil } from '@motionpicture/ttts-do
  * @return {any}
  */
 export async function getTargetReservationsForRefund(performanceIds: string[],
-                                                     refundStatus: string): Promise<any> {
+                                                     refundStatus: string,
+                                                     allFields: boolean): Promise<any> {
     let info: any = null;
     // 検索条件セット([指定パフォーマンス]かつ[一般予約]かつ[予約済])
     const conditions: any = {
@@ -34,10 +36,13 @@ export async function getTargetReservationsForRefund(performanceIds: string[],
     if (refundStatus !== '') {
         conditions['performance_ttts_extension.refund_status'] = refundStatus;
     }
+    // フィールドセット
+    const fields: string = allFields ? '' : '_id performance_day payment_no checkins performance_ttts_extension';
+
     // パフォーマンスに紐づく予約情報取得
     const reservations = <any[]>await Models.Reservation.find(
         conditions,
-        '_id performance_day payment_no checkins performance_ttts_extension'
+        fields
     ).exec();
 
     // 入塔済、返金済の予約情報セット
@@ -73,17 +78,48 @@ export async function getTargetReservationsForRefund(performanceIds: string[],
 
     // 更新対象の予約IDセット
     const ids: any = [];
+    const targrtInfo: any = {};
     reservations.map((reservation: any) => {
+        // 入塔記録がない時
         if (isArrived(reservation) === false) {
             ids.push(reservation._id);
+            // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
+            const key : string = `${reservation.performance_day}_${reservation.payment_no}`;
+            if (targrtInfo.hasOwnProperty(key) === false) {
+                targrtInfo[key] = [];
+            }
+            targrtInfo[key].push(reservation);
         }
     });
 
     // 戻り値セット
     info = {};
-    info.reservationIds = ids;
+    info.targrtIds = ids;
+    info.targrtInfo = targrtInfo;
     info.arrivedInfos = arrivedInfos;
     info.refundedInfo = refundedInfo;
 
     return info;
+}
+/**
+ * メールキューインタフェース
+ *
+ * @interface IEmailQueue
+ */
+export interface IEmailQueue {
+    // tslint:disable-next-line:no-reserved-keywords
+    from: { // 送信者
+        address: string;
+        name: string;
+    };
+    to: { // 送信先
+        address: string;
+        name?: string;
+    };
+    subject: string;
+    content: { // 本文
+        mimetype: string;
+        text: string;
+    };
+    status: string;
 }

@@ -293,11 +293,11 @@ exports.refundProcess = refundProcess;
 function updateRefundStatus(performanceId, staffUser) {
     return __awaiter(this, void 0, void 0, function* () {
         // 返金対象予約情報取得(入塔記録のない、未指示データ)
-        const info = yield suspensionCommon.getTargetReservationsForRefund([performanceId], ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED);
+        const info = yield suspensionCommon.getTargetReservationsForRefund([performanceId], ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED, false);
         //対象予約(checkinsのない購入番号)の返金ステータスを更新する。
         const now = moment().format('YYYY/MM/DD HH:mm:ss');
         yield ttts_domain_1.Models.Reservation.update({
-            _id: { $in: info.reservationIds }
+            _id: { $in: info.targrtIds }
         }, {
             $set: {
                 'performance_ttts_extension.refund_status': ttts_domain_1.PerformanceUtil.REFUND_STATUS.INSTRUCTED,

@@ -22,6 +22,7 @@ const ttts_domain_1 = require("@motionpicture/ttts-domain");
  *
  *  info: {
  *     reservationIds: [id1,id2,,,idn]
+ *     targrtInfos: [{performance_day:'20171201', payment_no:'67890'}]
  *     arrivedInfos: [{performance_day:'20171201', payment_no:'12345'}]
  *     refundedInfo: [{'20171201_12345': [r1,r2,,,rn]}]
  * }
@@ -29,7 +30,7 @@ const ttts_domain_1 = require("@motionpicture/ttts-domain");
  * @param {string} performanceIds
  * @return {any}
  */
-function getTargetReservationsForRefund(performanceIds, refundStatus) {
+function getTargetReservationsForRefund(performanceIds, refundStatus, allFields) {
     return __awaiter(this, void 0, void 0, function* () {
         let info = null;
         // 検索条件セット([指定パフォーマンス]かつ[一般予約]かつ[予約済])
@@ -43,8 +44,10 @@ function getTargetReservationsForRefund(performanceIds, refundStatus) {
         if (refundStatus !== '') {
             conditions['performance_ttts_extension.refund_status'] = refundStatus;
         }
+        // フィールドセット
+        const fields = allFields ? '' : '_id performance_day payment_no checkins performance_ttts_extension';
         // パフォーマンスに紐づく予約情報取得
-        const reservations = yield ttts_domain_1.Models.Reservation.find(conditions, '_id performance_day payment_no checkins performance_ttts_extension').exec();
+        const reservations = yield ttts_domain_1.Models.Reservation.find(conditions, fields).exec();
         // 入塔済、返金済の予約情報セット
         const arrivedInfos = [];
         const refundedInfo = {};
@@ -76,14 +79,23 @@ function getTargetReservationsForRefund(performanceIds, refundStatus) {
         };
         // 更新対象の予約IDセット
         const ids = [];
+        const targrtInfo = {};
         reservations.map((reservation) => {
+            // 入塔記録がない時
             if (isArrived(reservation) === false) {
                 ids.push(reservation._id);
+                // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
+                const key = `${reservation.performance_day}_${reservation.payment_no}`;
+                if (targrtInfo.hasOwnProperty(key) === false) {
+                    targrtInfo[key] = [];
+                }
+                targrtInfo[key].push(reservation);
             }
         });
         // 戻り値セット
         info = {};
-        info.reservationIds = ids;
+        info.targrtIds = ids;
+        info.targrtInfo = targrtInfo;
         info.arrivedInfos = arrivedInfos;
         info.refundedInfo = refundedInfo;
         return info;

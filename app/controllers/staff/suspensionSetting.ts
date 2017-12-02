@@ -3,7 +3,7 @@
  *
  * @namespace controller/staff/suspensionSetting
  */
-import { CommonUtil, Models, PerformanceUtil } from '@motionpicture/ttts-domain';
+import { CommonUtil, EmailQueueUtil, Models, PerformanceUtil } from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import { NextFunction, Request, Response } from 'express';
 import * as moment from 'moment';
@@ -66,18 +66,22 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
             throw new Error(req.__('Message.UnexpectedError'));
         }
 
-        //59fc92c3fca1c8737f068a
-        const executeType: string = req.body.executeType;
-        const onlineStatus: string =  executeType === '1' ? req.body.onlineStatus : PerformanceUtil.ONLINE_SALES_STATUS.NORMAL;
-        const evStatus: string =  executeType === '1' ? req.body.evStatus : PerformanceUtil.EV_SERVICE_STATUS.NORMAL;
-        await updateStatusByIds((<any>req).staffUser.username,
-                                performanceIds,
-                                onlineStatus,
-                                evStatus);
+        // const executeType: string = req.body.executeType;
+        // const onlineStatus: string =  executeType === '1' ? req.body.onlineStatus : PerformanceUtil.ONLINE_SALES_STATUS.NORMAL;
+        // const evStatus: string =  executeType === '1' ? req.body.evStatus : PerformanceUtil.EV_SERVICE_STATUS.NORMAL;
+        const onlineStatus: string = req.body.onlineStatus;
+        const evStatus: string = req.body.evStatus;
+        const notice: string = req.body.notice;
+        const info: any =  await updateStatusByIds((<any>req).staffUser.username,
+                                                   performanceIds,
+                                                   onlineStatus,
+                                                   evStatus);
+
         // 運行停止の時、メール作成
-        // if (req.body.ev_service_status === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
-        //     await createEmails((<any>req).staffUser, performanceIds);
-        // }
+        if ( evStatus === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
+            // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
+            await createEmails(res, info.targrtInfo, notice);
+        }
         res.json({
             success: true,
             message: null
@@ -101,7 +105,7 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
 async function updateStatusByIds(staffUser: string,
                                  performanceIds: string[],
                                  onlineStatus: string,
-                                 evStatus: string) : Promise<void> {
+                                 evStatus: string) : Promise<any> {
     // パフォーマンスIDをObjectIdに変換
     const ids = performanceIds.map((id) => {
         return new mongoose.Types.ObjectId(id);
@@ -111,12 +115,13 @@ async function updateStatusByIds(staffUser: string,
     // 返金対象予約情報取得(入塔記録のないもの)
     const info = await suspensionCommon.getTargetReservationsForRefund(
                                             performanceIds,
-                                            PerformanceUtil.REFUND_STATUS.NONE);
+                                            PerformanceUtil.REFUND_STATUS.NONE,
+                                            evStatus === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
     // 予約情報返金ステータスを未指示に更新
-    if (info.reservationIds.length > 0) {
+    if (info.targrtIds.length > 0) {
         await Models.Reservation.update(
             {
-                _id: { $in: info.reservationIds}
+                _id: { $in: info.targrtIds}
             },
             {
                 $set: {
@@ -154,5 +159,66 @@ async function updateStatusByIds(staffUser: string,
         }
     ).exec();
 
+    return info;
+}
+/**
+ * 運行・オンライン販売停止メール作成
+ *
+ * @param {Response} res
+ * @param {any[]} targrtInfos
+ * @param {any} notice
+ * @return {Promise<void>}
+ */
+async function createEmails(res: Response,
+                            targrtInfo: any,
+                            notice: string) : Promise<void> {
+    // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
+    if (Object.keys(targrtInfo).length === 0) {
+
+        return;
+    }
+    // 購入単位ごとにメール作成
+    const promises = (Object.keys(targrtInfo).map(async(key) => {
+        if (targrtInfo[key].length > 0) {
+            await createEmail(res, targrtInfo[key][0], notice);
+        }
+    }));
+    await Promise.all(promises);
+
     return;
+}
+/**
+ * 運行・オンライン販売停止メール作成(1通)
+ *
+ * @param {Response} res
+ * @param {an} reservation
+ * @param {any} notice
+ * @return {Promise<void>}
+ */
+async function createEmail(res: Response,
+                           reservation: any,
+                           notice: string) : Promise<void> {
+    // タイトル編集
+    const title = res.__('Title');
+    const titleEmail = res.__('Email.Title');
+
+    // メール編集
+    const emailQueue: suspensionCommon.IEmailQueue = {
+        from: {
+            address: conf.get<string>('email.from'),
+            name: conf.get<string>('email.fromname')
+        },
+        to: {
+            address: reservation.purchaser_email
+        },
+        subject: `${title} ${titleEmail}`,
+        content: {
+            mimetype: 'text/plain',
+            text: notice
+        },
+        status: EmailQueueUtil.STATUS_UNSENT
+    };
+
+    // メール作成
+    await Models.EmailQueue.create(emailQueue);
 }

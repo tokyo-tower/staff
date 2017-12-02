@@ -295,13 +295,14 @@ async function updateRefundStatus(performanceId: string,
     // 返金対象予約情報取得(入塔記録のない、未指示データ)
     const info = await suspensionCommon.getTargetReservationsForRefund(
                     [performanceId],
-                    PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED);
+                    PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+                    false);
 
     //対象予約(checkinsのない購入番号)の返金ステータスを更新する。
     const now = moment().format('YYYY/MM/DD HH:mm:ss');
     await Models.Reservation.update(
         {
-            _id: { $in: info.reservationIds}
+            _id: { $in: info.targrtIds}
         },
         {
             $set: {
