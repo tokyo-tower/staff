@@ -318,6 +318,7 @@ interface ITicketType {
     name: IMultilingualString;
     charge: number; // 料金
     count: number;  // 枚数
+    watcher_name: string;
     cancel_charge: [ICancelCharge];
     ttts_extension: IExtensionTiket;
 }

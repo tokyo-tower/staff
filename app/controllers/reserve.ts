@@ -4,7 +4,7 @@
  * @namespace controller/reserve
  */
 
-import { Models, ReservationUtil, ScreenUtil } from '@motionpicture/ttts-domain';
+import { Models, ReservationUtil } from '@motionpicture/ttts-domain';
 import { NextFunction, Request, Response } from 'express';
 
 import ReservationModel from '../models/reserve/session';
