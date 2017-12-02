@@ -100,4 +100,3 @@ export async function getSeatProperties(req: Request, res: Response, __: NextFun
         res.json({ propertiesBySeatCode: {} });
     }
 }
-
