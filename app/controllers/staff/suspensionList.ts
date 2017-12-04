@@ -323,7 +323,6 @@ async function updateRefundStatus(performanceId: string,
         },
         {
             $set: {
-                'ttts_extension.refunded_count' : Object.keys(info.refundedInfo).length,
                 'ttts_extension.refund_status': PerformanceUtil.REFUND_STATUS.INSTRUCTED,
                 'ttts_extension.refund_update_user': staffUser,
                 'ttts_extension.refund_update_at': now

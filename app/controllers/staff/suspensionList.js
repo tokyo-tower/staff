@@ -312,7 +312,6 @@ function updateRefundStatus(performanceId, staffUser) {
             _id: performanceId
         }, {
             $set: {
-                'ttts_extension.refunded_count': Object.keys(info.refundedInfo).length,
                 'ttts_extension.refund_status': ttts_domain_1.PerformanceUtil.REFUND_STATUS.INSTRUCTED,
                 'ttts_extension.refund_update_user': staffUser,
                 'ttts_extension.refund_update_at': now
