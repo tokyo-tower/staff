@@ -148,7 +148,7 @@ $(function() {
         },
         // カレンダーの日付が変更されたら検索を実行
         onValueUpdate: function(selectedDates, dateStr) {
-            window.setSessionStorage('performance_ymd', dateStr);
+            ///////////window.setSessionStorage('performance_ymd', dateStr);
             search({
                 page: 1,
                 day: dateStr.replace(/\-/g, '') // Y-m-dをYmdに整形

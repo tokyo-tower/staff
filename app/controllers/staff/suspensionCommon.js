@@ -14,6 +14,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * @namespace controller/staff/suspensionSetting
  */
 const ttts_domain_1 = require("@motionpicture/ttts-domain");
+const numeral = require("numeral");
 /**
  * 返金対象予約情報取得
  *  [一般予約]かつ
@@ -102,3 +103,31 @@ function getTargetReservationsForRefund(performanceIds, refundStatus, allFields)
     });
 }
 exports.getTargetReservationsForRefund = getTargetReservationsForRefund;
+function getTicketInfo(reservations, leaf, locale) {
+    // 券種ごとに合計枚数算出
+    const keyName = 'ticket_type';
+    const ticketInfos = {};
+    for (const reservation of reservations) {
+        // チケットタイプセット
+        const dataValue = reservation[keyName];
+        // チケットタイプごとにチケット情報セット
+        if (!ticketInfos.hasOwnProperty(dataValue)) {
+            ticketInfos[dataValue] = {
+                ticket_type_name: reservation.ticket_type_name[locale],
+                charge: `\\${numeral(reservation.charge).format('0,0')}`,
+                count: 1
+            };
+        }
+        else {
+            ticketInfos[dataValue].count += 1;
+        }
+    }
+    // 券種ごとの表示情報編集
+    const ticketInfoArray = [];
+    Object.keys(ticketInfos).forEach((key) => {
+        const ticketInfo = ticketInfos[key];
+        ticketInfoArray.push(`${ticketInfo.ticket_type_name} ${ticketInfo.count}${leaf}`);
+    });
+    return ticketInfoArray;
+}
+exports.getTicketInfo = getTicketInfo;

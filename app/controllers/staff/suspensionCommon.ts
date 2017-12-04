@@ -4,6 +4,7 @@
  * @namespace controller/staff/suspensionSetting
  */
 import { Models, PerformanceUtil, ReservationUtil } from '@motionpicture/ttts-domain';
+import * as numeral from 'numeral';
 
 /**
  * 返金対象予約情報取得
@@ -122,4 +123,33 @@ export interface IEmailQueue {
         text: string;
     };
     status: string;
+}
+export function getTicketInfo(reservations: any[],
+                              leaf : string,
+                              locale: string): string[] {
+    // 券種ごとに合計枚数算出
+    const keyName: string = 'ticket_type';
+    const ticketInfos: {} = {};
+    for ( const reservation of reservations) {
+        // チケットタイプセット
+        const dataValue = reservation[keyName];
+        // チケットタイプごとにチケット情報セット
+        if (!ticketInfos.hasOwnProperty(dataValue)) {
+            (<any>ticketInfos)[dataValue] = {
+                ticket_type_name: reservation.ticket_type_name[locale],
+                charge: `\\${numeral(reservation.charge).format('0,0')}`,
+                count: 1
+            };
+        } else {
+            (<any>ticketInfos)[dataValue].count += 1;
+        }
+    }
+    // 券種ごとの表示情報編集
+    const ticketInfoArray: string[] = [];
+    Object.keys(ticketInfos).forEach((key) => {
+        const ticketInfo = (<any>ticketInfos)[key];
+        ticketInfoArray.push(`${ticketInfo.ticket_type_name} ${ticketInfo.count}${leaf}`);
+    });
+
+    return ticketInfoArray;
 }

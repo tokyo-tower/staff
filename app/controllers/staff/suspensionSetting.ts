@@ -180,7 +180,7 @@ async function createEmails(res: Response,
     // 購入単位ごとにメール作成
     const promises = (Object.keys(targrtInfo).map(async(key) => {
         if (targrtInfo[key].length > 0) {
-            await createEmail(res, targrtInfo[key][0], notice);
+            await createEmail(res, targrtInfo[key], notice);
         }
     }));
     await Promise.all(promises);
@@ -191,16 +191,42 @@ async function createEmails(res: Response,
  * 運行・オンライン販売停止メール作成(1通)
  *
  * @param {Response} res
- * @param {an} reservation
+ * @param {any} reservation
  * @param {any} notice
  * @return {Promise<void>}
  */
 async function createEmail(res: Response,
-                           reservation: any,
+                           reservations: any[],
                            notice: string) : Promise<void> {
+
+    const reservation = reservations[0];
     // タイトル編集
+    // 東京タワー TOP DECK Ticket
     const title = res.__('Title');
-    const titleEmail = res.__('Email.Title');
+    // 東京タワー TOP DECK エレベータ運行停止のお知らせ
+    const titleEmail = res.__('Email.TitleSus');
+    //トウキョウ タロウ 様
+    const purchaserName: string = `${res.__('Mr{{name}}', {name: reservation.purchaser_name[res.locale]})}`;
+
+    // 購入チケット情報
+    const paymentTicketInfos: string[] = [];
+    // 購入番号 : 850000001
+    paymentTicketInfos.push(`${res.__('Label.PaymentNo')} : ${reservation.payment_no}`);
+
+    // ご来塔日時 : 2017/12/10 09:15
+    const day: string = moment(reservation.performance_day, 'YYYYMMDD').format('YYYY/MM/DD');
+    // tslint:disable-next-line:no-magic-numbers
+    const time: string = `${reservation.performance_start_time.substr(0, 2)}:${reservation.performance_start_time.substr(2, 2)}`;
+    paymentTicketInfos.push(`${res.__('Label.Day')} : ${day} ${time}`);
+
+    // 券種 枚数
+    paymentTicketInfos.push(`${res.__('Label.TicketType')} ${res.__('Label.TicketCount')}`);
+    // TOP DECKチケット(大人) 1枚
+    const leaf: string = res.__('Email.Leaf');
+    const infos = suspensionCommon.getTicketInfo(reservations, leaf, res.locale);
+    paymentTicketInfos.push(infos.join('\n'));
+    // 本文セット
+    const content: string = `${titleEmail}\n\n${purchaserName}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}`;
 
     // メール編集
     const emailQueue: suspensionCommon.IEmailQueue = {
@@ -214,7 +240,7 @@ async function createEmail(res: Response,
         subject: `${title} ${titleEmail}`,
         content: {
             mimetype: 'text/plain',
-            text: notice
+            text: content
         },
         status: EmailQueueUtil.STATUS_UNSENT
     };
