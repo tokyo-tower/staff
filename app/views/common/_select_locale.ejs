@@ -1,29 +1,50 @@
 <div id="select_locale"></div>
+<style>
+#select_locale label {
+    cursor: pointer;
+}
+#select_locale .dd-select, #select_locale .dd-option {
+    height: 48px!important;
+    padding: 0 10px;
+    font-size: 14.5px;
+}
+#select_locale .dd-selected {
+    padding: 0;
+    font-size: 14.5px;
+}
+#select_locale .dd-option-image,
+#select_locale .dd-selected-image {
+    max-width: 32px;
+    float: none;
+}
+</style>
 <script src="/js/lib/jquery.ddslick.min.js"></script>
 <script>
 window.ttts.locales = <%- JSON.stringify(conf.get('locales')) %>;
 window.ttts.currentLocale = window.sessionStorage.getItem('locale') || '<%- (typeof locale === 'string') ? locale : '' %>' || 'ja';
 window.ttts.domurl = new Url();
-window.ttts.isLocalesAlreadyInitialzed = false;
-$('#select_locale').ddslick({
-    data: Object.keys(window.ttts.locales).map(function(localeCode) {
-        return {
-            value: localeCode,
-            text: window.ttts.locales[localeCode],
-            selected: (localeCode === window.ttts.currentLocale),
-            imageSrc: '/images/common/localeflag/' + localeCode + '.svg'
-        }
-    }),
-    onSelected: function(ev) {
-        if (!window.ttts.isLocalesAlreadyInitialzed) {
-            window.ttts.isLocalesAlreadyInitialzed = true;
-            return false;
-        }
-        window.ttts.domurl.query.locale = null;
-        window.ttts.setSessionStorage('locale', ev.selectedData.value);
-        return location.replace('/language/update/' + ev.selectedData.value + '?cb=' + window.ttts.domurl.toString());
-    },
-    width: '200px',
-    background: 'transparent'
-});
+(function(){
+    var isLocalesAlreadyInitialzed = false;
+    $('#select_locale').ddslick({
+        data: Object.keys(window.ttts.locales).map(function(localeCode) {
+            return {
+                value: localeCode,
+                text: window.ttts.locales[localeCode],
+                selected: (localeCode === window.ttts.currentLocale),
+                imageSrc: '/images/common/localeflag/' + localeCode + '.svg'
+            }
+        }),
+        onSelected: function(ev) {
+            if (!isLocalesAlreadyInitialzed) {
+                isLocalesAlreadyInitialzed = true;
+                return false;
+            }
+            window.ttts.domurl.query.locale = null;
+            window.ttts.setSessionStorage('locale', ev.selectedData.value);
+            return location.replace('/language/update/' + ev.selectedData.value + '?cb=' + window.ttts.domurl.toString());
+        },
+        width: '200px',
+        background: 'transparent'
+    });
+})();
 </script>

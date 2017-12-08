@@ -12,7 +12,7 @@ const _ = require("underscore");
 function update(req, res) {
     const locale = req.params.locale;
     req.session.locale = locale;
-    const cb = (!_.isEmpty(req.query.cb)) ? req.query.cb : '/';
+    const cb = (!_.isEmpty(req.query.cb)) ? decodeURIComponent(req.query.cb) : '/';
     res.redirect(cb);
 }
 exports.update = update;

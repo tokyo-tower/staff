@@ -22,7 +22,7 @@
             </tr>
             <% /*決済手段*/ %>
             <tr class="tr-payment">
-                <th><%- __('Form.FieldName.paymentMethod') %><span class="required">*</span></th>
+                <th><%- __('Form.FieldName.paymentMethod') %><span class="required">*<%- __('Label.Required') %></span></th>
                 <td>
                     <div class="wrapper-payment form-inline">
                         <% Object.keys(conf.get('paymentMethodsForStaff')).forEach((methodCode) => { %>
@@ -50,58 +50,65 @@
     let preferred_countries = conf.get('preferred_countries_by_locale') || {};
     preferred_countries = (preferred_countries[locale]) ? JSON.stringify(preferred_countries[locale]) : '';
 %>
-    <input type="hidden" id="locale_errmsg_empty" value="<%-__('Message.required{{fieldName}}', { fieldName: '{{fieldName}}' }) %>">
-    <input type="hidden" id="locale_errmsg_invalid" value="<%-__('Message.invalid{{fieldName}}', { fieldName: '{{fieldName}}' }) %>">
-    <input type="hidden" id="locale_errmsg_maxLength" value="<%-__('Message.maxLength{{fieldName}}{{max}}', { fieldName: '{{fieldName}}', max: '{{max}}' }) %>">
-    <input type="hidden" id="locale_errmsg_cardtoken" value="<%- __('Message.cardTokenError') %>">
-    <input type="hidden" id="preferred_countries" value='<%- preferred_countries %>'>
-    <input type="hidden" id="local_address" value='<%- address %>'>
-    <input type="hidden" id="local_tel" value='<%- tel %>'>
+    <script>
+        window.ttts.errmsgLocales = {
+            empty: "<%-__('Message.required{{fieldName}}', { fieldName: '{{fieldName}}' }) %>",
+            invalid: "<%-__('Message.invalid{{fieldName}}', { fieldName: '{{fieldName}}' }) %>",
+            match: "<%-__('Message.match{{fieldName}}', { fieldName: '{{fieldName}}' }) %>",
+            maxLength: "<%-__('Message.maxLength{{fieldName}}{{max}}', { fieldName: '{{fieldName}}', max: '{{max}}' }) %>",
+            cardtoken: "<%- __('Message.cardTokenError') %>"
+        };
+        window.ttts.local = {
+            address: '<%- address %>',
+            tel: '<%- tel %>'
+        };
+        window.ttts.preferred_countries = '<%- preferred_countries %>';
+    </script>
 
     <table class="table table-profile table-profile-customer">
         <tbody>
             <tr class="tr-name">
-                <th><%- __('Form.FieldName.name') %><span class="required">*</span></th>
+                <th><%- __('Form.FieldName.name') %><span class="required">*<%- __('Label.Required') %></span></th>
                 <td>
                     <div class="wrapper-names">
                         <div class="wrapper-nameinput wrapper-nameinput-lastname">
                             <label for="id_lastName"><%- __('Form.FieldName.lastName') %></label>
                             <input type="text" name="lastName" id="id_lastName" class="form-control input-required" data-pattern="^[ァ-ロワヲンーa-zA-Z・\.\s　]*$" data-parentSelector=".wrapper-nameinput-lastname" data-fieldname="<%- __('Form.FieldName.lastName') %>" value="<%= lastName %>" required>
+                            <p class="errmsg errmsg-lastName"><%- (validation && validation.lastName) ? validation.lastName.msg : '' %></p>
                         </div>
                         <div class="wrapper-nameinput wrapper-nameinput-firstname">
                             <label for="id_firstName"><%- __('Form.FieldName.firstName') %></label>
                             <input type="text" name="firstName" id="id_firstName" class="form-control input-required" data-pattern="^[ァ-ロワヲンーa-zA-Z・\.\s　]*$" data-parentSelector=".wrapper-nameinput-firstname" data-fieldname="<%- __('Form.FieldName.firstName') %>" value="<%= firstName %>" required>
+                            <p class="errmsg errmsg-firstName"><%- (validation && validation.firstName) ? validation.firstName.msg : '' %></p>
                         </div>
                     </div>
                     <p class="notice">※<%- __('Message.EnterInFullWidthKatakana') %></p>
-                    <p class="errmsg errmsg-lastName"><%- (validation && validation.lastName) ? validation.lastName.msg : '' %></p>
-                    <p class="errmsg errmsg-firstName"><%- (validation && validation.firstName) ? validation.firstName.msg : '' %></p>
                 </td>
             </tr>
 
             <tr class="tr-email">
-                <th><%- __('Form.FieldName.email') %><span class="required">*</span></th>
+                <th><%- __('Form.FieldName.email') %><span class="required">*<%- __('Label.Required') %></span></th>
                 <td>
                     <div class="wrapper-emailinput">
-                        <input type="text" name="email" id="id_email" class="form-control input-required" data-pattern="^[a-zA-Z0-9@\.!#$%&'*+/=?^_`{|}~-]*$" data-parentSelector=".wrapper-emailinput" data-fieldname="<%- __('Form.FieldName.email') %>" value="<%= email %>">
+                        <input type="text" name="email" id="id_email" class="form-control input-required" data-pattern="^[a-zA-Z0-9@\.!#$%&'*+/=?^_`{|}~-]*@[a-zA-Z0-9@\.!#$%&'*+/=?^_`{|}~-]*$" data-parentSelector=".wrapper-emailinput" data-fieldname="<%- __('Form.FieldName.email') %>" value="<%= email %>">
                     </div>
                     <p class="notice">※<%- __('Message.RetypeToConfirm') %></p>
                     <div class="wrapper-emailconfirm">
-                        <input type="text" name="emailConfirm" id="id_emailConfirm" class="form-control input-emailconfirm" value="<%= emailConfirm %>">
+                        <input type="text" name="emailConfirm" id="id_emailConfirm" class="form-control input-required input-emailconfirm" value="<%= emailConfirm %>" data-pattern="^[a-zA-Z0-9@\.!#$%&'*+/=?^_`{|}~-]*$" data-parentSelector=".wrapper-emailconfirm" data-fieldname="<%- __('Form.FieldName.emailConfirm') %>">
                         <span>@</span>
-                        <input type="text" name="emailConfirmDomain" id="id_emailConfirmDomain" class="form-control input-emailconfirm" value="<%= emailConfirmDomain %>">
-                        <input type="hidden" id="input_emailconfirmconcat" name="emailconfirmconcat" class="input-required" data-pattern="^[a-zA-Z0-9@\.!#$%&'*+/=?^_`{|}~-]*$" data-parentSelector=".wrapper-emailconfirm" data-fieldname="<%- __('Form.FieldName.emailConfirm') %>">
+                        <input type="text" name="emailConfirmDomain" id="id_emailConfirmDomain" class="form-control input-required input-emailconfirm" value="<%= emailConfirmDomain %>" data-pattern="^[a-zA-Z0-9@\.!#$%&'*+/=?^_`{|}~-]*$" data-parentSelector=".wrapper-emailconfirm" data-fieldname="<%- __('Form.FieldName.emailConfirm') %>">
+                        <input type="hidden" id="input_emailconfirmconcat" class="input-required" name="emailconfirmconcat" data-parentSelector=".wrapper-emailconfirm" data-fieldname="<%- __('Form.FieldName.emailConfirm') %>">
                     </div>
-                    <p class="notice"><%- __('Message.SettingForLimitingEmailReception') %></p>
                     <p class="errmsg errmsg-email"><%- (validation && validation.email ? validation.email.msg : '') %></p>
-                    <p class="errmsg errmsg-emailconfirmconcat"></p>
                     <p class="errmsg errmsg-emailConfirm"><%- (validation && validation.emailConfirm ? validation.emailConfirm.msg : '') %></p>
                     <p class="errmsg errmsg-emailConfirmDomain"><%-  (validation && validation.emailConfirmDomain ? validation.emailConfirmDomain.msg : '') %></p>
+                    <p class="errmsg errmsg-emailconfirmconcat"></p>
+                    <p class="notice"><%- __('Message.SettingForLimitingEmailReception') %></p>
                 </td>
             </tr>
 
             <tr class="tr-tel <% (validation && validation.tel ? 'has-error' : '') %>">
-                <th><label for="id_tel"><%- __('Form.FieldName.tel') %></label><span class="required">*</span></th>
+                <th><label for="id_tel"><%- __('Form.FieldName.tel') %></label><span class="required">*<%- __('Label.Required') %></span></th>
                 <td>
                     <input type="text" name="tel" id="id_tel" class="form-control input-required" minlength="6" maxlength="15" data-pattern="^[0-9]{6,15}$" data-fieldname="<%- __('Form.FieldName.tel') %>" value="<%= tel %>">
                     <label for="checkbox_otherregion">
@@ -111,9 +118,9 @@
                         <p>Enter your telephone number start with calling code (without "+" and "-")</p>
                         <input type="text" name="tel" id="input_tel_otherregion" class="form-control" minlength="4" maxlength="15" data-pattern="^[0-9]{4,15}$" data-fieldname="<%- __('Form.FieldName.tel') %>" value="<%= tel %>" disabled="disabled">
                     </div>
+                    <p class="errmsg errmsg-tel"><%- (validation && validation.tel ? validation.tel.msg : '') %></p>
                     <input type="hidden" name="address" id="input_country" value="<%- address %>">
                     <p class="notice">※<%- __('Message.UseHalfWidthAlphanumericWithoutHyphens') %></p>
-                    <p class="errmsg errmsg-tel"><%- (validation && validation.tel ? validation.tel.msg : '') %></p>
                 </td>
             </tr>
 
@@ -176,18 +183,18 @@
             </tr>
 
             <tr class="tr-cardNumber <% (validation && validation.cardNumber ? 'has-error' : '') %>">
-                <th><label for="cardNumber"><%- __('Form.FieldName.cardNumber') %></label><span class="required">*</span></th>
+                <th><label for="cardNumber"><%- __('Form.FieldName.cardNumber') %></label><span class="required">*<%- __('Label.Required') %></span></th>
                 <td>
                     <input type="text" name="cardNumber" id="cardNumber" class="form-control input-required" value="" maxlength="16" data-pattern="^[0-9]+$" data-fieldname="<%- __('Form.FieldName.cardNumber') %>" required>
                     <p class="errmsg errmsg-cardNumber"><% (validation && validation.cardNumber ? validation.cardNumber.msg : '') %></p>
-                    <p><img src="/images/common/available_credit_cards.png" alt="available credit cards"></p>
+                    <figure class="figure-availablecards"><img src="/images/common/available_credit_cards.png" alt="available credit cards"></figure>
                     <p><%- __('Message.CreditAvailable') %></p>
                     <p class="notice"><%- __('Message.cardNumber') %></p>
                 </td>
             </tr>
 
             <tr class="tr-holdername <% (validation && validation.holdername ? 'has-error' : '') %>">
-                <th><label for="holdername"><%- __('Form.FieldName.holdername') %></label><span class="required">*</span></th>
+                <th><label for="holdername"><%- __('Form.FieldName.holdername') %></label><span class="required">*<%- __('Label.Required') %></span></th>
                 <td>
                     <input type="text" name="holdername" id="holdername" class="form-control input-required" value="" data-fieldname="<%- __('Form.FieldName.holdername') %>" required>
                     <p class="errmsg errmsg-holdername"><% (validation && validation.holdername ? validation.holdername.msg : '') %></p>
@@ -195,7 +202,7 @@
             </tr>
 
             <tr class="tr-expire <% (validation && validation.expire ? 'has-error' : '') %>">
-                <th><label for="expire"><%- __('Form.FieldName.expire') %></label><span class="required">*</span></th>
+                <th><label for="expire"><%- __('Form.FieldName.expire') %></label><span class="required">*<%- __('Label.Required') %></span></th>
                 <td>
                     <select name="cardExpirationMonth" id="cardExpirationMonth" class="form-control select-cardexpire" required>
                         <option value="">--</option>
@@ -227,11 +234,11 @@
             </tr>
 
             <tr class="tr-securitycode <% (validation && validation.securitycode ? 'has-error' : '') %>">
-                <th><label for="securitycode"><%- __('Form.FieldName.securitycode') %></label><span class="required">*</span></th>
+                <th><label for="securitycode"><%- __('Form.FieldName.securitycode') %></label><span class="required">*<%- __('Label.Required') %></span></th>
                 <td>
                     <input type="text" name="securitycode" id="securitycode" class="form-control input-required" value="" maxlength="4" data-pattern="^[0-9]+$" data-fieldname="<%- __('Form.FieldName.securitycode') %>" required>
-                    <p class="btn-securitycode" id="modalbtn_cardsecurirycode"><%- __('Message.securitycode') %></p>
                     <p class="errmsg errmsg-securitycode"><% (validation && validation.securitycode ? validation.securitycode.msg : '') %></p>
+                    <p class="btn-securitycode" id="modalbtn_cardsecurirycode"><%- __('Message.securitycode') %></p>
                 </td>
             </tr>
         </tbody>
@@ -239,7 +246,7 @@
     </table>
     <input type="hidden" name="gmoTokenObject" value="">
     <input style="display:none;" type="radio" name="paymentMethod" value="0" checked="checked">
-    <script src="/js/lib/intl-tel-input/intlTelInput.min.js">
+    <script src="/js/lib/intl-tel-input/intlTelInput.min.js"></script>
 <% } %>
 </form>
 
@@ -260,6 +267,9 @@
                 <p>【カード表面】セキュリティコード(4桁)</p>
                 <figure><img src="/images/common/figure_securitycode_amex.png" alt="AMEXの場合はカード表面の4桁"></figure>
 			</div>
+            <div class="modal-footer">
+				<p class="btn btn-close" data-dismiss="modal"><span><%- __('Button.Close') %></span></p>
+            </div>
 		</div>
 	</div>
 </div>

@@ -1,11 +1,14 @@
-<input type="hidden" name="apiEndpoint" value="<%= process.env.API_ENDPOINT %>">
-<input type="hidden" id="input_apiToken" value="<%= token.access_token %>">
-<input type="hidden" id="input_apiTokenExpire" value="<%= token.expires_in %>">
-<input type="hidden" name="urlSuspend" value="/staff/suspension/setting/execute">
+<script>
+    window.ttts.API_TOKEN = {
+        VALUE: '<%= token.access_token %>',
+        EXPIRES_IN: '<%= token.expires_in %>'
+    };
+    window.ttts.API_SUSPENSION_ENDPOINT = '/staff/suspension/setting/execute';
+</script>
 
 <script src="/js/flatpickr/flatpickr.min.js"></script>
 <script src="/js/flatpickr/flatpickr.locale.<%= locale %>.js"></script>
-<script src="/js/suspension/performances.js"></script>
+<script src="/js/suspension/settings.js"></script>
 
 <h1 class="pagetitle"><%- __('h1.SelectPerformance') %></h1>
 <p class="guidetext is-staff-block">対応するスケジュールを選択してください</p>
@@ -20,19 +23,13 @@
     </form>
 </div>
 
-<h3><span class="redcircle">2</span><%- __('Label.PreferredTime') %></h3>
-<p class="icondescription"><%- __('Label.IconDescription') %>:<br class="visible-mobile-block">
-    <img src="/images/common/icon-status-capable.svg" alt="capable"> … <%- __('Label.Capable') %>
-    <img src="/images/common/icon-status-crowded.svg" alt="crowded"> … <%- __('Label.Crowded') %>
-    <br class="mbr">
-    <img src="/images/common/icon-status-last.svg" alt="last"> … <%- __('Label.Last') %>
-    <img src="/images/common/icon-status-soldout.svg" alt="soldout"> … <%- __('Label.Soldout') %>
-</p>
-
 <div class="row performances">
 </div>
-<a class="btn btn-next call-modal" href="javascript:void(0)"><span>オンライン販売中止 / 解除</a>
 
+<div class="btns2clm">
+    <a class="btn btn-big" id="btn_callmodal_resume" href="javascript:void(0)"><span>オンライン販売再開</a>
+    <a class="btn btn-big" id="btn_callmodal_suspend" href="javascript:void(0)"><span>オンライン販売中止</a>
+</div>
 
 <form method="post" id="form_performanceId">
     <input type="hidden" name="performanceId">
@@ -54,38 +51,32 @@
     </div>
 </div>
 
-<div id="modal_detail" class="modal modal-detail modal-cancel fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div id="modal_suspension" class="modal modal-suspension modal-cancel fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
 			<div class="modal-header">
 				<p class="btn-close" data-dismiss="modal"><span>×</span></p>
 				<h2 class="modal-title">オンライン販売・EV運行対応</h2>
-                <p id="error_cancel"></p>
+                <p>エレベーター運行状況を選択して実行ボタンを押してください。</p>
 			</div>
 			<div class="modal-body">
                 <form>
-                    <h3>オンラインチケット販売対応</h3>
-                    <p>対応を選択してください。</p>
-                    <div>
-                        <p><input type="radio" name="online" value="1" checked>オンライン販売停止</p>
-                        <p><input type="radio" name="online" value="0">オンライン販売再開</p>
-                    </div>
                     <h3>エレベータ運転状況</h3>
-                    <p>状況を選択してください。</p>
                     <div>
-                        <p><input type="radio" name="ev" value="1" checked>減速運転</p>
-                        <p><input type="radio" name="ev" value="2">運転停止</p>
-                        <p><input type="radio" name="ev" value="0">運行再開</p>
+                        <p>状況を選択してください。</p>
+                        <label class="for-suspend"><input class="radio-ev" type="radio" id="radio_ev_slow" name="ev" value="1" checked>減速運転</label>
+                        <label class="for-suspend"><input class="radio-ev" type="radio" id="radio_ev_stop" name="ev" value="2">運転停止</label>
+                        <label class="for-resume"><input class="radio-ev" type="radio" id="radio_ev_restart" name="ev" value="0">運行再開</label>
                     </div>
-                    <h3>お客様通知内容</h3>
-                    <p>お客様に送信する通知内容を確認・編集してください。</p>
-                    <div>
-                        <p><textarea rows="10" name="notice" style="width:100%;"></textarea></p>
+                    <div class="for-suspend for-evstop">
+                        <h3>お客様通知内容</h3>
+                        <p>お客様に送信する通知内容を確認・編集してください。</p>
+                        <textarea id="textarea_announcemail" rows="10" placeholder="運転停止の通知テキスト(日・英を併記)"></textarea>
                     </div>
                 </form>
 			</div>
             <div class="modal-footer">
-                <p class="btn btn-suspension"><span>実行</span></p>
+                <p class="btn btn-big" id="btn_exec"><span></span></p>
             </div>
         </div>
     </div>

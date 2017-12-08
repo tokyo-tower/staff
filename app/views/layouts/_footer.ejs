@@ -12,13 +12,13 @@
 </footer>
 
 <script>
-    window.ttts = window.ttts || {};
+    window.ttts.API_ENDPOINT = '<%= process.env.API_ENDPOINT %>';
     window.ttts.commonlocales = {
         Next: '<%- __('Button.Next') %>',
         Sending: '<%- __('Message.Sending') %>',
         UnexpectedError: '<%- __('Message.UnexpectedError') %>'
     };
-
+    window.ttts.reservation_maxq = '<%- conf.get('reservation_maxq') %>';
     $(document).on('click', '.update-locale', function(){
         location.href = '/language/update/' + $(this).attr('data-locale') + '?cb=' + location.href;
     })

@@ -14,6 +14,6 @@ export function update(req: Request, res: Response): void {
     const locale = req.params.locale;
     (<any>req.session).locale = locale;
 
-    const cb = (!_.isEmpty(req.query.cb)) ? req.query.cb : '/';
+    const cb = (!_.isEmpty(req.query.cb)) ? decodeURIComponent(req.query.cb) : '/';
     res.redirect(cb);
 }

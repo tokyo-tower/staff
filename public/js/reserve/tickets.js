@@ -1,17 +1,12 @@
 $(function() {
-    var LOCALE = document.documentElement.getAttribute('lang');
-
     var isSubmitting = false;    
 
     var isAgreed = function() {
-        if (window.ttts.mode === 'customer') {
-            return document.getElementById('checkbox_agreed').checked;
+        if (window.ttts.mode !== 'customer') {
+            return true;
         }
-        return true;
+        return document.getElementById('checkbox_agreed').checked;        
     };
-
-    // 購入上限数
-    var MAX_Q = document.getElementById('input_maxq').value;
 
     // 合計金額の更新
     var isValidTicketsSelected = false;
@@ -31,8 +26,8 @@ $(function() {
             total += parseInt(tr.getAttribute('data-ticket-charge'), 10) * q;
             count += q;
         });
-        if (isNaN(total) || !count || count > MAX_Q) {
-            if (count > MAX_Q) {
+        if (isNaN(total) || !count || count > window.ttts.reservation_maxq) {
+            if (count > window.ttts.reservation_maxq) {
                 $alertTicketOvermax.show();
             }
             isValidTicketsSelected = false;
@@ -41,7 +36,7 @@ $(function() {
         isValidTicketsSelected = true;
 
         // 数字をコンマ区切りに
-        var text = total.toString().replace(/(\d)(?=(\d{3})+$)/g, '$1,') + ((LOCALE === 'ja') ? '円' : 'yen');
+        var text = total.toString().replace(/(\d)(?=(\d{3})+$)/g, '$1,') + ((window.ttts.currentLocale === 'ja') ? '円' : 'JPY');
         dom_price.innerText = text;
         dom_tfoot.classList.remove('hidden');
         if (isAgreed()) {
