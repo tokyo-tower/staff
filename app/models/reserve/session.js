@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const gmo_service_1 = require("@motionpicture/gmo-service");
-const ttts_domain_1 = require("@motionpicture/ttts-domain");
+const ttts = require("@motionpicture/ttts-domain");
 const moment = require("moment");
 const MAX_RESERVATION_SEATS_DEFAULT = 4;
 const MAX_RESERVATION_SEATS_STAFFS = 10;
@@ -48,8 +47,7 @@ class ReserveSessionModel {
         let limit = MAX_RESERVATION_SEATS_DEFAULT;
         // 主体によっては、決済方法を強制的に固定で
         switch (this.purchaserGroup) {
-            case ttts_domain_1.ReservationUtil.PURCHASER_GROUP_STAFF:
-            case ttts_domain_1.ReservationUtil.PURCHASER_GROUP_WINDOW:
+            case ttts.ReservationUtil.PURCHASER_GROUP_STAFF:
                 limit = MAX_RESERVATION_SEATS_STAFFS;
                 break;
             default:
@@ -81,24 +79,9 @@ class ReserveSessionModel {
         }
         return charge;
     }
-    getChargeExceptTicketTypeBySeatCode(seatCode) {
-        let charge = 0;
-        if (this.purchaserGroup === ttts_domain_1.ReservationUtil.PURCHASER_GROUP_WINDOW) {
-            const reservation = this.getReservation(seatCode);
-            // 座席グレード分加算
-            if (reservation.seat_grade_additional_charge > 0) {
-                charge += reservation.seat_grade_additional_charge;
-            }
-            // MX4D分加算
-            if (this.performance.film.is_mx4d) {
-                charge += ttts_domain_1.ReservationUtil.CHARGE_MX4D;
-            }
-            // コンビニ手数料加算
-            if (this.paymentMethod === gmo_service_1.Util.PAY_TYPE_CVS) {
-                charge += ttts_domain_1.ReservationUtil.CHARGE_CVS;
-            }
-        }
-        return charge;
+    // tslint:disable-next-line:prefer-function-over-method
+    getChargeExceptTicketTypeBySeatCode(__) {
+        return 0;
     }
     /**
      * 座席コードから予約情報を取得する
@@ -113,28 +96,15 @@ class ReserveSessionModel {
         this[`reservation_${seatCode}`] = reservation;
     }
     /**
-     * フロー中の予約IDリストを取得する
-     */
-    getReservationIds() {
-        return (this.seatCodes !== undefined) ? this.seatCodes.map((seatCode) => this.getReservation(seatCode)._id) : [];
-    }
-    /**
-     * フロー中の予約IDリスト(特殊チケット用)を取得する
-     */
-    getReservationIdsExtra() {
-        return (this.seatCodesExtra !== undefined) ?
-            this.seatCodesExtra.map((seatCodesExtra) => this.getReservation(seatCodesExtra)._id) : [];
-    }
-    /**
      * 座席コードから予約(確定)ドキュメントを作成する
      *
      * @param {string} seatCode 座席コード
      */
     seatCode2reservationDocument(seatCode) {
+        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
         const reservation = this.getReservation(seatCode);
-        return {
-            _id: reservation._id,
-            status: reservation.status,
+        const doc = {
+            status: reservation.status_after,
             seat_code: seatCode,
             seat_grade_name: reservation.seat_grade_name,
             seat_grade_additional_charge: reservation.seat_grade_additional_charge,
@@ -174,6 +144,7 @@ class ReserveSessionModel {
             watcher_name_updated_at: (reservation.watcher_name !== undefined) ? moment().valueOf() : '',
             purchased_at: this.purchasedAt
         };
+        return new reservationRepo.reservationModel(doc);
     }
 }
 ReserveSessionModel.SESSION_KEY = 'ttts-reserve-session';

@@ -1,9 +1,9 @@
 /**
  * 運行・オンライン販売停止一覧コントローラー
- *
  * @namespace controller/staff/suspensionList
  */
-import { Models, PerformanceUtil, ReservationUtil } from '@motionpicture/ttts-domain';
+
+import * as ttts from '@motionpicture/ttts-domain';
 import { NextFunction, Request, Response } from 'express';
 import * as moment from 'moment';
 import * as _ from 'underscore';
@@ -36,6 +36,7 @@ export async function index(__: Request, res: Response, next: NextFunction): Pro
 export async function search(req: Request, res: Response, next: NextFunction): Promise<void> {
     if (req.staffUser === undefined) {
         next(new Error(req.__('Message.UnexpectedError')));
+
         return;
     }
 
@@ -70,14 +71,14 @@ export async function search(req: Request, res: Response, next: NextFunction): P
 
     // 検索条件を作成
     const conditions: any[] = [];
-    conditions.push({'ttts_extension.online_sales_status':  PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED});
+    conditions.push({ 'ttts_extension.online_sales_status': ttts.PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED });
     // 販売停止処理日
     if (day1 !== null || day2 !== null) {
-        conditions.push({ 'ttts_extension.online_sales_update_at' : getConditionsFromTo(day1, day2, true) });
+        conditions.push({ 'ttts_extension.online_sales_update_at': getConditionsFromTo(day1, day2, true) });
     }
     // 対象ツアー年月日
     if (performanceDate1 !== null || performanceDate2 !== null) {
-        conditions.push({ day : getConditionsFromTo(performanceDate1, performanceDate2) });
+        conditions.push({ day: getConditionsFromTo(performanceDate1, performanceDate2) });
     }
 
     // 予約情報
@@ -91,8 +92,8 @@ export async function search(req: Request, res: Response, next: NextFunction): P
         // データ検索
         const performances = await getPerformances(conditions, limit, page);
         const cntPerformances: number = performances.length;
-        let infoR : any = {};
-        if ( cntPerformances > 0 ) {
+        let infoR: any = {};
+        if (cntPerformances > 0) {
             // infoR.dicResevations { performance_id : [resevation1, resevationn] }
             infoR = await getResevations(conditionsR, performances);
         }
@@ -122,9 +123,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
  * @param {boolean} convert
  * @return {any}
  */
-function getConditionsFromTo(value1: string | null,
-                             value2: string | null,
-                             convert: boolean = false): any {
+function getConditionsFromTo(value1: string | null, value2: string | null, convert: boolean = false): any {
     const conditionsFromTo: any = {};
     if (value1 !== null) {
         value1 = convert ? moment(value1, 'YYYY/MM/DD').format('YYYY/MM/DD HH:mm:ss') : value1;
@@ -145,12 +144,9 @@ function getConditionsFromTo(value1: string | null,
  * @param {number} page
  * @return {any}
  */
-async function getPerformances(conditions: any[],
-                               limit: number,
-                               page: number): Promise<any> {
-
-    return (<any[]>await Models.Performance
-        .find({$and: conditions})
+async function getPerformances(conditions: any[], limit: number, page: number): Promise<any> {
+    return (<any[]>await ttts.Models.Performance
+        .find({ $and: conditions })
         .sort({
             day: -1,
             start_time: 1
@@ -162,25 +158,24 @@ async function getPerformances(conditions: any[],
 }
 /**
  * 予約情報取得
- *
  * @param {any} conditions
  * @param {any} performances
  * @return {any}
  */
-async function getResevations(conditions: any,
-                              performances: any[]): Promise<any> {
+async function getResevations(conditions: any, performances: any[]): Promise<any> {
+    const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
 
-    const info: any = { dicReservations: {}};
+    const info: any = { dicReservations: {} };
     // 予約情報取得
     // { performanceId : [reservation1,reservationn] }
-    conditions.status = ReservationUtil.STATUS_RESERVED;
-    conditions.purchaser_group = ReservationUtil.PURCHASER_GROUP_CUSTOMER;
+    conditions.status = ttts.factory.reservationStatusType.ReservationConfirmed;
+    conditions.purchaser_group = ttts.ReservationUtil.PURCHASER_GROUP_CUSTOMER;
     const dicReservations: any = {};
-    const promises = performances.map(async(performance: any) => {
+    const promises = performances.map(async (performance: any) => {
         // パフォーマンスごとに予約情報取得
         const key: string = performance._id.toString();
         conditions.performance = key;
-        dicReservations[key] = await Models.Reservation.find(
+        dicReservations[key] = await reservationRepo.reservationModel.find(
             conditions
         ).exec();
     });
@@ -196,8 +191,7 @@ async function getResevations(conditions: any,
  * @param {any} infoR
  * @return {any}
  */
-function getSuspensionList(performances: any[],
-                           infoR: any): any {
+function getSuspensionList(performances: any[], infoR: any): any {
     const suspensionList: any[] = [];
     for (const performance of performances) {
         // 予約情報がない時のため、予約関連項目はここで初期化
@@ -231,6 +225,7 @@ function getSuspensionList(performances: any[],
         // 一覧に追加
         suspensionList.push(suspension);
     }
+
     return suspensionList;
 }
 /**
@@ -256,6 +251,7 @@ function getArrivedCount(reservations: any[]): number {
 export async function refundProcess(req: Request, res: Response, next: NextFunction): Promise<void> {
     if (req.staffUser === undefined) {
         next(new Error(req.__('Message.UnexpectedError')));
+
         return;
     }
     try {
@@ -270,8 +266,7 @@ export async function refundProcess(req: Request, res: Response, next: NextFunct
             return;
         }
         // パフォーマンスと予約情報の返金ステータス更新(指示済に)
-        await updateRefundStatus(performanceId,
-                                 (<any>req.staffUser).username);
+        await updateRefundStatus(performanceId, (<any>req.staffUser).username);
         res.json({
             success: true,
             message: null
@@ -289,24 +284,24 @@ export async function refundProcess(req: Request, res: Response, next: NextFunct
  * @param {string} performanceId
  * @param {string} staffUser
  */
-async function updateRefundStatus(performanceId: string,
-                                  staffUser: string): Promise<void> {
+async function updateRefundStatus(performanceId: string, staffUser: string): Promise<void> {
 
     // 返金対象予約情報取得(入塔記録のない、未指示データ)
     const info = await suspensionCommon.getTargetReservationsForRefund(
-                    [performanceId],
-                    PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
-                    false);
+        [performanceId],
+        ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+        false);
 
     //対象予約(checkinsのない購入番号)の返金ステータスを更新する。
     const now = moment().format('YYYY/MM/DD HH:mm:ss');
-    await Models.Reservation.update(
+    // TODO 実装
+    await (<any>ttts.Models).Reservation.update(
         {
-            _id: { $in: info.targrtIds}
+            _id: { $in: info.targrtIds }
         },
         {
             $set: {
-                'performance_ttts_extension.refund_status': PerformanceUtil.REFUND_STATUS.INSTRUCTED,
+                'performance_ttts_extension.refund_status': ttts.PerformanceUtil.REFUND_STATUS.INSTRUCTED,
                 'performance_ttts_extension.refund_update_user': staffUser,
                 'performance_ttts_extension.refund_update_at': now
             }
@@ -317,13 +312,13 @@ async function updateRefundStatus(performanceId: string,
     ).exec();
 
     // パフォーマンス更新
-    await Models.Performance.findOneAndUpdate(
+    await ttts.Models.Performance.findOneAndUpdate(
         {
             _id: performanceId
         },
         {
             $set: {
-                'ttts_extension.refund_status': PerformanceUtil.REFUND_STATUS.INSTRUCTED,
+                'ttts_extension.refund_status': ttts.PerformanceUtil.REFUND_STATUS.INSTRUCTED,
                 'ttts_extension.refund_update_user': staffUser,
                 'ttts_extension.refund_update_at': now
             }

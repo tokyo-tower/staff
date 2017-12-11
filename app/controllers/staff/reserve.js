@@ -13,15 +13,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *
  * @namespace controller/staff/reserve
  */
-const TTTS = require("@motionpicture/ttts-domain");
+const ttts = require("@motionpicture/ttts-domain");
 const conf = require("config");
+const createDebug = require("debug");
 const moment = require("moment");
-//import * as request from 'request'; // for token
 const _ = require("underscore");
 const reservePerformanceForm_1 = require("../../forms/reserve/reservePerformanceForm");
 const session_1 = require("../../models/reserve/session");
 const reserveBaseController = require("../reserveBase");
-const PURCHASER_GROUP = TTTS.ReservationUtil.PURCHASER_GROUP_STAFF;
+const debug = createDebug('ttts-staff:controller:reserve');
+const PURCHASER_GROUP = ttts.ReservationUtil.PURCHASER_GROUP_STAFF;
 const layout = 'layouts/staff/layout';
 const PAY_TYPE_FREE = 'F';
 const paymentMethodNames = { F: '無料招待券', I: '請求書支払い' };
@@ -99,7 +100,7 @@ function performances(req, res, next) {
                 return;
             }
             //const token: string = await getToken();
-            const token = yield TTTS.CommonUtil.getToken(process.env.API_ENDPOINT);
+            const token = yield ttts.CommonUtil.getToken(process.env.API_ENDPOINT);
             // tslint:disable-next-line:no-console
             // console.log('token=' + JSON.stringify(token));
             const maxDate = moment();
@@ -131,7 +132,7 @@ function performances(req, res, next) {
                 yield reserveBaseController.processCancelSeats(reservationModel);
                 reservationModel.save(req);
                 res.render('staff/reserve/performances', {
-                    // FilmUtil: TTTS.FilmUtil,
+                    // FilmUtil: ttts.FilmUtil,
                     token: token,
                     reserveMaxDate: reserveMaxDate,
                     layout: layout
@@ -268,7 +269,7 @@ function confirm(req, res, next) {
                         throw new Error(req.__('Message.Expired'));
                     }
                     // 予約確定
-                    yield reserveBaseController.processFixReservations(reservationModel, reservationModel.performance.day, reservationModel.paymentNo, {}, res);
+                    yield reserveBaseController.processFixReservations(reservationModel, res);
                     session_1.default.REMOVE(req);
                     res.redirect(`/staff/reserve/${reservationModel.performance.day}/${reservationModel.paymentNo}/complete`);
                 }
@@ -311,21 +312,42 @@ function complete(req, res, next) {
             return;
         }
         try {
-            const reservations = yield TTTS.Models.Reservation.find({
-                performance_day: req.params.performanceDay,
-                payment_no: req.params.paymentNo,
-                status: TTTS.ReservationUtil.STATUS_RESERVED,
-                owner: req.staffUser.get('_id'),
-                purchased_at: {
-                    $gt: moment().add(-30, 'minutes').toISOString() // tslint:disable-line:no-magic-numbers
+            const transactionRepo = new ttts.repository.Transaction(ttts.mongoose.connection);
+            const transaction = yield transactionRepo.transactionModel.findOne({
+                'result.eventReservations.performance_day': req.params.performanceDay,
+                'result.eventReservations.payment_no': req.params.paymentNo,
+                'result.eventReservations.purchaser_group': PURCHASER_GROUP,
+                'result.eventReservations.status': ttts.factory.reservationStatusType.ReservationConfirmed,
+                'result.eventReservations.owner': req.staffUser.get('_id'),
+                'result.eventReservations.purchased_at': {
+                    $gt: moment().add(-30, 'minutes').toDate() // tslint:disable-line:no-magic-numbers
                 }
             }).exec();
+            debug('confirmed transaction:', transaction);
+            if (transaction === null) {
+                next(new Error(req.__('Message.NotFound')));
+                return;
+            }
+            let reservations = transaction.get('result').get('eventReservations');
+            debug('reservations:', reservations);
+            reservations = reservations.filter((reservation) => reservation.get('status') === ttts.factory.reservationStatusType.ReservationConfirmed);
+            // const reservations = await ttts.Models.Reservation.find(
+            //     {
+            //         performance_day: req.params.performanceDay,
+            //         payment_no: req.params.paymentNo,
+            //         status: ttts.ReservationUtil.STATUS_RESERVED,
+            //         owner: req.staffUser.get('_id'),
+            //         purchased_at: { // 購入確定から30分有効
+            //             $gt: moment().add(-30, 'minutes').toISOString() // tslint:disable-line:no-magic-numbers
+            //         }
+            //     }
+            // ).exec();
             if (reservations.length === 0) {
                 next(new Error(req.__('Message.NotFound')));
                 return;
             }
             reservations.sort((a, b) => {
-                return TTTS.ScreenUtil.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
+                return ttts.ScreenUtil.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
             });
             res.render('staff/reserve/complete', {
                 reservationDocuments: reservations,

@@ -5,7 +5,6 @@
  * @module middleware/setLocal
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-const GMO = require("@motionpicture/gmo-service");
 const ttts_domain_1 = require("@motionpicture/ttts-domain");
 const conf = require("config");
 const moment = require("moment");
@@ -17,7 +16,7 @@ exports.default = (req, res, next) => {
     res.locals.conf = conf;
     res.locals.Util = ttts_domain_1.CommonUtil;
     res.locals.validation = null;
-    res.locals.GMOUtil = GMO.Util;
+    res.locals.GMOUtil = ttts_domain_1.GMO.utils.util;
     res.locals.ReservationUtil = ttts_domain_1.ReservationUtil;
     res.locals.ScreenUtil = ttts_domain_1.ScreenUtil;
     res.locals.Models = ttts_domain_1.Models;

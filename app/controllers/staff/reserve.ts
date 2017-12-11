@@ -3,28 +3,30 @@
  *
  * @namespace controller/staff/reserve
  */
-import * as TTTS from '@motionpicture/ttts-domain';
+import * as ttts from '@motionpicture/ttts-domain';
 import * as conf from 'config';
+import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 import * as moment from 'moment';
-//import * as request from 'request'; // for token
 import * as _ from 'underscore';
 
 import reservePerformanceForm from '../../forms/reserve/reservePerformanceForm';
 import ReserveSessionModel from '../../models/reserve/session';
 import * as reserveBaseController from '../reserveBase';
 
-const PURCHASER_GROUP: string = TTTS.ReservationUtil.PURCHASER_GROUP_STAFF;
+const debug = createDebug('ttts-staff:controller:reserve');
+const PURCHASER_GROUP: string = ttts.ReservationUtil.PURCHASER_GROUP_STAFF;
 const layout: string = 'layouts/staff/layout';
 
 const PAY_TYPE_FREE: string = 'F';
-const paymentMethodNames: any = {F: '無料招待券', I: '請求書支払い'};
+const paymentMethodNames: any = { F: '無料招待券', I: '請求書支払い' };
 const reserveMaxDateInfo: any = conf.get<any>('reserve_max_date');
 
 export async function start(req: Request, res: Response, next: NextFunction): Promise<void> {
     // 期限指定
     if (moment() < moment(conf.get<string>('datetimes.reservation_start_staffs'))) {
         next(new Error(req.__('Message.OutOfTerm')));
+
         return;
     }
 
@@ -90,11 +92,12 @@ export async function performances(req: Request, res: Response, next: NextFuncti
 
         if (reservationModel === null) {
             next(new Error(req.__('Message.Expired')));
+
             return;
         }
 
         //const token: string = await getToken();
-        const token: string = await TTTS.CommonUtil.getToken(process.env.API_ENDPOINT);
+        const token: string = await ttts.CommonUtil.getToken(<string>process.env.API_ENDPOINT);
         // tslint:disable-next-line:no-console
         // console.log('token=' + JSON.stringify(token));
         const maxDate = moment();
@@ -108,6 +111,7 @@ export async function performances(req: Request, res: Response, next: NextFuncti
             const validationResult = await req.getValidationResult();
             if (!validationResult.isEmpty()) {
                 next(new Error(req.__('Message.UnexpectedError')));
+
                 return;
             }
             try {
@@ -119,9 +123,11 @@ export async function performances(req: Request, res: Response, next: NextFuncti
                 );
                 reservationModel.save(req);
                 res.redirect('/staff/reserve/tickets');
+
                 return;
             } catch (error) {
                 next(new Error(req.__('Message.UnexpectedError')));
+
                 return;
             }
         } else {
@@ -130,7 +136,7 @@ export async function performances(req: Request, res: Response, next: NextFuncti
             reservationModel.save(req);
 
             res.render('staff/reserve/performances', {
-                // FilmUtil: TTTS.FilmUtil,
+                // FilmUtil: ttts.FilmUtil,
                 token: token,
                 reserveMaxDate: reserveMaxDate,
                 layout: layout
@@ -152,7 +158,7 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
 
             return;
         }
-        reservationModel.paymentMethod = '';
+        reservationModel.paymentMethod = <any>'';
         if (req.method === 'POST') {
             // 仮予約あればキャンセルする
             try {
@@ -249,6 +255,7 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
         const reservationModel = ReserveSessionModel.FIND(req);
         if (reservationModel === null) {
             next(new Error(req.__('Message.Expired')));
+
             return;
         }
 
@@ -260,13 +267,7 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                 }
 
                 // 予約確定
-                await reserveBaseController.processFixReservations(
-                    reservationModel,
-                    reservationModel.performance.day,
-                    reservationModel.paymentNo,
-                    {},
-                    res
-                );
+                await reserveBaseController.processFixReservations(reservationModel, res);
                 ReserveSessionModel.REMOVE(req);
                 res.redirect(`/staff/reserve/${reservationModel.performance.day}/${reservationModel.paymentNo}/complete`);
             } catch (error) {
@@ -301,29 +302,57 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
 export async function complete(req: Request, res: Response, next: NextFunction): Promise<void> {
     if (req.staffUser === undefined) {
         next(new Error(req.__('Message.UnexpectedError')));
+
         return;
     }
 
     try {
-        const reservations = await TTTS.Models.Reservation.find(
+        const transactionRepo = new ttts.repository.Transaction(ttts.mongoose.connection);
+        const transaction = await transactionRepo.transactionModel.findOne(
             {
-                performance_day: req.params.performanceDay,
-                payment_no: req.params.paymentNo,
-                status: TTTS.ReservationUtil.STATUS_RESERVED,
-                owner: req.staffUser.get('_id'),
-                purchased_at: { // 購入確定から30分有効
-                    $gt: moment().add(-30, 'minutes').toISOString() // tslint:disable-line:no-magic-numbers
+                'result.eventReservations.performance_day': req.params.performanceDay,
+                'result.eventReservations.payment_no': req.params.paymentNo,
+                'result.eventReservations.purchaser_group': PURCHASER_GROUP,
+                'result.eventReservations.status': ttts.factory.reservationStatusType.ReservationConfirmed,
+                'result.eventReservations.owner': req.staffUser.get('_id'),
+                'result.eventReservations.purchased_at': { // 購入確定から30分有効
+                    $gt: moment().add(-30, 'minutes').toDate() // tslint:disable-line:no-magic-numbers
                 }
             }
         ).exec();
+        debug('confirmed transaction:', transaction);
+        if (transaction === null) {
+            next(new Error(req.__('Message.NotFound')));
+
+            return;
+        }
+
+        let reservations: ttts.mongoose.Document[] = transaction.get('result').get('eventReservations');
+        debug('reservations:', reservations);
+        reservations = reservations.filter(
+            (reservation) => reservation.get('status') === ttts.factory.reservationStatusType.ReservationConfirmed
+        );
+
+        // const reservations = await ttts.Models.Reservation.find(
+        //     {
+        //         performance_day: req.params.performanceDay,
+        //         payment_no: req.params.paymentNo,
+        //         status: ttts.ReservationUtil.STATUS_RESERVED,
+        //         owner: req.staffUser.get('_id'),
+        //         purchased_at: { // 購入確定から30分有効
+        //             $gt: moment().add(-30, 'minutes').toISOString() // tslint:disable-line:no-magic-numbers
+        //         }
+        //     }
+        // ).exec();
 
         if (reservations.length === 0) {
             next(new Error(req.__('Message.NotFound')));
+
             return;
         }
 
         reservations.sort((a, b) => {
-            return TTTS.ScreenUtil.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
+            return ttts.ScreenUtil.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
         });
 
         res.render('staff/reserve/complete', {

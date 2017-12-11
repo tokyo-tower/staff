@@ -16,7 +16,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ttts_domain_1 = require("@motionpicture/ttts-domain");
 const conf = require("config");
 const moment = require("moment");
-const mongoose = require("mongoose");
 const suspensionCommon = require("./suspensionCommon");
 const SETTING_PATH = '/staff/suspension/setting';
 const VIEW_PATH = 'staff/suspension';
@@ -119,13 +118,14 @@ function updateStatusByIds(staffUser, performanceIds, onlineStatus, evStatus) {
     return __awaiter(this, void 0, void 0, function* () {
         // パフォーマンスIDをObjectIdに変換
         const ids = performanceIds.map((id) => {
-            return new mongoose.Types.ObjectId(id);
+            return new ttts_domain_1.mongoose.Types.ObjectId(id);
         });
         const now = moment().format('YYYY/MM/DD HH:mm:ss');
         // 返金対象予約情報取得(入塔記録のないもの)
         const info = yield suspensionCommon.getTargetReservationsForRefund(performanceIds, ttts_domain_1.PerformanceUtil.REFUND_STATUS.NONE, evStatus === ttts_domain_1.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
         // 予約情報返金ステータスを未指示に更新
         if (info.targrtIds.length > 0) {
+            // TODO 実装
             yield ttts_domain_1.Models.Reservation.update({
                 _id: { $in: info.targrtIds }
             }, {

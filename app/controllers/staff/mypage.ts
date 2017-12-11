@@ -1,12 +1,10 @@
 /**
  * 内部関係者マイページコントローラー
- *
  * @namespace controller/staff/mypage
  */
-//, ScreenUtil
-import { CommonUtil, Models, ReservationUtil } from '@motionpicture/ttts-domain';
+
+import * as ttts from '@motionpicture/ttts-domain';
 import { NextFunction, Request, Response } from 'express';
-import * as mongoose from 'mongoose';
 import * as _ from 'underscore';
 
 const DEFAULT_RADIX = 10;
@@ -18,7 +16,7 @@ const layout: string = 'layouts/staff/layout';
  */
 export async function index(__: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const owners = await Models.Owner.find({}, '_id name', { sort: { _id: 1 } }).exec();
+        const owners = await ttts.Models.Owner.find({}, '_id name', { sort: { _id: 1 } }).exec();
         res.render('staff/mypage/index', {
             owners: owners,
             layout: layout
@@ -30,13 +28,12 @@ export async function index(__: Request, res: Response, next: NextFunction): Pro
 
 /**
  * マイページ予約検索
- *
  */
-// tslint:disable-next-line:max-func-body-length
-// tslint:disable-next-line:cyclomatic-complexity
+// tslint:disable-next-line:cyclomatic-complexity max-func-body-length
 export async function search(req: Request, res: Response, next: NextFunction): Promise<void> {
     if (req.staffUser === undefined) {
         next(new Error(req.__('Message.UnexpectedError')));
+
         return;
     }
 
@@ -49,6 +46,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
             count: 0,
             errors: errors
         });
+
         return;
     }
     //mypageForm(req);
@@ -98,23 +96,13 @@ export async function search(req: Request, res: Response, next: NextFunction): P
     if (req.staffUser.get('is_admin') === true) {
         conditions.push(
             {
-                $or: [
-                    {
-                        //purchaser_group: ReservationUtil.PURCHASER_GROUP_STAFF,
-                        status: ReservationUtil.STATUS_RESERVED
-                    },
-                    {
-                        status: ReservationUtil.STATUS_KEPT_BY_TTTS
-                    }
-                ]
+                status: ttts.factory.reservationStatusType.ReservationConfirmed
             }
         );
     } else {
         conditions.push(
             {
-                //purchaser_group: ReservationUtil.PURCHASER_GROUP_STAFF,
-                //owner: req.staffUser.get('_id'),
-                status: ReservationUtil.STATUS_RESERVED
+                status: ttts.factory.reservationStatusType.ReservationConfirmed
             }
         );
     }
@@ -135,12 +123,12 @@ export async function search(req: Request, res: Response, next: NextFunction): P
         if (startTimeTo !== null) {
             conditionsTime.$lte = startTimeTo;
         }
-        conditions.push({ performance_start_time : conditionsTime });
+        conditions.push({ performance_start_time: conditionsTime });
     }
     // 購入番号
     if (paymentNo !== null) {
         // remove space characters
-        paymentNo = CommonUtil.toHalfWidth(paymentNo.replace(/\s/g, ''));
+        paymentNo = ttts.CommonUtil.toHalfWidth(paymentNo.replace(/\s/g, ''));
         conditions.push({ payment_no: { $regex: `${paymentNo}` } });
     }
     // アカウント
@@ -171,17 +159,20 @@ export async function search(req: Request, res: Response, next: NextFunction): P
     // 電話番号
     if (purchaserTel !== null) {
         //conditions.push({ purchaser_tel: purchaserTel });
-        conditions.push({ $or: [{ purchaser_international_tel: purchaserTel },
-                                { purchaser_tel: purchaserTel }]});
+        conditions.push({
+            $or: [{ purchaser_international_tel: purchaserTel },
+            { purchaser_tel: purchaserTel }]
+        });
     }
     // メモ
     if (watcherName !== null) {
         conditions.push({ watcher_name: watcherName });
     }
 
+    const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
     try {
         // 総数検索
-        const count = await Models.Reservation.count(
+        const count = await reservationRepo.reservationModel.count(
             {
                 $and: conditions
             }
@@ -219,8 +210,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
         // });
 
         // データ検索(検索→ソート→指定ページ分切取り)
-        const reservations = <any[]>await Models.Reservation
-            .find({$and: conditions})
+        const reservations = <any[]>await reservationRepo.reservationModel.find({ $and: conditions })
             .sort({
                 performance_day: 1,
                 performance_start_time: 1,
@@ -264,11 +254,12 @@ async function validate(req: Request): Promise<any> {
 
     // 片方入力エラーチェック
     if (!isInputEven(req.query.start_hour1, req.query.start_minute1)) {
-        (<any>errors).start_hour1 = {msg: '時分Fromが片方しか指定されていません'};
+        (<any>errors).start_hour1 = { msg: '時分Fromが片方しか指定されていません' };
     }
     if (!isInputEven(req.query.start_hour2, req.query.start_minute2)) {
-        (<any>errors).start_hour2 = {msg: '時分Toが片方しか指定されていません'};
+        (<any>errors).start_hour2 = { msg: '時分Toが片方しか指定されていません' };
     }
+
     return errors;
 }
 /**
@@ -278,13 +269,14 @@ async function validate(req: Request): Promise<any> {
  * @param {string} value2
  * @return {boolean}
  */
-function isInputEven( value1: string, value2: string): boolean {
+function isInputEven(value1: string, value2: string): boolean {
     if (_.isEmpty(value1) && _.isEmpty(value2)) {
         return true;
     }
     if (!_.isEmpty(value1) && !_.isEmpty(value2)) {
         return true;
     }
+
     return false;
 }
 
@@ -294,6 +286,7 @@ function isInputEven( value1: string, value2: string): boolean {
 export async function updateWatcherName(req: Request, res: Response, next: NextFunction): Promise<void> {
     if (req.staffUser === undefined) {
         next(new Error(req.__('Message.UnexpectedError')));
+
         return;
     }
 
@@ -302,14 +295,15 @@ export async function updateWatcherName(req: Request, res: Response, next: NextF
 
     const condition = {
         _id: reservationId,
-        status: ReservationUtil.STATUS_RESERVED
+        status: ttts.factory.reservationStatusType.ReservationConfirmed
     };
 
     // 自分の予約のみ
     (<any>condition).owner = req.staffUser.get('_id');
 
+    const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
     try {
-        const reservation = await Models.Reservation.findOneAndUpdate(
+        const reservation = await reservationRepo.reservationModel.findOneAndUpdate(
             condition,
             {
                 watcher_name: watcherName,
@@ -337,69 +331,5 @@ export async function updateWatcherName(req: Request, res: Response, next: NextF
             message: req.__('Message.UnexpectedError'),
             reservationId: null
         });
-    }
-}
-
-/**
- * 座席開放
- */
-export async function release(req: Request, res: Response, next: NextFunction): Promise<void> {
-    if (req.method === 'POST') {
-        const day = req.body.day;
-        if (day === undefined || day === '') {
-            res.json({
-                success: false,
-                message: req.__('Message.UnexpectedError')
-            });
-            return;
-        }
-
-        try {
-            await Models.Reservation.remove(
-                {
-                    performance_day: day,
-                    status: ReservationUtil.STATUS_KEPT_BY_TTTS
-                }
-            ).exec();
-
-            res.json({
-                success: true,
-                message: null
-            });
-        } catch (error) {
-            res.json({
-                success: false,
-                message: req.__('Message.UnexpectedError')
-            });
-        }
-    } else {
-        try {
-            // 開放座席情報取得
-            const reservations = await Models.Reservation.find(
-                {
-                    status: ReservationUtil.STATUS_KEPT_BY_TTTS
-                },
-                'status seat_code performance_day'
-            ).exec();
-
-            // 日付ごとに
-            const reservationsByDay: {
-                [day: string]: mongoose.Document[]
-            } = {};
-            reservations.forEach((reservation) => {
-                if (!reservationsByDay.hasOwnProperty(reservation.get('performance_day'))) {
-                    reservationsByDay[reservation.get('performance_day')] = [];
-                }
-
-                reservationsByDay[reservation.get('performance_day')].push(reservation);
-            });
-
-            res.render('staff/mypage/release', {
-                reservationsByDay: reservationsByDay,
-                layout: layout
-            });
-        } catch (error) {
-            next(new Error(req.__('Message.UnexpectedError')));
-        }
     }
 }

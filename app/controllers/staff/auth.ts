@@ -125,7 +125,7 @@ export async function auth(req: Request, res: Response): Promise<void> {
             throw new Error('session undefined.');
         }
         //const token: string = await getToken();
-        const token: string = await TTTS.CommonUtil.getToken(process.env.API_ENDPOINT);
+        const token: string = await TTTS.CommonUtil.getToken(<string>process.env.API_ENDPOINT);
         res.json({
             success: true,
             token: token,

@@ -95,7 +95,6 @@ router.all('/reserve/profile', base, authentication, staffReserveController.prof
 router.all('/reserve/confirm', base, authentication, staffReserveController.confirm);
 router.get('/reserve/:performanceDay/:paymentNo/complete', base, authentication, staffReserveController.complete);
 router.post('/cancel/execute', base, authentication, staffCancelController.execute);
-router.all('/mypage/release', base, authentication, staffMyPageController.release);
 
 // 運行・オンライン販売停止設定コントローラー
 router.all('/suspension/setting/performances', base, authentication, staffSuspensionSettingController.performances);
