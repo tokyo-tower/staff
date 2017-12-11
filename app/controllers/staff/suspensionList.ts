@@ -79,13 +79,17 @@ export async function search(req: Request, res: Response, next: NextFunction): P
     if (performanceDate1 !== null || performanceDate2 !== null) {
         conditions.push({ day : getConditionsFromTo(performanceDate1, performanceDate2) });
     }
+    // 返金ステータス
+    if (refundStatus !== null) {
+        conditions.push({'ttts_extension.refund_status': refundStatus});
+    }
 
     // 予約情報
     // 返金ステータス
     const conditionsR: any = {};
-    if (refundStatus !== null) {
-        conditionsR.refund_status = refundStatus;
-    }
+    // if (refundStatus !== null) {
+    //     conditionsR.refund_status = refundStatus;
+    // }
 
     try {
         // データ検索

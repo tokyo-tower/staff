@@ -67,8 +67,6 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
         }
 
         // const executeType: string = req.body.executeType;
-        // const onlineStatus: string =  executeType === '1' ? req.body.onlineStatus : PerformanceUtil.ONLINE_SALES_STATUS.NORMAL;
-        // const evStatus: string =  executeType === '1' ? req.body.evStatus : PerformanceUtil.EV_SERVICE_STATUS.NORMAL;
         const onlineStatus: string = req.body.onlineStatus;
         const evStatus: string = req.body.evStatus;
         const notice: string = req.body.notice;
@@ -77,8 +75,8 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
                                                    onlineStatus,
                                                    evStatus);
 
-        // 運行停止の時、メール作成
-        if ( evStatus === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
+        // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
+        if (evStatus === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
             // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
             await createEmails(res, info.targrtInfo, notice);
         }
@@ -111,31 +109,40 @@ async function updateStatusByIds(staffUser: string,
         return new mongoose.Types.ObjectId(id);
     });
     const now = moment().format('YYYY/MM/DD HH:mm:ss');
+    let info : any = {};
 
-    // 返金対象予約情報取得(入塔記録のないもの)
-    const info = await suspensionCommon.getTargetReservationsForRefund(
-                                            performanceIds,
-                                            PerformanceUtil.REFUND_STATUS.NONE,
-                                            evStatus === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
-    // 予約情報返金ステータスを未指示に更新
-    if (info.targrtIds.length > 0) {
-        await Models.Reservation.update(
-            {
-                _id: { $in: info.targrtIds}
-            },
-            {
-                $set: {
-                    'performance_ttts_extension.refund_status': PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
-                    'performance_ttts_extension.refund_update_user': staffUser,
-                    'performance_ttts_extension.refund_update_at': now
-                }
-            },
-            {
-                multi: true
-            }
-        ).exec();
+    // オンライン販売停止の時、予約更新
+    if (onlineStatus === PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED) {
+        // 返金対象予約情報取得(入塔記録のないもの)
+        info = await suspensionCommon.getTargetReservationsForRefund(
+            performanceIds,
+            PerformanceUtil.REFUND_STATUS.NONE,
+            evStatus === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
+
+        // 予約情報返金ステータスを未指示に更新
+        if (info.targrtIds.length > 0) {
+            await Models.Reservation.update(
+                {
+                    _id: { $in: info.targrtIds}
+                },
+                {
+                    $set: {
+                        'performance_ttts_extension.refund_status': PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+                        'performance_ttts_extension.refund_update_user': staffUser,
+                        'performance_ttts_extension.refund_update_at': now
+                    }
+                },
+                {
+                    multi: true
+                   }
+            ).exec();
+        }
     }
 
+    // 販売停止か再開かで返金ステータスセットorクリア決定
+    const refundStatus: string = onlineStatus === PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED ?
+                                 PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED :
+                                 PerformanceUtil.REFUND_STATUS.NONE;
     // パフォーマンス更新
     await Models.Performance.update(
         {
@@ -149,7 +156,7 @@ async function updateStatusByIds(staffUser: string,
                 'ttts_extension.ev_service_status': evStatus,
                 'ttts_extension.ev_service_update_user': staffUser,
                 'ttts_extension.ev_service_update_at': now,
-                'ttts_extension.refund_status': PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+                'ttts_extension.refund_status': refundStatus,
                 'ttts_extension.refund_update_user': staffUser,
                 'ttts_extension.refund_update_at': now
             }

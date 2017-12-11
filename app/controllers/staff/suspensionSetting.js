@@ -81,13 +81,11 @@ function execute(req, res, next) {
                 throw new Error(req.__('Message.UnexpectedError'));
             }
             // const executeType: string = req.body.executeType;
-            // const onlineStatus: string =  executeType === '1' ? req.body.onlineStatus : PerformanceUtil.ONLINE_SALES_STATUS.NORMAL;
-            // const evStatus: string =  executeType === '1' ? req.body.evStatus : PerformanceUtil.EV_SERVICE_STATUS.NORMAL;
             const onlineStatus = req.body.onlineStatus;
             const evStatus = req.body.evStatus;
             const notice = req.body.notice;
             const info = yield updateStatusByIds(req.staffUser.username, performanceIds, onlineStatus, evStatus);
-            // 運行停止の時、メール作成
+            // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
             if (evStatus === ttts_domain_1.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
                 // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
                 yield createEmails(res, info.targrtInfo, notice);
@@ -122,22 +120,30 @@ function updateStatusByIds(staffUser, performanceIds, onlineStatus, evStatus) {
             return new mongoose.Types.ObjectId(id);
         });
         const now = moment().format('YYYY/MM/DD HH:mm:ss');
-        // 返金対象予約情報取得(入塔記録のないもの)
-        const info = yield suspensionCommon.getTargetReservationsForRefund(performanceIds, ttts_domain_1.PerformanceUtil.REFUND_STATUS.NONE, evStatus === ttts_domain_1.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
-        // 予約情報返金ステータスを未指示に更新
-        if (info.targrtIds.length > 0) {
-            yield ttts_domain_1.Models.Reservation.update({
-                _id: { $in: info.targrtIds }
-            }, {
-                $set: {
-                    'performance_ttts_extension.refund_status': ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
-                    'performance_ttts_extension.refund_update_user': staffUser,
-                    'performance_ttts_extension.refund_update_at': now
-                }
-            }, {
-                multi: true
-            }).exec();
+        let info = {};
+        // オンライン販売停止の時、予約更新
+        if (onlineStatus === ttts_domain_1.PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED) {
+            // 返金対象予約情報取得(入塔記録のないもの)
+            info = yield suspensionCommon.getTargetReservationsForRefund(performanceIds, ttts_domain_1.PerformanceUtil.REFUND_STATUS.NONE, evStatus === ttts_domain_1.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
+            // 予約情報返金ステータスを未指示に更新
+            if (info.targrtIds.length > 0) {
+                yield ttts_domain_1.Models.Reservation.update({
+                    _id: { $in: info.targrtIds }
+                }, {
+                    $set: {
+                        'performance_ttts_extension.refund_status': ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+                        'performance_ttts_extension.refund_update_user': staffUser,
+                        'performance_ttts_extension.refund_update_at': now
+                    }
+                }, {
+                    multi: true
+                }).exec();
+            }
         }
+        // 販売停止か再開かで返金ステータスセットorクリア決定
+        const refundStatus = onlineStatus === ttts_domain_1.PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED ?
+            ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED :
+            ttts_domain_1.PerformanceUtil.REFUND_STATUS.NONE;
         // パフォーマンス更新
         yield ttts_domain_1.Models.Performance.update({
             _id: { $in: ids }
@@ -149,7 +155,7 @@ function updateStatusByIds(staffUser, performanceIds, onlineStatus, evStatus) {
                 'ttts_extension.ev_service_status': evStatus,
                 'ttts_extension.ev_service_update_user': staffUser,
                 'ttts_extension.ev_service_update_at': now,
-                'ttts_extension.refund_status': ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+                'ttts_extension.refund_status': refundStatus,
                 'ttts_extension.refund_update_user': staffUser,
                 'ttts_extension.refund_update_at': now
             }
