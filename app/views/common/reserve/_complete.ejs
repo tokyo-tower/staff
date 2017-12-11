@@ -77,7 +77,7 @@ for (let reservation of reservationDocuments) {
 </table>
 
 
-<a class="btn btn-blue" id="btn_print_a4" target="_blank" href='<%- process.env.INQUIRY_SITE_URL %>print/print?ids=[<%- printIds.join(',') %>]'><span><%- __('Label.Print') %></span></a>
+<a class="btn btn-blue visible-pc" id="btn_print_a4" target="_blank" href='<%- process.env.INQUIRY_SITE_URL %>print/print?ids=[<%- printIds.join(',') %>]'><span><%- __('Label.Print') %></span></a>
 
 <% if (reservationDocuments[0].purchaser_group === ReservationUtil.PURCHASER_GROUP_STAFF) { %>
 <div class="thermalprint">
@@ -91,5 +91,5 @@ for (let reservation of reservationDocuments) {
 <div class="enteringguide">
     <h3><%- __('Label.AboutEntry') %></h3>
     <p><%- __('Message.AboutEntryDescription') %></p>
-    <a class="btn btn-blue btn-entering" href="https://www.tokyotower.co.jp/observatory/index.html"><span><%- __('Button.AboutEntry') %></span></a>
+    <a class="btn btn-blue btn-entering" href="/aboutenter" target="_blank"><span><%- __('Button.AboutEntry') %></span></a>
 </div>

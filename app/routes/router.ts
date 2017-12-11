@@ -10,8 +10,16 @@ import * as reserveController from '../controllers/reserve';
 
 // 本体サイトのトップページの言語別URL
 const topUrlByLocale = conf.get<any>('official_url_top_by_locale');
+
+// 本体サイトのチケット案内ページの言語別URL
+const ticketInfoUrlByLocale = conf.get<any>('official_url_ticketinfo_by_locale');
+
+// 本体サイトの入場案内ページの言語別URL
+const aboutEnteringUrlByLocale = conf.get<any>('official_url_aboutentering_by_locale');
+
 // 本体サイトのプライバシーポリシーページの言語別URL
 const privacyPolicyUrlByLocale = conf.get<any>('official_url_privacypolicy_by_locale');
+
 // 本体サイトのお問い合わせページの言語別URL
 const contactUrlByLocale = conf.get<any>('official_url_contact_by_locale');
 
@@ -33,6 +41,22 @@ router.get('/terms/', (req: Request, res: Response) => {
     res.locals.keywords = 'TTTS Terms';
 
     return res.render('common/terms/');
+});
+
+// 本体サイトのチケット案内ページの対応言語版(無ければ英語版)に転送
+router.get('/ticketinfo', (req: Request, res: Response) => {
+    const locale: string = (req.getLocale()) || 'en';
+    const url: string = (ticketInfoUrlByLocale[locale] || ticketInfoUrlByLocale.en);
+
+    return res.redirect(url);
+});
+
+// 本体サイトの入場案内ページの対応言語版(無ければ英語版)に転送
+router.get('/aboutenter', (req: Request, res: Response) => {
+    const locale: string = (req.getLocale()) || 'en';
+    const url: string = (aboutEnteringUrlByLocale[locale] || aboutEnteringUrlByLocale.en);
+
+    return res.redirect(url);
 });
 
 // 本体サイトのプライバシーポリシーページの対応言語版(無ければ英語版)に転送

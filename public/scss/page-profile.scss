@@ -22,10 +22,13 @@
             padding: 10px;
             width: 196px;
             .required {
+                display: block;
+                font-size: 0.8em;
                 color: #c30d23;
                 padding: 2px;
                 @media screen and (max-width: $breakpoint_tablet) {
-                    margin-left:1em;
+                    margin-left: 4px;
+                    display: inline-block;
                 }
             }
         }
@@ -112,8 +115,8 @@
         letter-spacing: 1px;
     }
 
-    #cardNumber {
-        margin-bottom: 10px;
+    .figure-availablecards {
+        margin-top: 10px;
     }
 
     #cardExpirationMonth {

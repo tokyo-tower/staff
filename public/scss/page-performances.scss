@@ -2,7 +2,7 @@
 .page-performances {
     .performancesearchform {
         margin-top: 10px;
-        margin-bottom: 48px;
+        margin-bottom: 2em;
         .input-date {
             width: 100%;
             position: relative;
@@ -69,7 +69,7 @@
         }
     }
     .icondescription {
-        margin-top: 24px;
+        margin-top: 10px;
         line-height: 2;
         .mbr {
             display: none;
@@ -216,7 +216,7 @@
                 background-image: url(/images/common/icon-status-last.svg);
             }
         }
-        .item-soldout {
+        .item-soldout, .item-unavailable {
             pointer-events: none;
             .time,
             .wrapper-status {
@@ -225,8 +225,15 @@
             .wrapper-status {
                 box-shadow: 0 -2px rgba(0, 0, 0, 0.3);
             }
+        }
+        .item-soldout {
             .status::before {
                 background-image: url(/images/common/icon-status-soldout.svg);
+            }
+        }
+        .item-unavailable {
+            .status::before {
+                background-image: url(/images/common/icon-status-unavailable.svg);
             }
         }
     }

@@ -1,11 +1,13 @@
 <%
     const cate = (typeof category === 'string') ? category : 'general';
 %>
-<input type="hidden" name="apiEndpoint" value="<%= process.env.API_ENDPOINT %>">
-<input type="hidden" id="input_apiToken" value="<%= token.access_token %>">
-<input type="hidden" id="input_apiTokenExpire" value="<%= token.expires_in %>">
-<input type="hidden" name="reserveMaxDate" value="<%= reserveMaxDate %>">
-
+<script>
+    window.ttts.API_TOKEN = {
+        VALUE: '<%= token.access_token %>',
+        EXPIRES_IN: '<%= token.expires_in %>'
+    };
+    window.ttts.reservableMaxDate = '<%= reserveMaxDate %>';
+</script>
 <script src="/js/flatpickr/flatpickr.min.js"></script>
 <script src="/js/flatpickr/flatpickr.locale.<%= locale %>.js"></script>
 <script src="/js/reserve/performances.js"></script>
@@ -36,7 +38,8 @@
     <img src="/images/common/icon-status-crowded.svg" alt="crowded"> … <%- __('Label.Crowded') %>
     <br class="mbr">
     <img src="/images/common/icon-status-last.svg" alt="last"> … <%- __('Label.Last') %>
-    <img src="/images/common/icon-status-soldout.svg" alt="soldout"> … <%- __('Label.Soldout') %>
+    <img src="/images/common/icon-status-soldout_d.svg" alt="soldout"> … <%- __('Label.Soldout') %>
+    <img src="/images/common/icon-status-unavailable_d.svg" alt="unavailable"> … <%- __('Label.Unavailable') %>
 </p>
 
 <div class="row performances">

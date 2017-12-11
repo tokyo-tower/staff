@@ -3,6 +3,7 @@
     .rednotice {
         color: red;
         text-align: center;
+        margin-bottom: 1em;
     }
 
     .table-complete {
@@ -108,14 +109,16 @@
     .mailnotice {
         max-width: 800px;
         width: 100%;
-        margin: 4em auto;
+        margin: 2em auto;
         font-size: 14px;
+        line-height: 1.4;
     }
 
     .enteringguide {
         background-color: #eee;
         padding: 1em;
         text-align: center;
+        line-height: 1.4;
         width: 50%;
         margin: 2em auto;
         @media screen and (max-width: $breakpoint_tablet) {

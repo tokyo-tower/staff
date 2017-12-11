@@ -37,6 +37,13 @@
         "zh-hant": "https://www.tokyotower.co.jp/price/zh.html",
         "ko": "https://www.tokyotower.co.jp/price/kr.html"
     },
+    "official_url_aboutentering_by_locale": {
+        "ja": "https://www.tokyotower.co.jp/observatory/index.html",
+        "en": "https://www.tokyotower.co.jp/observatory/en.html",
+        "zh-hans": "https://www.tokyotower.co.jp/observatory/cn.html",
+        "zh-hant": "https://www.tokyotower.co.jp/observatory/zh.html",
+        "ko": "https://www.tokyotower.co.jp/observatory/kr.html"
+    },
     "official_url_privacypolicy_by_locale": {
         "ja": "https://www.tokyotower.co.jp/privacypolicy/index.html",        
         "en": "https://www.tokyotower.co.jp/privacypolicy/en.html",

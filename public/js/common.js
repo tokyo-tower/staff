@@ -13,6 +13,17 @@ window.ttts.setSessionStorage = function(key, value) {
     }
 };
 
+// 文字列整形用 (Stringのidx文字目にstrを差し込む)
+window.ttts.fn_spliceStr = function(targetStr, idx, str) {
+    var ret = targetStr;
+    try {
+        ret = (targetStr.slice(0, idx) + str + targetStr.slice(idx));
+    } catch (e) {
+        console.log(e);
+    }
+    return ret || '';
+};
+
 $(function() {
     var $window = $(window);
     var CSSBREAKPOINT_MOBILE = 480;

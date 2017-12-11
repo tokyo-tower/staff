@@ -1,6 +1,5 @@
 <%- include('./_step', {currentStepName: 'tickets'}) %>
 
-<input type="hidden" id="input_maxq" name="maxq" value="<%= conf.get('reservation_maxq') %>">
 <input type="hidden" name="category" value="<%= reservationModel.category %>">
 
 <h1 class="pagetitle"><%- __('h1.SelectTickets') %></h1>
@@ -9,7 +8,7 @@
 <p class="guidetext" style="color:red;"><%= message %></p>
 <% } %>
 
-<a class="link-guide" href="<%- conf.get('official_url_ticketinfo_by_locale')[locale] %>" target="_blank"><%- __('Label.AboutTicket') %></a>
+<a class="link-guide" href="/ticketinfo" target="_blank"><%- __('Label.AboutTicket') %></a>
 <!--<p class="guidetext"><%- __('Label.AboutTOPDECKTicket') %></p>-->
 <div class="wrapper-2clm">
     <div class="clm-left" data-token="">

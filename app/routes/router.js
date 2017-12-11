@@ -11,6 +11,10 @@ const languageController = require("../controllers/language");
 const reserveController = require("../controllers/reserve");
 // 本体サイトのトップページの言語別URL
 const topUrlByLocale = conf.get('official_url_top_by_locale');
+// 本体サイトのチケット案内ページの言語別URL
+const ticketInfoUrlByLocale = conf.get('official_url_ticketinfo_by_locale');
+// 本体サイトの入場案内ページの言語別URL
+const aboutEnteringUrlByLocale = conf.get('official_url_aboutentering_by_locale');
 // 本体サイトのプライバシーポリシーページの言語別URL
 const privacyPolicyUrlByLocale = conf.get('official_url_privacypolicy_by_locale');
 // 本体サイトのお問い合わせページの言語別URL
@@ -29,6 +33,18 @@ router.get('/terms/', (req, res) => {
     res.locals.description = 'TTTS Terms';
     res.locals.keywords = 'TTTS Terms';
     return res.render('common/terms/');
+});
+// 本体サイトのチケット案内ページの対応言語版(無ければ英語版)に転送
+router.get('/ticketinfo', (req, res) => {
+    const locale = (req.getLocale()) || 'en';
+    const url = (ticketInfoUrlByLocale[locale] || ticketInfoUrlByLocale.en);
+    return res.redirect(url);
+});
+// 本体サイトの入場案内ページの対応言語版(無ければ英語版)に転送
+router.get('/aboutenter', (req, res) => {
+    const locale = (req.getLocale()) || 'en';
+    const url = (aboutEnteringUrlByLocale[locale] || aboutEnteringUrlByLocale.en);
+    return res.redirect(url);
 });
 // 本体サイトのプライバシーポリシーページの対応言語版(無ければ英語版)に転送
 router.get('/privacypolicy', (req, res) => {

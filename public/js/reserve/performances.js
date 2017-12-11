@@ -1,14 +1,11 @@
 /* global moment, flatpickr */
 $(function() {
     'use strict';
-    var LOCALE = document.documentElement.getAttribute('lang');
-    var API_ENDPOINT = document.querySelector('input[name="apiEndpoint"]').value;
-    var API_TOKEN = document.getElementById('input_apiToken').value;
-    if (!API_ENDPOINT) { return alert('API_ENDPOINT undefined'); }
-
+    if (!window.ttts.API_ENDPOINT) { return alert('API_ENDPOINT undefined'); }
+    if (!window.ttts.API_TOKEN.VALUE) { return alert('API_TOKEN undefined'); }
+    
     // カレンダーを何日先まで表示するか
-    var CALENDER_MAXDATE = document.querySelector('input[name="reserveMaxDate"]') || {};
-    CALENDER_MAXDATE = CALENDER_MAXDATE.value;
+    var CALENDER_MAXDATE = window.ttts.reservableMaxDate || 60;
 
     // 空き状況表示切り替え閾値 (以下)
     var STATUS_THRESHOLD = {
@@ -16,31 +13,21 @@ $(function() {
         LAST: 9
     };
 
-    // 空席数からCSSクラス名を得る
-    var getStatusNameByRemainsNum = function(num) {
-        num = parseInt(num, 10);
+    // performanceのstatusからCSSクラス名を得る
+    var getItemClassNameByPerformance = function(performance) {
+        if (performance.online_sales_status !== '0') {
+            return 'item-unavailable'; // 「-」
+        }
+        var num = parseInt(performance.seat_status, 10);
         if (num > STATUS_THRESHOLD.CROWDED) {
-            return 'capable'; // 「⚪」
+            return 'item-capable'; // 「⚪」
         } else if (num > STATUS_THRESHOLD.LAST) {
-            return 'crowded'; // 「△」
+            return 'item-crowded'; // 「△」
         } else if (num > 0) {
-            return 'last'; // 「人間アイコン + 残数」
+            return 'item-last'; // 「人間アイコン + 残数」
         }
-        return 'soldout'; // 「×」
+        return 'item-soldout'; // 「×」
     };
-
-
-    // 文字列整形用 (Stringのidx文字目にstrを差し込む)
-    var spliceStr = function(targetStr, idx, str) {
-        var ret = targetStr;
-        try {
-            ret = (targetStr.slice(0, idx) + str + targetStr.slice(idx));
-        } catch (e) {
-            console.log(e);
-        }
-        return ret || '';
-    };
-
 
     // APIから得たパフォーマンス一覧を整形して表示
     var dom_performances = document.querySelector('.performances');
@@ -64,7 +51,8 @@ $(function() {
                     id: performance.id,
                     start_time: performance.attributes.start_time,
                     end_time: performance.attributes.end_time,
-                    seat_status: performance.attributes.seat_status
+                    seat_status: performance.attributes.seat_status,
+                    online_sales_status: performance.attributes.online_sales_status
                 });
             } catch (e) {
                 console.log(e);
@@ -91,8 +79,8 @@ $(function() {
                         '<div class="hour"><span>' + hour + ':00～</span></div>' +
                         '<div class="items">';
             performancesByHour[hour].forEach(function(performance) {
-                html +=     '<div class="item item-' + getStatusNameByRemainsNum(performance.seat_status) + '" data-performance-id="' + performance.id + '">' +
-                                '<p class="time">' + spliceStr(performance.start_time, 2, ':') + ' - ' + spliceStr(performance.end_time, 2, ':') + '</p>' +
+                html +=     '<div class="item ' + getItemClassNameByPerformance(performance) + '" data-performance-id="' + performance.id + '">' +
+                                '<p class="time">' + window.ttts.fn_spliceStr(performance.start_time, 2, ':') + ' - ' + window.ttts.fn_spliceStr(performance.end_time, 2, ':') + '</p>' +
                                 '<div class="wrapper-status">' +
                                     '<p class="status">' + performance.seat_status + '</p>' +
                                 '</div>' +
@@ -110,11 +98,11 @@ $(function() {
     var search = function(condition) {
         $.ajax({
             dataType: 'json',
-            url: API_ENDPOINT + 'performances',
+            url: window.ttts.API_ENDPOINT + 'performances',
             type: 'GET',
             data: condition,
             beforeSend: function(xhr) {
-                xhr.setRequestHeader('Authorization', 'Bearer ' + API_TOKEN);
+                xhr.setRequestHeader('Authorization', 'Bearer ' + window.ttts.API_TOKEN.VALUE);
                 $loading.modal();
             }
         }).done(function(body) {
@@ -132,13 +120,13 @@ $(function() {
 
 
     // 日付選択カレンダー (再読込時のために日付はsessionStorageにキープしておく)
-    flatpickr.localize(window.flatpickr.l10ns[LOCALE]);
+    flatpickr.localize(window.flatpickr.l10ns[window.ttts.currentLocale]);
     var $modal_calender = $('.modal-calender');
     var calendar = new flatpickr(document.getElementById('input_performancedate'), {
         appendTo: $('#calendercontainer').on('click', function(e) { e.stopPropagation(); })[0], // モーダル内コンテナに挿入しつつカレンダークリックでモーダルが閉じるのを防止
         defaultDate: window.sessionStorage.getItem('performance_ymd') || 'today',
         disableMobile: true, // 端末自前の日付選択UIを使わない
-        locale: LOCALE,
+        locale: window.ttts.currentLocale,
         minDate: 'today',
         maxDate: CALENDER_MAXDATE || new Date().fp_incr(60),
         onOpen: function() {

@@ -1,0 +1,138 @@
+.page-suspension.page-setting {
+    .hour {
+        position: relative;
+        z-index: 32;
+        label {
+            display: table-cell;
+            vertical-align: middle;
+            font-size: 20px;
+            cursor: pointer;
+            user-select: none;            
+            span {
+                display: block;
+                font-size: 32px;
+                margin-bottom: 10px;
+            }
+            input {
+                width: 24px;
+                height: 24px;
+                background-color: #fff;
+                vertical-align: text-bottom;
+            }
+        }
+    }
+    .item {
+        .time {
+            background-color: #a8a8a8;
+        }
+    }
+    .item-selected {
+        .wrapper-status {
+            background-color: #cc0000;
+        }
+    }
+    .item-supenpeded {
+        .wrapper-status {
+            background-color: #333333;
+        }
+        &.item-selected {
+            .wrapper-status {
+                background-color: #5190cc;
+            }
+        }
+    }
+    .item-selected, .item-supenpeded {
+        .wrapper-status {
+            color: #fff;
+            .status, .status::before {
+                color: #fff;
+            }
+        }
+    }
+    .supensionstatus {
+        text-align: center;
+        vertical-align: middle;
+        display: table-cell;
+        .status {
+            display: inline-block;
+        }
+    }
+    #btn_callmodal_suspend {
+        @include btn-red;
+    }
+    #btn_callmodal_resume {
+        @include btn-blue;
+    }
+}
+
+#modal_suspension {
+    &.mode-suspend {
+        .for-resume {
+            display: none;
+        }
+        #btn_exec {
+            @include btn-red;            
+            >span::before {
+                content: '販売停止';
+            }
+        }
+    }
+    &.mode-resume {
+        .for-suspend {
+            display: none;
+        }
+        .modal-footer {
+            border-top: 1px solid #ccc;
+        }
+        #btn_exec {
+            @include btn-blue;
+            >span::before {
+                content: '販売再開';
+            }
+        }
+    }
+    .for-evstop {
+        display: none;
+    }
+    &.mode-evstop {
+        .for-evstop {
+            display: block;
+        }
+    }
+
+    #textarea_announcemail {
+        display: block;
+        width: 96%;
+        height: 10em;
+        margin: auto;
+        border: 1px solid #ccc;
+    }
+
+    h2 {
+        margin-bottom: 10px;
+    }
+    h3 {
+        line-height: 2;
+        padding: 0 1em;
+        background-color: #d6d6d6;        
+    }
+    form >div{
+        padding: 0;
+        p,label {
+            padding: 1em;
+        }
+    }
+    label {
+        display: block;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        border-top: 1px solid #ccc;
+        input {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            vertical-align: text-top;            
+        }
+    }
+}
