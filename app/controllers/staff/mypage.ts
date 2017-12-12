@@ -4,9 +4,11 @@
  */
 
 import * as ttts from '@motionpicture/ttts-domain';
+import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 import * as _ from 'underscore';
 
+const debug = createDebug('ttts-staff:controller:staff:mypage');
 const DEFAULT_RADIX = 10;
 const layout: string = 'layouts/staff/layout';
 
@@ -16,7 +18,8 @@ const layout: string = 'layouts/staff/layout';
  */
 export async function index(__: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const owners = await ttts.Models.Owner.find({}, '_id name', { sort: { _id: 1 } }).exec();
+        const ownerRepo = new ttts.repository.Owner(ttts.mongoose.connection);
+        const owners = await ownerRepo.ownerModel.find({}, '_id name', { sort: { _id: 1 } }).exec();
         res.render('staff/mypage/index', {
             owners: owners,
             layout: layout
@@ -169,6 +172,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
         conditions.push({ watcher_name: watcherName });
     }
 
+    debug('searching reservations...', conditions);
     const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
     try {
         // 総数検索
@@ -177,6 +181,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
                 $and: conditions
             }
         ).exec();
+        debug('reservation count:', count);
 
         // 2017/11/14 データ検索、切り取り、ソートの順を変更
         // データ検索

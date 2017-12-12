@@ -3,7 +3,7 @@
  *
  * @namespace controller/staff/suspensionSetting
  */
-import { CommonUtil, EmailQueueUtil, Models, mongoose, PerformanceUtil } from '@motionpicture/ttts-domain';
+import * as ttts from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import { NextFunction, Request, Response } from 'express';
 import * as moment from 'moment';
@@ -37,7 +37,7 @@ export async function start(req: Request, res: Response, next: NextFunction): Pr
 export async function performances(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         // token取得
-        const token: string = await CommonUtil.getToken(<string>process.env.API_ENDPOINT);
+        const token: string = await ttts.CommonUtil.getToken(<string>process.env.API_ENDPOINT);
 
         if (req.method !== 'POST') {
             // 運行・オンライン販売停止設定画面表示
@@ -80,7 +80,7 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
             evStatus);
 
         // 運行停止の時、メール作成
-        if (evStatus === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
+        if (evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
             // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
             await createEmails(res, info.targrtInfo, notice);
         }
@@ -111,25 +111,25 @@ async function updateStatusByIds(
     evStatus: string): Promise<any> {
     // パフォーマンスIDをObjectIdに変換
     const ids = performanceIds.map((id) => {
-        return new mongoose.Types.ObjectId(id);
+        return new ttts.mongoose.Types.ObjectId(id);
     });
     const now = moment().format('YYYY/MM/DD HH:mm:ss');
 
     // 返金対象予約情報取得(入塔記録のないもの)
     const info = await suspensionCommon.getTargetReservationsForRefund(
         performanceIds,
-        PerformanceUtil.REFUND_STATUS.NONE,
-        evStatus === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
+        ttts.PerformanceUtil.REFUND_STATUS.NONE,
+        evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
     // 予約情報返金ステータスを未指示に更新
     if (info.targrtIds.length > 0) {
         // TODO 実装
-        await (<any>Models).Reservation.update(
+        await (<any>ttts.Models).Reservation.update(
             {
                 _id: { $in: info.targrtIds }
             },
             {
                 $set: {
-                    'performance_ttts_extension.refund_status': PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+                    'performance_ttts_extension.refund_status': ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
                     'performance_ttts_extension.refund_update_user': staffUser,
                     'performance_ttts_extension.refund_update_at': now
                 }
@@ -141,7 +141,8 @@ async function updateStatusByIds(
     }
 
     // パフォーマンス更新
-    await Models.Performance.update(
+    const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
+    await performanceRepo.performanceModel.update(
         {
             _id: { $in: ids }
         },
@@ -153,7 +154,7 @@ async function updateStatusByIds(
                 'ttts_extension.ev_service_status': evStatus,
                 'ttts_extension.ev_service_update_user': staffUser,
                 'ttts_extension.ev_service_update_at': now,
-                'ttts_extension.refund_status': PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+                'ttts_extension.refund_status': ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
                 'ttts_extension.refund_update_user': staffUser,
                 'ttts_extension.refund_update_at': now
             }
@@ -248,9 +249,9 @@ async function createEmail(
             mimetype: 'text/plain',
             text: content
         },
-        status: EmailQueueUtil.STATUS_UNSENT
+        status: ttts.EmailQueueUtil.STATUS_UNSENT
     };
 
     // メール作成
-    await Models.EmailQueue.create(emailQueue);
+    await ttts.Models.EmailQueue.create(emailQueue);
 }

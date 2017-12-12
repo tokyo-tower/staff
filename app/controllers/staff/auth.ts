@@ -1,12 +1,10 @@
 /**
  * 内部関係者認証コントローラー
- *
  * @namespace controller/staff/auth
  */
 
-import * as TTTS from '@motionpicture/ttts-domain';
+import * as ttts from '@motionpicture/ttts-domain';
 import { NextFunction, Request, Response } from 'express';
-// import * as request from 'request'; // for token
 import * as _ from 'underscore';
 
 import staffLoginForm from '../../forms/staff/staffLoginForm';
@@ -20,6 +18,7 @@ import StaffUser from '../../models/user/staff';
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
     if (req.staffUser !== undefined && req.staffUser.isAuthenticated()) {
         res.redirect('/staff/mypage');
+
         return;
     }
 
@@ -40,10 +39,11 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 
             if (validationResult.isEmpty()) {
                 // ユーザー認証
-                const owner = await TTTS.Models.Owner.findOne(
+                const ownerRepo = new ttts.repository.Owner(ttts.mongoose.connection);
+                const owner = await ownerRepo.ownerModel.findOne(
                     {
                         username: req.body.userId,
-                        group: TTTS.OwnerUtil.GROUP_STAFF
+                        group: ttts.OwnerUtil.GROUP_STAFF
                     }
                 ).exec();
 
@@ -59,7 +59,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
                     ];
                 } else {
                     // パスワードチェック
-                    if (owner.get('password_hash') !== TTTS.CommonUtil.createHash(req.body.password, owner.get('password_salt'))) {
+                    if (owner.get('password_hash') !== ttts.CommonUtil.createHash(req.body.password, owner.get('password_salt'))) {
                         res.locals.validation = [
                             { msg: req.__('Message.invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
                         ];
@@ -67,9 +67,9 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
                         // ログイン記憶
                         if (req.body.remember === 'on') {
                             // トークン生成
-                            const authentication = await TTTS.Models.Authentication.create(
+                            const authentication = await ttts.Models.Authentication.create(
                                 {
-                                    token: TTTS.CommonUtil.createToken(),
+                                    token: ttts.CommonUtil.createToken(),
                                     owner: owner.get('_id'),
                                     signature: req.body.signature,
                                     locale: req.body.language
@@ -90,6 +90,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 
                         const cb = (!_.isEmpty(req.query.cb)) ? req.query.cb : '/staff/mypage';
                         res.redirect(cb);
+
                         return;
                     }
                 }
@@ -106,11 +107,12 @@ export async function logout(req: Request, res: Response, next: NextFunction): P
     try {
         if (req.session === undefined) {
             next(new Error(req.__('Message.UnexpectedError')));
+
             return;
         }
 
         delete req.session[StaffUser.AUTH_SESSION_NAME];
-        await TTTS.Models.Authentication.remove({ token: req.cookies.remember_staff }).exec();
+        await ttts.Models.Authentication.remove({ token: req.cookies.remember_staff }).exec();
 
         res.clearCookie('remember_staff');
         res.redirect('/staff/mypage');
@@ -125,7 +127,7 @@ export async function auth(req: Request, res: Response): Promise<void> {
             throw new Error('session undefined.');
         }
         //const token: string = await getToken();
-        const token: string = await TTTS.CommonUtil.getToken(<string>process.env.API_ENDPOINT);
+        const token: string = await ttts.CommonUtil.getToken(<string>process.env.API_ENDPOINT);
         res.json({
             success: true,
             token: token,

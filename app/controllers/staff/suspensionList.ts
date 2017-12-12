@@ -138,14 +138,15 @@ function getConditionsFromTo(value1: string | null, value2: string | null, conve
 }
 /**
  * パフォーマンス情報取得
- *
  * @param {any} conditions
  * @param {number} limit
  * @param {number} page
  * @return {any}
  */
-async function getPerformances(conditions: any[], limit: number, page: number): Promise<any> {
-    return (<any[]>await ttts.Models.Performance
+async function getPerformances(conditions: any[], limit: number, page: number): Promise<ttts.mongoose.Document[]> {
+    const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
+
+    return performanceRepo.performanceModel
         .find({ $and: conditions })
         .sort({
             day: -1,
@@ -153,8 +154,7 @@ async function getPerformances(conditions: any[], limit: number, page: number): 
         })
         .skip(limit * (page - 1))
         .limit(limit)
-        .exec()
-    );
+        .exec();
 }
 /**
  * 予約情報取得
@@ -312,7 +312,8 @@ async function updateRefundStatus(performanceId: string, staffUser: string): Pro
     ).exec();
 
     // パフォーマンス更新
-    await ttts.Models.Performance.findOneAndUpdate(
+    const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
+    await performanceRepo.performanceModel.findOneAndUpdate(
         {
             _id: performanceId
         },

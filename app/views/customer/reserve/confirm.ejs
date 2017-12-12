@@ -98,9 +98,9 @@
                 <th><%- __('Label.PaymentMethod') %></th>
                 <td>
                     <p>
-                    <% if (reservationModel.paymentMethod === GMOUtil.PAY_TYPE_CREDIT) { %>
+                    <% if (reservationModel.paymentMethod === GMOUtil.PayType.Credit) { %>
                     <%- __('Label.PaymentMethodName.0') %>
-                    <% } else if (reservationModel.paymentMethod === GMOUtil.PAY_TYPE_CVS) {%>
+                    <% } else if (reservationModel.paymentMethod === GMOUtil.PayType.Csv) {%>
                     <%- __('Label.PaymentMethodName.CVS') %>
                     <% } %>
                     </p>

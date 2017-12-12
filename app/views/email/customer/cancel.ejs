@@ -34,7 +34,7 @@ We sincerely apologize for the inconvenience we caused you.
 <%= reservations.map((reservation) => reservation.get('ticket_type_detail_str').ja.replace(/\\/g, '￥')).join('\n') %>
 <%= reservations.map((reservation) => reservation.get('ticket_type_detail_str').en.replace(/\\/g, '￥')).join('\n') %>
 
-<% if (reservations[0].get('payment_method') === GMOUtil.PAY_TYPE_CVS) { %>
+<% if (reservations[0].get('payment_method') === GMOUtil.PayType.Cvs) { %>
 コンビニ決済手数料 (Handling charge) :
 ￥<%- ReservationUtil.CHARGE_CVS %> x <%- reservations.length %>
 <% } %>

@@ -143,6 +143,7 @@ export async function performances(req: Request, res: Response, next: NextFuncti
             });
         }
     } catch (error) {
+        console.error(error);
         next(new Error(req.__('Message.UnexpectedError')));
     }
 }
@@ -352,7 +353,7 @@ export async function complete(req: Request, res: Response, next: NextFunction):
         }
 
         reservations.sort((a, b) => {
-            return ttts.ScreenUtil.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
+            return ttts.factory.place.screen.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
         });
 
         res.render('staff/reserve/complete', {

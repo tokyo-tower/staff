@@ -140,6 +140,7 @@ function performances(req, res, next) {
             }
         }
         catch (error) {
+            console.error(error);
             next(new Error(req.__('Message.UnexpectedError')));
         }
     });
@@ -347,7 +348,7 @@ function complete(req, res, next) {
                 return;
             }
             reservations.sort((a, b) => {
-                return ttts.ScreenUtil.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
+                return ttts.factory.place.screen.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
             });
             res.render('staff/reserve/complete', {
                 reservationDocuments: reservations,

@@ -4,7 +4,7 @@
  * @module middleware/setLocal
  */
 
-import { CommonUtil, GMO, Models, ReservationUtil, ScreenUtil } from '@motionpicture/ttts-domain';
+import { CommonUtil, GMO, Models, ReservationUtil } from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import { NextFunction, Request, Response } from 'express';
 import * as moment from 'moment';
@@ -20,7 +20,6 @@ export default (req: Request, res: Response, next: NextFunction) => {
 
     res.locals.GMOUtil = GMO.utils.util;
     res.locals.ReservationUtil = ReservationUtil;
-    res.locals.ScreenUtil = ScreenUtil;
     res.locals.Models = Models;
 
     next();

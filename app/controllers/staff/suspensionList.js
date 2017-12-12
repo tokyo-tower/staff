@@ -144,7 +144,6 @@ function getConditionsFromTo(value1, value2, convert = false) {
 }
 /**
  * パフォーマンス情報取得
- *
  * @param {any} conditions
  * @param {number} limit
  * @param {number} page
@@ -152,7 +151,8 @@ function getConditionsFromTo(value1, value2, convert = false) {
  */
 function getPerformances(conditions, limit, page) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield ttts.Models.Performance
+        const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
+        return performanceRepo.performanceModel
             .find({ $and: conditions })
             .sort({
             day: -1,
@@ -308,7 +308,8 @@ function updateRefundStatus(performanceId, staffUser) {
             multi: true
         }).exec();
         // パフォーマンス更新
-        yield ttts.Models.Performance.findOneAndUpdate({
+        const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
+        yield performanceRepo.performanceModel.findOneAndUpdate({
             _id: performanceId
         }, {
             $set: {

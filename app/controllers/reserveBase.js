@@ -86,7 +86,7 @@ function processFixSeatsAndTickets(reservationModel, req) {
             reservationModel.setReservation(tmpReservation.seat_code, tmpReservation);
         });
         // 座席コードのソート(文字列順に)
-        reservationModel.seatCodes.sort(ttts.ScreenUtil.sortBySeatCode);
+        reservationModel.seatCodes.sort(ttts.factory.place.screen.sortBySeatCode);
     });
 }
 exports.processFixSeatsAndTickets = processFixSeatsAndTickets;

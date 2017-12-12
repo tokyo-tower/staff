@@ -95,7 +95,7 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
         reservationModel.setReservation(tmpReservation.seat_code, tmpReservation);
     });
     // 座席コードのソート(文字列順に)
-    reservationModel.seatCodes.sort(ttts.ScreenUtil.sortBySeatCode);
+    reservationModel.seatCodes.sort(ttts.factory.place.screen.sortBySeatCode);
 }
 
 export interface ICheckInfo {

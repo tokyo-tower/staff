@@ -1,7 +1,6 @@
 "use strict";
 /**
  * 内部関係者認証コントローラー
- *
  * @namespace controller/staff/auth
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -13,8 +12,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const TTTS = require("@motionpicture/ttts-domain");
-// import * as request from 'request'; // for token
+const ttts = require("@motionpicture/ttts-domain");
 const _ = require("underscore");
 const staffLoginForm_1 = require("../../forms/staff/staffLoginForm");
 const staff_1 = require("../../models/user/staff");
@@ -44,9 +42,10 @@ function login(req, res, next) {
                 res.locals.validation = validationResult.array();
                 if (validationResult.isEmpty()) {
                     // ユーザー認証
-                    const owner = yield TTTS.Models.Owner.findOne({
+                    const ownerRepo = new ttts.repository.Owner(ttts.mongoose.connection);
+                    const owner = yield ownerRepo.ownerModel.findOne({
                         username: req.body.userId,
-                        group: TTTS.OwnerUtil.GROUP_STAFF
+                        group: ttts.OwnerUtil.GROUP_STAFF
                     }).exec();
                     res.locals.userId = req.body.userId;
                     res.locals.password = '';
@@ -60,7 +59,7 @@ function login(req, res, next) {
                     }
                     else {
                         // パスワードチェック
-                        if (owner.get('password_hash') !== TTTS.CommonUtil.createHash(req.body.password, owner.get('password_salt'))) {
+                        if (owner.get('password_hash') !== ttts.CommonUtil.createHash(req.body.password, owner.get('password_salt'))) {
                             res.locals.validation = [
                                 { msg: req.__('Message.invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
                             ];
@@ -69,8 +68,8 @@ function login(req, res, next) {
                             // ログイン記憶
                             if (req.body.remember === 'on') {
                                 // トークン生成
-                                const authentication = yield TTTS.Models.Authentication.create({
-                                    token: TTTS.CommonUtil.createToken(),
+                                const authentication = yield ttts.Models.Authentication.create({
+                                    token: ttts.CommonUtil.createToken(),
                                     owner: owner.get('_id'),
                                     signature: req.body.signature,
                                     locale: req.body.language
@@ -105,7 +104,7 @@ function logout(req, res, next) {
                 return;
             }
             delete req.session[staff_1.default.AUTH_SESSION_NAME];
-            yield TTTS.Models.Authentication.remove({ token: req.cookies.remember_staff }).exec();
+            yield ttts.Models.Authentication.remove({ token: req.cookies.remember_staff }).exec();
             res.clearCookie('remember_staff');
             res.redirect('/staff/mypage');
         }
@@ -122,7 +121,7 @@ function auth(req, res) {
                 throw new Error('session undefined.');
             }
             //const token: string = await getToken();
-            const token = yield TTTS.CommonUtil.getToken(process.env.API_ENDPOINT);
+            const token = yield ttts.CommonUtil.getToken(process.env.API_ENDPOINT);
             res.json({
                 success: true,
                 token: token,

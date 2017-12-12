@@ -13,7 +13,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ttts = require("@motionpicture/ttts-domain");
+const createDebug = require("debug");
 const _ = require("underscore");
+const debug = createDebug('ttts-staff:controller:staff:mypage');
 const DEFAULT_RADIX = 10;
 const layout = 'layouts/staff/layout';
 /**
@@ -23,7 +25,8 @@ const layout = 'layouts/staff/layout';
 function index(__, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const owners = yield ttts.Models.Owner.find({}, '_id name', { sort: { _id: 1 } }).exec();
+            const ownerRepo = new ttts.repository.Owner(ttts.mongoose.connection);
+            const owners = yield ownerRepo.ownerModel.find({}, '_id name', { sort: { _id: 1 } }).exec();
             res.render('staff/mypage/index', {
                 owners: owners,
                 layout: layout
@@ -169,12 +172,14 @@ function search(req, res, next) {
         if (watcherName !== null) {
             conditions.push({ watcher_name: watcherName });
         }
+        debug('searching reservations...', conditions);
         const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
         try {
             // 総数検索
             const count = yield reservationRepo.reservationModel.count({
                 $and: conditions
             }).exec();
+            debug('reservation count:', count);
             // 2017/11/14 データ検索、切り取り、ソートの順を変更
             // データ検索
             // const reservations = <any[]>await Models.Reservation.find({ $and: conditions })

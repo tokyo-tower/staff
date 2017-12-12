@@ -18,7 +18,7 @@ import * as favicon from 'serve-favicon';
 import * as _ from 'underscore';
 
 import basicAuth from './middlewares/basicAuth';
-import benchmarks from './middlewares/benchmarks';
+// import benchmarks from './middlewares/benchmarks';
 import errorHandler from './middlewares/errorHandler';
 import notFoundHandler from './middlewares/notFoundHandler';
 import session from './middlewares/session';
@@ -27,11 +27,13 @@ import setLocals from './middlewares/setLocals';
 import router from './routes/router';
 import staffRouter from './routes/staff';
 
+import mongooseConnectionOptions from '../mongooseConnectionOptions';
+
 const app = express();
 
 app.use(partials()); // レイアウト&パーシャルサポート
 
-app.use(benchmarks); // ベンチマーク的な
+// app.use(benchmarks); // ベンチマーク的な
 app.use(session); // セッション
 app.use(basicAuth); // ベーシック認証
 
@@ -103,17 +105,6 @@ app.use(notFoundHandler);
 // error handlers
 app.use(errorHandler);
 
-/*
- * Mongoose by default sets the auto_reconnect option to true.
- * We recommend setting socket options at both the server and replica set level.
- * We recommend a 30 second connection timeout because it allows for
- * plenty of time in most operating environments.
- */
-ttts.mongoose.connect(
-    <string>process.env.MONGOLAB_URI,
-    {
-        useMongoClient: true
-    }
-);
+ttts.mongoose.connect(<string>process.env.MONGOLAB_URI, mongooseConnectionOptions);
 
 export = app;
