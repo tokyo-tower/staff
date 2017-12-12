@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * 運行・オンライン販売停止一覧コントローラー
+ * @namespace controller/staff/suspensionList
+ */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -8,12 +12,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * 運行・オンライン販売停止一覧コントローラー
- *
- * @namespace controller/staff/suspensionList
- */
-const ttts_domain_1 = require("@motionpicture/ttts-domain");
+const ttts = require("@motionpicture/ttts-domain");
 const moment = require("moment");
 const _ = require("underscore");
 const suspensionCommon = require("./suspensionCommon");
@@ -78,7 +77,7 @@ function search(req, res, next) {
         const refundStatus = getValue(req.query.refund_status);
         // 検索条件を作成
         const conditions = [];
-        conditions.push({ 'ttts_extension.online_sales_status': ttts_domain_1.PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED });
+        conditions.push({ 'ttts_extension.online_sales_status': ttts.PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED });
         // 販売停止処理日
         if (day1 !== null || day2 !== null) {
             conditions.push({ 'ttts_extension.online_sales_update_at': getConditionsFromTo(day1, day2, true) });
@@ -149,7 +148,6 @@ function getConditionsFromTo(value1, value2, convert = false) {
 }
 /**
  * パフォーマンス情報取得
- *
  * @param {any} conditions
  * @param {number} limit
  * @param {number} page
@@ -157,7 +155,8 @@ function getConditionsFromTo(value1, value2, convert = false) {
  */
 function getPerformances(conditions, limit, page) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield ttts_domain_1.Models.Performance
+        const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
+        return performanceRepo.performanceModel
             .find({ $and: conditions })
             .sort({
             day: -1,
@@ -170,24 +169,24 @@ function getPerformances(conditions, limit, page) {
 }
 /**
  * 予約情報取得
- *
  * @param {any} conditions
  * @param {any} performances
  * @return {any}
  */
 function getResevations(conditions, performances) {
     return __awaiter(this, void 0, void 0, function* () {
+        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
         const info = { dicReservations: {} };
         // 予約情報取得
         // { performanceId : [reservation1,reservationn] }
-        conditions.status = ttts_domain_1.ReservationUtil.STATUS_RESERVED;
-        conditions.purchaser_group = ttts_domain_1.ReservationUtil.PURCHASER_GROUP_CUSTOMER;
+        conditions.status = ttts.factory.reservationStatusType.ReservationConfirmed;
+        conditions.purchaser_group = ttts.ReservationUtil.PURCHASER_GROUP_CUSTOMER;
         const dicReservations = {};
         const promises = performances.map((performance) => __awaiter(this, void 0, void 0, function* () {
             // パフォーマンスごとに予約情報取得
             const key = performance._id.toString();
             conditions.performance = key;
-            dicReservations[key] = yield ttts_domain_1.Models.Reservation.find(conditions).exec();
+            dicReservations[key] = yield reservationRepo.reservationModel.find(conditions).exec();
         }));
         yield Promise.all(promises);
         info.dicReservations = dicReservations;
@@ -297,14 +296,15 @@ exports.refundProcess = refundProcess;
 function updateRefundStatus(performanceId, staffUser) {
     return __awaiter(this, void 0, void 0, function* () {
         // 返金対象予約情報取得(入塔記録のない、未指示データ)
-        const info = yield suspensionCommon.getTargetReservationsForRefund([performanceId], ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED, false);
+        const info = yield suspensionCommon.getTargetReservationsForRefund([performanceId], ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED, false);
         //対象予約(checkinsのない購入番号)の返金ステータスを更新する。
         const now = moment().format('YYYY/MM/DD HH:mm:ss');
-        yield ttts_domain_1.Models.Reservation.update({
+        // TODO 実装
+        yield ttts.Models.Reservation.update({
             _id: { $in: info.targrtIds }
         }, {
             $set: {
-                'performance_ttts_extension.refund_status': ttts_domain_1.PerformanceUtil.REFUND_STATUS.INSTRUCTED,
+                'performance_ttts_extension.refund_status': ttts.PerformanceUtil.REFUND_STATUS.INSTRUCTED,
                 'performance_ttts_extension.refund_update_user': staffUser,
                 'performance_ttts_extension.refund_update_at': now
             }
@@ -312,11 +312,12 @@ function updateRefundStatus(performanceId, staffUser) {
             multi: true
         }).exec();
         // パフォーマンス更新
-        yield ttts_domain_1.Models.Performance.findOneAndUpdate({
+        const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
+        yield performanceRepo.performanceModel.findOneAndUpdate({
             _id: performanceId
         }, {
             $set: {
-                'ttts_extension.refund_status': ttts_domain_1.PerformanceUtil.REFUND_STATUS.INSTRUCTED,
+                'ttts_extension.refund_status': ttts.PerformanceUtil.REFUND_STATUS.INSTRUCTED,
                 'ttts_extension.refund_update_user': staffUser,
                 'ttts_extension.refund_update_at': now
             }

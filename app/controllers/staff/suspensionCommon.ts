@@ -3,7 +3,7 @@
  *
  * @namespace controller/staff/suspensionSetting
  */
-import { Models, PerformanceUtil, ReservationUtil } from '@motionpicture/ttts-domain';
+import * as ttts from '@motionpicture/ttts-domain';
 import * as numeral from 'numeral';
 
 /**
@@ -22,15 +22,15 @@ import * as numeral from 'numeral';
  * @param {string} performanceIds
  * @return {any}
  */
-export async function getTargetReservationsForRefund(performanceIds: string[],
-                                                     refundStatus: string,
-                                                     allFields: boolean): Promise<any> {
+export async function getTargetReservationsForRefund(performanceIds: string[], refundStatus: string, allFields: boolean): Promise<any> {
+    const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
     let info: any = null;
     // 検索条件セット([指定パフォーマンス]かつ[一般予約]かつ[予約済])
     const conditions: any = {
-        purchaser_group: ReservationUtil.PURCHASER_GROUP_CUSTOMER,
-        status: { $in: [ReservationUtil.STATUS_RESERVED,
-                        ReservationUtil.STATUS_ON_KEPT_FOR_SECURE_EXTRA]},
+        purchaser_group: ttts.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
+        status: {
+            $in: [ttts.factory.reservationStatusType.ReservationConfirmed, ttts.factory.reservationStatusType.ReservationSecuredExtra]
+        },
         performance: { $in: performanceIds }
     };
     // 返金ステータス条件セット
@@ -41,7 +41,7 @@ export async function getTargetReservationsForRefund(performanceIds: string[],
     const fields: string = allFields ? '' : '_id performance_day payment_no checkins performance_ttts_extension';
 
     // パフォーマンスに紐づく予約情報取得
-    const reservations = <any[]>await Models.Reservation.find(
+    const reservations = <any[]>await reservationRepo.reservationModel.find(
         conditions,
         fields
     ).exec();
@@ -52,13 +52,15 @@ export async function getTargetReservationsForRefund(performanceIds: string[],
     reservations.map((reservation: any) => {
         // 入塔済情報 [{performance_day:'20171201', payment_no:'12345'}]
         if (reservation.checkins.length > 0) {
-            arrivedInfos.push({ performance_day: reservation.performance_day,
-                                payment_no: reservation.payment_no});
+            arrivedInfos.push({
+                performance_day: reservation.performance_day,
+                payment_no: reservation.payment_no
+            });
         }
         // 返金済情報 [{'20171201_12345': [r1,r2,,,rn]}]
-        const key : string = `${reservation.performance_day}_${reservation.payment_no}`;
+        const key: string = `${reservation.performance_day}_${reservation.payment_no}`;
         // 返金済の時
-        if (reservation.performance_ttts_extension.refund_status === PerformanceUtil.REFUND_STATUS.COMPLETE) {
+        if (reservation.performance_ttts_extension.refund_status === ttts.PerformanceUtil.REFUND_STATUS.COMPLETE) {
             if (refundedInfo.hasOwnProperty(key) === false) {
                 refundedInfo[key] = [];
             }
@@ -71,9 +73,10 @@ export async function getTargetReservationsForRefund(performanceIds: string[],
         for (const arrivedInfo of arrivedInfos) {
             if (arrivedInfo.performance_day === reservation.performance_day &&
                 arrivedInfo.payment_no === reservation.payment_no) {
-                    return true;
+                return true;
             }
         }
+
         return false;
     };
 
@@ -85,7 +88,7 @@ export async function getTargetReservationsForRefund(performanceIds: string[],
         if (isArrived(reservation) === false) {
             ids.push(reservation._id);
             // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
-            const key : string = `${reservation.performance_day}_${reservation.payment_no}`;
+            const key: string = `${reservation.performance_day}_${reservation.payment_no}`;
             if (targrtInfo.hasOwnProperty(key) === false) {
                 targrtInfo[key] = [];
             }
@@ -124,13 +127,11 @@ export interface IEmailQueue {
     };
     status: string;
 }
-export function getTicketInfo(reservations: any[],
-                              leaf : string,
-                              locale: string): string[] {
+export function getTicketInfo(reservations: any[], leaf: string, locale: string): string[] {
     // 券種ごとに合計枚数算出
     const keyName: string = 'ticket_type';
     const ticketInfos: {} = {};
-    for ( const reservation of reservations) {
+    for (const reservation of reservations) {
         // チケットタイプセット
         const dataValue = reservation[keyName];
         // チケットタイプごとにチケット情報セット
