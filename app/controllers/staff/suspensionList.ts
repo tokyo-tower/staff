@@ -82,7 +82,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
     }
     // 返金ステータス
     if (refundStatus !== null) {
-        conditions.push({'ttts_extension.refund_status': refundStatus});
+        conditions.push({ 'ttts_extension.refund_status': refundStatus });
     }
 
     // 予約情報
@@ -298,6 +298,7 @@ async function updateRefundStatus(performanceId: string, staffUser: string): Pro
 
     //対象予約(checkinsのない購入番号)の返金ステータスを更新する。
     const now = moment().format('YYYY/MM/DD HH:mm:ss');
+    // tslint:disable-next-line:no-suspicious-comment
     // TODO 実装
     await (<any>ttts.Models).Reservation.update(
         {

@@ -18,18 +18,21 @@ export default (req: Request, res: Response, next: NextFunction) => {
         process.env.NODE_ENV === 'test4gmo' ||
         process.env.NODE_ENV === 'prod4gmo') {
         next();
+
         return;
     }
 
     // SendGridイベント通知に対してはオープンにする
     if (req.originalUrl === '/sendGrid/event/notify') {
         next();
+
         return;
     }
 
     const user = basicAuth(req);
     if (user !== undefined && user.name === BASIC_AUTH_NAME && user.pass === BASIC_AUTH_PASS) {
         next();
+
         return;
     }
 
