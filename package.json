@@ -94,7 +94,8 @@
   "repository": {},
   "scripts": {
     "build": "tsc",
-    "check": "tslint --type-check --project tsconfig.json -c tslint.json index.ts app/**/*.ts && nsp check",
+    "check": "npm run tslint && nsp check",
+    "tslint": "tslint --project tsconfig.json -c tslint.json index.ts app/**/*.ts",
     "snyk": "snyk auth && snyk test --ignore-policy",
     "clean": "rimraf app/**/*.js index.js npm-debug.log* docs/*",
     "css": "gulp",

@@ -176,7 +176,7 @@ async function checkFixSeatsAndTickets(reservationModel: ReserveSessionModel, re
             const choiceInfo: IChoiceInfo = {
                 ticket_type: choice.ticket_type,
                 ticketCount: 1,
-                watcher_name: (choice.watcher_name) ? choice.watcher_name : '',
+                watcher_name: (typeof choice.watcher_name === 'string') ? choice.watcher_name : '',
                 choicesExtra: [],
                 updated: false
             };
@@ -268,6 +268,7 @@ export async function processFixProfile(reservationModel: ReserveSessionModel, r
     }
 
     // 購入情報を保存
+    // tslint:disable-next-line:no-suspicious-comment
     // TODO factoryに決済方法を定義
     reservationModel.paymentMethod = req.body.paymentMethod;
 
