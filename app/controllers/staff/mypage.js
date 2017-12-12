@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * 内部関係者マイページコントローラー
+ * @namespace controller/staff/mypage
+ */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -8,14 +12,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * 内部関係者マイページコントローラー
- *
- * @namespace controller/staff/mypage
- */
-//, ScreenUtil
-const ttts_domain_1 = require("@motionpicture/ttts-domain");
+const ttts = require("@motionpicture/ttts-domain");
+const createDebug = require("debug");
 const _ = require("underscore");
+const debug = createDebug('ttts-staff:controller:staff:mypage');
 const DEFAULT_RADIX = 10;
 const layout = 'layouts/staff/layout';
 /**
@@ -25,7 +25,8 @@ const layout = 'layouts/staff/layout';
 function index(__, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const owners = yield ttts_domain_1.Models.Owner.find({}, '_id name', { sort: { _id: 1 } }).exec();
+            const ownerRepo = new ttts.repository.Owner(ttts.mongoose.connection);
+            const owners = yield ownerRepo.ownerModel.find({}, '_id name', { sort: { _id: 1 } }).exec();
             res.render('staff/mypage/index', {
                 owners: owners,
                 layout: layout
@@ -39,10 +40,8 @@ function index(__, res, next) {
 exports.index = index;
 /**
  * マイページ予約検索
- *
  */
-// tslint:disable-next-line:max-func-body-length
-// tslint:disable-next-line:cyclomatic-complexity
+// tslint:disable-next-line:cyclomatic-complexity max-func-body-length
 function search(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (req.staffUser === undefined) {
@@ -103,22 +102,12 @@ function search(req, res, next) {
         // 管理者の場合、内部関係者の予約全て&確保中
         if (req.staffUser.get('is_admin') === true) {
             conditions.push({
-                $or: [
-                    {
-                        //purchaser_group: ReservationUtil.PURCHASER_GROUP_STAFF,
-                        status: ttts_domain_1.ReservationUtil.STATUS_RESERVED
-                    },
-                    {
-                        status: ttts_domain_1.ReservationUtil.STATUS_KEPT_BY_TTTS
-                    }
-                ]
+                status: ttts.factory.reservationStatusType.ReservationConfirmed
             });
         }
         else {
             conditions.push({
-                //purchaser_group: ReservationUtil.PURCHASER_GROUP_STAFF,
-                //owner: req.staffUser.get('_id'),
-                status: ttts_domain_1.ReservationUtil.STATUS_RESERVED
+                status: ttts.factory.reservationStatusType.ReservationConfirmed
             });
         }
         // 来塔日
@@ -143,7 +132,7 @@ function search(req, res, next) {
         // 購入番号
         if (paymentNo !== null) {
             // remove space characters
-            paymentNo = ttts_domain_1.CommonUtil.toHalfWidth(paymentNo.replace(/\s/g, ''));
+            paymentNo = ttts.CommonUtil.toHalfWidth(paymentNo.replace(/\s/g, ''));
             conditions.push({ payment_no: { $regex: `${paymentNo}` } });
         }
         // アカウント
@@ -174,18 +163,23 @@ function search(req, res, next) {
         // 電話番号
         if (purchaserTel !== null) {
             //conditions.push({ purchaser_tel: purchaserTel });
-            conditions.push({ $or: [{ purchaser_international_tel: purchaserTel },
-                    { purchaser_tel: purchaserTel }] });
+            conditions.push({
+                $or: [{ purchaser_international_tel: purchaserTel },
+                    { purchaser_tel: purchaserTel }]
+            });
         }
         // メモ
         if (watcherName !== null) {
             conditions.push({ watcher_name: watcherName });
         }
+        debug('searching reservations...', conditions);
+        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
         try {
             // 総数検索
-            const count = yield ttts_domain_1.Models.Reservation.count({
+            const count = yield reservationRepo.reservationModel.count({
                 $and: conditions
             }).exec();
+            debug('reservation count:', count);
             // 2017/11/14 データ検索、切り取り、ソートの順を変更
             // データ検索
             // const reservations = <any[]>await Models.Reservation.find({ $and: conditions })
@@ -216,8 +210,7 @@ function search(req, res, next) {
             //     return ScreenUtil.sortBySeatCode(a.seat_code, b.seat_code);
             // });
             // データ検索(検索→ソート→指定ページ分切取り)
-            const reservations = yield ttts_domain_1.Models.Reservation
-                .find({ $and: conditions })
+            const reservations = yield reservationRepo.reservationModel.find({ $and: conditions })
                 .sort({
                 performance_day: 1,
                 performance_start_time: 1,
@@ -299,12 +292,13 @@ function updateWatcherName(req, res, next) {
         const watcherName = req.body.watcherName;
         const condition = {
             _id: reservationId,
-            status: ttts_domain_1.ReservationUtil.STATUS_RESERVED
+            status: ttts.factory.reservationStatusType.ReservationConfirmed
         };
         // 自分の予約のみ
         condition.owner = req.staffUser.get('_id');
+        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
         try {
-            const reservation = yield ttts_domain_1.Models.Reservation.findOneAndUpdate(condition, {
+            const reservation = yield reservationRepo.reservationModel.findOneAndUpdate(condition, {
                 watcher_name: watcherName,
                 watcher_name_updated_at: Date.now(),
                 owner_signature: req.staffUser.get('signature')
@@ -333,60 +327,3 @@ function updateWatcherName(req, res, next) {
     });
 }
 exports.updateWatcherName = updateWatcherName;
-/**
- * 座席開放
- */
-function release(req, res, next) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (req.method === 'POST') {
-            const day = req.body.day;
-            if (day === undefined || day === '') {
-                res.json({
-                    success: false,
-                    message: req.__('Message.UnexpectedError')
-                });
-                return;
-            }
-            try {
-                yield ttts_domain_1.Models.Reservation.remove({
-                    performance_day: day,
-                    status: ttts_domain_1.ReservationUtil.STATUS_KEPT_BY_TTTS
-                }).exec();
-                res.json({
-                    success: true,
-                    message: null
-                });
-            }
-            catch (error) {
-                res.json({
-                    success: false,
-                    message: req.__('Message.UnexpectedError')
-                });
-            }
-        }
-        else {
-            try {
-                // 開放座席情報取得
-                const reservations = yield ttts_domain_1.Models.Reservation.find({
-                    status: ttts_domain_1.ReservationUtil.STATUS_KEPT_BY_TTTS
-                }, 'status seat_code performance_day').exec();
-                // 日付ごとに
-                const reservationsByDay = {};
-                reservations.forEach((reservation) => {
-                    if (!reservationsByDay.hasOwnProperty(reservation.get('performance_day'))) {
-                        reservationsByDay[reservation.get('performance_day')] = [];
-                    }
-                    reservationsByDay[reservation.get('performance_day')].push(reservation);
-                });
-                res.render('staff/mypage/release', {
-                    reservationsByDay: reservationsByDay,
-                    layout: layout
-                });
-            }
-            catch (error) {
-                next(new Error(req.__('Message.UnexpectedError')));
-            }
-        }
-    });
-}
-exports.release = release;

@@ -13,8 +13,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *
  * @namespace controller/staff/cancel
  */
-const ttts_domain_1 = require("@motionpicture/ttts-domain");
-const ttts_domain_2 = require("@motionpicture/ttts-domain");
+const ttts = require("@motionpicture/ttts-domain");
+const createDebug = require("debug");
+const debug = createDebug('ttts-staff:controller:staff:cancel');
 /**
  * キャンセル実行api
  *
@@ -66,68 +67,56 @@ function execute(req, res, next) {
 exports.execute = execute;
 /**
  * キャンセル処理(idから)
- *
  * @param {string} reservationId
  * @return {Promise<boolean>}
  */
 function cancelById(reservationId) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
+            const stockRepo = new ttts.repository.Stock(ttts.mongoose.connection);
             // idから予約データ取得
-            const reservation = yield ttts_domain_1.Models.Reservation.findById(reservationId).exec();
-            // seat_code_baseから本体分+余分確保分チケットを取得
-            const conditions = {
-                performance: reservation.performance,
-                performance_day: reservation.performance_day
-            };
-            conditions['reservation_ttts_extension.seat_code_base'] = reservation.seat_code;
-            // 同じseat_code_baseのチケット一式を'予約可能'に更新
-            yield ttts_domain_1.Models.Reservation.update(conditions, {
-                $set: { status: ttts_domain_2.ReservationUtil.STATUS_AVAILABLE },
-                $unset: getUnsetFields(reservation._doc)
-            }, {
-                multi: true
+            const reservation = yield reservationRepo.reservationModel.findOne({
+                _id: reservationId,
+                status: ttts.factory.reservationStatusType.ReservationConfirmed
+            }).exec().then((doc) => {
+                if (doc === null) {
+                    throw new Error('Reservation not found.');
+                }
+                return doc.toObject();
+            });
+            // 同じseat_code_baseのチケット一式を予約キャンセル(車椅子予約の場合は、システムホールドのデータもキャンセルする必要があるので)
+            const cancelingReservations = yield reservationRepo.reservationModel.find({
+                performance_day: reservation.performance_day,
+                payment_no: reservation.payment_no,
+                'reservation_ttts_extension.seat_code_base': reservation.seat_code
             }).exec();
-            // 2017/11 時間ごとの予約レコードのSTATUS初期化
-            if (reservation.ticket_ttts_extension !== ttts_domain_1.TicketTypeGroupUtil.TICKET_TYPE_CATEGORY_NORMAL) {
-                yield ttts_domain_1.Models.ReservationPerHour.findOneAndUpdate({ reservation_id: reservationId }, {
-                    $set: { status: ttts_domain_2.ReservationUtil.STATUS_AVAILABLE },
-                    $unset: { expired_at: 1, reservation_id: 1 }
-                }, {
-                    new: true
-                }).exec();
-            }
+            debug('canceling...', cancelingReservations);
+            yield Promise.all(cancelingReservations.map((cancelingReservation) => __awaiter(this, void 0, void 0, function* () {
+                // 予約をキャンセル
+                yield reservationRepo.reservationModel.findByIdAndUpdate(cancelingReservation._id, { status: ttts.factory.reservationStatusType.ReservationCancelled }).exec();
+                // 在庫を空きに(在庫IDに対して、元の状態に戻す)
+                yield stockRepo.stockModel.findByIdAndUpdate(cancelingReservation.get('stock'), { availability: cancelingReservation.get('stock_availability_before') }).exec();
+            })));
+            debug(cancelingReservations.length, 'reservation(s) canceled.');
+            // tslint:disable-next-line:no-suspicious-comment
+            // TODO 017/11 時間ごとの予約レコードのSTATUS初期化
+            // if (reservation.ticket_ttts_extension !== ttts.TicketTypeGroupUtil.TICKET_TYPE_CATEGORY_NORMAL) {
+            //     await ttts.Models.ReservationPerHour.findOneAndUpdate(
+            //         { reservation_id: reservationId },
+            //         {
+            //             $set: { status: ttts.factory.itemAvailability.InStock },
+            //             $unset: { expired_at: 1, reservation_id: 1 }
+            //         },
+            //         {
+            //             new: true
+            //         }
+            //     ).exec();
+            // }
         }
         catch (error) {
             return false;
         }
         return true;
     });
-}
-/**
- * 更新時削除フィールド取得
- *
- * @param {any} reservation
- * @return {any} unset
- */
-function getUnsetFields(reservation) {
-    const setFields = [
-        '_id',
-        'performance',
-        'seat_code',
-        'updated_at',
-        'checkins',
-        'performance_canceled',
-        'status',
-        '__v',
-        'created_at'
-    ];
-    const unset = {};
-    // セットフィールド以外は削除フィールドにセット
-    Object.getOwnPropertyNames(reservation).forEach((propertyName) => {
-        if (setFields.indexOf(propertyName) < 0) {
-            unset[propertyName] = 1;
-        }
-    });
-    return unset;
 }

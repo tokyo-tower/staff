@@ -3,11 +3,10 @@
  *
  * @namespace controller/staff/suspensionSetting
  */
-import { CommonUtil, EmailQueueUtil, Models, PerformanceUtil } from '@motionpicture/ttts-domain';
+import * as ttts from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import { NextFunction, Request, Response } from 'express';
 import * as moment from 'moment';
-import * as mongoose from 'mongoose';
 import * as suspensionCommon from './suspensionCommon';
 
 const SETTING_PATH: string = '/staff/suspension/setting';
@@ -21,6 +20,7 @@ export async function start(req: Request, res: Response, next: NextFunction): Pr
     // 期限指定
     if (moment() < moment(conf.get<string>('datetimes.reservation_start_staffs'))) {
         next(new Error(req.__('Message.OutOfTerm')));
+
         return;
     }
     try {
@@ -37,7 +37,7 @@ export async function start(req: Request, res: Response, next: NextFunction): Pr
 export async function performances(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         // token取得
-        const token: string = await CommonUtil.getToken(process.env.API_ENDPOINT);
+        const token: string = await ttts.CommonUtil.getToken(<string>process.env.API_ENDPOINT);
 
         if (req.method !== 'POST') {
             // 運行・オンライン販売停止設定画面表示
@@ -57,6 +57,7 @@ export async function performances(req: Request, res: Response, next: NextFuncti
 export async function execute(req: Request, res: Response, next: NextFunction): Promise<void> {
     if (req.staffUser === undefined) {
         next(new Error(req.__('Message.UnexpectedError')));
+
         return;
     }
     try {
@@ -70,13 +71,14 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
         const onlineStatus: string = req.body.onlineStatus;
         const evStatus: string = req.body.evStatus;
         const notice: string = req.body.notice;
-        const info: any =  await updateStatusByIds((<any>req).staffUser.username,
-                                                   performanceIds,
-                                                   onlineStatus,
-                                                   evStatus);
+        const info: any = await updateStatusByIds(
+            (<any>req).staffUser.username,
+            performanceIds,
+            onlineStatus,
+            evStatus);
 
         // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
-        if (evStatus === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
+        if (evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
             // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
             await createEmails(res, info.targrtInfo, notice);
         }
@@ -100,51 +102,54 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
  * @param {string} evStatus
  * @return {Promise<boolean>}
  */
-async function updateStatusByIds(staffUser: string,
-                                 performanceIds: string[],
-                                 onlineStatus: string,
-                                 evStatus: string) : Promise<any> {
+async function updateStatusByIds(
+    staffUser: string,
+    performanceIds: string[],
+    onlineStatus: string,
+    evStatus: string): Promise<any> {
     // パフォーマンスIDをObjectIdに変換
     const ids = performanceIds.map((id) => {
-        return new mongoose.Types.ObjectId(id);
+        return new ttts.mongoose.Types.ObjectId(id);
     });
     const now = moment().format('YYYY/MM/DD HH:mm:ss');
-    let info : any = {};
+    let info: any = {};
 
     // オンライン販売停止の時、予約更新
-    if (onlineStatus === PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED) {
+    if (onlineStatus === ttts.PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED) {
         // 返金対象予約情報取得(入塔記録のないもの)
         info = await suspensionCommon.getTargetReservationsForRefund(
             performanceIds,
-            PerformanceUtil.REFUND_STATUS.NONE,
-            evStatus === PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
+            ttts.PerformanceUtil.REFUND_STATUS.NONE,
+            evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
 
         // 予約情報返金ステータスを未指示に更新
         if (info.targrtIds.length > 0) {
-            await Models.Reservation.update(
+            const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
+            await reservationRepo.reservationModel.update(
                 {
-                    _id: { $in: info.targrtIds}
+                    _id: { $in: info.targrtIds }
                 },
                 {
                     $set: {
-                        'performance_ttts_extension.refund_status': PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+                        'performance_ttts_extension.refund_status': ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
                         'performance_ttts_extension.refund_update_user': staffUser,
                         'performance_ttts_extension.refund_update_at': now
                     }
                 },
                 {
                     multi: true
-                   }
+                }
             ).exec();
         }
     }
 
     // 販売停止か再開かで返金ステータスセットorクリア決定
-    const refundStatus: string = onlineStatus === PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED ?
-                                 PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED :
-                                 PerformanceUtil.REFUND_STATUS.NONE;
+    const refundStatus: string = onlineStatus === ttts.PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED ?
+        ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED :
+        ttts.PerformanceUtil.REFUND_STATUS.NONE;
     // パフォーマンス更新
-    await Models.Performance.update(
+    const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
+    await performanceRepo.performanceModel.update(
         {
             _id: { $in: ids }
         },
@@ -176,16 +181,17 @@ async function updateStatusByIds(staffUser: string,
  * @param {any} notice
  * @return {Promise<void>}
  */
-async function createEmails(res: Response,
-                            targrtInfo: any,
-                            notice: string) : Promise<void> {
+async function createEmails(
+    res: Response,
+    targrtInfo: any,
+    notice: string): Promise<void> {
     // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
     if (Object.keys(targrtInfo).length === 0) {
 
         return;
     }
     // 購入単位ごとにメール作成
-    const promises = (Object.keys(targrtInfo).map(async(key) => {
+    const promises = (Object.keys(targrtInfo).map(async (key) => {
         if (targrtInfo[key].length > 0) {
             await createEmail(res, targrtInfo[key], notice);
         }
@@ -202,9 +208,10 @@ async function createEmails(res: Response,
  * @param {any} notice
  * @return {Promise<void>}
  */
-async function createEmail(res: Response,
-                           reservations: any[],
-                           notice: string) : Promise<void> {
+async function createEmail(
+    res: Response,
+    reservations: any[],
+    notice: string): Promise<void> {
 
     const reservation = reservations[0];
     // タイトル編集
@@ -213,7 +220,7 @@ async function createEmail(res: Response,
     // 東京タワー TOP DECK エレベータ運行停止のお知らせ
     const titleEmail = res.__('Email.TitleSus');
     //トウキョウ タロウ 様
-    const purchaserName: string = `${res.__('Mr{{name}}', {name: reservation.purchaser_name[res.locale]})}`;
+    const purchaserName: string = `${res.__('Mr{{name}}', { name: reservation.purchaser_name[res.locale] })}`;
 
     // 購入チケット情報
     const paymentTicketInfos: string[] = [];
@@ -249,9 +256,9 @@ async function createEmail(res: Response,
             mimetype: 'text/plain',
             text: content
         },
-        status: EmailQueueUtil.STATUS_UNSENT
+        status: ttts.EmailQueueUtil.STATUS_UNSENT
     };
 
     // メール作成
-    await Models.EmailQueue.create(emailQueue);
+    await ttts.Models.EmailQueue.create(emailQueue);
 }

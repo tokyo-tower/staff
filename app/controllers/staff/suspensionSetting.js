@@ -13,10 +13,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
  *
  * @namespace controller/staff/suspensionSetting
  */
-const ttts_domain_1 = require("@motionpicture/ttts-domain");
+const ttts = require("@motionpicture/ttts-domain");
 const conf = require("config");
 const moment = require("moment");
-const mongoose = require("mongoose");
 const suspensionCommon = require("./suspensionCommon");
 const SETTING_PATH = '/staff/suspension/setting';
 const VIEW_PATH = 'staff/suspension';
@@ -49,7 +48,7 @@ function performances(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // token取得
-            const token = yield ttts_domain_1.CommonUtil.getToken(process.env.API_ENDPOINT);
+            const token = yield ttts.CommonUtil.getToken(process.env.API_ENDPOINT);
             if (req.method !== 'POST') {
                 // 運行・オンライン販売停止設定画面表示
                 res.render(`${VIEW_PATH}/performances`, {
@@ -86,7 +85,7 @@ function execute(req, res, next) {
             const notice = req.body.notice;
             const info = yield updateStatusByIds(req.staffUser.username, performanceIds, onlineStatus, evStatus);
             // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
-            if (evStatus === ttts_domain_1.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
+            if (evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
                 // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
                 yield createEmails(res, info.targrtInfo, notice);
             }
@@ -117,21 +116,22 @@ function updateStatusByIds(staffUser, performanceIds, onlineStatus, evStatus) {
     return __awaiter(this, void 0, void 0, function* () {
         // パフォーマンスIDをObjectIdに変換
         const ids = performanceIds.map((id) => {
-            return new mongoose.Types.ObjectId(id);
+            return new ttts.mongoose.Types.ObjectId(id);
         });
         const now = moment().format('YYYY/MM/DD HH:mm:ss');
         let info = {};
         // オンライン販売停止の時、予約更新
-        if (onlineStatus === ttts_domain_1.PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED) {
+        if (onlineStatus === ttts.PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED) {
             // 返金対象予約情報取得(入塔記録のないもの)
-            info = yield suspensionCommon.getTargetReservationsForRefund(performanceIds, ttts_domain_1.PerformanceUtil.REFUND_STATUS.NONE, evStatus === ttts_domain_1.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
+            info = yield suspensionCommon.getTargetReservationsForRefund(performanceIds, ttts.PerformanceUtil.REFUND_STATUS.NONE, evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
             // 予約情報返金ステータスを未指示に更新
             if (info.targrtIds.length > 0) {
-                yield ttts_domain_1.Models.Reservation.update({
+                const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
+                yield reservationRepo.reservationModel.update({
                     _id: { $in: info.targrtIds }
                 }, {
                     $set: {
-                        'performance_ttts_extension.refund_status': ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+                        'performance_ttts_extension.refund_status': ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
                         'performance_ttts_extension.refund_update_user': staffUser,
                         'performance_ttts_extension.refund_update_at': now
                     }
@@ -141,11 +141,12 @@ function updateStatusByIds(staffUser, performanceIds, onlineStatus, evStatus) {
             }
         }
         // 販売停止か再開かで返金ステータスセットorクリア決定
-        const refundStatus = onlineStatus === ttts_domain_1.PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED ?
-            ttts_domain_1.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED :
-            ttts_domain_1.PerformanceUtil.REFUND_STATUS.NONE;
+        const refundStatus = onlineStatus === ttts.PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED ?
+            ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED :
+            ttts.PerformanceUtil.REFUND_STATUS.NONE;
         // パフォーマンス更新
-        yield ttts_domain_1.Models.Performance.update({
+        const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
+        yield performanceRepo.performanceModel.update({
             _id: { $in: ids }
         }, {
             $set: {
@@ -238,9 +239,9 @@ function createEmail(res, reservations, notice) {
                 mimetype: 'text/plain',
                 text: content
             },
-            status: ttts_domain_1.EmailQueueUtil.STATUS_UNSENT
+            status: ttts.EmailQueueUtil.STATUS_UNSENT
         };
         // メール作成
-        yield ttts_domain_1.Models.EmailQueue.create(emailQueue);
+        yield ttts.Models.EmailQueue.create(emailQueue);
     });
 }

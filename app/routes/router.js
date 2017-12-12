@@ -8,7 +8,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const conf = require("config");
 const express_1 = require("express");
 const languageController = require("../controllers/language");
-const reserveController = require("../controllers/reserve");
 // 本体サイトのトップページの言語別URL
 const topUrlByLocale = conf.get('official_url_top_by_locale');
 // 本体サイトのチケット案内ページの言語別URL
@@ -22,8 +21,6 @@ const contactUrlByLocale = conf.get('official_url_contact_by_locale');
 const router = express_1.Router();
 // 言語
 router.get('/language/update/:locale', languageController.update);
-router.get('/reserve/getSeatProperties', reserveController.getSeatProperties);
-router.get('/reserve/:performanceId/unavailableSeatCodes', reserveController.getUnavailableSeatCodes);
 // 利用規約ページ
 router.get('/terms/', (req, res) => {
     res.locals.req = req;
