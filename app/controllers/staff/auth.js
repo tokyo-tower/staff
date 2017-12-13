@@ -120,8 +120,15 @@ function auth(req, res) {
             if (req.session === undefined) {
                 throw new Error('session undefined.');
             }
-            //const token: string = await getToken();
-            const token = yield ttts.CommonUtil.getToken(process.env.API_ENDPOINT);
+            const token = yield ttts.CommonUtil.getToken({
+                authorizeServerDomain: process.env.API_AUTHORIZE_SERVER_DOMAIN,
+                clientId: process.env.API_CLIENT_ID,
+                clientSecret: process.env.API_CLIENT_SECRET,
+                scopes: [
+                    `${process.env.API_RESOURECE_SERVER_IDENTIFIER}/performances.read-only`
+                ],
+                state: ''
+            });
             res.json({
                 success: true,
                 token: token,

@@ -47,8 +47,15 @@ exports.start = start;
 function performances(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            // token取得
-            const token = yield ttts.CommonUtil.getToken(process.env.API_ENDPOINT);
+            const token = yield ttts.CommonUtil.getToken({
+                authorizeServerDomain: process.env.API_AUTHORIZE_SERVER_DOMAIN,
+                clientId: process.env.API_CLIENT_ID,
+                clientSecret: process.env.API_CLIENT_SECRET,
+                scopes: [
+                    `${process.env.API_RESOURECE_SERVER_IDENTIFIER}/performances.read-only`
+                ],
+                state: ''
+            });
             if (req.method !== 'POST') {
                 // 運行・オンライン販売停止設定画面表示
                 res.render(`${VIEW_PATH}/performances`, {

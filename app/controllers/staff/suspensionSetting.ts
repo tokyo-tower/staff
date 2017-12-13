@@ -36,8 +36,15 @@ export async function start(req: Request, res: Response, next: NextFunction): Pr
  */
 export async function performances(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        // token取得
-        const token: string = await ttts.CommonUtil.getToken(<string>process.env.API_ENDPOINT);
+        const token = await ttts.CommonUtil.getToken({
+            authorizeServerDomain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
+            clientId: <string>process.env.API_CLIENT_ID,
+            clientSecret: <string>process.env.API_CLIENT_SECRET,
+            scopes: [
+                `${<string>process.env.API_RESOURECE_SERVER_IDENTIFIER}/performances.read-only`
+            ],
+            state: ''
+        });
 
         if (req.method !== 'POST') {
             // 運行・オンライン販売停止設定画面表示
