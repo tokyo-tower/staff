@@ -213,8 +213,6 @@ function profile(req, res, next) {
             if (req.method === 'POST') {
                 try {
                     yield reserveBaseController.processFixProfile(reservationModel, req, res);
-                    // 予約情報確定
-                    yield reserveBaseController.processAllExceptConfirm(reservationModel, req);
                     reservationModel.save(req);
                     res.redirect('/staff/reserve/confirm');
                 }

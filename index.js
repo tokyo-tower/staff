@@ -49,16 +49,16 @@ function onError(error) {
         throw error;
     }
     const bind = typeof port === 'string'
-        ? 'Pipe ' + port
-        : 'Port ' + port.toString();
+        ? `Pipe ${port}`
+        : `Port ${port.toString()}`;
     // handle specific listen errors with friendly messages
     switch (error.code) {
         case 'EACCES':
-            console.error(bind + ' requires elevated privileges');
+            console.error(`${bind} requires elevated privileges`);
             process.exit(1);
             break;
         case 'EADDRINUSE':
-            console.error(bind + ' is already in use');
+            console.error(`${bind} is already in use`);
             process.exit(1);
             break;
         default:
@@ -71,9 +71,9 @@ function onError(error) {
 function onListening() {
     const addr = server.address();
     const bind = typeof addr === 'string'
-        ? 'pipe ' + addr
-        : 'port ' + addr.port.toString();
-    debug('Listening on ' + bind);
+        ? `pipe ${addr}`
+        : `port ${addr.port.toString()}`;
+    debug(`Listening on ${bind}`);
     const diff = process.hrtime(startTime);
     debug(`api server listening took ${diff[0]} seconds and ${diff[1]} nanoseconds.`);
 }

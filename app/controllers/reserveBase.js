@@ -136,7 +136,7 @@ function checkFixSeatsAndTickets(reservationModel, req) {
                 const choiceInfo = {
                     ticket_type: choice.ticket_type,
                     ticketCount: 1,
-                    watcher_name: (choice.watcher_name) ? choice.watcher_name : '',
+                    watcher_name: (typeof choice.watcher_name === 'string') ? choice.watcher_name : '',
                     choicesExtra: [],
                     updated: false
                 };
@@ -224,6 +224,7 @@ function processFixProfile(reservationModel, req, res) {
             throw new Error(req.__('Message.Invalid'));
         }
         // 購入情報を保存
+        // tslint:disable-next-line:no-suspicious-comment
         // TODO factoryに決済方法を定義
         reservationModel.paymentMethod = req.body.paymentMethod;
         // セッションに購入者情報格納
@@ -350,23 +351,12 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
         // 内部関係者の場合
         switch (reservationModel.purchaserGroup) {
             case ttts.ReservationUtil.PURCHASER_GROUP_STAFF:
-                // 2017/07/06
-                // //＠＠＠＠＠
-                // //reservationModel.ticketTypes = TicketTypeGroupUtil.getOne4staff();
-                // const staffTickets = TicketTypeGroupUtil.getOne4staff();
-                // // tslint:disable-next-line:no-empty
-                // if (staffTickets) {
-                // }
-                //---
-                //const staffTickets = TicketTypeGroupUtil.getOne4staff();
                 if (ticketTypeGroup !== null) {
                     reservationModel.ticketTypes = ticketTypeGroup.get('ticket_types');
                 }
                 break;
             default:
                 // 一般、当日窓口の場合
-                // 2017/06/19 upsate node+typesctipt
-                //reservationModel.ticketTypes = ticketTypeGroup.get('ticket_types');
                 if (ticketTypeGroup !== null) {
                     reservationModel.ticketTypes = ticketTypeGroup.get('ticket_types');
                 }
@@ -382,90 +372,11 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
         reservationModel.seatGradeCodesInScreen = reservationModel.performance.screen.sections[0].seats
             .map((seat) => seat.grade.code)
             .filter((seatCode, index, seatCodes) => seatCodes.indexOf(seatCode) === index);
-        // コンビニ決済はパフォーマンス上映の5日前まで
-        // tslint:disable-next-line:no-magic-numbers
-        // const day5DaysAgo = parseInt(moment().add(+5, 'days').format('YYYYMMDD'), DEFAULT_RADIX);
-        // if (parseInt(reservationModel.performance.day, DEFAULT_RADIX) < day5DaysAgo) {
-        //     if (reservationModel.paymentMethodChoices.indexOf(GMO.Util.PAY_TYPE_CVS) >= 0) {
-        //         reservationModel.paymentMethodChoices.splice(reservationModel.paymentMethodChoices.indexOf(GMO.Util.PAY_TYPE_CVS), 1);
-        //     }
-        // }
         // スクリーン座席表HTMLを保管(TTTS未使用)
         reservationModel.screenHtml = '';
     });
 }
 exports.processFixPerformance = processFixPerformance;
-/**
- * 確定以外の全情報を確定するプロセス
- */
-function processAllExceptConfirm(__, __2) {
-    return __awaiter(this, void 0, void 0, function* () {
-        /*
-        const commonUpdate: any = {
-        };
-    
-        switch (reservationModel.purchaserGroup) {
-            case ttts.ReservationUtil.PURCHASER_GROUP_STAFF:
-                commonUpdate.owner = (<Express.StaffUser>req.staffUser).get('_id');
-                commonUpdate.owner_username = (<Express.StaffUser>req.staffUser).get('username');
-                commonUpdate.owner_name = (<Express.StaffUser>req.staffUser).get('name');
-                commonUpdate.owner_email = (<Express.StaffUser>req.staffUser).get('email');
-                commonUpdate.owner_signature = (<Express.StaffUser>req.staffUser).get('signature');
-                commonUpdate.owner_group = (<Express.StaffUser>req.staffUser).get('group');
-    
-                commonUpdate.purchaser_last_name = '';
-                commonUpdate.purchaser_first_name = '';
-                commonUpdate.purchaser_email = '';
-                commonUpdate.purchaser_tel = '';
-                commonUpdate.purchaser_age = '';
-                commonUpdate.purchaser_address = '';
-                commonUpdate.purchaser_gender = '';
-                break;
-    
-            case ttts.ReservationUtil.PURCHASER_GROUP_WINDOW:
-                commonUpdate.owner = (<Express.WindowUser>req.windowUser).get('_id');
-                commonUpdate.owner_username = (<Express.WindowUser>req.windowUser).get('username');
-                commonUpdate.owner_name = (<Express.WindowUser>req.windowUser).get('name');
-                commonUpdate.owner_email = (<Express.WindowUser>req.windowUser).get('email');
-                commonUpdate.owner_signature = (<Express.WindowUser>req.windowUser).get('signature');
-                commonUpdate.owner_group = (<Express.WindowUser>req.windowUser).get('group');
-    
-                commonUpdate.purchaser_last_name = '';
-                commonUpdate.purchaser_first_name = '';
-                commonUpdate.purchaser_email = '';
-                commonUpdate.purchaser_tel = '';
-                commonUpdate.purchaser_age = '';
-                commonUpdate.purchaser_address = '';
-                commonUpdate.purchaser_gender = '';
-                break;
-    
-            default:
-                throw new Error(req.__('Message.UnexpectedError'));
-        }
-    
-        // 2017/07/08 特殊チケット対応
-        const seatCodesAll: string[] = Array.prototype.concat(reservationModel.seatCodes, reservationModel.seatCodesExtra);
-        // いったん全情報をDBに保存
-        await Promise.all(seatCodesAll.map(async (seatCode, index) => {
-            let update = reservationModel.seatCode2reservationDocument(seatCode);
-            // update = Object.assign(update, commonUpdate);
-            update = { ...update, ...commonUpdate };
-            (<any>update).payment_seat_index = index;
-            const reservation = await ttts.Models.Reservation.findByIdAndUpdate(
-                update._id,
-                update,
-                { new: true }
-            ).exec();
-    
-            // IDの予約ドキュメントが万が一なければ予期せぬエラー(基本的にありえないフローのはず)
-            if (reservation === null) {
-                throw new Error(req.__('Message.UnexpectedError'));
-            }
-        }));
-        */
-    });
-}
-exports.processAllExceptConfirm = processAllExceptConfirm;
 /**
  * 購入番号から全ての予約を完了にする
  *
@@ -480,46 +391,6 @@ function processFixReservations(reservationModel, res) {
             paymentMethod: reservationModel.paymentMethod
         });
         debug('transaction confirmed.', transaction);
-        // reservationsは非同期で作成される
-        /*
-        (<any>update).purchased_at = moment().valueOf();
-        (<any>update).status = ttts.ReservationUtil.STATUS_RESERVED;
-    
-        const conditions: any = {
-            performance_day: performanceDay,
-            payment_no: paymentNo,
-            status: ttts.ReservationUtil.STATUS_TEMPORARY
-        };
-        // 予約完了ステータスへ変更
-        await ttts.Models.Reservation.update(
-            conditions,
-            update,
-            { multi: true } // 必須！複数予約ドキュメントを一度に更新するため
-        ).exec();
-        // 2017/07/08 特殊チケット対応
-        // 特殊チケット一時予約を特殊チケット予約完了ステータスへ変更
-        conditions.status = ttts.ReservationUtil.STATUS_TEMPORARY_FOR_SECURE_EXTRA;
-        (<any>update).status = ttts.ReservationUtil.STATUS_ON_KEPT_FOR_SECURE_EXTRA;
-        await ttts.Models.Reservation.update(
-            conditions,
-            update,
-            { multi: true }
-        ).exec();
-    
-        // 2017/11 本体チケット予約情報取得
-        const reservations = getReservations(reservationModel);
-        await Promise.all(reservations.map(async (reservation) => {
-            // 2017/11 本体チケットかつ特殊(車椅子)チケットの時
-            if (reservation.ticket_ttts_extension.category !== ttts.TicketTypeGroupUtil.TICKET_TYPE_CATEGORY_NORMAL) {
-                // 時間ごとの予約情報更新('仮予約'を'予約'に変更)
-                await ttts.Models.ReservationPerHour.findOneAndUpdate(
-                    { reservation_id: reservation._id.toString() },
-                    { status: ttts.ReservationUtil.STATUS_RESERVED },
-                    { new: true }
-                ).exec();
-            }
-        }));
-        */
         try {
             const result = transaction.result;
             // 完了メールキュー追加(あれば更新日時を更新するだけ)
