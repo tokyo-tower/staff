@@ -55,33 +55,6 @@ export function terms(req: Request, res: Response, __: NextFunction): void {
 }
 
 /**
- * token取得(いずれはttts-domainへ移動)
- */
-// async function getToken(): Promise<any> {
-//     return new Promise((resolve, reject) => {
-//         request.post(`${process.env.API_ENDPOINT}oauth/token`, {
-//             body: {
-//                 grant_type: 'client_credentials',
-//                 client_id: 'motionpicture',
-//                 client_secret: 'motionpicture',
-//                 state: 'state123456789',
-//                 scopes: [
-//                     'performances.read-only'
-//                 ]
-//             },
-//             json: true
-//             },       (error, response, body) => {
-//             // tslint:disable-next-line:no-magic-numbers
-//             if (response.statusCode === 200) {
-//                 resolve(body);
-//             } else {
-//                 reject(error);
-//             }
-//         });
-//     });
-// }
-
-/**
  * スケジュール選択
  * @method performances
  * @returns {Promise<void>}
@@ -96,8 +69,15 @@ export async function performances(req: Request, res: Response, next: NextFuncti
             return;
         }
 
-        //const token: string = await getToken();
-        const token: string = await ttts.CommonUtil.getToken(<string>process.env.API_ENDPOINT);
+        const token = await ttts.CommonUtil.getToken({
+            authorizeServerDomain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
+            clientId: <string>process.env.API_CLIENT_ID,
+            clientSecret: <string>process.env.API_CLIENT_SECRET,
+            scopes: [
+                `${<string>process.env.API_RESOURECE_SERVER_IDENTIFIER}/performances.read-only`
+            ],
+            state: ''
+        });
         // tslint:disable-next-line:no-console
         // console.log('token=' + JSON.stringify(token));
         const maxDate = moment();

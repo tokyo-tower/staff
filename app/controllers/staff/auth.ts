@@ -126,8 +126,16 @@ export async function auth(req: Request, res: Response): Promise<void> {
         if (req.session === undefined) {
             throw new Error('session undefined.');
         }
-        //const token: string = await getToken();
-        const token: string = await ttts.CommonUtil.getToken(<string>process.env.API_ENDPOINT);
+
+        const token = await ttts.CommonUtil.getToken({
+            authorizeServerDomain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
+            clientId: <string>process.env.API_CLIENT_ID,
+            clientSecret: <string>process.env.API_CLIENT_SECRET,
+            scopes: [
+                `${<string>process.env.API_RESOURECE_SERVER_IDENTIFIER}/performances.read-only`
+            ],
+            state: ''
+        });
         res.json({
             success: true,
             token: token,
