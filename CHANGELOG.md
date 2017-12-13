@@ -7,7 +7,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 ### Changed
-- APIの認証情報をCognitoから取得するように変更。
 
 ### Deprecated
 
@@ -17,6 +16,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+
+## v3.0.2 - 2017-12-13
+### Changed
+- APIの認証情報をCognitoから取得するように変更。
 
 ## v3.0.1 - 2017-12-13
 ### Removed
