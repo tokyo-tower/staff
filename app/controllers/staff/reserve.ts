@@ -212,8 +212,7 @@ export async function profile(req: Request, res: Response, next: NextFunction): 
         if (req.method === 'POST') {
             try {
                 await reserveBaseController.processFixProfile(reservationModel, req, res);
-                // 予約情報確定
-                await reserveBaseController.processAllExceptConfirm(reservationModel, req);
+
                 reservationModel.save(req);
                 res.redirect('/staff/reserve/confirm');
             } catch (error) {

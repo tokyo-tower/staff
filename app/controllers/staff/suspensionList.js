@@ -299,6 +299,7 @@ function updateRefundStatus(performanceId, staffUser) {
         const info = yield suspensionCommon.getTargetReservationsForRefund([performanceId], ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED, false);
         //対象予約(checkinsのない購入番号)の返金ステータスを更新する。
         const now = moment().format('YYYY/MM/DD HH:mm:ss');
+        // tslint:disable-next-line:no-suspicious-comment
         // TODO 実装
         yield ttts.Models.Reservation.update({
             _id: { $in: info.targrtIds }
