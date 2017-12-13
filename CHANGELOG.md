@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Security
 
 
+## v3.0.1 - 2017-12-13
+### Removed
+- 不要なコードを削除。
+
 ## v3.0.0 - 2017-12-13
 ### Changed
 - ttts-domain@12.0.0で再実装。
