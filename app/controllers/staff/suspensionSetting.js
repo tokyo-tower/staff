@@ -134,8 +134,8 @@ function updateStatusByIds(staffUser, performanceIds, onlineStatus, evStatus) {
             ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED :
             ttts.PerformanceUtil.REFUND_STATUS.NONE;
         // 予約情報の各ステータス更新
+        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
         if (info.targrtIds.length > 0) {
-            const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
             yield reservationRepo.reservationModel.update({
                 _id: { $in: info.targrtIds }
             }, {
@@ -149,6 +149,23 @@ function updateStatusByIds(staffUser, performanceIds, onlineStatus, evStatus) {
                     'performance_ttts_extension.refund_status': refundStatus,
                     'performance_ttts_extension.refund_update_user': staffUser,
                     'performance_ttts_extension.refund_update_at': now
+                }
+            }, {
+                multi: true
+            }).exec();
+        }
+        // キャンセル情報の各ステータス更新
+        if (info.cancelledIds.length > 0) {
+            yield reservationRepo.reservationModel.update({
+                _id: { $in: info.cancelledIds }
+            }, {
+                $set: {
+                    'performance_ttts_extension.online_sales_status': onlineStatus,
+                    'performance_ttts_extension.online_sales_update_user': staffUser,
+                    'performance_ttts_extension.online_sales_update_at': now,
+                    'performance_ttts_extension.ev_service_status': evStatus,
+                    'performance_ttts_extension.ev_service_update_user': staffUser,
+                    'performance_ttts_extension.ev_service_update_at': now
                 }
             }, {
                 multi: true

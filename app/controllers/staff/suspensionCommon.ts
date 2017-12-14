@@ -13,10 +13,12 @@ import * as numeral from 'numeral';
  *  [同一購入単位に入塔記録のない]予約のid配列
  *
  *  info: {
- *     reservationIds: [id1,id2,,,idn]
- *     targrtInfos: [{performance_day:'20171201', payment_no:'67890'}]
+ *     targrtIds:    [id1,id2,,,idn]
+ *     cancelledIds: [id1,id2,,,idn]
+ *     targrtInfo:   {performance_day:'20171201', payment_no:'67890'}
  *     arrivedInfos: [{performance_day:'20171201', payment_no:'12345'}]
- *     refundedInfo: [{'20171201_12345': [r1,r2,,,rn]}]
+ *     refundedInfo: {'20171201_12345': [r1,r2,,,rn]}
+ *     cancelledInfo:{'20171201_12345': [r1,r2,,,rn]}
  * }
  *
  * @param {string} performanceIds
@@ -25,28 +27,16 @@ import * as numeral from 'numeral';
 export async function getTargetReservationsForRefund(performanceIds: string[],
                                                      refundStatus: string,
                                                      allFields: boolean): Promise<any> {
-    const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
-    let info: any = null;
-    // 検索条件セット([指定パフォーマンス]かつ[一般予約]かつ[予約済])
-    const conditions: any = {
-        purchaser_group: ttts.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
-        status: {
-            $in: [ttts.factory.reservationStatusType.ReservationConfirmed, ttts.factory.reservationStatusType.ReservationSecuredExtra]
-        },
-        performance: { $in: performanceIds }
-    };
-    // 返金ステータス条件セット
-    if (refundStatus !== '') {
-        conditions['performance_ttts_extension.refund_status'] = refundStatus;
-    }
-    // フィールドセット
-    const fields: string = allFields ? '' : '_id performance_day payment_no checkins performance_ttts_extension';
-
     // パフォーマンスに紐づく予約情報取得
-    const reservations = <any[]>await reservationRepo.reservationModel.find(
-        conditions,
-        fields
-    ).exec();
+    const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
+    const reservations = await getReservations(reservationRepo,
+                                               performanceIds,
+                                               refundStatus,
+                                               allFields);
+
+    // パフォーマンスに紐づくキャンセル情報取得
+    const reservationsCancel = await getReservationsCancel(reservationRepo,
+                                                           performanceIds);
 
     // 入塔済、返金済の予約情報セット
     const arrivedInfos: any[] = [];
@@ -82,31 +72,109 @@ export async function getTargetReservationsForRefund(performanceIds: string[],
         return false;
     };
 
+    // キャンセル情報セット
+    const cancelledInfo: any = {};
+    reservationsCancel.map((reservation: any) => {
+        // キャンセル情報 [{'20171201_12345': [r1,r2,,,rn]}]
+        const key: string = `${reservation.performance_day}_${reservation.payment_no}`;
+        if (cancelledInfo.hasOwnProperty(key) === false) {
+            cancelledInfo[key] = [];
+        }
+        cancelledInfo[key].push(reservation._id.toString());
+    });
+
     // 更新対象の予約IDセット
-    const ids: any = [];
+    const targrtIds: any = [];
+    const cancelledIds: any = [];
     const targrtInfo: any = {};
     reservations.map((reservation: any) => {
         // 入塔記録がない時
         if (isArrived(reservation) === false) {
-            ids.push(reservation._id);
-            // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
             const key: string = `${reservation.performance_day}_${reservation.payment_no}`;
-            if (targrtInfo.hasOwnProperty(key) === false) {
-                targrtInfo[key] = [];
+            // キャンセルがある購入の時
+            if (cancelledInfo.hasOwnProperty(key)) {
+                cancelledIds.push(reservation._id);
+            } else {
+                targrtIds.push(reservation._id);
+                // メール送信情報 {'20171201_12345': [r1,r2,,,rn]}
+                if (targrtInfo.hasOwnProperty(key) === false) {
+                    targrtInfo[key] = [];
+                }
+                targrtInfo[key].push(reservation);
             }
-            targrtInfo[key].push(reservation);
         }
     });
 
     // 戻り値セット
-    info = {};
-    info.targrtIds = ids;
-    info.targrtInfo = targrtInfo;
-    info.arrivedInfos = arrivedInfos;
-    info.refundedInfo = refundedInfo;
-
-    return info;
+    return ({
+        targrtIds: targrtIds,
+        cancelledIds: cancelledIds,
+        targrtInfo: targrtInfo,
+        arrivedInfos: arrivedInfos,
+        refundedInfo: refundedInfo,
+        cancelledInfo: cancelledInfo
+    });
 }
+
+/**
+ * 予約情報取得
+ *
+ * @param {ttts.repository.Reservation} reservationRepo
+ * @param {string[]} performanceIds
+ * @param {string} refundStatus
+ * @param {boolean} allFields
+ * @return {Promise<any>}
+ */
+async function getReservations(reservationRepo: ttts.repository.Reservation,
+                               performanceIds: string[],
+                               refundStatus: string,
+                               allFields: boolean): Promise<any> {
+
+    // 検索条件セット([指定パフォーマンス]かつ[一般予約]かつ[予約済])
+    const conditions: any = {
+        purchaser_group: ttts.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
+        status: {
+            $in: [
+                ttts.factory.reservationStatusType.ReservationConfirmed,
+                ttts.factory.reservationStatusType.ReservationSecuredExtra
+            ]
+        },
+        performance: { $in: performanceIds }
+    };
+    // 返金ステータス条件セット
+    if (refundStatus !== '') {
+        conditions['performance_ttts_extension.refund_status'] = refundStatus;
+    }
+    // フィールドセット
+    const fields: string = allFields ? '' : '_id performance_day payment_no checkins performance_ttts_extension';
+
+    // パフォーマンスに紐づく予約情報取得
+    return (<any[]>await reservationRepo.reservationModel.find(
+        conditions,
+        fields
+    ).exec());
+}
+/**
+ * キャンセル情報取得
+ *
+ * @param {ttts.repository.Reservation} reservationRepo
+ * @param {string[]} performanceIds
+ * @return {Promise<any>}
+ */
+async function getReservationsCancel(reservationRepo: ttts.repository.Reservation,
+                                     performanceIds: string[]) : Promise<any> {
+
+    // パフォーマンスに紐づくキャンセル情報取得
+    return (<any[]>await reservationRepo.reservationModel.find(
+        {
+            purchaser_group: ttts.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
+            status: ttts.factory.reservationStatusType.ReservationCancelled,
+            performance: { $in: performanceIds }
+        },
+        '_id performance_day payment_no'
+    ).exec());
+}
+
 /**
  * メールキューインタフェース
  *
@@ -129,6 +197,11 @@ export interface IEmailQueue {
     };
     status: string;
 }
+
+/**
+ * チケット情報取得
+ *
+ */
 export function getTicketInfo(reservations: any[], leaf: string, locale: string): string[] {
     // 券種ごとに合計枚数算出
     const keyName: string = 'ticket_type';
