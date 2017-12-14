@@ -22,7 +22,9 @@ import * as numeral from 'numeral';
  * @param {string} performanceIds
  * @return {any}
  */
-export async function getTargetReservationsForRefund(performanceIds: string[], refundStatus: string, allFields: boolean): Promise<any> {
+export async function getTargetReservationsForRefund(performanceIds: string[],
+                                                     refundStatus: string,
+                                                     allFields: boolean): Promise<any> {
     const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
     let info: any = null;
     // 検索条件セット([指定パフォーマンス]かつ[一般予約]かつ[予約済])

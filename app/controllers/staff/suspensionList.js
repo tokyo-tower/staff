@@ -91,11 +91,7 @@ function search(req, res, next) {
             conditions.push({ 'ttts_extension.refund_status': refundStatus });
         }
         // 予約情報
-        // 返金ステータス
         const conditionsR = {};
-        // if (refundStatus !== null) {
-        //     conditionsR.refund_status = refundStatus;
-        // }
         try {
             // データ検索
             const performances = yield getPerformances(conditions, limit, page);
@@ -297,11 +293,10 @@ function updateRefundStatus(performanceId, staffUser) {
     return __awaiter(this, void 0, void 0, function* () {
         // 返金対象予約情報取得(入塔記録のない、未指示データ)
         const info = yield suspensionCommon.getTargetReservationsForRefund([performanceId], ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED, false);
-        //対象予約(checkinsのない購入番号)の返金ステータスを更新する。
+        // 対象予約(checkinsのない購入番号)の返金ステータスを更新する。
         const now = moment().format('YYYY/MM/DD HH:mm:ss');
-        // tslint:disable-next-line:no-suspicious-comment
-        // TODO 実装
-        yield ttts.Models.Reservation.update({
+        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
+        yield reservationRepo.reservationModel.update({
             _id: { $in: info.targrtIds }
         }, {
             $set: {

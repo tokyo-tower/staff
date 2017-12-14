@@ -86,11 +86,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
     }
 
     // 予約情報
-    // 返金ステータス
     const conditionsR: any = {};
-    // if (refundStatus !== null) {
-    //     conditionsR.refund_status = refundStatus;
-    // }
 
     try {
         // データ検索
@@ -296,11 +292,10 @@ async function updateRefundStatus(performanceId: string, staffUser: string): Pro
         ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
         false);
 
-    //対象予約(checkinsのない購入番号)の返金ステータスを更新する。
+    // 対象予約(checkinsのない購入番号)の返金ステータスを更新する。
     const now = moment().format('YYYY/MM/DD HH:mm:ss');
-    // tslint:disable-next-line:no-suspicious-comment
-    // TODO 実装
-    await (<any>ttts.Models).Reservation.update(
+    const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
+    await reservationRepo.reservationModel.update(
         {
             _id: { $in: info.targrtIds }
         },
