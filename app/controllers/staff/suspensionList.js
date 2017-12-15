@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ttts = require("@motionpicture/ttts-domain");
 const moment = require("moment");
 const _ = require("underscore");
-const suspensionCommon = require("./suspensionCommon");
+//import * as suspensionCommon from './suspensionCommon';
 const DEFAULT_RADIX = 10;
 const VIEW_PATH = 'staff/suspension';
 const layout = 'layouts/staff/layout';
@@ -260,15 +260,20 @@ function refundProcess(req, res, next) {
         try {
             // パフォーマンスIDセット
             const performanceId = (!_.isEmpty(req.body.performanceId)) ? req.body.performanceId : null;
-            if (performanceId === null) {
-                res.json({
-                    success: false,
-                    message: 'req.body.performanceId is empty.'
-                });
-                return;
-            }
             // パフォーマンスと予約情報の返金ステータス更新(指示済に)
-            yield updateRefundStatus(performanceId, req.staffUser.username);
+            const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
+            const taskRepo = new ttts.repository.Task(ttts.mongoose.connection);
+            const task = ttts.service.order.returnAllByPerformance(performanceId)(performanceRepo, taskRepo);
+            // tslint:disable-next-line:no-console
+            console.log(task);
+            // if (performanceId === null) {
+            //     res.json({
+            //         success: false,
+            //         message: 'req.body.performanceId is empty.'
+            //     });
+            //     return;
+            // }
+            //await updateRefundStatus(performanceId, (<any>req.staffUser).username);
             res.json({
                 success: true,
                 message: null
@@ -289,36 +294,45 @@ exports.refundProcess = refundProcess;
  * @param {string} performanceId
  * @param {string} staffUser
  */
-function updateRefundStatus(performanceId, staffUser) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // 返金対象予約情報取得(入塔記録のない、未指示データ)
-        const info = yield suspensionCommon.getTargetReservationsForRefund([performanceId], ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED, false);
-        // 対象予約(checkinsのない購入番号)の返金ステータスを更新する。
-        const now = moment().format('YYYY/MM/DD HH:mm:ss');
-        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
-        yield reservationRepo.reservationModel.update({
-            _id: { $in: info.targrtIds }
-        }, {
-            $set: {
-                'performance_ttts_extension.refund_status': ttts.PerformanceUtil.REFUND_STATUS.INSTRUCTED,
-                'performance_ttts_extension.refund_update_user': staffUser,
-                'performance_ttts_extension.refund_update_at': now
-            }
-        }, {
-            multi: true
-        }).exec();
-        // パフォーマンス更新
-        const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
-        yield performanceRepo.performanceModel.findOneAndUpdate({
-            _id: performanceId
-        }, {
-            $set: {
-                'ttts_extension.refund_status': ttts.PerformanceUtil.REFUND_STATUS.INSTRUCTED,
-                'ttts_extension.refund_update_user': staffUser,
-                'ttts_extension.refund_update_at': now
-            }
-        }, {
-            new: true
-        }).exec();
-    });
-}
+// async function updateRefundStatus(performanceId: string, staffUser: string): Promise<void> {
+//     // 返金対象予約情報取得(入塔記録のない、未指示データ)
+//     const info = await suspensionCommon.getTargetReservationsForRefund(
+//         [performanceId],
+//         ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
+//         false);
+//     // 対象予約(checkinsのない購入番号)の返金ステータスを更新する。
+//     const now = moment().format('YYYY/MM/DD HH:mm:ss');
+//     const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
+//     await reservationRepo.reservationModel.update(
+//         {
+//             _id: { $in: info.targrtIds }
+//         },
+//         {
+//             $set: {
+//                 'performance_ttts_extension.refund_status': ttts.PerformanceUtil.REFUND_STATUS.INSTRUCTED,
+//                 'performance_ttts_extension.refund_update_user': staffUser,
+//                 'performance_ttts_extension.refund_update_at': now
+//             }
+//         },
+//         {
+//             multi: true
+//         }
+//     ).exec();
+//     // パフォーマンス更新
+//     const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
+//     await performanceRepo.performanceModel.findOneAndUpdate(
+//         {
+//             _id: performanceId
+//         },
+//         {
+//             $set: {
+//                 'ttts_extension.refund_status': ttts.PerformanceUtil.REFUND_STATUS.INSTRUCTED,
+//                 'ttts_extension.refund_update_user': staffUser,
+//                 'ttts_extension.refund_update_at': now
+//             }
+//         },
+//         {
+//             new: true
+//         }
+//     ).exec();
+// }
