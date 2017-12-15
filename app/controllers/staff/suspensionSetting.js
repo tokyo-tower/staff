@@ -86,7 +86,7 @@ function execute(req, res, next) {
             if (!Array.isArray(performanceIds)) {
                 throw new Error(req.__('Message.UnexpectedError'));
             }
-            // const executeType: string = req.body.executeType;
+            // パフォーマンス・予約(入塔記録のないもの)のステータス更新
             const onlineStatus = req.body.onlineStatus;
             const evStatus = req.body.evStatus;
             const notice = req.body.notice;
@@ -127,30 +127,50 @@ function updateStatusByIds(staffUser, performanceIds, onlineStatus, evStatus) {
         });
         const now = moment().format('YYYY/MM/DD HH:mm:ss');
         let info = {};
-        // オンライン販売停止の時、予約更新
-        if (onlineStatus === ttts.PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED) {
-            // 返金対象予約情報取得(入塔記録のないもの)
-            info = yield suspensionCommon.getTargetReservationsForRefund(performanceIds, ttts.PerformanceUtil.REFUND_STATUS.NONE, evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
-            // 予約情報返金ステータスを未指示に更新
-            if (info.targrtIds.length > 0) {
-                const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
-                yield reservationRepo.reservationModel.update({
-                    _id: { $in: info.targrtIds }
-                }, {
-                    $set: {
-                        'performance_ttts_extension.refund_status': ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED,
-                        'performance_ttts_extension.refund_update_user': staffUser,
-                        'performance_ttts_extension.refund_update_at': now
-                    }
-                }, {
-                    multi: true
-                }).exec();
-            }
-        }
-        // 販売停止か再開かで返金ステータスセットorクリア決定
-        const refundStatus = onlineStatus === ttts.PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED ?
+        // 返金対象予約情報取得(入塔記録のないもの)
+        info = yield suspensionCommon.getTargetReservationsForRefund(performanceIds, '', evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
+        // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
+        const refundStatus = evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED ?
             ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED :
             ttts.PerformanceUtil.REFUND_STATUS.NONE;
+        // 予約情報の各ステータス更新
+        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
+        if (info.targrtIds.length > 0) {
+            yield reservationRepo.reservationModel.update({
+                _id: { $in: info.targrtIds }
+            }, {
+                $set: {
+                    'performance_ttts_extension.online_sales_status': onlineStatus,
+                    'performance_ttts_extension.online_sales_update_user': staffUser,
+                    'performance_ttts_extension.online_sales_update_at': now,
+                    'performance_ttts_extension.ev_service_status': evStatus,
+                    'performance_ttts_extension.ev_service_update_user': staffUser,
+                    'performance_ttts_extension.ev_service_update_at': now,
+                    'performance_ttts_extension.refund_status': refundStatus,
+                    'performance_ttts_extension.refund_update_user': staffUser,
+                    'performance_ttts_extension.refund_update_at': now
+                }
+            }, {
+                multi: true
+            }).exec();
+        }
+        // キャンセル情報の各ステータス更新
+        if (info.cancelledIds.length > 0) {
+            yield reservationRepo.reservationModel.update({
+                _id: { $in: info.cancelledIds }
+            }, {
+                $set: {
+                    'performance_ttts_extension.online_sales_status': onlineStatus,
+                    'performance_ttts_extension.online_sales_update_user': staffUser,
+                    'performance_ttts_extension.online_sales_update_at': now,
+                    'performance_ttts_extension.ev_service_status': evStatus,
+                    'performance_ttts_extension.ev_service_update_user': staffUser,
+                    'performance_ttts_extension.ev_service_update_at': now
+                }
+            }, {
+                multi: true
+            }).exec();
+        }
         // パフォーマンス更新
         const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
         yield performanceRepo.performanceModel.update({

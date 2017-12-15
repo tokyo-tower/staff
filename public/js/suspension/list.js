@@ -115,15 +115,18 @@ $(function() {
             // 処理実行リンク
             html += '<td class="td-actions">'
             switch (suspension.refund_status) {
-                case '1': // 指示済
-                    html +=  '<p class="btn"><span>処理完了</span></p>'
-                    break;
-                case '2': // 返金済
-                    html +=  '<p class="btn"><span>処理中</span></p>'
-                    break;
-                default: // 未指示
-                    html +=  '<p class="btn  btn-refund_process"><span>処理実行</span></p>'
-                    break;
+            case '0': // 指示済
+                html +=  '<p><span>-</span></p>'
+                break;
+            case '1': // 未指示
+                html +=  '<p class="btn  btn-refund_process"><span>処理実行</span></p>'
+                break;
+            case '2': // 指示済
+                html +=  '<p class="btn"><span>処理中</span></p>'
+                break;
+            default: // 返金済
+                html +=  '<p class="btn"><span>処理完了</span></p>'
+                break;
             }
             html += '</td>'  + '</tr>';
         });
