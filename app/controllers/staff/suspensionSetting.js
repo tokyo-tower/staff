@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * 運行・オンライン販売停止設定コントローラー
+ * @namespace controller/staff/suspensionSetting
+ */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -8,15 +12,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * 運行・オンライン販売停止設定コントローラー
- *
- * @namespace controller/staff/suspensionSetting
- */
 const ttts = require("@motionpicture/ttts-domain");
 const conf = require("config");
+const createDebug = require("debug");
+const httpStatus = require("http-status");
 const moment = require("moment");
 const suspensionCommon = require("./suspensionCommon");
+const debug = createDebug('ttts-staff:controllers:staff:suspensionSetting');
 const SETTING_PATH = '/staff/suspension/setting';
 const VIEW_PATH = 'staff/suspension';
 const layout = 'layouts/staff/layout';
@@ -82,7 +84,7 @@ function execute(req, res, next) {
         }
         try {
             // パフォーマンスIDリストをjson形式で受け取る
-            const performanceIds = JSON.parse(req.body.performanceIds);
+            const performanceIds = req.body.performanceIds;
             if (!Array.isArray(performanceIds)) {
                 throw new Error(req.__('Message.UnexpectedError'));
             }
@@ -90,20 +92,37 @@ function execute(req, res, next) {
             const onlineStatus = req.body.onlineStatus;
             const evStatus = req.body.evStatus;
             const notice = req.body.notice;
-            const info = yield updateStatusByIds(req.staffUser.username, performanceIds, onlineStatus, evStatus);
+            debug('updating performances...', performanceIds, onlineStatus, evStatus, notice);
+            const now = new Date();
+            // 返金対象予約情報取得(入塔記録のないもの)
+            const targetPlaceOrderTransactions = yield suspensionCommon.getTargetReservationsForRefund(performanceIds);
+            debug('email target placeOrderTransactions:', targetPlaceOrderTransactions);
+            // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
+            const refundStatus = evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED ?
+                ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED :
+                ttts.PerformanceUtil.REFUND_STATUS.NONE;
+            // パフォーマンス更新
+            const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
+            yield performanceRepo.performanceModel.update({ _id: { $in: performanceIds } }, {
+                'ttts_extension.online_sales_status': onlineStatus,
+                'ttts_extension.online_sales_update_user': req.staffUser,
+                'ttts_extension.online_sales_update_at': now,
+                'ttts_extension.ev_service_status': evStatus,
+                'ttts_extension.ev_service_update_user': req.staffUser,
+                'ttts_extension.ev_service_update_at': now,
+                'ttts_extension.refund_status': refundStatus,
+                'ttts_extension.refund_update_user': req.staffUser,
+                'ttts_extension.refund_update_at': now
+            }, { multi: true }).exec();
             // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
             if (evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
                 // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
-                yield createEmails(res, info.targrtInfo, notice);
+                yield createEmails(res, targetPlaceOrderTransactions, notice);
             }
-            res.json({
-                success: true,
-                message: null
-            });
+            res.status(httpStatus.NO_CONTENT).end();
         }
         catch (error) {
-            res.json({
-                success: false,
+            res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
                 message: error.message
             });
         }
@@ -111,118 +130,29 @@ function execute(req, res, next) {
 }
 exports.execute = execute;
 /**
- * 運行・オンライン販売停止設定処理(idから)
- *
- * @param {string} staffUser
- * @param {string[]} performanceIds
- * @param {string} onlineStatus
- * @param {string} evStatus
- * @return {Promise<boolean>}
- */
-function updateStatusByIds(staffUser, performanceIds, onlineStatus, evStatus) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // パフォーマンスIDをObjectIdに変換
-        const ids = performanceIds.map((id) => {
-            return new ttts.mongoose.Types.ObjectId(id);
-        });
-        const now = moment().format('YYYY/MM/DD HH:mm:ss');
-        let info = {};
-        // 返金対象予約情報取得(入塔記録のないもの)
-        info = yield suspensionCommon.getTargetReservationsForRefund(performanceIds, '', evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
-        // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
-        const refundStatus = evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED ?
-            ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED :
-            ttts.PerformanceUtil.REFUND_STATUS.NONE;
-        // 予約情報の各ステータス更新
-        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
-        if (info.targrtIds.length > 0) {
-            yield reservationRepo.reservationModel.update({
-                _id: { $in: info.targrtIds }
-            }, {
-                $set: {
-                    'performance_ttts_extension.online_sales_status': onlineStatus,
-                    'performance_ttts_extension.online_sales_update_user': staffUser,
-                    'performance_ttts_extension.online_sales_update_at': now,
-                    'performance_ttts_extension.ev_service_status': evStatus,
-                    'performance_ttts_extension.ev_service_update_user': staffUser,
-                    'performance_ttts_extension.ev_service_update_at': now,
-                    'performance_ttts_extension.refund_status': refundStatus,
-                    'performance_ttts_extension.refund_update_user': staffUser,
-                    'performance_ttts_extension.refund_update_at': now
-                }
-            }, {
-                multi: true
-            }).exec();
-        }
-        // キャンセル情報の各ステータス更新
-        if (info.cancelledIds.length > 0) {
-            yield reservationRepo.reservationModel.update({
-                _id: { $in: info.cancelledIds }
-            }, {
-                $set: {
-                    'performance_ttts_extension.online_sales_status': onlineStatus,
-                    'performance_ttts_extension.online_sales_update_user': staffUser,
-                    'performance_ttts_extension.online_sales_update_at': now,
-                    'performance_ttts_extension.ev_service_status': evStatus,
-                    'performance_ttts_extension.ev_service_update_user': staffUser,
-                    'performance_ttts_extension.ev_service_update_at': now
-                }
-            }, {
-                multi: true
-            }).exec();
-        }
-        // パフォーマンス更新
-        const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
-        yield performanceRepo.performanceModel.update({
-            _id: { $in: ids }
-        }, {
-            $set: {
-                'ttts_extension.online_sales_status': onlineStatus,
-                'ttts_extension.online_sales_update_user': staffUser,
-                'ttts_extension.online_sales_update_at': now,
-                'ttts_extension.ev_service_status': evStatus,
-                'ttts_extension.ev_service_update_user': staffUser,
-                'ttts_extension.ev_service_update_at': now,
-                'ttts_extension.refund_status': refundStatus,
-                'ttts_extension.refund_update_user': staffUser,
-                'ttts_extension.refund_update_at': now
-            }
-        }, {
-            multi: true
-        }).exec();
-        return info;
-    });
-}
-/**
  * 運行・オンライン販売停止メール作成
- *
  * @param {Response} res
- * @param {any[]} targrtInfos
+ * @param {ttts.factory.transaction.placeOrder.ITransaction[]} transactions
  * @param {any} notice
  * @return {Promise<void>}
  */
-function createEmails(res, targrtInfo, notice) {
+function createEmails(res, transactions, notice) {
     return __awaiter(this, void 0, void 0, function* () {
-        // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
-        if (Object.keys(targrtInfo).length === 0) {
+        if (transactions.length === 0) {
             return;
         }
         // 購入単位ごとにメール作成
-        const promises = (Object.keys(targrtInfo).map((key) => __awaiter(this, void 0, void 0, function* () {
-            if (targrtInfo[key].length > 0) {
-                yield createEmail(res, targrtInfo[key], notice);
-            }
+        yield Promise.all(transactions.map((transaction) => __awaiter(this, void 0, void 0, function* () {
+            const result = transaction.result;
+            yield createEmail(res, result.eventReservations, notice);
         })));
-        yield Promise.all(promises);
-        return;
     });
 }
 /**
  * 運行・オンライン販売停止メール作成(1通)
- *
  * @param {Response} res
- * @param {any} reservation
- * @param {any} notice
+ * @param {ttts.factory.reservation.event.IReservation[]} reservation
+ * @param {string} notice
  * @return {Promise<void>}
  */
 function createEmail(res, reservations, notice) {

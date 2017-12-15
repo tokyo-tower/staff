@@ -1,14 +1,17 @@
 /**
  * 運行・オンライン販売停止設定コントローラー
- *
  * @namespace controller/staff/suspensionSetting
  */
+
 import * as ttts from '@motionpicture/ttts-domain';
 import * as conf from 'config';
+import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
+import * as httpStatus from 'http-status';
 import * as moment from 'moment';
 import * as suspensionCommon from './suspensionCommon';
 
+const debug = createDebug('ttts-staff:controllers:staff:suspensionSetting');
 const SETTING_PATH: string = '/staff/suspension/setting';
 const VIEW_PATH: string = 'staff/suspension';
 const layout: string = 'layouts/staff/layout';
@@ -67,9 +70,10 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
 
         return;
     }
+
     try {
         // パフォーマンスIDリストをjson形式で受け取る
-        const performanceIds = JSON.parse(req.body.performanceIds);
+        const performanceIds = req.body.performanceIds;
         if (!Array.isArray(performanceIds)) {
             throw new Error(req.__('Message.UnexpectedError'));
         }
@@ -78,172 +82,82 @@ export async function execute(req: Request, res: Response, next: NextFunction): 
         const onlineStatus: string = req.body.onlineStatus;
         const evStatus: string = req.body.evStatus;
         const notice: string = req.body.notice;
-        const info: any = await updateStatusByIds(
-                                    (<any>req).staffUser.username,
-                                    performanceIds,
-                                    onlineStatus,
-                                    evStatus);
+        debug('updating performances...', performanceIds, onlineStatus, evStatus, notice);
+
+        const now = new Date();
+
+        // 返金対象予約情報取得(入塔記録のないもの)
+        const targetPlaceOrderTransactions = await suspensionCommon.getTargetReservationsForRefund(performanceIds);
+        debug('email target placeOrderTransactions:', targetPlaceOrderTransactions);
+
+        // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
+        const refundStatus: string = evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED ?
+            ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED :
+            ttts.PerformanceUtil.REFUND_STATUS.NONE;
+
+        // パフォーマンス更新
+        const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
+        await performanceRepo.performanceModel.update(
+            { _id: { $in: performanceIds } },
+            {
+                'ttts_extension.online_sales_status': onlineStatus,
+                'ttts_extension.online_sales_update_user': req.staffUser,
+                'ttts_extension.online_sales_update_at': now,
+                'ttts_extension.ev_service_status': evStatus,
+                'ttts_extension.ev_service_update_user': req.staffUser,
+                'ttts_extension.ev_service_update_at': now,
+                'ttts_extension.refund_status': refundStatus,
+                'ttts_extension.refund_update_user': req.staffUser,
+                'ttts_extension.refund_update_at': now
+            },
+            { multi: true }
+        ).exec();
 
         // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
         if (evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
             // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
-            await createEmails(res, info.targrtInfo, notice);
+            await createEmails(res, targetPlaceOrderTransactions, notice);
         }
-        res.json({
-            success: true,
-            message: null
-        });
+
+        res.status(httpStatus.NO_CONTENT).end();
     } catch (error) {
-        res.json({
-            success: false,
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
             message: error.message
         });
     }
 }
-/**
- * 運行・オンライン販売停止設定処理(idから)
- *
- * @param {string} staffUser
- * @param {string[]} performanceIds
- * @param {string} onlineStatus
- * @param {string} evStatus
- * @return {Promise<boolean>}
- */
-async function updateStatusByIds(staffUser: string,
-                                 performanceIds: string[],
-                                 onlineStatus: string,
-                                 evStatus: string): Promise<any> {
-    // パフォーマンスIDをObjectIdに変換
-    const ids = performanceIds.map((id) => {
-        return new ttts.mongoose.Types.ObjectId(id);
-    });
-    const now = moment().format('YYYY/MM/DD HH:mm:ss');
-    let info: any = {};
 
-    // 返金対象予約情報取得(入塔記録のないもの)
-    info = await suspensionCommon.getTargetReservationsForRefund(
-        performanceIds,
-        '',
-        evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED);
-
-    // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
-    const refundStatus: string = evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED ?
-                         ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED :
-                         ttts.PerformanceUtil.REFUND_STATUS.NONE;
-
-    // 予約情報の各ステータス更新
-    const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
-    if (info.targrtIds.length > 0) {
-        await reservationRepo.reservationModel.update(
-            {
-                _id: { $in: info.targrtIds }
-            },
-            {
-                $set: {
-                    'performance_ttts_extension.online_sales_status': onlineStatus,
-                    'performance_ttts_extension.online_sales_update_user': staffUser,
-                    'performance_ttts_extension.online_sales_update_at': now,
-                    'performance_ttts_extension.ev_service_status': evStatus,
-                    'performance_ttts_extension.ev_service_update_user': staffUser,
-                    'performance_ttts_extension.ev_service_update_at': now,
-                    'performance_ttts_extension.refund_status': refundStatus,
-                    'performance_ttts_extension.refund_update_user': staffUser,
-                    'performance_ttts_extension.refund_update_at': now
-                }
-            },
-            {
-                multi: true
-            }
-        ).exec();
-    }
-    // キャンセル情報の各ステータス更新
-    if (info.cancelledIds.length > 0) {
-        await reservationRepo.reservationModel.update(
-            {
-                _id: { $in: info.cancelledIds }
-            },
-            {
-                $set: {
-                    'performance_ttts_extension.online_sales_status': onlineStatus,
-                    'performance_ttts_extension.online_sales_update_user': staffUser,
-                    'performance_ttts_extension.online_sales_update_at': now,
-                    'performance_ttts_extension.ev_service_status': evStatus,
-                    'performance_ttts_extension.ev_service_update_user': staffUser,
-                    'performance_ttts_extension.ev_service_update_at': now
-                }
-            },
-            {
-                multi: true
-            }
-        ).exec();
-    }
-
-    // パフォーマンス更新
-    const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
-    await performanceRepo.performanceModel.update(
-        {
-            _id: { $in: ids }
-        },
-        {
-            $set: {
-                'ttts_extension.online_sales_status': onlineStatus,
-                'ttts_extension.online_sales_update_user': staffUser,
-                'ttts_extension.online_sales_update_at': now,
-                'ttts_extension.ev_service_status': evStatus,
-                'ttts_extension.ev_service_update_user': staffUser,
-                'ttts_extension.ev_service_update_at': now,
-                'ttts_extension.refund_status': refundStatus,
-                'ttts_extension.refund_update_user': staffUser,
-                'ttts_extension.refund_update_at': now
-            }
-        },
-        {
-            multi: true
-        }
-    ).exec();
-
-    return info;
-}
 /**
  * 運行・オンライン販売停止メール作成
- *
  * @param {Response} res
- * @param {any[]} targrtInfos
+ * @param {ttts.factory.transaction.placeOrder.ITransaction[]} transactions
  * @param {any} notice
  * @return {Promise<void>}
  */
 async function createEmails(
     res: Response,
-    targrtInfo: any,
-    notice: string): Promise<void> {
-    // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
-    if (Object.keys(targrtInfo).length === 0) {
-
+    transactions: ttts.factory.transaction.placeOrder.ITransaction[],
+    notice: string
+): Promise<void> {
+    if (transactions.length === 0) {
         return;
     }
-    // 購入単位ごとにメール作成
-    const promises = (Object.keys(targrtInfo).map(async (key) => {
-        if (targrtInfo[key].length > 0) {
-            await createEmail(res, targrtInfo[key], notice);
-        }
-    }));
-    await Promise.all(promises);
 
-    return;
+    // 購入単位ごとにメール作成
+    await Promise.all(transactions.map(async (transaction) => {
+        const result = <ttts.factory.transaction.placeOrder.IResult>transaction.result;
+        await createEmail(res, result.eventReservations, notice);
+    }));
 }
+
 /**
  * 運行・オンライン販売停止メール作成(1通)
- *
  * @param {Response} res
- * @param {any} reservation
- * @param {any} notice
+ * @param {ttts.factory.reservation.event.IReservation[]} reservation
+ * @param {string} notice
  * @return {Promise<void>}
  */
-async function createEmail(
-    res: Response,
-    reservations: any[],
-    notice: string): Promise<void> {
-
+async function createEmail(res: Response, reservations: ttts.factory.reservation.event.IReservation[], notice: string): Promise<void> {
     const reservation = reservations[0];
     // タイトル編集
     // 東京タワー TOP DECK Ticket
@@ -251,7 +165,7 @@ async function createEmail(
     // 東京タワー TOP DECK エレベータ運行停止のお知らせ
     const titleEmail = res.__('Email.TitleSus');
     //トウキョウ タロウ 様
-    const purchaserName: string = `${res.__('Mr{{name}}', { name: reservation.purchaser_name[res.locale] })}`;
+    const purchaserName: string = `${res.__('Mr{{name}}', { name: (<any>reservation).purchaser_name[res.locale] })}`;
 
     // 購入チケット情報
     const paymentTicketInfos: string[] = [];
