@@ -35,7 +35,10 @@ function performances(req, res, next) {
             // 運行・オンライン販売停止設定画面表示
             res.render(`${VIEW_PATH}/performances`, {
                 token: token,
-                layout: layout
+                layout: layout,
+                EvServiceStatus: ttts.factory.performance.EvServiceStatus,
+                OnlineSalesStatus: ttts.factory.performance.OnlineSalesStatus,
+                RefundStatus: ttts.factory.performance.RefundStatus
             });
         }
         catch (error) {

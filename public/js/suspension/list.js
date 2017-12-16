@@ -89,19 +89,19 @@ $(function () {
                 + '<td class="td-name">' + suspension.online_sales_update_user + '</td>'
                 + '<td class="td-checkin">' + suspension.canceled + '</td>'
                 + '<td class="td-checkin">' + suspension.arrived + '</td>'
-                + '<td class="td-checkin">' + suspension.refund_status_name + '</td>'
+                + '<td class="td-refund_status_name">' + suspension.refund_status_name + '</td>'
                 + '<td class="td-checkin">' + suspension.refunded + '</td>';
 
             // 処理実行リンク
             html += '<td class="td-actions">'
             switch (suspension.refund_status) {
-                case '0': // 指示済
+                case 'None': // 指示済
                     html += '<p><span>-</span></p>'
                     break;
-                case '1': // 未指示
+                case 'NotInstructed': // 未指示
                     html += '<p class="btn  btn-refund_process"><span>処理実行</span></p>'
                     break;
-                case '2': // 指示済
+                case 'Instructed': // 指示済
                     html += '<p class="btn"><span>処理中</span></p>'
                     break;
                 default: // 返金済
@@ -208,7 +208,6 @@ $(function () {
     // 返金処理実行
     $(document).on('click', '.btn-refund_process', function (e) {
         var performanceId = $(e.currentTarget).closest('tr').attr('performance_id');
-        alert(performanceId);
         $.ajax({
             dataType: 'json',
             url: '/api/performances/suspended/' + performanceId + '/tasks/returnOrders',
@@ -217,11 +216,15 @@ $(function () {
             beforeSend: function () {
             }
         }).done(function (data) {
-            // 再検索して表示を更新
-            search();
+            // ステータス表示変更
+            $('.td-refund_status_name', $('.btn-refund_process').parent().parent()).html('指示済');
+            $('.btn-refund_process').replaceWith('<p class="btn"><span>処理中</span></p>');
         }).fail(function (jqxhr, textStatus, error) {
             if (jqxhr.status === 500) {
-                alert('返金処理の実行でエラーが発生しました');
+                var response = $.parseJSON(jqxhr.responseText);
+                console.error(jqxhr.res);
+
+                alert('返金処理の実行でエラーが発生しました\n' + response.errors[0].message);
             } else {
                 alert(error);
             }

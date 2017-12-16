@@ -9,6 +9,7 @@ import * as createDebug from 'debug';
 import { Request, Response } from 'express';
 import { INTERNAL_SERVER_ERROR, NO_CONTENT } from 'http-status';
 import * as moment from 'moment';
+import * as numeral from 'numeral';
 
 const debug = createDebug('ttts-staff:controllers:api:performances');
 
@@ -36,11 +37,12 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
         debug('email target placeOrderTransactions:', targetPlaceOrderTransactions);
 
         // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
-        const refundStatus: string = evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED ?
-            ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED :
-            ttts.PerformanceUtil.REFUND_STATUS.NONE;
+        const refundStatus: string = evStatus === ttts.factory.performance.EvServiceStatus.Suspended ?
+            ttts.factory.performance.RefundStatus.NotInstructed :
+            ttts.factory.performance.RefundStatus.None;
 
         // パフォーマンス更新
+        debug('updating performance online_sales_status...');
         const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
         await performanceRepo.performanceModel.update(
             { _id: { $in: performanceIds } },
@@ -57,11 +59,16 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             },
             { multi: true }
         ).exec();
+        debug('performance online_sales_status updated.');
 
         // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
-        if (evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
-            // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
-            await createEmails(res, targetPlaceOrderTransactions, notice);
+        if (evStatus === ttts.factory.performance.EvServiceStatus.Suspended) {
+            try {
+                await createEmails(res, targetPlaceOrderTransactions, notice);
+            } catch (error) {
+                // no op
+                console.error(error);
+            }
         }
 
         res.status(NO_CONTENT).end();
@@ -205,7 +212,9 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
     };
 
     // メール作成
+    debug('creating email queue...', emailQueue);
     await ttts.Models.EmailQueue.create(emailQueue);
+    debug('email queue created.');
 }
 
 /**

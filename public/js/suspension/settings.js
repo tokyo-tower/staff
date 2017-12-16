@@ -10,12 +10,12 @@ $(function () {
     // statusからCSSクラス名を得る
     var getClassNameByStatus = function (performance) {
         var className = '';
-        if (performance.ev_service_status === '1') {
+        if (performance.ev_service_status === 'Slowdown') {
             className += 'item-ev-slow ';
-        } else if (performance.ev_service_status === '2') {
+        } else if (performance.ev_service_status === 'Suspended') {
             className += 'item-ev-stopped ';
         }
-        if (performance.online_sales_status === '1') {
+        if (performance.online_sales_status === 'Suspended') {
             className += 'item-supenpeded ';
         }
         className += 'item-hour-' + performance.hour;
@@ -99,13 +99,13 @@ $(function () {
             performancesByHour[hour].forEach(function (performance) {
                 var suspensionStatusStr = '';
                 var separatorStr = '';
-                if (performance.online_sales_status === '1') {
+                if (performance.online_sales_status === 'Suspended') {
                     suspensionStatusStr += '販売中止';
                 }
                 separatorStr += (suspensionStatusStr) ? ' / ' : '';
-                if (performance.ev_service_status === '1') {
+                if (performance.ev_service_status === 'Slowdown') {
                     suspensionStatusStr += separatorStr + 'EV 減速';
-                } else if (performance.ev_service_status === '2') {
+                } else if (performance.ev_service_status === 'Suspended') {
                     suspensionStatusStr += separatorStr + 'EV 停止';
                 }
                 html += '<div class="item ' + getClassNameByStatus(performance) + '" data-performance-id="' + performance.id + '">' +
@@ -267,8 +267,8 @@ $(function () {
                 return alert('お客様への通知内容を入力してください');
             }
         }
-        // '0': 解除 '1': 停止
-        var onlineStatus = (bool_forResume) ? '0' : '1';
+        // 'Normal': 解除 'Suspended': 停止
+        var onlineStatus = (bool_forResume) ? 'Normal' : 'Suspended';
         // 運行状況
         var evStatus = $('input[name="ev"]:checked').val();
         busy_suspend = true;
@@ -286,7 +286,7 @@ $(function () {
                 $modal_suspension.modal('hide');
             }
         }).done(function (data) {
-            alert('販売を' + ((onlineStatus === '1') ? '停止' : '再開') + 'しました');
+            alert('販売を' + ((onlineStatus === 'Suspended') ? '停止' : '再開') + 'しました');
         }).fail(function (jqxhr, textStatus, error) {
             if (jqxhr.status === 500) {
                 alert('サーバエラーが発生しました');

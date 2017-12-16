@@ -19,8 +19,15 @@ const moment = require("moment");
 const _ = require("underscore");
 const debug = createDebug('ttts-staff:controllers:api:performances');
 const EMPTY_STRING = '-';
-const EV_SERVICE_STATUS_NAMES = { 0: EMPTY_STRING, 1: '減速', 2: '停止' };
-const REFUND_STATUS_NAMES = { 0: EMPTY_STRING, 1: '未指示', 2: '指示済', 3: '返金済' };
+const EV_SERVICE_STATUS_NAMES = {};
+EV_SERVICE_STATUS_NAMES[ttts.factory.performance.EvServiceStatus.Normal] = EMPTY_STRING;
+EV_SERVICE_STATUS_NAMES[ttts.factory.performance.EvServiceStatus.Slowdown] = '減速';
+EV_SERVICE_STATUS_NAMES[ttts.factory.performance.EvServiceStatus.Suspended] = '停止';
+const REFUND_STATUS_NAMES = {};
+REFUND_STATUS_NAMES[ttts.factory.performance.RefundStatus.None] = EMPTY_STRING;
+REFUND_STATUS_NAMES[ttts.factory.performance.RefundStatus.NotInstructed] = '未指示';
+REFUND_STATUS_NAMES[ttts.factory.performance.RefundStatus.Instructed] = '指示済';
+REFUND_STATUS_NAMES[ttts.factory.performance.RefundStatus.Compeleted] = '返金済';
 /**
  * 販売中止一覧検索(api)
  */
@@ -44,7 +51,7 @@ function searchSuspendedPerformances(req, res) {
         const refundStatus = getValue(req.query.refund_status);
         // 検索条件を作成
         const conditions = [];
-        conditions.push({ 'ttts_extension.online_sales_status': ttts.PerformanceUtil.ONLINE_SALES_STATUS.SUSPENDED });
+        conditions.push({ 'ttts_extension.online_sales_status': ttts.factory.performance.OnlineSalesStatus.Suspended });
         // 販売停止処理日
         if (day1 !== null || day2 !== null) {
             conditions.push({ 'ttts_extension.online_sales_update_at': getConditionsFromTo(day1, day2, true) });
@@ -109,20 +116,21 @@ function findSuspendedPerformances(conditions, limit, page) {
             .lean()
             .exec();
         debug('suspended performances found.', performances);
-        const infoR = {};
-        // 予約情報取得
-        const dicReservations = {};
-        yield Promise.all(performances.map((performance) => __awaiter(this, void 0, void 0, function* () {
-            // パフォーマンスごとに予約情報取得
-            dicReservations[performance._id.toString()] = yield reservationRepo.reservationModel.find({
+        return Promise.all(performances.map((performance) => __awaiter(this, void 0, void 0, function* () {
+            const performanceId = performance._id.toString();
+            // パフォーマンスに対する予約数
+            const numberOfReservations = yield reservationRepo.reservationModel.count({
                 status: ttts.factory.reservationStatusType.ReservationConfirmed,
                 purchaser_group: ttts.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
-                performance: performance._id.toString()
+                performance: performance._id
             }).exec();
-        })));
-        infoR.dicReservations = dicReservations;
-        return performances.map((performance) => {
-            const performanceId = performance._id.toString();
+            // 未入場の予約数
+            const nubmerOfUncheckedReservations = yield reservationRepo.reservationModel.count({
+                status: ttts.factory.reservationStatusType.ReservationConfirmed,
+                purchaser_group: ttts.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
+                performance: performance._id,
+                checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
+            }).exec();
             return {
                 performance_id: performanceId,
                 performance_day: moment(performance.day, 'YYYYMMDD').format('YYYY/MM/DD'),
@@ -132,13 +140,13 @@ function findSuspendedPerformances(conditions, limit, page) {
                 ev_service_status_name: EV_SERVICE_STATUS_NAMES[performance.ttts_extension.ev_service_status],
                 online_sales_update_at: performance.ttts_extension.online_sales_update_at,
                 online_sales_update_user: performance.ttts_extension.online_sales_update_user,
-                canceled: infoR.dicReservations[performanceId].length,
-                arrived: infoR.dicReservations[performanceId].filter((r) => r.checkins.length > 0).length,
+                canceled: numberOfReservations,
+                arrived: numberOfReservations - nubmerOfUncheckedReservations,
                 refund_status: performance.ttts_extension.refund_status,
                 refund_status_name: REFUND_STATUS_NAMES[performance.ttts_extension.refund_status],
                 refunded: performance.ttts_extension.refunded_count
             };
-        });
+        })));
     });
 }
 /**
