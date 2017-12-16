@@ -207,6 +207,7 @@ $(function () {
 
     // 返金処理実行
     $(document).on('click', '.btn-refund_process', function (e) {
+        var button = $(this);
         var performanceId = $(e.currentTarget).closest('tr').attr('performance_id');
         $.ajax({
             dataType: 'json',
@@ -217,8 +218,8 @@ $(function () {
             }
         }).done(function (data) {
             // ステータス表示変更
-            $('.td-refund_status_name', $('.btn-refund_process').parent().parent()).html('指示済');
-            $('.btn-refund_process').replaceWith('<p class="btn"><span>処理中</span></p>');
+            $('.td-refund_status_name', button.parent().parent()).html('指示済');
+            button.replaceWith('<p class="btn"><span>処理中</span></p>');
         }).fail(function (jqxhr, textStatus, error) {
             if (jqxhr.status === 500) {
                 var response = $.parseJSON(jqxhr.responseText);
