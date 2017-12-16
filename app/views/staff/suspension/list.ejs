@@ -1,6 +1,5 @@
 <div class="wrapper-searchform">
-
-    <form class="search-form" action="/staff/suspension/list/search">
+    <form class="search-form" action="/api/performances/suspended">
         <input type="hidden" name="limit" value="20">
         <h3>販売停止処理日</h3>
         <div class="wrapper-inputs wrapper-time form-group">
@@ -25,7 +24,11 @@
                 </select>
             </div>
         </div>
-        <a class="btn btn-next" href="javascript:void(0)"><span><%- __('Button.Search') %></span></a>
+        <a class="btn btn-next" href="javascript:void(0)">
+            <span>
+                <%- __('Button.Search') %>
+            </span>
+        </a>
 
     </form>
 </div>
@@ -54,99 +57,19 @@
     </table>
 </div>
 
-
-
-<div class="wrapper-controls">
-
-    <div class="form-inline">
-        <div class="form-group">
-            <select class="form-control" id="select_action" name="action">
-                <option value=""><%- __('Label.Actions') %></option>
-                <option value="cancel">キャンセル</option>
-                <option value="print">A4チケット印刷</option>
-                <option value="thermalprint">サーマルチケット印刷</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <p class="btn action-to-reservations"><span><%- __('Label.Apply') %></span></p>
-        </div>
-    </div>
-
-    <div class="navigation">
-    </div>
-
-</div>
-
 <div class="modal-calender">
     <div class="modal-calender-content">
         <div id="calendercontainer"></div>
     </div>
 </div>
 
-<div id="modal_detail" class="modal modal-detail modal-cancel fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-			<div class="modal-header">
-				<p class="btn-close" data-dismiss="modal"><span>×</span></p>
-				<h2 class="modal-title">予約詳細</h2>
-                <p id="error_cancel"></p>
-			</div>
-			<div class="modal-body">
-                <form>
-                    <h3>購入情報</h3>
-                    <div>
-                        <h4>購入番号</h4>
-                        <p class="echo" id="echo_detailmodal__payment_no"></p>
-                        <hr>
-
-                        <h4>ご来塔ご予約日時</h4>
-                        <p class="echo" id="echo_detailmodal__date"></p>
-                        <hr>
-
-                        <h4>座席 / 券種 / メモ</h4>
-                        <p class="echo" id="echo_detailmodal__info"></p>
-                        <hr>
-
-                        <h4>購入場所</h4>
-                        <p class="echo" id="echo_detailmodal__purchaseinfo"></p>
-                        <hr>
-                    </div>
-                </form>
-			</div>
-            <div class="modal-footer">
-                <div class="btns2clm">
-                    <p class="btn btn-print"><span>A4チケット印刷</span></p>
-                    <p class="btn btn-thermalprint"><span>入場QRサーマル印刷</span></p>
-                </div>
-                <p class="btn btn-cancelrsrv"><span>この予約をキャンセル</span></p>
-                <p class="btn btn-close" data-dismiss="modal"><span>閉じる</span></p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="modal_cancelcompleted" class="modal modal-cancel fade" tabindex="-1">
-	<div class="modal-dialog">
-		<div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">チケットキャンセル完了</h2>
-            </div>
-			<div class="modal-body">
-                <div id="echo_canceledreservations"></div>
-                <p>上記チケットのキャンセル手続きが完了いたしました。</p>
-			</div>
-			<div class="modal-footer">
-				<p class="btn btn-close" data-dismiss="modal"><span>閉じる</span></p>
-			</div>
-		</div>
-	</div>
-</div>
-
 <div class="modal fade loading" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-body">
-                <div class="text-center"><%- __('Message.Searching') %></div>
+                <div class="text-center">
+                    <%- __('Message.Searching') %>
+                </div>
             </div>
         </div>
     </div>
@@ -154,15 +77,7 @@
 
 <input type="hidden" name="userId" value="<%- req.staffUser._id %>">
 <input type="hidden" name="username" value="<%- req.staffUser.name.ja %>">
-<input type="hidden" name="urlCancel" value="/staff/cancel/execute">
-<input type="hidden" name="urlUpdateWatcherName" value="/staff/mypage/updateWatcherName">
-<input type="hidden" name="messageAreYouSureCancel" value="<%- __('Message.AreYouSureCancel') %>">
-<input type="hidden" name="messageConfirmCancelSelectedTickets" value="<%- __('Message.ConfirmCancelSelectedTickets') %>">
 
-<script src="/js/thermalprint/StarWebPrintTrader.js"></script>
-<script src="/js/thermalprint/StarWebPrintBuilder.js"></script>
-<script src="/js/thermalprint/starprint.js"></script>
 <script src="/js/flatpickr/flatpickr.min.js"></script>
 <script src="/js/flatpickr/flatpickr.locale.ja.js"></script>
 <script src="/js/suspension/list.js"></script>
-

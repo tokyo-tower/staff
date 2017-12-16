@@ -1,92 +1,96 @@
 <div class="wrapper-searchform">
 
-    <form class="search-form" action="/staff/mypage/search">
+    <form class="search-form" action="/api/reservations">
         <input type="hidden" name="limit" value="20">
 
-        <h3><%- __('Label.Day') %></h3>
+        <h3>
+            <%- __('Label.Day') %>
+        </h3>
         <div class="wrapper-inputs wrapper-time form-group">
             <input name="day" id="input_performancedate" class="form-control" value="">
             <%- /* 開始時刻 */ %>
-            <select class="form-control" name="start_hour1">
-                <option value=""></option>
-                <option value="00">00</option>
-                <option value="01">01</option>
-                <option value="02">02</option>
-                <option value="03">03</option>
-                <option value="04">04</option>
-                <option value="05">05</option>
-                <option value="06">06</option>
-                <option value="07">07</option>
-                <option value="08">08</option>
-                <option value="09">09</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-                <option value="12">12</option>
-                <option value="13">13</option>
-                <option value="14">14</option>
-                <option value="15">15</option>
-                <option value="16">16</option>
-                <option value="17">17</option>
-                <option value="18">18</option>
-                <option value="19">19</option>
-                <option value="20">20</option>
-                <option value="21">21</option>
-                <option value="22">22</option>
-                <option value="23">23</option>
-            </select>
-            <%- __('Label.Hour') %>
-            <select class="form-control" name="start_minute1">
-                <option value=""></option>
-                <option value="00">00</option>
-                <option value="15">15</option>
-                <option value="30">30</option>
-                <option value="45">45</option>
-            </select>
-            <%- __('Label.Minute') %>
-            <%- __('Label.FromTo') %>
-            <%- /* 終了時刻 */ %>
-            <select class="form-control" name="start_hour2">
-                <option value=""></option>
-                <option value="00">00</option>
-                <option value="01">01</option>
-                <option value="02">02</option>
-                <option value="03">03</option>
-                <option value="04">04</option>
-                <option value="05">05</option>
-                <option value="06">06</option>
-                <option value="07">07</option>
-                <option value="08">08</option>
-                <option value="09">09</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-                <option value="12">12</option>
-                <option value="13">13</option>
-                <option value="14">14</option>
-                <option value="15">15</option>
-                <option value="16">16</option>
-                <option value="17">17</option>
-                <option value="18">18</option>
-                <option value="19">19</option>
-                <option value="20">20</option>
-                <option value="21">21</option>
-                <option value="22">22</option>
-                <option value="23">23</option>
-            </select>
-            <%- __('Label.Hour') %>
-            <select class="form-control" name="start_minute2">
-                <option value=""></option>
-                <option value="00">00</option>
-                <option value="15">15</option>
-                <option value="30">30</option>
-                <option value="45">45</option>
-            </select>
-            <%- __('Label.Minute') %>
+                <select class="form-control" name="start_hour1">
+                    <option value=""></option>
+                    <option value="00">00</option>
+                    <option value="01">01</option>
+                    <option value="02">02</option>
+                    <option value="03">03</option>
+                    <option value="04">04</option>
+                    <option value="05">05</option>
+                    <option value="06">06</option>
+                    <option value="07">07</option>
+                    <option value="08">08</option>
+                    <option value="09">09</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                    <option value="17">17</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
+                    <option value="21">21</option>
+                    <option value="22">22</option>
+                    <option value="23">23</option>
+                </select>
+                <%- __('Label.Hour') %>
+                    <select class="form-control" name="start_minute1">
+                        <option value=""></option>
+                        <option value="00">00</option>
+                        <option value="15">15</option>
+                        <option value="30">30</option>
+                        <option value="45">45</option>
+                    </select>
+                    <%- __('Label.Minute') %>
+                        <%- __('Label.FromTo') %>
+                            <%- /* 終了時刻 */ %>
+                                <select class="form-control" name="start_hour2">
+                                    <option value=""></option>
+                                    <option value="00">00</option>
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                    <option value="04">04</option>
+                                    <option value="05">05</option>
+                                    <option value="06">06</option>
+                                    <option value="07">07</option>
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>
+                                    <option value="14">14</option>
+                                    <option value="15">15</option>
+                                    <option value="16">16</option>
+                                    <option value="17">17</option>
+                                    <option value="18">18</option>
+                                    <option value="19">19</option>
+                                    <option value="20">20</option>
+                                    <option value="21">21</option>
+                                    <option value="22">22</option>
+                                    <option value="23">23</option>
+                                </select>
+                                <%- __('Label.Hour') %>
+                                    <select class="form-control" name="start_minute2">
+                                        <option value=""></option>
+                                        <option value="00">00</option>
+                                        <option value="15">15</option>
+                                        <option value="30">30</option>
+                                        <option value="45">45</option>
+                                    </select>
+                                    <%- __('Label.Minute') %>
         </div>
 
         <h3>購入情報から検索</h3>
         <div class="wrapper-inputs form-inline">
             <div class="form-group">
-                <label><%- __('Label.PaymentNo') %></label>
+                <label>
+                    <%- __('Label.PaymentNo') %>
+                </label>
                 <input type="text" class="form-control" name="payment_no">
             </div>
             <div class="form-group">
@@ -103,8 +107,10 @@
                 <select class="form-control" name="owner">
                     <option value="">指定無し</option>
                     <% owners.forEach((owner) => { %>
-                        <option value="<%= owner._id %>"><%= owner.name.ja %></option>
-                    <% }) %>
+                        <option value="<%= owner._id %>">
+                            <%= owner.name.ja %>
+                        </option>
+                        <% }) %>
                 </select>
             </div>
             <div class="form-group">
@@ -115,14 +121,18 @@
                         const paymentMethodsForCustomer = conf.get('paymentMethodsForCustomer');
                         Object.keys(paymentMethodsForCustomer).forEach((methodCode) => {
                     %>
-                            <option value="<%- methodCode %>"><%- paymentMethodsForCustomer[methodCode] %></option>
-                    <%  });
+                        <option value="<%- methodCode %>">
+                            <%- paymentMethodsForCustomer[methodCode] %>
+                        </option>
+                        <%  });
                         const paymentMethodsForStaff = conf.get('paymentMethodsForStaff');
                         Object.keys(paymentMethodsForStaff).forEach((methodCode) => {
                     %>
-                            <option value="<%- methodCode %>"><%- paymentMethodsForStaff[methodCode] %></option>
-                    <%  }); %>
-                    <option value="-">POS</option>
+                            <option value="<%- methodCode %>">
+                                <%- paymentMethodsForStaff[methodCode] %>
+                            </option>
+                            <%  }); %>
+                                <option value="-">POS</option>
                 </select>
             </div>
         </div>
@@ -156,7 +166,11 @@
             </div>
         </div>
 
-        <a class="btn btn-next" href="javascript:void(0)"><span><%- __('Button.Search') %></span></a>
+        <a class="btn btn-next" href="javascript:void(0)">
+            <span>
+                <%- __('Button.Search') %>
+            </span>
+        </a>
 
     </form>
 </div>
@@ -167,11 +181,17 @@
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th><input type="checkbox" class="check-all"></th>
-                <th><%- __('Label.PaymentNo') %></th>
+                <th>
+                    <input type="checkbox" class="check-all">
+                </th>
+                <th>
+                    <%- __('Label.PaymentNo') %>
+                </th>
                 <th>氏名</th>
                 <th>メモ</th>
-                <th><%- __('Label.SeatCode') %></th>
+                <th>
+                    <%- __('Label.SeatCode') %>
+                </th>
                 <th>券種</th>
                 <th>予約方法</th>
                 <th>入場状況</th>
@@ -191,14 +211,20 @@
     <div class="form-inline">
         <div class="form-group">
             <select class="form-control" id="select_action" name="action">
-                <option value=""><%- __('Label.Actions') %></option>
+                <option value="">
+                    <%- __('Label.Actions') %>
+                </option>
                 <option value="cancel">キャンセル</option>
                 <option value="print">A4チケット印刷</option>
                 <option value="thermalprint">サーマルチケット印刷</option>
             </select>
         </div>
         <div class="form-group">
-            <p class="btn action-to-reservations"><span><%- __('Label.Apply') %></span></p>
+            <p class="btn action-to-reservations">
+                <span>
+                    <%- __('Label.Apply') %>
+                </span>
+            </p>
         </div>
     </div>
 
@@ -216,12 +242,14 @@
 <div id="modal_detail" class="modal modal-detail modal-cancel fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-			<div class="modal-header">
-				<p class="btn-close" data-dismiss="modal"><span>×</span></p>
-				<h2 class="modal-title">予約詳細</h2>
+            <div class="modal-header">
+                <p class="btn-close" data-dismiss="modal">
+                    <span>×</span>
+                </p>
+                <h2 class="modal-title">予約詳細</h2>
                 <p id="error_cancel"></p>
-			</div>
-			<div class="modal-body">
+            </div>
+            <div class="modal-body">
                 <form>
                     <h3>購入情報</h3>
                     <div>
@@ -242,41 +270,53 @@
                         <hr>
                     </div>
                 </form>
-			</div>
+            </div>
             <div class="modal-footer">
                 <div class="btns2clm">
-                    <p class="btn btn-print"><span>A4チケット印刷</span></p>
-                    <p class="btn btn-thermalprint"><span>入場QRサーマル印刷</span></p>
+                    <p class="btn btn-print">
+                        <span>A4チケット印刷</span>
+                    </p>
+                    <p class="btn btn-thermalprint">
+                        <span>入場QRサーマル印刷</span>
+                    </p>
                 </div>
-                <p class="btn btn-cancelrsrv"><span>この予約をキャンセル</span></p>
-                <p class="btn btn-close" data-dismiss="modal"><span>閉じる</span></p>
+                <p class="btn btn-cancelrsrv">
+                    <span>この予約をキャンセル</span>
+                </p>
+                <p class="btn btn-close" data-dismiss="modal">
+                    <span>閉じる</span>
+                </p>
             </div>
         </div>
     </div>
 </div>
 
 <div id="modal_cancelcompleted" class="modal modal-cancel fade" tabindex="-1">
-	<div class="modal-dialog">
-		<div class="modal-content">
+    <div class="modal-dialog">
+        <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">チケットキャンセル完了</h2>
             </div>
-			<div class="modal-body">
+            <div class="modal-body">
                 <div id="echo_canceledreservations"></div>
                 <p>上記チケットのキャンセル手続きが完了いたしました。</p>
-			</div>
-			<div class="modal-footer">
-				<p class="btn btn-close" data-dismiss="modal"><span>閉じる</span></p>
-			</div>
-		</div>
-	</div>
+            </div>
+            <div class="modal-footer">
+                <p class="btn btn-close" data-dismiss="modal">
+                    <span>閉じる</span>
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="modal fade loading" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-body">
-                <div class="text-center"><%- __('Message.Searching') %></div>
+                <div class="text-center">
+                    <%- __('Message.Searching') %>
+                </div>
             </div>
         </div>
     </div>
@@ -284,8 +324,8 @@
 
 <input type="hidden" name="userId" value="<%- req.staffUser._id %>">
 <input type="hidden" name="username" value="<%- req.staffUser.name.ja %>">
-<input type="hidden" name="urlCancel" value="/staff/cancel/execute">
-<input type="hidden" name="urlUpdateWatcherName" value="/staff/mypage/updateWatcherName">
+<input type="hidden" name="urlCancel" value="/api/reservations/cancel">
+<input type="hidden" name="urlUpdateWatcherName" value="/api/reservations/updateWatcherName">
 <input type="hidden" name="messageAreYouSureCancel" value="<%- __('Message.AreYouSureCancel') %>">
 <input type="hidden" name="messageConfirmCancelSelectedTickets" value="<%- __('Message.ConfirmCancelSelectedTickets') %>">
 <input type="hidden" id="INQUIRY_SITE_URL" value="<%- process.env.INQUIRY_SITE_URL %>">
@@ -296,4 +336,3 @@
 <script src="/js/flatpickr/flatpickr.min.js"></script>
 <script src="/js/flatpickr/flatpickr.locale.ja.js"></script>
 <script src="/js/staff/mypage.js"></script>
-

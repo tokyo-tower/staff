@@ -16,18 +16,19 @@ const i18n = require("i18n");
 const multer = require("multer");
 const favicon = require("serve-favicon");
 const _ = require("underscore");
+const authentication_1 = require("./middlewares/authentication");
 const basicAuth_1 = require("./middlewares/basicAuth");
-// import benchmarks from './middlewares/benchmarks';
 const errorHandler_1 = require("./middlewares/errorHandler");
 const notFoundHandler_1 = require("./middlewares/notFoundHandler");
 const session_1 = require("./middlewares/session");
 const setLocals_1 = require("./middlewares/setLocals");
+const api_1 = require("./routes/api");
+const auth_1 = require("./routes/auth");
 const router_1 = require("./routes/router");
 const staff_1 = require("./routes/staff");
 const mongooseConnectionOptions_1 = require("../mongooseConnectionOptions");
 const app = express();
 app.use(partials()); // レイアウト&パーシャルサポート
-// app.use(benchmarks); // ベンチマーク的な
 app.use(session_1.default); // セッション
 app.use(basicAuth_1.default); // ベーシック認証
 if (process.env.NODE_ENV !== 'production') {
@@ -46,7 +47,7 @@ app.set('view engine', 'ejs');
 // uncomment after placing your favicon in /public
 app.use(favicon(`${__dirname}/../public/favicon.ico`));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 // for parsing multipart/form-data
 const storage = multer.memoryStorage();
 app.use(multer({ storage: storage }).any());
@@ -77,6 +78,9 @@ app.use((req, _res, next) => {
 app.use(expressValidator()); // バリデーション
 app.use(setLocals_1.default); // ローカル変数セット
 // ルーティング登録の順序に注意！
+app.use('/auth', auth_1.default);
+app.use(authentication_1.default);
+app.use('/api', api_1.default);
 app.use('/staff', staff_1.default);
 app.use('/', router_1.default);
 // 404

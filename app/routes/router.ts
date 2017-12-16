@@ -1,6 +1,5 @@
 /**
  * ルーティング
- *
  * @ignore
  */
 import * as conf from 'config';

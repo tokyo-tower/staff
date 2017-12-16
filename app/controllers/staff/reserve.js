@@ -287,10 +287,6 @@ exports.confirm = confirm;
  */
 function complete(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (req.staffUser === undefined) {
-            next(new Error(req.__('Message.UnexpectedError')));
-            return;
-        }
         try {
             const transactionRepo = new ttts.repository.Transaction(ttts.mongoose.connection);
             const transaction = yield transactionRepo.transactionModel.findOne({
