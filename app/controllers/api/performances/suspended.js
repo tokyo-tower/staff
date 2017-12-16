@@ -24,12 +24,8 @@ const REFUND_STATUS_NAMES = { 0: EMPTY_STRING, 1: '未指示', 2: '指示済', 3
 /**
  * 販売中止一覧検索(api)
  */
-function searchSuspendedPerformances(req, res, next) {
+function searchSuspendedPerformances(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (req.staffUser === undefined) {
-            next(new Error(req.__('Message.UnexpectedError')));
-            return;
-        }
         // tslint:disable-next-line:no-magic-numbers
         const limit = (!_.isEmpty(req.query.limit)) ? parseInt(req.query.limit, 10) : 10;
         // tslint:disable-next-line:no-magic-numbers
@@ -148,12 +144,8 @@ function findSuspendedPerformances(conditions, limit, page) {
 /**
  * 返金処理(api)
  */
-function returnOrders(req, res, next) {
+function returnOrders(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (req.staffUser === undefined) {
-            next(new Error(req.__('Message.UnexpectedError')));
-            return;
-        }
         try {
             // パフォーマンスと予約情報の返金ステータス更新(指示済に)
             const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);

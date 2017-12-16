@@ -1,7 +1,6 @@
 /**
  * セッションミドルウェア
- *
- * @module sessionMiddleware
+ * @namespace middlewares.session
  */
 
 import * as connectRedis from 'connect-redis';
@@ -11,7 +10,7 @@ const redisStore = connectRedis(session);
 const COOKIE_MAX_AGE = 3600000; // 60 * 60 * 1000(session active 1 hour)
 
 export default session({
-    secret: 'TTTSFrontendSecret',
+    secret: 'ttts-staff-session-secret',
     resave: false,
     // Force a session identifier cookie to be set on every response.
     // The expiration is reset to the original maxAge, resetting the expiration countdown.

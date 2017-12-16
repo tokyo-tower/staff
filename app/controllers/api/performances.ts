@@ -6,7 +6,7 @@
 import * as ttts from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import * as createDebug from 'debug';
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { INTERNAL_SERVER_ERROR, NO_CONTENT } from 'http-status';
 import * as moment from 'moment';
 
@@ -15,13 +15,7 @@ const debug = createDebug('ttts-staff:controllers:api:performances');
 /**
  * 運行・オンライン販売ステータス変更
  */
-export async function updateOnlineStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
-    if (req.staffUser === undefined) {
-        next(new Error(req.__('Message.UnexpectedError')));
-
-        return;
-    }
-
+export async function updateOnlineStatus(req: Request, res: Response): Promise<void> {
     try {
         // パフォーマンスIDリストをjson形式で受け取る
         const performanceIds = req.body.performanceIds;

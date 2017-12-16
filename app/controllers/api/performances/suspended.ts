@@ -5,7 +5,7 @@
 
 import * as ttts from '@motionpicture/ttts-domain';
 import * as createDebug from 'debug';
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { CREATED, INTERNAL_SERVER_ERROR } from 'http-status';
 import * as moment from 'moment';
 import * as _ from 'underscore';
@@ -18,13 +18,7 @@ const REFUND_STATUS_NAMES: any = { 0: EMPTY_STRING, 1: '未指示', 2: '指示�
 /**
  * 販売中止一覧検索(api)
  */
-export async function searchSuspendedPerformances(req: Request, res: Response, next: NextFunction): Promise<void> {
-    if (req.staffUser === undefined) {
-        next(new Error(req.__('Message.UnexpectedError')));
-
-        return;
-    }
-
+export async function searchSuspendedPerformances(req: Request, res: Response): Promise<void> {
     // tslint:disable-next-line:no-magic-numbers
     const limit: number = (!_.isEmpty(req.query.limit)) ? parseInt(req.query.limit, 10) : 10;
     // tslint:disable-next-line:no-magic-numbers
@@ -177,13 +171,7 @@ async function findSuspendedPerformances(conditions: any[], limit: number, page:
 /**
  * 返金処理(api)
  */
-export async function returnOrders(req: Request, res: Response, next: NextFunction): Promise<void> {
-    if (req.staffUser === undefined) {
-        next(new Error(req.__('Message.UnexpectedError')));
-
-        return;
-    }
-
+export async function returnOrders(req: Request, res: Response): Promise<void> {
     try {
         // パフォーマンスと予約情報の返金ステータス更新(指示済に)
         const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);

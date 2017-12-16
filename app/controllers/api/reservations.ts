@@ -14,13 +14,7 @@ const debug = createDebug('ttts-staff:controllers:api:reservations');
  * 予約検索
  */
 // tslint:disable-next-line:cyclomatic-complexity max-func-body-length
-export async function search(req: Request, res: Response, next: NextFunction): Promise<void> {
-    if (req.staffUser === undefined) {
-        next(new Error(req.__('Message.UnexpectedError')));
-
-        return;
-    }
-
+export async function search(req: Request, res: Response): Promise<void> {
     // バリデーション
     const errors = await validate(req);
     if (Object.keys(errors).length > 0) {
@@ -66,7 +60,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
     const conditions: any[] = [];
 
     // 管理者の場合、内部関係者の予約全て&確保中
-    if (req.staffUser.get('is_admin') === true) {
+    if ((<Express.StaffUser>req.staffUser).get('is_admin') === true) {
         conditions.push(
             {
                 status: ttts.factory.reservationStatusType.ReservationConfirmed

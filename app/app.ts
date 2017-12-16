@@ -17,14 +17,15 @@ import * as multer from 'multer';
 import * as favicon from 'serve-favicon';
 import * as _ from 'underscore';
 
+import authentication from './middlewares/authentication';
 import basicAuth from './middlewares/basicAuth';
-// import benchmarks from './middlewares/benchmarks';
 import errorHandler from './middlewares/errorHandler';
 import notFoundHandler from './middlewares/notFoundHandler';
 import session from './middlewares/session';
 import setLocals from './middlewares/setLocals';
 
 import apiRouter from './routes/api';
+import authRouter from './routes/auth';
 import router from './routes/router';
 import staffRouter from './routes/staff';
 
@@ -34,7 +35,6 @@ const app = express();
 
 app.use(partials()); // レイアウト&パーシャルサポート
 
-// app.use(benchmarks); // ベンチマーク的な
 app.use(session); // セッション
 app.use(basicAuth); // ベーシック認証
 
@@ -97,6 +97,9 @@ app.use(expressValidator()); // バリデーション
 app.use(setLocals); // ローカル変数セット
 
 // ルーティング登録の順序に注意！
+app.use('/auth', authRouter);
+app.use(authentication);
+
 app.use('/api', apiRouter);
 app.use('/staff', staffRouter);
 app.use('/', router);

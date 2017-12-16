@@ -20,12 +20,8 @@ const debug = createDebug('ttts-staff:controllers:api:reservations');
  * 予約検索
  */
 // tslint:disable-next-line:cyclomatic-complexity max-func-body-length
-function search(req, res, next) {
+function search(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (req.staffUser === undefined) {
-            next(new Error(req.__('Message.UnexpectedError')));
-            return;
-        }
         // バリデーション
         const errors = yield validate(req);
         if (Object.keys(errors).length > 0) {

@@ -21,12 +21,8 @@ const debug = createDebug('ttts-staff:controllers:api:performances');
 /**
  * 運行・オンライン販売ステータス変更
  */
-function updateOnlineStatus(req, res, next) {
+function updateOnlineStatus(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (req.staffUser === undefined) {
-            next(new Error(req.__('Message.UnexpectedError')));
-            return;
-        }
         try {
             // パフォーマンスIDリストをjson形式で受け取る
             const performanceIds = req.body.performanceIds;
