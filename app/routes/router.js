@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * ルーティング
- *
  * @ignore
  */
 const conf = require("config");

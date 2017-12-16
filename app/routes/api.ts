@@ -1,19 +1,16 @@
 /**
- * 内部関係者ルーティング
- *
+ * APIルーティング
  * @ignore
  */
 
 import * as ttts from '@motionpicture/ttts-domain';
 import * as express from 'express';
-import * as staffAuthController from '../controllers/staff/auth';
-import * as staffMyPageController from '../controllers/staff/mypage';
-import * as staffReserveController from '../controllers/staff/reserve';
-import * as staffSuspensionListController from '../controllers/staff/suspensionList';
-import * as staffSuspensionSettingController from '../controllers/staff/suspensionSetting';
+import * as PerformancesController from '../controllers/api/performances';
+import * as SuspendedPerformancesController from '../controllers/api/performances/suspended';
+import * as ReservationsController from '../controllers/api/reservations';
 import StaffUser from '../models/user/staff';
 
-const staffRouter = express.Router();
+const apiRouter = express.Router();
 
 const authentication = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (req.staffUser === undefined) {
@@ -84,23 +81,16 @@ const base = (req: express.Request, __: express.Response, next: express.NextFunc
     next();
 };
 
-staffRouter.all('/login', base, staffAuthController.login);
-staffRouter.all('/logout', base, staffAuthController.logout);
-staffRouter.all('/mypage', base, authentication, staffMyPageController.index);
-staffRouter.get('/reserve/start', base, authentication, staffReserveController.start);
-staffRouter.all('/reserve/terms', base, authentication, staffReserveController.terms);
-staffRouter.all('/reserve/performances', base, authentication, staffReserveController.performances);
-staffRouter.all('/reserve/tickets', base, authentication, staffReserveController.tickets);
-staffRouter.all('/reserve/profile', base, authentication, staffReserveController.profile);
-staffRouter.all('/reserve/confirm', base, authentication, staffReserveController.confirm);
-staffRouter.get('/reserve/:performanceDay/:paymentNo/complete', base, authentication, staffReserveController.complete);
+apiRouter.get('/reservations', base, authentication, ReservationsController.search);
+apiRouter.post('/reservations/updateWatcherName', base, authentication, ReservationsController.updateWatcherName);
+apiRouter.post('/reservations/cancel', base, authentication, ReservationsController.cancel);
 
 // 運行・オンライン販売停止設定コントローラー
-staffRouter.get('/suspension/setting/performances', base, authentication, staffSuspensionSettingController.performances);
+apiRouter.post('/performances/updateOnlineStatus', base, authentication, PerformancesController.updateOnlineStatus);
 
 // 運行・オンライン販売停止一覧コントローラー
-staffRouter.get('/suspension/list', base, authentication, staffSuspensionListController.index);
+apiRouter.get('/performances/suspended', base, authentication, SuspendedPerformancesController.searchSuspendedPerformances);
+apiRouter.post(
+    '/performances/suspended/:performanceId/tasks/returnOrders', base, authentication, SuspendedPerformancesController.returnOrders);
 
-staffRouter.get('/auth', base, staffAuthController.auth);
-
-export default staffRouter;
+export default apiRouter;
