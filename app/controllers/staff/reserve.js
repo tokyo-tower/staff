@@ -22,7 +22,7 @@ const reservePerformanceForm_1 = require("../../forms/reserve/reservePerformance
 const session_1 = require("../../models/reserve/session");
 const reserveBaseController = require("../reserveBase");
 const debug = createDebug('ttts-staff:controller:reserve');
-const PURCHASER_GROUP = ttts.ReservationUtil.PURCHASER_GROUP_STAFF;
+const PURCHASER_GROUP = ttts.factory.person.Group.Staff;
 const layout = 'layouts/staff/layout';
 const PAY_TYPE_FREE = 'F';
 const paymentMethodNames = { F: '無料招待券', I: '請求書支払い' };
@@ -307,17 +307,6 @@ function complete(req, res, next) {
             let reservations = transaction.get('result').get('eventReservations');
             debug(reservations.length, 'reservation(s) found.');
             reservations = reservations.filter((reservation) => reservation.get('status') === ttts.factory.reservationStatusType.ReservationConfirmed);
-            // const reservations = await ttts.Models.Reservation.find(
-            //     {
-            //         performance_day: req.params.performanceDay,
-            //         payment_no: req.params.paymentNo,
-            //         status: ttts.ReservationUtil.STATUS_RESERVED,
-            //         owner: req.staffUser.get('_id'),
-            //         purchased_at: { // 購入確定から30分有効
-            //             $gt: moment().add(-30, 'minutes').toISOString() // tslint:disable-line:no-magic-numbers
-            //         }
-            //     }
-            // ).exec();
             if (reservations.length === 0) {
                 next(new Error(req.__('Message.NotFound')));
                 return;

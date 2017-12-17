@@ -43,7 +43,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
                 const owner = await ownerRepo.ownerModel.findOne(
                     {
                         username: req.body.userId,
-                        group: ttts.OwnerUtil.GROUP_STAFF
+                        group: ttts.factory.person.Group.Staff
                     }
                 ).exec();
 

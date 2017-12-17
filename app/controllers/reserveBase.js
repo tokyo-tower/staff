@@ -69,14 +69,8 @@ function processFixSeatsAndTickets(reservationModel, req) {
                 throw new Error(req.__('Message.UnexpectedError'));
             }
             return {
-                extra: choice.choicesExtra,
                 ticket_type: ticketType._id,
-                ticket_type_name: ticketType.name,
-                ticket_type_charge: ticketType.charge,
-                watcher_name: choice.watcher_name,
-                ticket_cancel_charge: ticketType.cancel_charge,
-                ticket_ttts_extension: ticketType.ttts_extension,
-                performance_ttts_extension: reservationModel.performance.ttts_extension
+                watcher_name: choice.watcher_name
             };
         });
         debug(`creating seatReservation authorizeAction on ${offers.length} offers...`);
@@ -297,7 +291,7 @@ function initializePayment(reservationModel, req) {
     };
     reservationModel.paymentMethodChoices = [];
     switch (reservationModel.purchaserGroup) {
-        case ttts.ReservationUtil.PURCHASER_GROUP_STAFF:
+        case ttts.factory.person.Group.Staff:
             if (req.staffUser === undefined) {
                 throw new Error(req.__('Message.UnexpectedError'));
             }
@@ -346,7 +340,7 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
             throw new Error(req.__('Message.OutOfTerm'));
         }
         // 内部と当日以外は、上映日当日まで購入可能
-        if (reservationModel.purchaserGroup !== ttts.ReservationUtil.PURCHASER_GROUP_STAFF) {
+        if (reservationModel.purchaserGroup !== ttts.factory.person.Group.Staff) {
             // tslint:disable-next-line:no-magic-numbers
             if (parseInt(performance.day, 10) < parseInt(moment().format('YYYYMMDD'), 10)) {
                 throw new Error('You cannot reserve this performance.');
@@ -358,7 +352,7 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
         // 券種リストは、予約する主体によって異なる
         // 内部関係者の場合
         switch (reservationModel.purchaserGroup) {
-            case ttts.ReservationUtil.PURCHASER_GROUP_STAFF:
+            case ttts.factory.person.Group.Staff:
                 if (ticketTypeGroup !== null) {
                     reservationModel.ticketTypes = ticketTypeGroup.get('ticket_types');
                 }
@@ -373,7 +367,7 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
         // パフォーマンス情報を保管
         reservationModel.performance = Object.assign({}, performance, {
             film: Object.assign({}, performance.film, {
-                image: `${req.protocol}://${req.hostname}/images/film/${performance.film._id}.jpg`
+                image: `${req.protocol}://${req.hostname}/images/film/${performance.film.id}.jpg`
             })
         });
         // 座席グレードリスト抽出
@@ -425,7 +419,7 @@ function createEmailQueue(reservations, reservationModel, res) {
         const reservationDocs = reservations.map((reservation) => new reservationRepo.reservationModel(reservation));
         let to = '';
         switch (reservations[0].purchaser_group) {
-            case ttts.ReservationUtil.PURCHASER_GROUP_STAFF:
+            case ttts.factory.person.Group.Staff:
                 to = reservations[0].owner_email;
                 break;
             default:
@@ -474,7 +468,6 @@ function createEmailQueue(reservations, reservationModel, res) {
                 numeral: numeral,
                 conf: conf,
                 GMOUtil: ttts.GMO.utils.util,
-                ReservationUtil: ttts.ReservationUtil,
                 ticketInfoArray: ticketInfoArray,
                 totalCharge: reservationModel.getTotalCharge(),
                 dayTime: `${day} ${time}`

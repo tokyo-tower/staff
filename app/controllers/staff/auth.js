@@ -45,7 +45,7 @@ function login(req, res, next) {
                     const ownerRepo = new ttts.repository.Owner(ttts.mongoose.connection);
                     const owner = yield ownerRepo.ownerModel.findOne({
                         username: req.body.userId,
-                        group: ttts.OwnerUtil.GROUP_STAFF
+                        group: ttts.factory.person.Group.Staff
                     }).exec();
                     res.locals.userId = req.body.userId;
                     res.locals.password = '';

@@ -98,7 +98,7 @@ export async function getTargetReservationsForRefund(performanceIds: string[]): 
         'transaction',
         {
             status: ttts.factory.reservationStatusType.ReservationConfirmed,
-            purchaser_group: ttts.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
+            purchaser_group: ttts.factory.person.Group.Customer,
             performance: { $in: performanceIds },
             checkins: { $size: 0 }
         }

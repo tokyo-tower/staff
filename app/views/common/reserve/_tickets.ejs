@@ -24,15 +24,13 @@
             <tbody>
                 <% /* スタッフ予約時 => 券種ごとの予約メモを回収 */
                     const memosByTicketType = {};
-                    if (reservationModel.purchaserGroup === ReservationUtil.PURCHASER_GROUP_STAFF) {
-                        reservationModel.seatCodes.forEach((seatCode) => {
-                            let reservation = reservationModel[`reservation_${seatCode}`]
-                            let ticketId = reservation.ticket_type;
-                            if (typeof memosByTicketType[ticketId] !== 'string') {
-                                memosByTicketType[ticketId] = reservation.watcher_name;
-                            }
-                        });
-                    }
+                    reservationModel.seatCodes.forEach((seatCode) => {
+                        let reservation = reservationModel[`reservation_${seatCode}`]
+                        let ticketId = reservation.ticket_type;
+                        if (typeof memosByTicketType[ticketId] !== 'string') {
+                            memosByTicketType[ticketId] = reservation.watcher_name;
+                        }
+                    });
                 %>
                 <% /* 券種分loop */ %>
                 <% reservationModel.ticketTypes.forEach(function(ticketType) {
@@ -45,12 +43,7 @@
                         <% /* 券種名+値段 */ %>
                         <th>
                             <span><%- ticketType.name[locale] %> \<%= ticketType.charge %></span>
-                            <%
-                                /* スタッフ予約時 => 予約メモ欄を表示 */
-                                if (reservationModel.purchaserGroup === ReservationUtil.PURCHASER_GROUP_STAFF) {
-                            %>
-                                <input type="text" name="watcherName" class="form-control" placeholder="予約メモ" data-ticket-code="<%- ticketType._id %>" value="<%- memosByTicketType[ticketType._id] %>">
-                            <% } %>
+                            <input type="text" name="watcherName" class="form-control" placeholder="予約メモ" data-ticket-code="<%- ticketType._id %>" value="<%- memosByTicketType[ticketType._id] %>">
                         </th>
                         <td>
                             <% /* 枚数選択dropdown */ %>

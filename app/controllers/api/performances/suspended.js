@@ -121,13 +121,13 @@ function findSuspendedPerformances(conditions, limit, page) {
             // パフォーマンスに対する予約数
             const numberOfReservations = yield reservationRepo.reservationModel.count({
                 status: ttts.factory.reservationStatusType.ReservationConfirmed,
-                purchaser_group: ttts.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
+                purchaser_group: ttts.factory.person.Group.Customer,
                 performance: performance._id
             }).exec();
             // 未入場の予約数
             const nubmerOfUncheckedReservations = yield reservationRepo.reservationModel.count({
                 status: ttts.factory.reservationStatusType.ReservationConfirmed,
-                purchaser_group: ttts.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
+                purchaser_group: ttts.factory.person.Group.Customer,
                 performance: performance._id,
                 checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
             }).exec();

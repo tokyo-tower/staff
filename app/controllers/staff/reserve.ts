@@ -15,7 +15,7 @@ import ReserveSessionModel from '../../models/reserve/session';
 import * as reserveBaseController from '../reserveBase';
 
 const debug = createDebug('ttts-staff:controller:reserve');
-const PURCHASER_GROUP: string = ttts.ReservationUtil.PURCHASER_GROUP_STAFF;
+const PURCHASER_GROUP: string = ttts.factory.person.Group.Staff;
 const layout: string = 'layouts/staff/layout';
 
 const PAY_TYPE_FREE: string = 'F';
@@ -306,18 +306,6 @@ export async function complete(req: Request, res: Response, next: NextFunction):
         reservations = reservations.filter(
             (reservation) => reservation.get('status') === ttts.factory.reservationStatusType.ReservationConfirmed
         );
-
-        // const reservations = await ttts.Models.Reservation.find(
-        //     {
-        //         performance_day: req.params.performanceDay,
-        //         payment_no: req.params.paymentNo,
-        //         status: ttts.ReservationUtil.STATUS_RESERVED,
-        //         owner: req.staffUser.get('_id'),
-        //         purchased_at: { // 購入確定から30分有効
-        //             $gt: moment().add(-30, 'minutes').toISOString() // tslint:disable-line:no-magic-numbers
-        //         }
-        //     }
-        // ).exec();
 
         if (reservations.length === 0) {
             next(new Error(req.__('Message.NotFound')));

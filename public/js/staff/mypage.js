@@ -208,18 +208,14 @@ $(function () {
                 $('#modal_detail').modal('hide');
             }
         }).done(function (data) {
-            if (data.success) {
-                var tempHTML = '';
-                reservationsIds4cancel.forEach(function (_id) {
-                    tempHTML += '<h3><span>購入番号:</span>' + reservationsById[_id].payment_no + '<span>座席 / 券種:</span>' + reservationsById[_id].seat_code + '/' + reservationsById[_id].ticket_type_name.ja + '</h3>';
-                });
-                document.getElementById('echo_canceledreservations').innerHTML = tempHTML;
-                $('#modal_cancelcompleted').modal();
-                // 再検索して表示を更新
-                search();
-            } else {
-                alert('キャンセル処理の実行でエラーが発生しました');
-            }
+            var tempHTML = '';
+            reservationsIds4cancel.forEach(function (_id) {
+                tempHTML += '<h3><span>購入番号:</span>' + reservationsById[_id].payment_no + '<span>座席 / 券種:</span>' + reservationsById[_id].seat_code + '/' + reservationsById[_id].ticket_type_name.ja + '</h3>';
+            });
+            document.getElementById('echo_canceledreservations').innerHTML = tempHTML;
+            $('#modal_cancelcompleted').modal();
+            // 再検索して表示を更新
+            search();
         }).fail(function (jqxhr, textStatus, error) {
             alert(error);
         }).always(function () {

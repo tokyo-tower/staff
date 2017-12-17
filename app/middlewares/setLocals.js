@@ -17,7 +17,6 @@ exports.default = (req, res, next) => {
     res.locals.Util = ttts_domain_1.CommonUtil;
     res.locals.validation = null;
     res.locals.GMOUtil = ttts_domain_1.GMO.utils.util;
-    res.locals.ReservationUtil = ttts_domain_1.ReservationUtil;
     res.locals.Models = ttts_domain_1.Models;
     next();
 };

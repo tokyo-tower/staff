@@ -148,7 +148,7 @@ async function findSuspendedPerformances(conditions: any[], limit: number, page:
         const numberOfReservations = await reservationRepo.reservationModel.count(
             {
                 status: ttts.factory.reservationStatusType.ReservationConfirmed,
-                purchaser_group: ttts.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
+                purchaser_group: ttts.factory.person.Group.Customer,
                 performance: performance._id
             }
         ).exec();
@@ -156,7 +156,7 @@ async function findSuspendedPerformances(conditions: any[], limit: number, page:
         const nubmerOfUncheckedReservations = await reservationRepo.reservationModel.count(
             {
                 status: ttts.factory.reservationStatusType.ReservationConfirmed,
-                purchaser_group: ttts.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
+                purchaser_group: ttts.factory.person.Group.Customer,
                 performance: performance._id,
                 checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
             }
