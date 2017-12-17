@@ -294,15 +294,15 @@ export async function complete(req: Request, res: Response, next: NextFunction):
                 }
             }
         ).exec();
-        debug('confirmed transaction:', transaction);
         if (transaction === null) {
             next(new Error(req.__('Message.NotFound')));
 
             return;
         }
 
+        debug('confirmed transaction:', transaction.id);
         let reservations: ttts.mongoose.Document[] = transaction.get('result').get('eventReservations');
-        debug('reservations:', reservations);
+        debug(reservations.length, 'reservation(s) found.');
         reservations = reservations.filter(
             (reservation) => reservation.get('status') === ttts.factory.reservationStatusType.ReservationConfirmed
         );

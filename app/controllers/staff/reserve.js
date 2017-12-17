@@ -299,13 +299,13 @@ function complete(req, res, next) {
                     $gt: moment().add(-30, 'minutes').toDate() // tslint:disable-line:no-magic-numbers
                 }
             }).exec();
-            debug('confirmed transaction:', transaction);
             if (transaction === null) {
                 next(new Error(req.__('Message.NotFound')));
                 return;
             }
+            debug('confirmed transaction:', transaction.id);
             let reservations = transaction.get('result').get('eventReservations');
-            debug('reservations:', reservations);
+            debug(reservations.length, 'reservation(s) found.');
             reservations = reservations.filter((reservation) => reservation.get('status') === ttts.factory.reservationStatusType.ReservationConfirmed);
             // const reservations = await ttts.Models.Reservation.find(
             //     {

@@ -67,6 +67,8 @@ set GMO_ENDPOINT=**********gmo apiのエンドポイント**********
 set GMO_SITE_ID=**********gmo サイトID**********
 set GMO_SHOP_ID=**********gmo ショップID**********
 set GMO_SHOP_PASS=**********gmo ショップパスワード**********
+set WHEELCHAIR_RATE_LIMIT_THRESHOLD=**********車椅子流入制限閾値**********
+set WHEELCHAIR_RATE_LIMIT_UNIT_IN_SECONDS=**********車椅子流入制限単位(秒)**********
 ```
 only on Aure WebApps
 

@@ -23,7 +23,14 @@ const reserveProfileForm_1 = require("../forms/reserve/reserveProfileForm");
 const reserveTicketForm_1 = require("../forms/reserve/reserveTicketForm");
 const session_1 = require("../models/reserve/session");
 const debug = createDebug('ttts-staff:controller:reserveBase');
-const DEFAULT_RADIX = 10;
+// 車椅子レート制限のためのRedis接続クライアント
+const redisClient = ttts.redis.createClient({
+    host: process.env.REDIS_HOST,
+    // tslint:disable-next-line:no-magic-numbers
+    port: parseInt(process.env.REDIS_PORT, 10),
+    password: process.env.REDIS_KEY,
+    tls: { servername: process.env.REDIS_HOST }
+});
 /**
  * 座席・券種FIXプロセス
  *
@@ -72,8 +79,8 @@ function processFixSeatsAndTickets(reservationModel, req) {
                 performance_ttts_extension: reservationModel.performance.ttts_extension
             };
         });
-        debug('creating seatReservation authorizeAction... offers:', offers);
-        const action = yield ttts.service.transaction.placeOrderInProgress.action.authorize.seatReservation.create(reservationModel.agentId, reservationModel.id, reservationModel.performance.id, offers);
+        debug(`creating seatReservation authorizeAction on ${offers.length} offers...`);
+        const action = yield ttts.service.transaction.placeOrderInProgress.action.authorize.seatReservation.create(reservationModel.agentId, reservationModel.id, reservationModel.performance.id, offers)(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.Performance(ttts.mongoose.connection), new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection), new ttts.repository.PaymentNo(ttts.mongoose.connection), new ttts.repository.WheelchairReservationCount(redisClient));
         reservationModel.seatReservationAuthorizeActionId = action.id;
         // この時点で購入番号が発行される
         reservationModel.paymentNo = action.result.tmpReservations[0].payment_no;
@@ -264,7 +271,7 @@ function processStart(purchaserGroup, req) {
             sellerId: 'TokyoTower',
             purchaserGroup: purchaserGroup
         });
-        debug('transaction started.', transaction);
+        debug('transaction started.', transaction.id);
         reservationModel.id = transaction.id;
         reservationModel.agentId = transaction.agent.id;
         reservationModel.sellerId = transaction.seller.id;
@@ -319,7 +326,7 @@ function processCancelSeats(reservationModel) {
         reservationModel.seatCodes = [];
         // 座席仮予約があればキャンセル
         if (reservationModel.seatReservationAuthorizeActionId !== undefined) {
-            yield ttts.service.transaction.placeOrderInProgress.action.authorize.seatReservation.cancel(reservationModel.agentId, reservationModel.id, reservationModel.seatReservationAuthorizeActionId);
+            yield ttts.service.transaction.placeOrderInProgress.action.authorize.seatReservation.cancel(reservationModel.agentId, reservationModel.id, reservationModel.seatReservationAuthorizeActionId)(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection), new ttts.repository.WheelchairReservationCount(redisClient));
         }
     });
 }
@@ -340,7 +347,8 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
         }
         // 内部と当日以外は、上映日当日まで購入可能
         if (reservationModel.purchaserGroup !== ttts.ReservationUtil.PURCHASER_GROUP_STAFF) {
-            if (parseInt(performance.day, DEFAULT_RADIX) < parseInt(moment().format('YYYYMMDD'), DEFAULT_RADIX)) {
+            // tslint:disable-next-line:no-magic-numbers
+            if (parseInt(performance.day, 10) < parseInt(moment().format('YYYYMMDD'), 10)) {
                 throw new Error('You cannot reserve this performance.');
             }
         }
@@ -390,7 +398,7 @@ function processFixReservations(reservationModel, res) {
             transactionId: reservationModel.id,
             paymentMethod: reservationModel.paymentMethod
         });
-        debug('transaction confirmed.', transaction);
+        debug('transaction confirmed.', transaction.id);
         try {
             const result = transaction.result;
             // 完了メールキュー追加(あれば更新日時を更新するだけ)
