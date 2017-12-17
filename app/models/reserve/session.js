@@ -116,7 +116,7 @@ class ReserveSessionModel {
             charge: this.getChargeBySeatCode(seatCode),
             payment_no: this.paymentNo,
             purchaser_group: this.purchaserGroup,
-            performance: this.performance._id,
+            performance: this.performance.id,
             performance_day: this.performance.day,
             performance_open_time: this.performance.open_time,
             performance_start_time: this.performance.start_time,

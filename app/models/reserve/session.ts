@@ -209,7 +209,7 @@ export default class ReserveSessionModel {
             payment_no: this.paymentNo,
             purchaser_group: this.purchaserGroup,
 
-            performance: this.performance._id,
+            performance: this.performance.id,
             performance_day: this.performance.day,
             performance_open_time: this.performance.open_time,
             performance_start_time: this.performance.start_time,
@@ -308,13 +308,8 @@ interface IExtensionTiket {
     required_seat_num: number;
     csv_code: string;
 }
+
 /**
  * 多言語情報インターフェース
  */
-interface IMultilingualString {
-    ja: string;
-    en: string;
-    kr: string;
-    tc: string;
-    sc: string;
-}
+type IMultilingualString = ttts.factory.multilingualString;

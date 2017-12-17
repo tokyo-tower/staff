@@ -39,7 +39,7 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
     }
 
     // tslint:disable-next-line:no-console
-    console.log(`reservationModel.performance=${reservationModel.performance._id}`);
+    console.log(`reservationModel.performance=${reservationModel.performance.id}`);
 
     // チケット情報に枚数セット(画面で選択された枚数<画面再表示用)
     reservationModel.ticketTypes.forEach((ticketType) => {
@@ -76,7 +76,7 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
     const action = await ttts.service.transaction.placeOrderInProgress.action.authorize.seatReservation.create(
         reservationModel.agentId,
         reservationModel.id,
-        reservationModel.performance._id,
+        reservationModel.performance.id,
         offers
     );
     reservationModel.seatReservationAuthorizeActionId = action.id;
@@ -218,7 +218,7 @@ async function getInfoFixSeatsAndTickets(reservationModel: ReserveSessionModel, 
     };
     // 予約可能件数取得
     const conditions: any = {
-        performance: reservationModel.performance._id,
+        performance: reservationModel.performance.id,
         availability: ttts.factory.itemAvailability.InStock
     };
     const count = await stockRepo.stockModel.count(conditions).exec();
