@@ -76,11 +76,11 @@
                     <div>
                         <p>状況を選択してください。</p>
                         <label class="for-suspend">
-                            <input class="radio-ev" type="radio" id="radio_ev_slow" name="ev" value="1" checked>減速運転</label>
+                            <input class="radio-ev" type="radio" id="radio_ev_slow" name="ev" value="<%- EvServiceStatus.Slowdown %>" checked>減速運転</label>
                         <label class="for-suspend">
-                            <input class="radio-ev" type="radio" id="radio_ev_stop" name="ev" value="2">運転停止</label>
+                            <input class="radio-ev" type="radio" id="radio_ev_stop" name="ev" value="<%- EvServiceStatus.Suspended %>">運転停止</label>
                         <label class="for-resume">
-                            <input class="radio-ev" type="radio" id="radio_ev_restart" name="ev" value="0">運行再開</label>
+                            <input class="radio-ev" type="radio" id="radio_ev_restart" name="ev" value="<%- EvServiceStatus.Normal %>">運行再開</label>
                     </div>
                     <div class="for-suspend for-evstop">
                         <h3>お客様通知内容</h3>

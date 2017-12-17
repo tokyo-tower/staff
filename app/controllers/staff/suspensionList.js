@@ -12,6 +12,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const ttts = require("@motionpicture/ttts-domain");
 const layout = 'layouts/staff/layout';
 /**
  * 運行・オンライン販売停止一覧
@@ -20,7 +21,10 @@ function index(__, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             res.render('staff/suspension/list', {
-                layout: layout
+                layout: layout,
+                EvServiceStatus: ttts.factory.performance.EvServiceStatus,
+                OnlineSalesStatus: ttts.factory.performance.OnlineSalesStatus,
+                RefundStatus: ttts.factory.performance.RefundStatus
             });
         }
         catch (error) {

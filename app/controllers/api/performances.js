@@ -17,6 +17,7 @@ const conf = require("config");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
 const moment = require("moment");
+const numeral = require("numeral");
 const debug = createDebug('ttts-staff:controllers:api:performances');
 /**
  * 運行・オンライン販売ステータス変更
@@ -39,10 +40,11 @@ function updateOnlineStatus(req, res) {
             const targetPlaceOrderTransactions = yield getTargetReservationsForRefund(performanceIds);
             debug('email target placeOrderTransactions:', targetPlaceOrderTransactions);
             // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
-            const refundStatus = evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED ?
-                ttts.PerformanceUtil.REFUND_STATUS.NOT_INSTRUCTED :
-                ttts.PerformanceUtil.REFUND_STATUS.NONE;
+            const refundStatus = evStatus === ttts.factory.performance.EvServiceStatus.Suspended ?
+                ttts.factory.performance.RefundStatus.NotInstructed :
+                ttts.factory.performance.RefundStatus.None;
             // パフォーマンス更新
+            debug('updating performance online_sales_status...');
             const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
             yield performanceRepo.performanceModel.update({ _id: { $in: performanceIds } }, {
                 'ttts_extension.online_sales_status': onlineStatus,
@@ -55,10 +57,16 @@ function updateOnlineStatus(req, res) {
                 'ttts_extension.refund_update_user': req.staffUser,
                 'ttts_extension.refund_update_at': now
             }, { multi: true }).exec();
+            debug('performance online_sales_status updated.');
             // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
-            if (evStatus === ttts.PerformanceUtil.EV_SERVICE_STATUS.SUSPENDED) {
-                // メール送信情報 [{'20171201_12345': [r1,r2,,,rn]}]
-                yield createEmails(res, targetPlaceOrderTransactions, notice);
+            if (evStatus === ttts.factory.performance.EvServiceStatus.Suspended) {
+                try {
+                    yield createEmails(res, targetPlaceOrderTransactions, notice);
+                }
+                catch (error) {
+                    // no op
+                    console.error(error);
+                }
             }
             res.status(http_status_1.NO_CONTENT).end();
         }
@@ -165,7 +173,9 @@ function createEmail(res, reservations, notice) {
             status: ttts.EmailQueueUtil.STATUS_UNSENT
         };
         // メール作成
+        debug('creating email queue...', emailQueue);
         yield ttts.Models.EmailQueue.create(emailQueue);
+        debug('email queue created.');
     });
 }
 /**

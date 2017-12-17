@@ -18,9 +18,9 @@
             <div class="form-group">
                 <select class="form-control" name="refund_status">
                     <option value="">すべて</option>
-                    <option value="1">未指示</option>
-                    <option value="2">指示済</option>
-                    <option value="3">返金完了</option>
+                    <option value="<%- RefundStatus.NotInstructed %>">未指示</option>
+                    <option value="<%- RefundStatus.Instructed %>">指示済</option>
+                    <option value="<%- RefundStatus.Compeleted %>">返金完了</option>
                 </select>
             </div>
         </div>
