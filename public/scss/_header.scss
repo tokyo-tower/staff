@@ -76,7 +76,7 @@ header {
         background-color: #eee;
         color: #000;
         &::before {
-            content: url(/images/common/icon-gray-search.svg);
+            content: url(/images/common/icon-checkmark.svg);
         }
     }
     .btn-mypage {
@@ -84,6 +84,20 @@ header {
         color: #000;
         &::before {
             content: url(/images/common/icon-gray-search.svg);
+        }
+    }
+    .btn-suspension-setting {
+        background-color: #eee;
+        color: #000;
+        &::before {
+            content: url(/images/common/icon-setting.svg);
+        }
+    }
+    .btn-suspension-list {
+        background-color: #eee;
+        color: #000;
+        &::before {
+            content: url(/images/common/icon-clock.svg);
         }
     }
     .btn-logout {
