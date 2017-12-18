@@ -151,8 +151,7 @@ function createEmail(res, reservations, notice) {
         // 券種 枚数
         paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`);
         // TOP DECKチケット(大人) 1枚
-        const leaf = res.__('{{n}}Leaf');
-        const infos = getTicketInfo(reservations, leaf, res.locale);
+        const infos = getTicketInfo(reservations, res.__, res.locale);
         paymentTicketInfos.push(infos.join('\n'));
         // 本文セット
         const content = `${titleEmail}\n\n${purchaserName}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}`;
@@ -182,7 +181,7 @@ function createEmail(res, reservations, notice) {
  * チケット情報取得
  *
  */
-function getTicketInfo(reservations, leaf, locale) {
+function getTicketInfo(reservations, __, locale) {
     // 券種ごとに合計枚数算出
     const keyName = 'ticket_type';
     const ticketInfos = {};
@@ -205,7 +204,7 @@ function getTicketInfo(reservations, leaf, locale) {
     const ticketInfoArray = [];
     Object.keys(ticketInfos).forEach((key) => {
         const ticketInfo = ticketInfos[key];
-        ticketInfoArray.push(`${ticketInfo.ticket_type_name} ${ticketInfo.count}${leaf}`);
+        ticketInfoArray.push(`${ticketInfo.ticket_type_name} ${__('{{n}}Leaf', { n: ticketInfo.count })}`);
     });
     return ticketInfoArray;
 }

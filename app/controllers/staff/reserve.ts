@@ -260,11 +260,10 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
             const reservations: any[] = reserveBaseController.getReservations(reservationModel);
             const ticketInfos: any = reserveBaseController.getTicketInfos(reservations);
             // 券種ごとの表示情報編集
-            const leaf: string = res.__('{{n}}Leaf');
             Object.keys(ticketInfos).forEach((key) => {
                 const ticketInfo = (<any>ticketInfos)[key];
                 (<any>ticketInfos)[key].info =
-                    `${ticketInfo.ticket_type_name[res.locale]} ${ticketInfo.charge} × ${ticketInfo.count}${leaf}`;
+                    `${ticketInfo.ticket_type_name[res.locale]} ${ticketInfo.charge} × ${res.__('{{n}}Leaf', { n: ticketInfo.count })}`;
             });
             res.render('staff/reserve/confirm', {
                 reservationModel: reservationModel,

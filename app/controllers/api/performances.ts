@@ -188,8 +188,7 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
     // 券種 枚数
     paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`);
     // TOP DECKチケット(大人) 1枚
-    const leaf: string = res.__('{{n}}Leaf');
-    const infos = getTicketInfo(reservations, leaf, res.locale);
+    const infos = getTicketInfo(reservations, res.__, res.locale);
     paymentTicketInfos.push(infos.join('\n'));
     // 本文セット
     const content: string = `${titleEmail}\n\n${purchaserName}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}`;
@@ -221,7 +220,7 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
  * チケット情報取得
  *
  */
-export function getTicketInfo(reservations: any[], leaf: string, locale: string): string[] {
+export function getTicketInfo(reservations: any[], __: Function, locale: string): string[] {
     // 券種ごとに合計枚数算出
     const keyName: string = 'ticket_type';
     const ticketInfos: {} = {};
@@ -243,7 +242,7 @@ export function getTicketInfo(reservations: any[], leaf: string, locale: string)
     const ticketInfoArray: string[] = [];
     Object.keys(ticketInfos).forEach((key) => {
         const ticketInfo = (<any>ticketInfos)[key];
-        ticketInfoArray.push(`${ticketInfo.ticket_type_name} ${ticketInfo.count}${leaf}`);
+        ticketInfoArray.push(`${ticketInfo.ticket_type_name} ${__('{{n}}Leaf', { n: ticketInfo.count })}`);
     });
 
     return ticketInfoArray;

@@ -413,11 +413,10 @@ function createEmailQueue(reservations, reservationModel, res) {
             }
         }
         // 券種ごとの表示情報編集
-        const leaf = res.__('{{n}}Leaf');
         const ticketInfoArray = [];
         Object.keys(ticketInfos).forEach((key) => {
             const ticketInfo = ticketInfos[key];
-            ticketInfoArray.push(`${ticketInfo.ticket_type_name[res.locale]} ${ticketInfo.count}${leaf}`);
+            ticketInfoArray.push(`${ticketInfo.ticket_type_name[res.locale]} ${res.__('{{n}}Leaf', { n: ticketInfo.count })}`);
         });
         const day = moment(reservations[0].performance_day, 'YYYYMMDD').format('YYYY/MM/DD');
         // tslint:disable-next-line:no-magic-numbers
