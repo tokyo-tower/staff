@@ -1,21 +1,6 @@
 #modal_cardsecurirycode {
     .modal-header {
         position: relative;
-        .btn-close {
-            cursor: pointer;
-            position: absolute;
-            top: 0;
-            right: 0;
-            font-size: 48px;
-            background-color: #3f3f3f;
-            color: #fff;
-            &:hover {
-                background-color: #5f5f5f;
-            }
-            @media screen and (max-width: $breakpoint_tablet) {
-                font-size: 36px;
-            }
-        }
         .modal-title {
             font-weight: bold;
         }

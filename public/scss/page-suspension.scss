@@ -91,6 +91,7 @@
             }
         }
     }
+
     .for-evstop {
         display: none;
     }
@@ -98,6 +99,11 @@
         .for-evstop {
             display: block;
         }
+    }
+
+    .modal-body {
+        padding: 0;
+        text-align: left;        
     }
 
     #textarea_announcemail {
