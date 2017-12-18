@@ -88,7 +88,7 @@
     "performanceIds4limit2": [],
     "reservation_maxq": 10,
     "reserve_max_date" : {
-        "days": 60
+        "days": 90
     },
     "paymentMethodsForCustomer": {
         "0": "クレジットカード"
