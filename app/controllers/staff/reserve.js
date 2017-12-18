@@ -200,7 +200,8 @@ function profile(req, res, next) {
                 catch (error) {
                     console.error(error);
                     res.render('staff/reserve/profile', {
-                        reservationModel: reservationModel
+                        reservationModel: reservationModel,
+                        layout: layout
                     });
                 }
             }
@@ -221,7 +222,8 @@ function profile(req, res, next) {
                 res.render('staff/reserve/profile', {
                     reservationModel: reservationModel,
                     GMO_ENDPOINT: process.env.GMO_ENDPOINT,
-                    GMO_SHOP_ID: process.env.GMO_SHOP_ID
+                    GMO_SHOP_ID: process.env.GMO_SHOP_ID,
+                    layout: layout
                 });
             }
         }

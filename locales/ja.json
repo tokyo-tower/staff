@@ -1,8 +1,16 @@
 {
-	"Title": "東京タワー TOP DECK Ticket",	
+	"Title": "東京タワー TOP DECK Ticket",
 	"{{price}} yen": "{{price}} 円",	
 	"ConfirmCancelSelectedTickets": "選択したチケットをキャンセルします",		
 	"AreYouSureCancel": "本当にキャンセルしますか？",
+    "PaymentMethodName": {
+		"0": "現金",
+        "CP": "CP支払い",
+        "I": "売掛（納品書・請求書支払い）",
+        "O": "団体予約",
+        "C": "貸切予約",
+        "F": "無料招待券"
+	},
 
 	"Terms": "利用規約",
 	"AboutPrivacy": "個人情報の取り扱いについて",
