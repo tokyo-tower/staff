@@ -37,6 +37,13 @@
         "zh-hant": "https://www.tokyotower.co.jp/price/zh.html",
         "ko": "https://www.tokyotower.co.jp/price/kr.html"
     },
+    "official_url_wheelchairinfo_by_locale" : {
+        "ja": "https://www.tokyotower.co.jp/barrierfree/index.html",
+        "en": "https://www.tokyotower.co.jp/barrierfree/en.html",
+        "zh-hans": "https://www.tokyotower.co.jp/barrierfree/cn.html",
+        "zh-hant": "https://www.tokyotower.co.jp/barrierfree/zh.html",
+        "ko": "https://www.tokyotower.co.jp/barrierfree/kr.html"
+    },
     "official_url_aboutentering_by_locale": {
         "ja": "https://www.tokyotower.co.jp/observatory/index.html",
         "en": "https://www.tokyotower.co.jp/observatory/en.html",
