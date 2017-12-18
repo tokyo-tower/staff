@@ -262,7 +262,7 @@ function confirm(req, res, next) {
                 const reservations = reserveBaseController.getReservations(reservationModel);
                 const ticketInfos = reserveBaseController.getTicketInfos(reservations);
                 // 券種ごとの表示情報編集
-                const leaf = res.__('Email.Leaf');
+                const leaf = res.__('{{n}}Leaf');
                 Object.keys(ticketInfos).forEach((key) => {
                     const ticketInfo = ticketInfos[key];
                     ticketInfos[key].info =

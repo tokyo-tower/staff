@@ -515,7 +515,7 @@ async function createEmailQueue(
         }
     }
     // 券種ごとの表示情報編集
-    const leaf: string = res.__('Email.Leaf');
+    const leaf: string = res.__('{{n}}Leaf');
     const ticketInfoArray: string[] = [];
     Object.keys(ticketInfos).forEach((key) => {
         const ticketInfo = (<any>ticketInfos)[key];

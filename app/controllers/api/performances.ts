@@ -188,7 +188,7 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
     // 券種 枚数
     paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`);
     // TOP DECKチケット(大人) 1枚
-    const leaf: string = res.__('Email.Leaf');
+    const leaf: string = res.__('{{n}}Leaf');
     const infos = getTicketInfo(reservations, leaf, res.locale);
     paymentTicketInfos.push(infos.join('\n'));
     // 本文セット

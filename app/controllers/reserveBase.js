@@ -413,7 +413,7 @@ function createEmailQueue(reservations, reservationModel, res) {
             }
         }
         // 券種ごとの表示情報編集
-        const leaf = res.__('Email.Leaf');
+        const leaf = res.__('{{n}}Leaf');
         const ticketInfoArray = [];
         Object.keys(ticketInfos).forEach((key) => {
             const ticketInfo = ticketInfos[key];
