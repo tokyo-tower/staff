@@ -47,7 +47,7 @@ class ReserveSessionModel {
         let limit = MAX_RESERVATION_SEATS_DEFAULT;
         // 主体によっては、決済方法を強制的に固定で
         switch (this.purchaserGroup) {
-            case ttts.ReservationUtil.PURCHASER_GROUP_STAFF:
+            case ttts.factory.person.Group.Staff:
                 limit = MAX_RESERVATION_SEATS_STAFFS;
                 break;
             default:
@@ -122,12 +122,12 @@ class ReserveSessionModel {
             performance_start_time: this.performance.start_time,
             performance_end_time: this.performance.end_time,
             performance_ttts_extension: this.performance.ttts_extension,
-            theater: this.performance.theater._id,
+            theater: this.performance.theater.id,
             theater_name: this.performance.theater.name,
             theater_address: this.performance.theater.address,
-            screen: this.performance.screen._id,
+            screen: this.performance.screen.id,
             screen_name: this.performance.screen.name,
-            film: this.performance.film._id,
+            film: this.performance.film.id,
             film_name: this.performance.film.name,
             film_image: this.performance.film.image,
             film_is_mx4d: this.performance.film.is_mx4d,

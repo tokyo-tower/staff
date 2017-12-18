@@ -127,7 +127,7 @@ export default class ReserveSessionModel {
 
         // 主体によっては、決済方法を強制的に固定で
         switch (this.purchaserGroup) {
-            case ttts.ReservationUtil.PURCHASER_GROUP_STAFF:
+            case ttts.factory.person.Group.Staff:
                 limit = MAX_RESERVATION_SEATS_STAFFS;
                 break;
 
@@ -214,15 +214,15 @@ export default class ReserveSessionModel {
             performance_open_time: this.performance.open_time,
             performance_start_time: this.performance.start_time,
             performance_end_time: this.performance.end_time,
-            performance_ttts_extension: this.performance.ttts_extension, //2017/11/16
-            theater: this.performance.theater._id,
+            performance_ttts_extension: this.performance.ttts_extension,
+            theater: this.performance.theater.id,
             theater_name: this.performance.theater.name,
             theater_address: this.performance.theater.address,
 
-            screen: this.performance.screen._id,
+            screen: this.performance.screen.id,
             screen_name: this.performance.screen.name,
 
-            film: this.performance.film._id,
+            film: this.performance.film.id,
             film_name: this.performance.film.name,
             film_image: this.performance.film.image,
             film_is_mx4d: this.performance.film.is_mx4d,
@@ -258,15 +258,11 @@ type IPerformance = ttts.factory.performance.IPerformanceWithDetails & {
 /**
  * チケット情報インターフェース
  */
-interface ITicketType {
-    _id: string;
-    name: IMultilingualString;
-    charge: number; // 料金
+type ITicketType = ttts.factory.performance.ITicketType & {
     count: number;  // 枚数
     watcher_name: string;
-    cancel_charge: [ICancelCharge];
-    ttts_extension: IExtensionTiket;
-}
+};
+
 /**
  * 予約情報インターフェース
  */
@@ -293,23 +289,3 @@ interface ITransactionGMO {
     count: number;
     status: string;
 }
-/**
- * キャンセル料情報インターフェース
- */
-interface ICancelCharge {
-    days: number;
-    charge: number;
-}
-/**
- * チケット拡張情報インターフェース
- */
-interface IExtensionTiket {
-    category: string;
-    required_seat_num: number;
-    csv_code: string;
-}
-
-/**
- * 多言語情報インターフェース
- */
-type IMultilingualString = ttts.factory.multilingualString;

@@ -17,8 +17,7 @@
     }
   ],
   "dependencies": {
-    "@motionpicture/ttts-domain": "^12.0.0-alpha.19",
-    "basic-auth": "^1.1.0",
+    "@motionpicture/ttts-domain": "^12.0.0-alpha.22",
     "body-parser": "^1.18.2",
     "config": "^1.28.1",
     "connect-redis": "^3.3.2",
@@ -39,12 +38,10 @@
     "request": "^2.83.0",
     "sendgrid": "^5.2.3",
     "serve-favicon": "^2.4.5",
-    "tsutils": "^1.9.1",
     "underscore": "^1.8.3"
   },
   "description": "This is a repogitory for TTTS online website.",
   "devDependencies": {
-    "@types/basic-auth": "0.0.31",
     "@types/body-parser": "0.0.34",
     "@types/config": "0.0.32",
     "@types/connect-redis": "0.0.5",
@@ -83,8 +80,8 @@
     "typescript": "^2.6.2"
   },
   "engines": {
-    "node": ">=6.9.1",
-    "npm": ">=3.10.8"
+    "node": ">=8.0.0",
+    "npm": ">=5.3.0"
   },
   "keywords": [],
   "license": "UNLICENSED",

@@ -1,7 +1,7 @@
 /* global moment */
 'use strict';
 $(function () {
-    // _idごとにまとめた予約ドキュメントリスト
+    // idごとにまとめた予約ドキュメントリスト
     var reservationsById = {};
 
     // 印刷URLエンドポイント
@@ -36,9 +36,9 @@ $(function () {
 
     // purchaser_groupをキーにした「予約方法」辞書
     var purchaseRoute = {
-        '01': '一般ネット予約',
-        '04': '窓口代理予約',
-        '06': 'POS'
+        'Customer': '一般ネット予約',
+        'Staff': '窓口代理予約',
+        'Pos': 'POS'
     };
 
     var conditions = {
@@ -56,7 +56,7 @@ $(function () {
                 + ' ' + reservation.performance_start_time.substr(0, 2) + ':' + reservation.performance_start_time.substr(2);
             html += ''
                 + '<tr data-seat-code="' + reservation.seat_code + '"'
-                + ' data-reservation-id="' + reservation._id + '"'
+                + ' data-reservation-id="' + reservation.id + '"'
                 + ' data-payment-no="' + reservation.payment_no + '"'
                 + ' data-performance-start-datetime="' + startDatetime + '"'
                 + ' data-watcher-name="' + reservation.watcher_name + '"'
@@ -83,8 +83,8 @@ $(function () {
             if (reservation.payment_no && !reservation.performance_canceled) {
                 html += ''
                     + '<p class="btn call-modal"><span>詳細</span></p>'
-                    + '<p class="btn btn-print" data-targetid="' + reservation._id + '"><span>A4チケット印刷</span></p>'
-                    + '<p class="btn btn-thermalprint" data-targetid="' + reservation._id + '"><span>サーマル印刷</span></p>';
+                    + '<p class="btn btn-print" data-targetid="' + reservation.id + '"><span>A4チケット印刷</span></p>'
+                    + '<p class="btn btn-thermalprint" data-targetid="' + reservation.id + '"><span>サーマル印刷</span></p>';
             }
             html += ''
                 + '</td>'
@@ -163,26 +163,29 @@ $(function () {
                 $('.wrapper-reservations input[type="checkbox"]').prop('checked', false);
             }
         }).done(function (data) {
-            // エラーメッセージ表示
-            if (data.errors) {
-                for (var error in data.errors) {
-                    if (error) {
-                        $('[name="error_' + error + '"]').text(data.errors[error].msg);
-                    }
-                }
-                $('.error-message').show();
-            }
             // データ表示
-            if (data.success) {
-                data.results.forEach(function (reservation) {
-                    reservationsById[reservation._id] = reservation;
-                });
-                showReservations(data.results);
-                showPager(parseInt(data.count, 10));
-                showConditions();
-                $('.total-count').text(data.count + '件');
-            }
+            data.results.forEach(function (reservation) {
+                reservationsById[reservation.id] = reservation;
+            });
+            showReservations(data.results);
+            showPager(parseInt(data.count, 10));
+            showConditions();
+            $('.total-count').text(data.count + '件');
         }).fail(function (jqxhr, textStatus, error) {
+            // エラーメッセージ表示
+            try {
+                var res = $.parseJSON(jqxhr.responseText);
+                if (res.errors) {
+                    for (var error in data.errors) {
+                        if (error) {
+                            $('[name="error_' + error + '"]').text(data.errors[error].message);
+                        }
+                    }
+                    $('.error-message').show();
+                }
+            } catch (e) {
+                // no op
+            }
             console.log(error);
         }).always(function () {
             $('.loading').modal('hide');
@@ -208,18 +211,14 @@ $(function () {
                 $('#modal_detail').modal('hide');
             }
         }).done(function (data) {
-            if (data.success) {
-                var tempHTML = '';
-                reservationsIds4cancel.forEach(function (_id) {
-                    tempHTML += '<h3><span>購入番号:</span>' + reservationsById[_id].payment_no + '<span>座席 / 券種:</span>' + reservationsById[_id].seat_code + '/' + reservationsById[_id].ticket_type_name.ja + '</h3>';
-                });
-                document.getElementById('echo_canceledreservations').innerHTML = tempHTML;
-                $('#modal_cancelcompleted').modal();
-                // 再検索して表示を更新
-                search();
-            } else {
-                alert('キャンセル処理の実行でエラーが発生しました');
-            }
+            var tempHTML = '';
+            reservationsIds4cancel.forEach(function (id) {
+                tempHTML += '<h3><span>購入番号:</span>' + reservationsById[id].payment_no + '<span>座席 / 券種:</span>' + reservationsById[id].seat_code + '/' + reservationsById[id].ticket_type_name.ja + '</h3>';
+            });
+            document.getElementById('echo_canceledreservations').innerHTML = tempHTML;
+            $('#modal_cancelcompleted').modal();
+            // 再検索して表示を更新
+            search();
         }).fail(function (jqxhr, textStatus, error) {
             alert(error);
         }).always(function () {
@@ -250,14 +249,14 @@ $(function () {
     $(document).on('click', '.call-modal', function () {
         var modal_detail = document.getElementById('modal_detail');
         var reservationNode = this.parentNode.parentNode;
-        var reservation_id = reservationNode.getAttribute('data-reservation-id');
+        var id = reservationNode.getAttribute('data-reservation-id');
         document.getElementById('echo_detailmodal__payment_no').innerHTML = reservationNode.getAttribute('data-payment-no');
         document.getElementById('echo_detailmodal__date').innerHTML = reservationNode.getAttribute('data-performance-start-datetime');
         document.getElementById('echo_detailmodal__info').innerHTML = reservationNode.getAttribute('data-seat-code') + ' / ' + reservationNode.getAttribute('data-ticketname') + ' / ' + reservationNode.getAttribute('data-watcher-name');
         document.getElementById('echo_detailmodal__purchaseinfo').innerHTML = reservationNode.getAttribute('data-purchase-route');
-        modal_detail.querySelector('.btn-print').setAttribute('data-targetid', reservation_id);
-        modal_detail.querySelector('.btn-thermalprint').setAttribute('data-targetid', reservation_id);
-        modal_detail.querySelector('.btn-cancelrsrv').onclick = function () { cancel([reservation_id]); };
+        modal_detail.querySelector('.btn-print').setAttribute('data-targetid', id);
+        modal_detail.querySelector('.btn-thermalprint').setAttribute('data-targetid', id);
+        modal_detail.querySelector('.btn-cancelrsrv').onclick = function () { cancel([id]); };
         $(modal_detail).modal();
     });
 
@@ -277,13 +276,9 @@ $(function () {
             beforeSend: function () {
             }
         }).done(function (data) {
-            if (data.success) {
-                // 再検索
-                search();
-            } else {
-                alert('Failed Updating.');
-            }
+            search();
         }).fail(function (jqxhr, textStatus, error) {
+            alert('Failed Updating.');
             console.log(error);
         }).always(function () {
         });

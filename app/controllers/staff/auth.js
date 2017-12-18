@@ -45,7 +45,7 @@ function login(req, res, next) {
                     const ownerRepo = new ttts.repository.Owner(ttts.mongoose.connection);
                     const owner = yield ownerRepo.ownerModel.findOne({
                         username: req.body.userId,
-                        group: ttts.OwnerUtil.GROUP_STAFF
+                        group: ttts.factory.person.Group.Staff
                     }).exec();
                     res.locals.userId = req.body.userId;
                     res.locals.password = '';
@@ -70,7 +70,7 @@ function login(req, res, next) {
                                 // トークン生成
                                 const authentication = yield ttts.Models.Authentication.create({
                                     token: ttts.CommonUtil.createToken(),
-                                    owner: owner.get('_id'),
+                                    owner: owner.get('id'),
                                     signature: req.body.signature,
                                     locale: req.body.language
                                 });

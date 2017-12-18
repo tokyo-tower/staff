@@ -1,11 +1,6 @@
 <%
-const printIds = [];
-let reservations = [];
-for (let reservation of reservationDocuments) {
-    let _reservation = reservation.toObject();
-    reservations.push(_reservation);
-    printIds.push(`\"${reservation._id.toString()}\"`);
-}
+const reservations = reservationDocuments.map((doc)=>doc.toObject());
+const printIds = reservationDocuments.map((doc)=>`"${doc.get('id')}"`);
 %>
 <input type="hidden" id="input_reservations" value="<%= JSON.stringify(reservations) %>">
 <script src="/js/reserve/complete.js"></script>
@@ -15,9 +10,7 @@ for (let reservation of reservationDocuments) {
 <h1 class="pagetitle"><%- __('h1.CompleteReservation') %></h1>
 <p class="guidetext guidetext-customer"><%- __('Label.CompleteReservationGuideText') %></p>
 <p class="rednotice qrnotice"><%- __('Label.CompleteReservationCautionText') %></p>
-<% if (reservationDocuments[0].purchaser_group === ReservationUtil.PURCHASER_GROUP_STAFF) { %>
 <p class="guidetext">代理予約が完了いたしました。<br>「印刷」ボタンを押してチケットを発見してください。</p>
-<% } %>
 
 <table class="table table-complete">
     <tbody>
@@ -70,7 +63,8 @@ for (let reservation of reservationDocuments) {
         <tr class="tr-price">
             <th><%- __('Label.TotalPrice') %> %></th>
             <td>
-                <span class="price">&yen;<%= reservationDocuments[0].get('gmo_amount') %></span>
+                <% var totalAmount = reservationDocuments.reduce((a,b)=>a+b.charge,0); %>
+                <span class="price"><span class="is-ja">&yen;</span><%= totalAmount %><span class="is-not-ja">JPY</span></span>
             </td>
         </tr>
     </tbody>
@@ -79,12 +73,9 @@ for (let reservation of reservationDocuments) {
 
 <a class="btn btn-blue visible-pc" id="btn_print_a4" target="_blank" href='<%- process.env.INQUIRY_SITE_URL %>print/print?ids=[<%- printIds.join(',') %>]'><span><%- __('Label.Print') %></span></a>
 
-<% if (reservationDocuments[0].purchaser_group === ReservationUtil.PURCHASER_GROUP_STAFF) { %>
 <div class="thermalprint">
     <a class="btn btn-big btn-thermalprint" id="btn_thermalprint" target="_blank" href='<%- process.env.INQUIRY_SITE_URL %>print/print_pcthermal/?ids=[<%- printIds.join(',') %>]'><span>サーマル印刷</span></a>
 </div>
-<% } %>
-
 
 <p class="mailnotice"><%- __('CompleteNotesText') %></p>
 

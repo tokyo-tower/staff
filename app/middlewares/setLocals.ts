@@ -4,7 +4,6 @@
  * @module middleware/setLocal
  */
 
-import { CommonUtil, GMO, Models, ReservationUtil } from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import { NextFunction, Request, Response } from 'express';
 import * as moment from 'moment';
@@ -15,12 +14,7 @@ export default (req: Request, res: Response, next: NextFunction) => {
     res.locals.moment = moment;
     res.locals.numeral = numeral;
     res.locals.conf = conf;
-    res.locals.Util = CommonUtil;
     res.locals.validation = null;
-
-    res.locals.GMOUtil = GMO.utils.util;
-    res.locals.ReservationUtil = ReservationUtil;
-    res.locals.Models = Models;
 
     next();
 };

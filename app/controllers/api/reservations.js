@@ -14,6 +14,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const ttts = require("@motionpicture/ttts-domain");
 const createDebug = require("debug");
+const http_status_1 = require("http-status");
 const _ = require("underscore");
 const debug = createDebug('ttts-staff:controllers:api:reservations');
 /**
@@ -185,18 +186,16 @@ function search(req, res) {
                 .exec();
             //---
             res.json({
-                success: true,
                 results: reservations,
                 count: count,
                 errors: null
             });
         }
         catch (error) {
-            res.json({
-                success: false,
-                results: [],
-                errors: null,
-                count: 0
+            res.status(http_status_1.INTERNAL_SERVER_ERROR).json({
+                errors: [{
+                        message: error.message
+                    }]
             });
         }
     });
@@ -257,7 +256,7 @@ function updateWatcherName(req, res, next) {
             status: ttts.factory.reservationStatusType.ReservationConfirmed
         };
         // 自分の予約のみ
-        condition.owner = req.staffUser.get('_id');
+        condition.owner = req.staffUser.get('id');
         const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
         try {
             const reservation = yield reservationRepo.reservationModel.findOneAndUpdate(condition, {
@@ -266,24 +265,17 @@ function updateWatcherName(req, res, next) {
                 owner_signature: req.staffUser.get('signature')
             }, { new: true }).exec();
             if (reservation === null) {
-                res.json({
-                    success: false,
-                    message: req.__('Message.NotFound'),
-                    reservationId: null
-                });
+                res.status(http_status_1.NOT_FOUND).json(null);
             }
             else {
-                res.json({
-                    success: true,
-                    reservation: reservation.toObject()
-                });
+                res.status(http_status_1.NO_CONTENT).end();
             }
         }
         catch (error) {
-            res.json({
-                success: false,
-                message: req.__('Message.UnexpectedError'),
-                reservationId: null
+            res.status(http_status_1.INTERNAL_SERVER_ERROR).json({
+                errors: [{
+                        message: req.__('Message.UnexpectedError')
+                    }]
             });
         }
     });
@@ -318,14 +310,10 @@ function cancel(req, res, next) {
                 }
             }));
             yield Promise.all(promises);
-            res.json({
-                message: null,
-                successIds: successIds,
-                errorIds: errorIds
-            });
+            res.status(http_status_1.NO_CONTENT).end();
         }
         catch (error) {
-            res.json({
+            res.status(http_status_1.INTERNAL_SERVER_ERROR).json({
                 message: error.message,
                 successIds: successIds,
                 errorIds: errorIds
@@ -363,13 +351,13 @@ function cancelById(reservationId) {
             debug('canceling...', cancelingReservations);
             yield Promise.all(cancelingReservations.map((cancelingReservation) => __awaiter(this, void 0, void 0, function* () {
                 // 予約をキャンセル
-                yield reservationRepo.reservationModel.findByIdAndUpdate(cancelingReservation._id, { status: ttts.factory.reservationStatusType.ReservationCancelled }).exec();
+                yield reservationRepo.reservationModel.findByIdAndUpdate(cancelingReservation.id, { status: ttts.factory.reservationStatusType.ReservationCancelled }).exec();
                 // 在庫を空きに(在庫IDに対して、元の状態に戻す)
                 yield stockRepo.stockModel.findByIdAndUpdate(cancelingReservation.get('stock'), { availability: cancelingReservation.get('stock_availability_before') }).exec();
             })));
             debug(cancelingReservations.length, 'reservation(s) canceled.');
             // tslint:disable-next-line:no-suspicious-comment
-            // TODO 017/11 時間ごとの予約レコードのSTATUS初期化
+            // TODO 車椅子流入制限解放
             // if (reservation.ticket_ttts_extension !== ttts.TicketTypeGroupUtil.TICKET_TYPE_CATEGORY_NORMAL) {
             //     await ttts.Models.ReservationPerHour.findOneAndUpdate(
             //         { reservation_id: reservationId },

@@ -62,13 +62,6 @@ $(function () {
     // モーダルを閉じたら中のカレンダーも閉じる
     $modal_calender.click(function () { calendar.close(); });
 
-    // purchaser_groupをキーにした「予約方法」辞書
-    var purchaseRoute = {
-        '01': '一般ネット予約',
-        '04': '窓口代理予約',
-        '06': 'POS'
-    };
-
     var conditions = {
         limit: $('.search-form input[name="limit"]').val(),
         page: '1'

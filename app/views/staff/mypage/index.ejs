@@ -107,7 +107,7 @@
                 <select class="form-control" name="owner">
                     <option value="">指定無し</option>
                     <% owners.forEach((owner) => { %>
-                        <option value="<%= owner._id %>">
+                        <option value="<%= owner.id %>">
                             <%= owner.name.ja %>
                         </option>
                         <% }) %>
@@ -322,7 +322,7 @@
     </div>
 </div>
 
-<input type="hidden" name="userId" value="<%- req.staffUser._id %>">
+<input type="hidden" name="userId" value="<%- req.staffUser.id %>">
 <input type="hidden" name="username" value="<%- req.staffUser.name.ja %>">
 <input type="hidden" name="urlCancel" value="/api/reservations/cancel">
 <input type="hidden" name="urlUpdateWatcherName" value="/api/reservations/updateWatcherName">

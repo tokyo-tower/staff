@@ -93,7 +93,7 @@ function getTargetReservationsForRefund(performanceIds) {
         // 返品されていない、かつ、入場履歴なし、の予約から、取引IDリストを取得
         const targetTransactionIds = yield reservationRepo.reservationModel.distinct('transaction', {
             status: ttts.factory.reservationStatusType.ReservationConfirmed,
-            purchaser_group: ttts.ReservationUtil.PURCHASER_GROUP_CUSTOMER,
+            purchaser_group: ttts.factory.person.Group.Customer,
             performance: { $in: performanceIds },
             checkins: { $size: 0 }
         }).exec();
