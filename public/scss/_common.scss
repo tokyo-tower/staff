@@ -113,13 +113,26 @@ select {
     margin: 0 0 20px 0;
 }
 
+.is-ja {
+    display: none;
+}
+
+.page-ja {
+    .is-ja {
+        display: inline;
+    }
+    .is-not-ja {
+        display: none;
+    }
+}
+
 .form-inline .form-control {
     @media screen and (max-width: $breakpoint_tablet) {
         width:100%;
     }
 }
 
-.errmsg {
+.red, .errmsg {
     color: red;
 }
 

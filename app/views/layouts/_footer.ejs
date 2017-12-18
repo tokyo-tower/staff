@@ -1,8 +1,8 @@
 <footer>
     <ul class="is-customer">
-        <li><a href="/terms" target="_blank"><%- __('h1.Policy') %></a></li>
-        <li><a href="/privacypolicy" target="_blank"><%- __('h1.Privacy') %></a></li>
-        <li><a href="/contact" target="_blank"><%- __('h1.ContactUs') %></a></li>
+        <li><a href="/terms" target="_blank"><%- __('Terms') %></a></li>
+        <li><a href="/privacypolicy" target="_blank"><%- __('AboutPrivacy') %></a></li>
+        <li><a href="/contact" target="_blank"><%- __('ContactUs') %></a></li>
     </ul>
     <div class="copyrights">
         <div class="inner">
@@ -14,9 +14,9 @@
 <script>
     window.ttts.API_ENDPOINT = '<%= process.env.API_ENDPOINT %>';
     window.ttts.commonlocales = {
-        Next: '<%- __('Button.Next') %>',
-        Sending: '<%- __('Message.Sending') %>',
-        UnexpectedError: '<%- __('Message.UnexpectedError') %>'
+        Next: '<%= __('Next') %>',
+        Sending: '<%= __('Processing') %>',
+        UnexpectedError: '<%= __('UnexpectedError') %>'
     };
     window.ttts.reservation_maxq = '<%- conf.get('reservation_maxq') %>';
     $(document).on('click', '.update-locale', function(){

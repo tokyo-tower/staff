@@ -1,5 +1,12 @@
 // 予約者情報入力ページ
 .page-profile {
+    .required {
+        color: #c30d23;
+    }
+    .description-required {
+        text-align: right;
+        margin-bottom: 10px;
+    }
     .table-profile {
         tr,
         th,
@@ -22,14 +29,7 @@
             padding: 10px;
             width: 196px;
             .required {
-                display: block;
-                font-size: 0.8em;
-                color: #c30d23;
-                padding: 2px;
-                @media screen and (max-width: $breakpoint_tablet) {
-                    margin-left: 4px;
-                    display: inline-block;
-                }
+                margin-left: 4px;
             }
         }
         td {

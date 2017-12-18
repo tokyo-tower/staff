@@ -1,11 +1,11 @@
 $(function() {
-    var isSubmitting = false;    
+    var isSubmitting = false;
 
     var isAgreed = function() {
         if (window.ttts.mode !== 'customer') {
             return true;
         }
-        return document.getElementById('checkbox_agreed').checked;        
+        return document.getElementById('checkbox_agreed').checked;
     };
 
     // 合計金額の更新
@@ -36,7 +36,7 @@ $(function() {
         isValidTicketsSelected = true;
 
         // 数字をコンマ区切りに
-        var text = total.toString().replace(/(\d)(?=(\d{3})+$)/g, '$1,') + ((window.ttts.currentLocale === 'ja') ? '円' : 'JPY');
+        var text = total.toString().replace(/(\d)(?=(\d{3})+$)/g, '$1,') + ((window.ttts.currentLocale === 'ja') ? '円' : ' JPY');
         dom_price.innerText = text;
         dom_tfoot.classList.remove('hidden');
         if (isAgreed()) {

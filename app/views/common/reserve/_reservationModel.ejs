@@ -1,12 +1,12 @@
 <div class="reservationstatus row">
-    <h2 class="accordion_mobile_toggle"><%- __('Label.PurchaseContent') %></h2>
+    <h2 class="accordion_mobile_toggle"><%- __('PurchaseContent') %></h2>
     <div class="reservationstatus-inner accordion_mobile_inner">
-        <p class="reservationstatus-title"><%- __('Label.PurchaseContentDate') %></p>
+        <p class="reservationstatus-title"><%- __('PurchaseContentDate') %></p>
         <div class="reservationstatus-info">
             <%= moment(reservationModel.performance.day).format('Y-MM-DD') %><br>
             <%= `${moment(reservationModel.performance.start_time, 'hmm').format('HH:mm')} - ${moment(reservationModel.performance.end_time, 'hmm').format('HH:mm')}` %>
         </div>
-        <p class="reservationstatus-title">ツアーナンバー</p>
+        <p class="reservationstatus-title"><%- __('TourNumber') %></p>
         <div class="reservationstatus-info">
             <%- reservationModel.performance.ttts_extension.tour_number %>
         </div>

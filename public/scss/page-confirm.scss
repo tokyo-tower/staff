@@ -78,10 +78,18 @@
             text-align: center;
             margin-bottom: 1em;
         }
+        h3 {
+            font-size: 1em;
+            text-align: center;
+            margin-bottom: 1em;            
+        }
         p {
             background-color: #eee;
             padding: 1em;
             line-height: 2;
+        }
+        a {
+            text-decoration: underline;
         }
     }
 

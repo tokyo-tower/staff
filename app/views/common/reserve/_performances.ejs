@@ -1,11 +1,14 @@
 <%
     const cate = (typeof category === 'string') ? category : 'general';
+    const isStaff = /staff/.test(req.baseUrl);
+    const isWheelchair = (cate === 'wheelchair');
 %>
 <script>
     window.ttts.API_TOKEN = {
         VALUE: '<%= token.access_token %>',
-        EXPIRES_IN: '<%= token.expires_in %>'
+        EXPIRES_IN: <%= token.expires_in %>
     };
+    window.ttts.isWheelchairReservation = <%= isWheelchair %>;
     window.ttts.reservableMaxDate = '<%= reserveMaxDate %>';
 </script>
 <script src="/js/flatpickr/flatpickr.min.js"></script>
@@ -14,15 +17,17 @@
 
 <%- include('./_step', {currentStepName: 'performances'}) %>
 
-<h1 class="pagetitle"><%- __('h1.SelectPerformance') %></h1>
-<p class="guidetext is-customer"><%- __('Label.SelectPerformanceGuideText') %></p>
-<p class="guidetext is-staff-block">代理予約を行う日時を指定してください</p>
+<h1 class="pagetitle"><%- (isWheelchair) ? `<span class="is-wheelchair">${__('ForWCReserveTitle')}</span>` : '' %><%- __('SelectPerformance') %></h1>
 
-<%  if (cate == "wheelchair") { %>
-    <p class="guidetext is-customer" style="color:red">〇〇〇車椅子〇〇〇</p>
-<%  } %>
+<p class="guidetext is-customer"><%- __('SelectPerformanceGuideText') %></p>
 
-<h3><span class="redcircle">1</span><%- __('Label.PreferredDate') %></h3>
+<% if (isStaff) { %><p class="guidetext is-staff-block">代理予約を行う日時を指定してください</p><% } %>
+
+<% if (!isStaff && !isWheelchair) { %><p class="guidetext guidetext-topdeck"><%- __('AboutTour') %></p><% } %>
+
+<p class="guidetext guidetext-reservation is-customer"><%- (isWheelchair) ? __('LinkContainedWheelChairGuideMessage') : __('LinkContainedPerformanceMessage') %></p>
+
+<h3><span class="redcircle">1</span><%- __('PreferredDateSelect') %><span class="daynotice"><%- __('ReservableMaxDate{{ymd}}', {ymd: reserveMaxDate}) %></span></h3>
 <div class="performancesearchform">
     <form>
         <div class="input-date input-group">
@@ -32,14 +37,15 @@
 </div>
 
 
-<h3><span class="redcircle">2</span><%- __('Label.PreferredTime') %></h3>
-<p class="icondescription"><%- __('Label.IconDescription') %>:<br class="visible-mobile-block">
-    <img src="/images/common/icon-status-capable.svg" alt="capable"> … <%- __('Label.Capable') %>
-    <img src="/images/common/icon-status-crowded.svg" alt="crowded"> … <%- __('Label.Crowded') %>
+<h3><span class="redcircle">2</span><%- __('PreferredTimeSelect') %></h3>
+<p class="icondescription"><%- __('PerformanceIconDescription') %>:<br class="visible-mobile-block">
+    <img src="/images/common/icon-status-capable.svg" alt="capable"> … <%- __('StatusCapable') %>
+    <img src="/images/common/icon-status-crowded.svg" alt="crowded"> … <%- __('StatusCrowded') %>
     <br class="mbr">
-    <img src="/images/common/icon-status-last.svg" alt="last"> … <%- __('Label.Last') %>
-    <img src="/images/common/icon-status-soldout_d.svg" alt="soldout"> … <%- __('Label.Soldout') %>
-    <img src="/images/common/icon-status-unavailable_d.svg" alt="unavailable"> … <%- __('Label.Unavailable') %>
+    <img src="/images/common/icon-status-last.svg" alt="last"> … <%- __('StatusLast') %>
+    <img src="/images/common/icon-status-soldout_d.svg" alt="soldout"> … <%- __('StatusSoldout') %>
+    <br class="mbr">
+    <img src="/images/common/icon-status-unavailable_d.svg" alt="unavailable"> … <%- __('StatusOnlineSalesSuspended') %>
 </p>
 
 <div class="row performances">
@@ -55,7 +61,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-body">
-                <div class="text-center"><%- __('Message.Searching') %></div>
+                <div class="text-center"><%- __('Processing') %></div>
             </div>
         </div>
     </div>
