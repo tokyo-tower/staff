@@ -55,13 +55,13 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 
                 if (owner === null) {
                     res.locals.validation = [
-                        { msg: req.__('Message.invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
+                        { msg: req.__('Invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
                     ];
                 } else {
                     // パスワードチェック
                     if (owner.get('password_hash') !== ttts.CommonUtil.createHash(req.body.password, owner.get('password_salt'))) {
                         res.locals.validation = [
-                            { msg: req.__('Message.invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
+                            { msg: req.__('Invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
                         ];
                     } else {
                         // ログイン記憶
@@ -99,14 +99,14 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 
         res.render('staff/auth/login', { layout: 'layouts/staff/login' });
     } catch (error) {
-        next(new Error(req.__('Message.UnexpectedError')));
+        next(new Error(req.__('UnexpectedError')));
     }
 }
 
 export async function logout(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         if (req.session === undefined) {
-            next(new Error(req.__('Message.UnexpectedError')));
+            next(new Error(req.__('UnexpectedError')));
 
             return;
         }

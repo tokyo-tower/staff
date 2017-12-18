@@ -12,7 +12,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     req.staffUser = StaffUser.parse(req.session);
 
     // if (req.staffUser === undefined) {
-    //     next(new Error(req.__('Message.UnexpectedError')));
+    //     next(new Error(req.__('UnexpectedError')));
 
     //     return;
     // }

@@ -42,7 +42,7 @@ export async function start(req: Request, res: Response, next: NextFunction): Pr
             res.redirect(`/staff/reserve/terms?cb=${encodeURIComponent(cb)}`);
         }
     } catch (error) {
-        next(new Error(req.__('Message.UnexpectedError')));
+        next(new Error(req.__('UnexpectedError')));
     }
 }
 
@@ -64,7 +64,7 @@ export async function performances(req: Request, res: Response, next: NextFuncti
         const reservationModel = ReserveSessionModel.FIND(req);
 
         if (reservationModel === null) {
-            next(new Error(req.__('Message.Expired')));
+            next(new Error(req.__('Expired')));
 
             return;
         }
@@ -90,7 +90,7 @@ export async function performances(req: Request, res: Response, next: NextFuncti
             reservePerformanceForm(req);
             const validationResult = await req.getValidationResult();
             if (!validationResult.isEmpty()) {
-                next(new Error(req.__('Message.UnexpectedError')));
+                next(new Error(req.__('UnexpectedError')));
 
                 return;
             }
@@ -106,7 +106,7 @@ export async function performances(req: Request, res: Response, next: NextFuncti
 
                 return;
             } catch (error) {
-                next(new Error(req.__('Message.UnexpectedError')));
+                next(new Error(req.__('UnexpectedError')));
 
                 return;
             }
@@ -124,7 +124,7 @@ export async function performances(req: Request, res: Response, next: NextFuncti
         }
     } catch (error) {
         console.error(error);
-        next(new Error(req.__('Message.UnexpectedError')));
+        next(new Error(req.__('UnexpectedError')));
     }
 }
 
@@ -135,7 +135,7 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
     try {
         const reservationModel = ReserveSessionModel.FIND(req);
         if (reservationModel === null) {
-            next(new Error(req.__('Message.Expired')));
+            next(new Error(req.__('Expired')));
 
             return;
         }
@@ -173,7 +173,7 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
             });
         }
     } catch (error) {
-        next(new Error(req.__('Message.UnexpectedError')));
+        next(new Error(req.__('UnexpectedError')));
     }
 }
 
@@ -184,7 +184,7 @@ export async function profile(req: Request, res: Response, next: NextFunction): 
     try {
         const reservationModel = ReserveSessionModel.FIND(req);
         if (reservationModel === null) {
-            next(new Error(req.__('Message.Expired')));
+            next(new Error(req.__('Expired')));
 
             return;
         }
@@ -223,7 +223,7 @@ export async function profile(req: Request, res: Response, next: NextFunction): 
             });
         }
     } catch (error) {
-        next(new Error(req.__('Message.UnexpectedError')));
+        next(new Error(req.__('UnexpectedError')));
     }
 }
 
@@ -234,7 +234,7 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
     try {
         const reservationModel = ReserveSessionModel.FIND(req);
         if (reservationModel === null) {
-            next(new Error(req.__('Message.Expired')));
+            next(new Error(req.__('Expired')));
 
             return;
         }
@@ -243,7 +243,7 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
             try {
                 // 仮押さえ有効期限チェック
                 if (reservationModel.expiredAt !== undefined && reservationModel.expiredAt < moment().valueOf()) {
-                    throw new Error(req.__('Message.Expired'));
+                    throw new Error(req.__('Expired'));
                 }
 
                 // 予約確定
@@ -272,7 +272,7 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
             });
         }
     } catch (error) {
-        next(new Error(req.__('Message.UnexpectedError')));
+        next(new Error(req.__('UnexpectedError')));
     }
 }
 
@@ -295,7 +295,7 @@ export async function complete(req: Request, res: Response, next: NextFunction):
             }
         ).exec();
         if (transaction === null) {
-            next(new Error(req.__('Message.NotFound')));
+            next(new Error(req.__('NotFound')));
 
             return;
         }
@@ -308,7 +308,7 @@ export async function complete(req: Request, res: Response, next: NextFunction):
         );
 
         if (reservations.length === 0) {
-            next(new Error(req.__('Message.NotFound')));
+            next(new Error(req.__('NotFound')));
 
             return;
         }
@@ -322,6 +322,6 @@ export async function complete(req: Request, res: Response, next: NextFunction):
             layout: layout
         });
     } catch (error) {
-        next(new Error(req.__('Message.UnexpectedError')));
+        next(new Error(req.__('UnexpectedError')));
     }
 }

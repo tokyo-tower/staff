@@ -66,7 +66,7 @@ function processFixSeatsAndTickets(reservationModel, req) {
             // tslint:disable-next-line:max-line-length
             const ticketType = reservationModel.ticketTypes.find((ticketTypeInArray) => (ticketTypeInArray.id === choice.ticket_type));
             if (ticketType === undefined) {
-                throw new Error(req.__('Message.UnexpectedError'));
+                throw new Error(req.__('UnexpectedError'));
             }
             return {
                 ticket_type: ticketType.id,
@@ -112,13 +112,13 @@ function checkFixSeatsAndTickets(reservationModel, req) {
         reserveTicketForm_1.default(req);
         const validationResult = yield req.getValidationResult();
         if (!validationResult.isEmpty()) {
-            checkInfo.message = req.__('Message.Invalid');
+            checkInfo.message = req.__('Invalid"');
             return checkInfo;
         }
         // 画面から座席選択情報が生成できなければエラー
         const choices = JSON.parse(req.body.choices);
         if (!Array.isArray(choices)) {
-            checkInfo.message = req.__('Message.UnexpectedError');
+            checkInfo.message = req.__('UnexpectedError');
             return checkInfo;
         }
         checkInfo.choices = choices;
@@ -186,7 +186,7 @@ function getInfoFixSeatsAndTickets(reservationModel, req, selectedCount) {
         // チケット枚数より少ない場合は、購入不可としてリターン
         if (count < selectedCount) {
             // "予約可能な席がございません"
-            info.message = req.__('Message.NoAvailableSeats');
+            info.message = req.__('NoAvailableSeats');
             return info;
         }
         // 予約情報取得
@@ -202,7 +202,7 @@ function getInfoFixSeatsAndTickets(reservationModel, req, selectedCount) {
         // チケット枚数より少ない場合は、購入不可としてリターン
         if (info.results.length < selectedCount) {
             // "予約可能な席がございません"
-            info.message = req.__('Message.NoAvailableSeats');
+            info.message = req.__('NoAvailableSeats');
             return info;
         }
         info.status = true;
@@ -222,7 +222,7 @@ function processFixProfile(reservationModel, req, res) {
         res.locals.validation = validationResult.mapped();
         res.locals.paymentMethod = req.body.paymentMethod;
         if (!validationResult.isEmpty()) {
-            throw new Error(req.__('Message.Invalid'));
+            throw new Error(req.__('Invalid"'));
         }
         // 購入情報を保存
         // tslint:disable-next-line:no-suspicious-comment
@@ -394,7 +394,7 @@ function createEmailQueue(reservations, reservationModel, res) {
             throw new Error('email to unknown');
         }
         const title = res.__('Title');
-        const titleEmail = res.__('Email.Title');
+        const titleEmail = res.__('EmailTitle');
         // 券種ごとに合計枚数算出
         const ticketInfos = {};
         for (const reservation of reservations) {

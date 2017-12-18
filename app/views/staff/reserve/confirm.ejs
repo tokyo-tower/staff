@@ -28,7 +28,7 @@
             <%- /* 券種/枚数/メモ */ %>
             <tr>
                 <th>
-                    <%- __('Label.TicketType') %> / <%- __('Label.TicketCount') %> / <%- __('Label.WatcherName') %>
+                    <%- __('TicketType') %> / <%- __('TicketCount') %> / <%- __('Label.WatcherName') %>
                 </th>
                 <td>
                 <% Object.keys(ticketInfos).forEach(function(key) { %>
@@ -49,7 +49,7 @@
                     <%- __('Label.HowToPayStaff') %>
                 </th>
                 <td>
-                    <p><%- __(`Label.PaymentMethodName.${reservationModel.paymentMethod}`) %></p>
+                    <p><%- __(`PaymentMethodName.${reservationModel.paymentMethod}`) %></p>
                 </td>
             </tr>
         </tbody>
@@ -58,7 +58,7 @@
 
 <div class="navbtns">
     <a class="btn btn-lg btn-next" href="javascript:void(0);"><span>代理予約確定</span></a>
-    <a class="btn-back" href="/staff/reserve/profile"><span><%- __('Button.Back') %></span></a>
+    <a class="btn-back" href="/staff/reserve/profile"><span><%- __('Back') %></span></a>
 </div>
 
 <script>
