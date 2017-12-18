@@ -39,15 +39,15 @@
                         return true;
                     }
                 %>
-                    <tr data-ticket-code="<%- ticketType._id %>" data-ticket-charge="<%= ticketType.charge %>">
+                    <tr data-ticket-code="<%- ticketType.id %>" data-ticket-charge="<%= ticketType.charge %>">
                         <% /* 券種名+値段 */ %>
                         <th>
                             <span><%- ticketType.name[locale] %> \<%= ticketType.charge %></span>
-                            <input type="text" name="watcherName" class="form-control" placeholder="予約メモ" data-ticket-code="<%- ticketType._id %>" value="<%- memosByTicketType[ticketType._id] %>">
+                            <input type="text" name="watcherName" class="form-control" placeholder="予約メモ" data-ticket-code="<%- ticketType.id %>" value="<%- memosByTicketType[ticketType.id] %>">
                         </th>
                         <td>
                             <% /* 枚数選択dropdown */ %>
-                            <select id="select_ticketq_<%- ticketType._id %>" class="form-control">
+                            <select id="select_ticketq_<%- ticketType.id %>" class="form-control">
                                 <% for (let ticketCount = 0; ticketCount < 11; ticketCount++) { %>
                                     <option value="<%- ticketCount.toString() %>"<% if (ticketCount === ticketType.count) { %> selected="selected"<% } %>><%- ticketCount.toString() %></option>
                                 <% } %>

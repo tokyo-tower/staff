@@ -6,6 +6,7 @@
 import * as ttts from '@motionpicture/ttts-domain';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
+import { INTERNAL_SERVER_ERROR, NO_CONTENT, NOT_FOUND } from 'http-status';
 import * as _ from 'underscore';
 
 const debug = createDebug('ttts-staff:controllers:api:reservations');
@@ -192,17 +193,15 @@ export async function search(req: Request, res: Response): Promise<void> {
         //---
 
         res.json({
-            success: true,
             results: reservations,
             count: count,
             errors: null
         });
     } catch (error) {
-        res.json({
-            success: false,
-            results: [],
-            errors: null,
-            count: 0
+        res.status(INTERNAL_SERVER_ERROR).json({
+            errors: [{
+                message: error.message
+            }]
         });
     }
 }
@@ -267,7 +266,7 @@ export async function updateWatcherName(req: Request, res: Response, next: NextF
     };
 
     // 自分の予約のみ
-    (<any>condition).owner = req.staffUser.get('_id');
+    (<any>condition).owner = req.staffUser.get('id');
 
     const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
     try {
@@ -282,22 +281,15 @@ export async function updateWatcherName(req: Request, res: Response, next: NextF
         ).exec();
 
         if (reservation === null) {
-            res.json({
-                success: false,
-                message: req.__('Message.NotFound'),
-                reservationId: null
-            });
+            res.status(NOT_FOUND).json(null);
         } else {
-            res.json({
-                success: true,
-                reservation: reservation.toObject()
-            });
+            res.status(NO_CONTENT).end();
         }
     } catch (error) {
-        res.json({
-            success: false,
-            message: req.__('Message.UnexpectedError'),
-            reservationId: null
+        res.status(INTERNAL_SERVER_ERROR).json({
+            errors: [{
+                message: req.__('Message.UnexpectedError')
+            }]
         });
     }
 }
@@ -331,13 +323,9 @@ export async function cancel(req: Request, res: Response, next: NextFunction): P
             }
         });
         await Promise.all(promises);
-        res.json({
-            message: null,
-            successIds: successIds,
-            errorIds: errorIds
-        });
+        res.status(NO_CONTENT).end();
     } catch (error) {
-        res.json({
+        res.status(INTERNAL_SERVER_ERROR).json({
             message: error.message,
             successIds: successIds,
             errorIds: errorIds
@@ -382,7 +370,7 @@ async function cancelById(reservationId: string): Promise<boolean> {
         await Promise.all(cancelingReservations.map(async (cancelingReservation) => {
             // 予約をキャンセル
             await reservationRepo.reservationModel.findByIdAndUpdate(
-                cancelingReservation._id,
+                <string>cancelingReservation.id,
                 { status: ttts.factory.reservationStatusType.ReservationCancelled }
             ).exec();
 
@@ -395,7 +383,7 @@ async function cancelById(reservationId: string): Promise<boolean> {
         debug(cancelingReservations.length, 'reservation(s) canceled.');
 
         // tslint:disable-next-line:no-suspicious-comment
-        // TODO 017/11 時間ごとの予約レコードのSTATUS初期化
+        // TODO 車椅子流入制限解放
         // if (reservation.ticket_ttts_extension !== ttts.TicketTypeGroupUtil.TICKET_TYPE_CATEGORY_NORMAL) {
         //     await ttts.Models.ReservationPerHour.findOneAndUpdate(
         //         { reservation_id: reservationId },

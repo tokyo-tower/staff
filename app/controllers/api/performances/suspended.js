@@ -113,38 +113,35 @@ function findSuspendedPerformances(conditions, limit, page) {
         })
             .skip(limit * (page - 1))
             .limit(limit)
-            .lean()
             .exec();
         debug('suspended performances found.', performances);
         return Promise.all(performances.map((performance) => __awaiter(this, void 0, void 0, function* () {
-            const performanceId = performance._id.toString();
+            const performanceId = performance.id;
             // パフォーマンスに対する予約数
             const numberOfReservations = yield reservationRepo.reservationModel.count({
-                status: ttts.factory.reservationStatusType.ReservationConfirmed,
                 purchaser_group: ttts.factory.person.Group.Customer,
-                performance: performance._id
+                performance: performanceId
             }).exec();
             // 未入場の予約数
             const nubmerOfUncheckedReservations = yield reservationRepo.reservationModel.count({
-                status: ttts.factory.reservationStatusType.ReservationConfirmed,
                 purchaser_group: ttts.factory.person.Group.Customer,
-                performance: performance._id,
+                performance: performanceId,
                 checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
             }).exec();
+            const extension = performance.get('ttts_extension');
             return {
                 performance_id: performanceId,
-                performance_day: moment(performance.day, 'YYYYMMDD').format('YYYY/MM/DD'),
-                tour_number: performance.ttts_extension.tour_number === '' ?
-                    EMPTY_STRING : performance.ttts_extension.tour_number,
-                ev_service_status: performance.ttts_extension.ev_service_status,
-                ev_service_status_name: EV_SERVICE_STATUS_NAMES[performance.ttts_extension.ev_service_status],
-                online_sales_update_at: performance.ttts_extension.online_sales_update_at,
-                online_sales_update_user: performance.ttts_extension.online_sales_update_user,
+                performance_day: moment(performance.get('day'), 'YYYYMMDD').format('YYYY/MM/DD'),
+                tour_number: extension.tour_number === '' ? EMPTY_STRING : extension.tour_number,
+                ev_service_status: extension.ev_service_status,
+                ev_service_status_name: EV_SERVICE_STATUS_NAMES[extension.ev_service_status],
+                online_sales_update_at: extension.online_sales_update_at,
+                online_sales_update_user: extension.online_sales_update_user,
                 canceled: numberOfReservations,
                 arrived: numberOfReservations - nubmerOfUncheckedReservations,
-                refund_status: performance.ttts_extension.refund_status,
-                refund_status_name: REFUND_STATUS_NAMES[performance.ttts_extension.refund_status],
-                refunded: performance.ttts_extension.refunded_count
+                refund_status: extension.refund_status,
+                refund_status_name: REFUND_STATUS_NAMES[extension.refund_status],
+                refunded: extension.refunded_count
             };
         })));
     });

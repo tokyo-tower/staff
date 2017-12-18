@@ -288,7 +288,7 @@ export async function complete(req: Request, res: Response, next: NextFunction):
                 'result.eventReservations.payment_no': req.params.paymentNo,
                 'result.eventReservations.purchaser_group': PURCHASER_GROUP,
                 'result.eventReservations.status': ttts.factory.reservationStatusType.ReservationConfirmed,
-                'result.eventReservations.owner': (<Express.StaffUser>req.staffUser).get('_id'),
+                'result.eventReservations.owner': (<Express.StaffUser>req.staffUser).get('id'),
                 'result.eventReservations.purchased_at': { // 購入確定から30分有効
                     $gt: moment().add(-30, 'minutes').toDate() // tslint:disable-line:no-magic-numbers
                 }

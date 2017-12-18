@@ -53,7 +53,7 @@ function processFixSeatsAndTickets(reservationModel, req) {
         console.log(`reservationModel.performance=${reservationModel.performance.id}`);
         // チケット情報に枚数セット(画面で選択された枚数<画面再表示用)
         reservationModel.ticketTypes.forEach((ticketType) => {
-            const choice = checkInfo.choices.find((c) => (ticketType._id === c.ticket_type));
+            const choice = checkInfo.choices.find((c) => (ticketType.id === c.ticket_type));
             ticketType.count = (choice !== undefined) ? Number(choice.ticket_count) : 0;
         });
         // セッション中の予約リストを初期化
@@ -64,12 +64,12 @@ function processFixSeatsAndTickets(reservationModel, req) {
         const offers = checkInfo.choicesAll.map((choice) => {
             // チケット情報
             // tslint:disable-next-line:max-line-length
-            const ticketType = reservationModel.ticketTypes.find((ticketTypeInArray) => (ticketTypeInArray._id === choice.ticket_type));
+            const ticketType = reservationModel.ticketTypes.find((ticketTypeInArray) => (ticketTypeInArray.id === choice.ticket_type));
             if (ticketType === undefined) {
                 throw new Error(req.__('Message.UnexpectedError'));
             }
             return {
-                ticket_type: ticketType._id,
+                ticket_type: ticketType.id,
                 watcher_name: choice.watcher_name
             };
         });
@@ -125,8 +125,8 @@ function checkFixSeatsAndTickets(reservationModel, req) {
         // 特殊チケット情報
         const extraSeatNum = {};
         reservationModel.ticketTypes.forEach((ticketTypeInArray) => {
-            if (ticketTypeInArray.ttts_extension.category !== ttts.TicketTypeGroupUtil.TICKET_TYPE_CATEGORY_NORMAL) {
-                extraSeatNum[ticketTypeInArray._id] = ticketTypeInArray.ttts_extension.required_seat_num;
+            if (ticketTypeInArray.ttts_extension.category !== ttts.factory.ticketTypeCategory.Normal) {
+                extraSeatNum[ticketTypeInArray.id] = ticketTypeInArray.ttts_extension.required_seat_num;
             }
         });
         // チケット枚数合計計算
@@ -193,7 +193,7 @@ function getInfoFixSeatsAndTickets(reservationModel, req, selectedCount) {
         const stocks = yield stockRepo.stockModel.find(conditions).exec();
         info.results = stocks.map((stock) => {
             return {
-                _id: stock._id,
+                id: stock.id,
                 performance: stock.performance,
                 seat_code: stock.seat_code,
                 used: false
@@ -290,24 +290,15 @@ function initializePayment(reservationModel, req) {
         gender: '1'
     };
     reservationModel.paymentMethodChoices = [];
-    switch (reservationModel.purchaserGroup) {
-        case ttts.factory.person.Group.Staff:
-            if (req.staffUser === undefined) {
-                throw new Error(req.__('Message.UnexpectedError'));
-            }
-            reservationModel.purchaser = {
-                lastName: 'ナイブ',
-                firstName: 'カンケイシャ',
-                tel: '0362263025',
-                email: req.staffUser.get('email'),
-                age: '00',
-                address: '',
-                gender: '1'
-            };
-            break;
-        default:
-            break;
-    }
+    reservationModel.purchaser = {
+        lastName: 'ナイブ',
+        firstName: 'カンケイシャ',
+        tel: '0362263025',
+        email: req.staffUser.get('email'),
+        age: '00',
+        address: '',
+        gender: '1'
+    };
 }
 /**
  * 予約フロー中の座席をキャンセルするプロセス
@@ -339,31 +330,11 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
         if (performance.canceled) {
             throw new Error(req.__('Message.OutOfTerm'));
         }
-        // 内部と当日以外は、上映日当日まで購入可能
-        if (reservationModel.purchaserGroup !== ttts.factory.person.Group.Staff) {
-            // tslint:disable-next-line:no-magic-numbers
-            if (parseInt(performance.day, 10) < parseInt(moment().format('YYYYMMDD'), 10)) {
-                throw new Error('You cannot reserve this performance.');
-            }
-        }
         // 券種取得
-        const ticketTypeGroup = yield ttts.Models.TicketTypeGroup.findById(performance.ticket_type_group).populate('ticket_types').exec();
+        reservationModel.ticketTypes = performance.ticket_type_group.ticket_types.map((t) => {
+            return Object.assign({}, t, { count: 0, watcher_name: '' });
+        });
         reservationModel.seatCodes = [];
-        // 券種リストは、予約する主体によって異なる
-        // 内部関係者の場合
-        switch (reservationModel.purchaserGroup) {
-            case ttts.factory.person.Group.Staff:
-                if (ticketTypeGroup !== null) {
-                    reservationModel.ticketTypes = ticketTypeGroup.get('ticket_types');
-                }
-                break;
-            default:
-                // 一般、当日窓口の場合
-                if (ticketTypeGroup !== null) {
-                    reservationModel.ticketTypes = ticketTypeGroup.get('ticket_types');
-                }
-                break;
-        }
         // パフォーマンス情報を保管
         reservationModel.performance = Object.assign({}, performance, {
             film: Object.assign({}, performance.film, {
@@ -417,15 +388,7 @@ function createEmailQueue(reservations, reservationModel, res) {
         // 特殊チケットは除外
         reservations = reservations.filter((reservation) => reservation.status === ttts.factory.reservationStatusType.ReservationConfirmed);
         const reservationDocs = reservations.map((reservation) => new reservationRepo.reservationModel(reservation));
-        let to = '';
-        switch (reservations[0].purchaser_group) {
-            case ttts.factory.person.Group.Staff:
-                to = reservations[0].owner_email;
-                break;
-            default:
-                to = reservations[0].purchaser_email;
-                break;
-        }
+        const to = reservations[0].owner_email;
         debug('to is', to);
         if (to.length === 0) {
             throw new Error('email to unknown');
@@ -467,7 +430,6 @@ function createEmailQueue(reservations, reservationModel, res) {
                 moment: moment,
                 numeral: numeral,
                 conf: conf,
-                GMOUtil: ttts.GMO.utils.util,
                 ticketInfoArray: ticketInfoArray,
                 totalCharge: reservationModel.getTotalCharge(),
                 dayTime: `${day} ${time}`

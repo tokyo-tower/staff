@@ -294,7 +294,7 @@ function complete(req, res, next) {
                 'result.eventReservations.payment_no': req.params.paymentNo,
                 'result.eventReservations.purchaser_group': PURCHASER_GROUP,
                 'result.eventReservations.status': ttts.factory.reservationStatusType.ReservationConfirmed,
-                'result.eventReservations.owner': req.staffUser.get('_id'),
+                'result.eventReservations.owner': req.staffUser.get('id'),
                 'result.eventReservations.purchased_at': {
                     $gt: moment().add(-30, 'minutes').toDate() // tslint:disable-line:no-magic-numbers
                 }

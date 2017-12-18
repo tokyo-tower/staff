@@ -11,7 +11,7 @@ class BaseUser {
      * サインイン中かどうか
      */
     isAuthenticated() {
-        return (this.get('_id') !== null);
+        return (this.get('id') !== null);
     }
     // tslint:disable-next-line:no-reserved-keywords
     get(key) {

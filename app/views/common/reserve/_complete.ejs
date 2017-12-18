@@ -1,11 +1,6 @@
 <%
-const printIds = [];
-let reservations = [];
-for (let reservation of reservationDocuments) {
-    let _reservation = reservation.toObject();
-    reservations.push(_reservation);
-    printIds.push(`\"${reservation._id.toString()}\"`);
-}
+const reservations = reservationDocuments.map((doc)=>doc.toObject());
+const printIds = reservationDocuments.map((doc)=>`"${doc.get('id')}"`);
 %>
 <input type="hidden" id="input_reservations" value="<%= JSON.stringify(reservations) %>">
 <script src="/js/reserve/complete.js"></script>

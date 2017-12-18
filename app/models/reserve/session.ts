@@ -258,15 +258,11 @@ type IPerformance = ttts.factory.performance.IPerformanceWithDetails & {
 /**
  * チケット情報インターフェース
  */
-interface ITicketType {
-    _id: string;
-    name: IMultilingualString;
-    charge: number; // 料金
+type ITicketType = ttts.factory.performance.ITicketType & {
     count: number;  // 枚数
     watcher_name: string;
-    cancel_charge: [ICancelCharge];
-    ttts_extension: IExtensionTiket;
-}
+};
+
 /**
  * 予約情報インターフェース
  */
@@ -293,23 +289,3 @@ interface ITransactionGMO {
     count: number;
     status: string;
 }
-/**
- * キャンセル料情報インターフェース
- */
-interface ICancelCharge {
-    days: number;
-    charge: number;
-}
-/**
- * チケット拡張情報インターフェース
- */
-interface IExtensionTiket {
-    category: string;
-    required_seat_num: number;
-    csv_code: string;
-}
-
-/**
- * 多言語情報インターフェース
- */
-type IMultilingualString = ttts.factory.multilingualString;

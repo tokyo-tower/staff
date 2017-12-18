@@ -1,6 +1,5 @@
 /**
  * expressアプリケーション
- *
  * @module app
  * @global
  */
@@ -18,7 +17,6 @@ import * as favicon from 'serve-favicon';
 import * as _ from 'underscore';
 
 import authentication from './middlewares/authentication';
-import basicAuth from './middlewares/basicAuth';
 import errorHandler from './middlewares/errorHandler';
 import notFoundHandler from './middlewares/notFoundHandler';
 import session from './middlewares/session';
@@ -36,7 +34,6 @@ const app = express();
 app.use(partials()); // レイアウト&パーシャルサポート
 
 app.use(session); // セッション
-app.use(basicAuth); // ベーシック認証
 
 if (process.env.NODE_ENV !== 'production') {
     // サーバーエラーテスト

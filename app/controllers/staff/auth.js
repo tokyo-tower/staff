@@ -70,7 +70,7 @@ function login(req, res, next) {
                                 // トークン生成
                                 const authentication = yield ttts.Models.Authentication.create({
                                     token: ttts.CommonUtil.createToken(),
-                                    owner: owner.get('_id'),
+                                    owner: owner.get('id'),
                                     signature: req.body.signature,
                                     locale: req.body.language
                                 });
