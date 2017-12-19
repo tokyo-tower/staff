@@ -225,9 +225,16 @@ function processFixProfile(reservationModel, req, res) {
             throw new Error(req.__('Invalid"'));
         }
         // 購入情報を保存
-        // tslint:disable-next-line:no-suspicious-comment
-        // TODO factoryに決済方法を定義
         reservationModel.paymentMethod = req.body.paymentMethod;
+        yield ttts.service.transaction.placeOrderInProgress.setCustomerContact(reservationModel.agentId, reservationModel.id, {
+            last_name: reservationModel.purchaser.lastName,
+            first_name: reservationModel.purchaser.firstName,
+            tel: reservationModel.purchaser.tel,
+            email: reservationModel.purchaser.email,
+            age: reservationModel.purchaser.age,
+            address: reservationModel.purchaser.address,
+            gender: reservationModel.purchaser.gender
+        })(new ttts.repository.Transaction(ttts.mongoose.connection));
         // セッションに購入者情報格納
         req.session.purchaser = {
             lastName: reservationModel.purchaser.lastName,
@@ -264,7 +271,7 @@ function processStart(purchaserGroup, req) {
             agentId: req.staffUser.get('_id'),
             sellerId: 'TokyoTower',
             purchaserGroup: purchaserGroup
-        });
+        })(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.Owner(ttts.mongoose.connection));
         debug('transaction started.', transaction.id);
         reservationModel.id = transaction.id;
         reservationModel.agentId = transaction.agent.id;
@@ -293,7 +300,7 @@ function initializePayment(reservationModel, req) {
     reservationModel.purchaser = {
         lastName: 'ナイブ',
         firstName: 'カンケイシャ',
-        tel: '0362263025',
+        tel: '0334335111',
         email: req.staffUser.get('email'),
         age: '00',
         address: '',
@@ -358,16 +365,14 @@ exports.processFixPerformance = processFixPerformance;
  */
 function processFixReservations(reservationModel, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        const transaction = yield ttts.service.transaction.placeOrderInProgress.confirm({
+        const transactionResult = yield ttts.service.transaction.placeOrderInProgress.confirm({
             agentId: reservationModel.agentId,
             transactionId: reservationModel.id,
             paymentMethod: reservationModel.paymentMethod
-        });
-        debug('transaction confirmed.', transaction.id);
+        })(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.action.authorize.CreditCard(ttts.mongoose.connection), new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection));
         try {
-            const result = transaction.result;
             // 完了メールキュー追加(あれば更新日時を更新するだけ)
-            const emailQueue = yield createEmailQueue(result.eventReservations, reservationModel, res);
+            const emailQueue = yield createEmailQueue(transactionResult.eventReservations, reservationModel, res);
             yield ttts.Models.EmailQueue.create(emailQueue);
         }
         catch (error) {

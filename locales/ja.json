@@ -1,17 +1,16 @@
 {
 	"Title": "東京タワー TOP DECK Ticket",
-	"{{price}} yen": "{{price}} 円",	
-	"ConfirmCancelSelectedTickets": "選択したチケットをキャンセルします",		
+	"{{price}} yen": "{{price}} 円",
+	"ConfirmCancelSelectedTickets": "選択したチケットをキャンセルします",
 	"AreYouSureCancel": "本当にキャンセルしますか？",
-    "PaymentMethodName": {
-		"0": "現金",
-        "CP": "CP支払い",
-        "I": "売掛（納品書・請求書支払い）",
-        "O": "団体予約",
-        "C": "貸切予約",
-        "F": "無料招待券"
+	"PaymentMethodName": {
+		"Cash": "現金",
+		"CP": "CP支払い",
+		"Invoice": "売掛（納品書・請求書支払い）",
+		"GroupReservation": "団体予約",
+		"Charter": "貸切予約",
+		"Invitation": "無料招待券"
 	},
-
 	"Terms": "利用規約",
 	"AboutPrivacy": "個人情報の取り扱いについて",
 	"ContactUs": "お問い合わせ",
@@ -93,7 +92,7 @@
 	"Profile": "購入者情報",
 	"FullName": "お名前",
 	"PaymentMethod": "お支払い方法",
-	"PaymentMethodName0": "クレジットカード",	
+	"PaymentMethodName0": "クレジットカード",
 	"Change": "変更",
 	"ConfirmNotes": "注意事項（重要）",
 	"ConfirmAgreementGuideText": "下記項目の内容をご確認のうえ、「同意する」にチェックを入れて「購入確定」ボタンを押してください。",
@@ -198,9 +197,9 @@
 	"MaintenanceMessage": "大変申し訳ございませんが、メンテナンス終了までお待ちください。",
 	"MaintenancePeriod": "メンテナンス期間：〇月〇日 〇〇時〇〇分～〇〇時〇〇分",
 	"AboutTour": "東京タワーの高さ250ｍに位置する「トップデッキ」へ真心を込めた演出で、待ち時間なくご案内するツアー。<br>多言語対応音声ガイドに、ドリンクサービスでおもてなし。<br>タワーとともに東京の過去から現在、そして未来を共有できるツアーです。",
-    "CardNumberMessage":"※半角数字、ハイフン「-」なしで入力してください",
-	"Close": "閉じる",	
-	"{{n}}Leaf":"{{n}}枚",
-    "InquiryResultCan":"キャンセルを行う場合は「チケットをキャンセルする」ボタンを押してください。",
-    "NotFoundGuideText":"既に存在しないか、もしくはアドレスの入力が間違っている可能性があります。"
+	"CardNumberMessage": "※半角数字、ハイフン「-」なしで入力してください",
+	"Close": "閉じる",
+	"{{n}}Leaf": "{{n}}枚",
+	"InquiryResultCan": "キャンセルを行う場合は「チケットをキャンセルする」ボタンを押してください。",
+	"NotFoundGuideText": "既に存在しないか、もしくはアドレスの入力が間違っている可能性があります。"
 }
