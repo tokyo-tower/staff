@@ -80,11 +80,15 @@ $breakpoint_mobile:481px;
 }
 
 body {
-    font-family: '游ゴシック', sans-serif;
+    font-family: sans-serif;
     background-color: #fff;
     @media screen and (max-width: $breakpoint_tablet) {
         font-size:14px;
     }
+}
+
+.page-ja {
+    font-family: '游ゴシック', sans-serif;
 }
 
 * {
