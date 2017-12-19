@@ -85,7 +85,7 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
         new ttts.repository.Performance(ttts.mongoose.connection),
         new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection),
         new ttts.repository.PaymentNo(ttts.mongoose.connection),
-        new ttts.repository.WheelchairReservationCount(redisClient)
+        new ttts.repository.rateLimit.TicketTypeCategory(redisClient)
         );
     reservationModel.seatReservationAuthorizeActionId = action.id;
     // この時点で購入番号が発行される
@@ -375,7 +375,7 @@ export async function processCancelSeats(reservationModel: ReserveSessionModel):
         )(
             new ttts.repository.Transaction(ttts.mongoose.connection),
             new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection),
-            new ttts.repository.WheelchairReservationCount(redisClient)
+            new ttts.repository.rateLimit.TicketTypeCategory(redisClient)
             );
     }
 }

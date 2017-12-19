@@ -50,9 +50,6 @@ npm run css
 ```shell
 set NODE_ENV=**********環境名(development,test,productionなど)**********
 set SENDGRID_API_KEY=**********sendgrid api key**********
-set TTTS_PERFORMANCE_STATUSES_REDIS_HOST=**********パフォーマンス空席状況保管先redis host**********
-set TTTS_PERFORMANCE_STATUSES_REDIS_PORT=**********パフォーマンス空席状況保管先redis port**********
-set TTTS_PERFORMANCE_STATUSES_REDIS_KEY=**********パフォーマンス空席状況保管先redis key**********
 set FRONTEND_GMO_RESULT_ENDPOINT=**********GMOリンク決済からの戻り先エンドポイント**********
 set API_ENDPOINT=**********frontと連携するttts apiのエンドポイント**********
 set API_CLIENT_ID=**********APIクライアントID**********
