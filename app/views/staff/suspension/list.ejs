@@ -1,22 +1,31 @@
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.0/locale/ja.js"></script>
+<script src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+<script>
+    window.ttts.API_SUSPENDED_ENDPOINT = '/api/performances/suspended';
+    window.ttts.RefundStatus = <%- JSON.stringify(RefundStatus) %>;
+</script>
+
 <div class="wrapper-searchform">
-    <form class="search-form" action="/api/performances/suspended">
-        <input type="hidden" name="limit" value="20">
-        <h3>販売停止処理日</h3>
-        <div class="wrapper-inputs wrapper-time form-group">
-            <input name="input_onlinedate1" id="input_onlinedate1" class="form-control" value="">
-            <input name="input_onlinedate2" id="input_onlinedate2" class="form-control" value="">
-        </div>
-        <h3>対象ツアー年月日</h3>
-        <div class="wrapper-inputs wrapper-time form-group">
+    <form id="form_searchsuspensions" class="search-form">
+        <input id="input_limit" type="hidden" name="limit" value="20">
+
+        <div class="wrapper-inputs wrapper-date form-group">
+            <h3>対象ツアー年月日</h3>
             <div class="form-group">
-                <input name="input_performancedate1" id="input_performancedate1" class="form-control" value="">
-                <input name="input_performancedate2" id="input_performancedate2" class="form-control" value="">
+                <input id="input_performancedate" class="form-control" value="">
             </div>
         </div>
-        <h3>返金状態</h3>
-        <div class="wrapper-inputs wrapper-time form-group">
+
+        <div class="wrapper-inputs wrapper-execday form-group">
+            <h3>販売停止処理実行日</h3>
+            <input id="input_onlinedate" class="form-control" value="">
+        </div>
+
+        <div class="wrapper-inputs wrapper-status form-group">
+            <h3>返金状態</h3>
             <div class="form-group">
-                <select class="form-control" name="refund_status">
+                <select id="select_refund_status" class="form-control" name="refund_status">
                     <option value="">すべて</option>
                     <option value="<%- RefundStatus.NotInstructed %>">未指示</option>
                     <option value="<%- RefundStatus.Instructed %>">指示済</option>
@@ -24,18 +33,15 @@
                 </select>
             </div>
         </div>
-        <a class="btn btn-next" href="javascript:void(0)">
-            <span>
-                検索
-            </span>
-        </a>
 
+        <a id="btn_execsearch" class="btn btn-next" href="javascript:void(0)"><span>検索</span></a>
+        <a id="btn_clearconditions" class="btn btn-big" href="javascript:void(0)"><span>検索条件リセット</span></a>
     </form>
 </div>
 
-<p class="total-count"></p>
 
 <div class="wrapper-reservations">
+    <p id="echo_suspensiontotal" class="total-count"></p>
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -57,11 +63,6 @@
     </table>
 </div>
 
-<div class="modal-calender">
-    <div class="modal-calender-content">
-        <div id="calendercontainer"></div>
-    </div>
-</div>
 
 <div class="modal fade loading" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">

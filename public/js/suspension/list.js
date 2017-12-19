@@ -1,110 +1,65 @@
 /* global moment */
 'use strict';
-$(function () {
-    // サーマル印刷の挙動 ('pc' = Windows, 'mobile' = 専用ブラウザ)
-    var mode_thermalprint = 'pc';
-
-    // _idごとにまとめた予約ドキュメントリスト
-    var reservationsById = {};
-
-    /*
-      サーマル印刷
-    */
-    if (mode_thermalprint !== 'pc') {
-        var can_thermalprint = false;
-        window.starThermalPrint.init({
-            publisher: document.querySelector('input[name=username]').value,
-            timeout: 10000
-        }).then(function () {
-            can_thermalprint = true;
-            $('body').removeClass('no-thermal');
-        }).catch(function (errMsg) {
-            $('.wrapper-searchform').prepend('<p id="msg_bluetooth">サーマルプリンタと接続できませんでした (' + errMsg + ')</p>');
-        });
-    } else {
-        $('body').removeClass('no-thermal');
+$(function() {
+    if (!window.ttts.API_SUSPENDED_ENDPOINT) {
+        return alert('window.ttts.API_SUSPENDED_ENDPOINT undefined');
     }
-    // サーマル印刷実行ボタン
-    $(document).on('click', '.btn-thermalprint', function (e) {
-        var id = e.currentTarget.getAttribute('data-targetid');
-        if (mode_thermalprint !== 'pc') {
-            if (!can_thermalprint) {
-                return alert('サーマルプリンタと接続できていません。ペアリング状態を確認してください。');
-            }
-            if (!reservationsById[id]) {
-                return alert('印刷の準備に失敗しました。ページを再読込して再度試してください。');
-            }
-            return window.starThermalPrint.printReservation(reservationsById[id]).catch(function (errmsg) {
-                alert(errmsg);
-            });
-        }
-        window.open('/reserve/print_pcthermal?ids=' + JSON.stringify([id]));
-    });
+    moment.locale('ja');
+    var $modal_loading = $('.loading');
 
-    // 日付選択カレンダー (再読込時のために日付はsessionStorageにキープしておく)
-    window.flatpickr.localize(window.flatpickr.l10ns.ja);
-    var input_day = document.getElementById('input_onlinedate1');
-    var $modal_calender = $('.modal-calender');
-    var calendar = new window.flatpickr(input_day, {
-        appendTo: $('#calendercontainer').on('click', function (e) { e.stopPropagation(); })[0], // モーダル内コンテナに挿入しつつカレンダークリックでモーダルが閉じるのを防止
-        defaultDate: 'today',
-        disableMobile: true, // 端末自前の日付選択UIを使わない
-        locale: 'ja',
-        // minDate: moment().add(-3, 'months').toDate(),
-        // maxDate: moment().add(3, 'months').toDate(),
-        onOpen: function () {
-            $modal_calender.fadeIn(200);
-        },
-        onClose: function () {
-            $modal_calender.hide();
-        }
-    });
-    // モーダルを閉じたら中のカレンダーも閉じる
-    $modal_calender.click(function () { calendar.close(); });
-
+    // 検索条件
     var conditions = {
-        limit: $('.search-form input[name="limit"]').val(),
+        limit: document.getElementById('input_limit').value,
         page: '1'
     };
 
-    function showReservations(suspensions) {
-        var html = '';
+    // APIから得た検索結果
+    var suspensionArray = [];
+    var suspensionsByPid = {};
 
-        suspensions.forEach(function (suspension) {
-            html += ''
-                + '<tr performance_id="' + suspension.performance_id + '"'
-                + '>'
-            html += ''
-                + '<td class="td-amemo">' + suspension.performance_day + '</td>'
-                + '<td class="td-ticket">' + suspension.tour_number + '</td>'
-                + '<td class="td-route">' + suspension.ev_service_status_name + '</td>'
-                + '<td class="td-number">' + suspension.online_sales_update_at + '</td>'
-                + '<td class="td-name">' + suspension.online_sales_update_user + '</td>'
-                + '<td class="td-checkin">' + suspension.canceled + '</td>'
-                + '<td class="td-checkin">' + suspension.arrived + '</td>'
-                + '<td class="td-refund_status_name">' + suspension.refund_status_name + '</td>'
-                + '<td class="td-checkin">' + suspension.refunded + '</td>';
+    // 検索条件の日付デフォルト
+    var moments_default = {
+        input_performancedate1: moment().subtract(30, 'days'),
+        input_performancedate2: moment().add(30, 'days'),
+        input_onlinedate1: moment().subtract(30, 'days'),
+        input_onlinedate2: moment()
+    };
 
-            // 処理実行リンク
-            html += '<td class="td-actions">'
-            switch (suspension.refund_status) {
-                case 'None': // 指示済
-                    html += '<p><span>-</span></p>'
-                    break;
-                case 'NotInstructed': // 未指示
-                    html += '<p class="btn  btn-refund_process"><span>処理実行</span></p>'
-                    break;
-                case 'Instructed': // 指示済
-                    html += '<p class="btn"><span>処理中</span></p>'
-                    break;
-                default: // 返金済
-                    html += '<p class="btn"><span>処理完了</span></p>'
-                    break;
-            }
-            html += '</td>' + '</tr>';
-        });
-        $('#reservations').html(html);
-    }
+    // daterangepicker共通設定
+    var daterangepickerSettings = {
+        format: 'YYYY/MM/DD',
+        showDropdowns: false,
+        autoUpdateInput: true,
+        ranges: {
+            '直近7日': [moment().subtract(7, 'days'), moment()],
+            '直近30日': [moment().subtract(29, 'days'), moment()],
+            '今月': [moment().startOf('month'), moment().endOf('month')],
+            '先月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        },
+        opens: 'left',
+        locale: {
+            applyLabel: '選択',
+            cancelLabel: '取消',
+            fromLabel: '開始日',
+            toLabel: '終了日',
+            weekLabel: 'W',
+            customRangeLabel: '日付指定',
+            daysOfWeek: moment.weekdaysMin(),
+            monthNames: moment.monthsShort(),
+            firstDay: moment.localeData()._week.dow
+        }
+    };
+
+    // 対象ツアー年月日初期化
+    daterangepickerSettings.startDate = moments_default.input_performancedate1;
+    daterangepickerSettings.endDate = moments_default.input_performancedate2;
+    var $input_performancedate = $('#input_performancedate').daterangepicker(daterangepickerSettings);
+
+    // 停止処理実行日初期化
+    daterangepickerSettings.startDate = moments_default.input_onlinedate1;
+    daterangepickerSettings.endDate = moments_default.input_onlinedate2;
+    var $input_onlinedate = $('#input_onlinedate').daterangepicker(daterangepickerSettings);
+
 
     /**
      * ページャーを表示する
@@ -116,9 +71,9 @@ $(function () {
         var limit = parseInt(conditions.limit, 10);
 
         if (page > 1) {
-            html += ''
-                + '<span><a href="javascript:void(0)" class="change-page" data-page="' + (page - 1) + '">&lt;</a></span>'
-                + '<span><a href="javascript:void(0)" class="change-page" data-page="1">最初</a></span>';
+            html += '' +
+                '<span><a href="javascript:void(0)" class="change-page" data-page="' + (page - 1) + '">&lt;</a></span>' +
+                '<span><a href="javascript:void(0)" class="change-page" data-page="1">最初</a></span>';
         }
 
         var pages = Math.ceil(count / parseInt(limit, 10));
@@ -133,156 +88,155 @@ $(function () {
         }
 
         if (parseInt(page, 10) < pages) {
-            html += ''
-                + '<span><a href="javascript:void(0)" class="change-page" data-page="' + pages + '">最後</a></span>'
-                + '<span><a href="javascript:void(0)" class="change-page" data-page="' + (page + 1) + '">&gt;</a></span>';
+            html += '' +
+                '<span><a href="javascript:void(0)" class="change-page" data-page="' + pages + '">最後</a></span>' +
+                '<span><a href="javascript:void(0)" class="change-page" data-page="' + (page + 1) + '">&gt;</a></span>';
         }
 
         $('.navigation').html(html);
     }
-    function setConditions() {
-        // 検索フォームの値を全て条件に追加
-        var formDatas = $('.search-form').serializeArray();
-        formDatas.forEach(function (formData) {
-            conditions[formData.name] = formData.value;
-        });
-    }
-    function showConditions() {
-        var formDatas = $('.search-form').serializeArray();
-        formDatas.forEach(function (formData) {
-            var name = formData.name;
-            if (conditions.hasOwnProperty(name)) {
-                $('input[name="' + name + '"], select[name="' + name + '"]', $('.search-form')).val(conditions[name]);
-            } else {
-                $('input[name="' + name + '"], select[name="' + name + '"]', $('.search-form')).val('');
-            }
-        });
-    }
 
-    function search() {
-        conditions.input_onlinedate1 = conditions.input_onlinedate1.replace(/\-/g, '');
-        conditions.input_onlinedate2 = conditions.input_onlinedate2.replace(/\-/g, '');
-        conditions.input_performancedate1 = conditions.input_performancedate1.replace(/\-/g, '');
-        conditions.input_performancedate2 = conditions.input_performancedate2.replace(/\-/g, '');
+    /**
+     * suspensionArray をページに描画する
+     */
+    var dom_reservations = document.getElementById('reservations');
+    var dom_suspensiontotal = document.getElementById('echo_suspensiontotal');
+    var renderSupensionsData = function() {
+        var html = '';
+        suspensionArray.forEach(function(suspension) {
+            suspensionsByPid[suspension.performance_id] = suspension;
+            html += '<tr>' +
+                '<td class="td-performance_day">' + suspension.performance_day + '</td>' +
+                '<td class="td-tour_number">' + suspension.tour_number + '</td>' +
+                '<td class="td-ev_service_status_name">' + suspension.ev_service_status_name + '</td>' +
+                '<td class="td-online_sales_update_at">' + moment(suspension.online_sales_update_at).format('YYYY/MM/DD HH:mm:ss') + '</td>' +
+                '<td class="td-online_sales_update_user">' + suspension.online_sales_update_user + '</td>' +
+                '<td class="td-caceled">' + suspension.canceled + '</td>' +
+                '<td class="td-arrived">' + suspension.arrived + '</td>' +
+                '<td class="td-refund_status_name">' + suspension.refund_status_name + '</td>' +
+                '<td class="td-refunded">' + suspension.refunded + '</td>' +
+                '<td class="td-actions">';
+            // 返金することがどれだけ早く確定していたとしても返金の実行はツアー終了予定時刻後にしかできない
+            if (moment().isBefore(moment(suspension.performance_day, 'YYYY/MM/DD'))) { // *TODO* performance_end_timeが含まれるようになったらそれも使う
+                html += '<p><span>まだ返金できません</span></p>';
+                // 未指示
+            } else if (suspension.refund_status === window.ttts.RefundStatus.NotInstructed) {
+                html += '<p class="btn btn-refund_process" data-pid="' + suspension.performance_id + '"><span>処理実行</span></p>';
+                // 指示済
+            } else if (suspension.refund_status === window.ttts.RefundStatus.Instructed) {
+                html += '<p class="btn btn-disabled"><span>処理中</span></p>';
+                // 完了済
+            } else if (suspension.refund_status === window.ttts.RefundStatus.Compeleted) {
+                html += '<p><span>処理完了</span></p>';
+            } else {
+                html += '<p><span>-</span></p>';
+            }
+            html += '</td></tr>';
+        });
+        dom_reservations.innerHTML = html;
+
+        dom_suspensiontotal.innerText = suspensionArray.length + '件';
+
+        showPager(parseInt(suspensionArray.length, 10));
+    };
+
+    /**
+     * 販売停止一覧APIに conditions をPOSTして suspensionArray を更新する
+     */
+    var search = function() {
+        var performancedate = $input_performancedate.data('daterangepicker');
+        conditions.input_performancedate1 = performancedate.startDate.format('YYYYMMDD');
+        conditions.input_performancedate2 = performancedate.endDate.format('YYYYMMDD');
+
+        var onlinedate = $input_onlinedate.data('daterangepicker');
+        conditions.input_onlinedate1 = onlinedate.startDate.format('YYYYMMDD');
+        conditions.input_onlinedate2 = onlinedate.endDate.format('YYYYMMDD');
+
+        conditions.refund_status = document.getElementById('select_refund_status').value || '';
+
         conditions.searched_at = Date.now(); // ブラウザキャッシュ対策
-        $('.error-message').hide();
         $.ajax({
-            dataType: 'json',
-            url: $('.search-form').attr('action'),
+            url: window.ttts.API_SUSPENDED_ENDPOINT,
             type: 'GET',
             data: conditions,
-            beforeSend: function () {
-                $('.loading').modal();
-                $('.wrapper-reservations input[type="checkbox"]').prop('checked', false);
+            beforeSend: function() {
+                $modal_loading.modal();
             }
-        }).done(function (data) {
-            // エラーメッセージ表示
-            if (data.errors) {
-                for (var error in data.errors) {
-                    if (error) {
-                        $('[name="error_' + error + '"]').text(data.errors[error].msg);
-                    }
-                }
-                $('.error-message').show();
-            }
-            // データ表示
-            showReservations(data);
-            showPager(parseInt(data.length, 10));
-            showConditions();
-            $('.total-count').text(data.length + '件');
-        }).fail(function (jqxhr, textStatus, error) {
+        }).done(function(data) {
+            suspensionArray = data || [];
+        }).fail(function(jqxhr, textStatus, error) {
+            suspensionArray = [];
             console.log(error);
             alert(error.message);
-        }).always(function () {
-            $('.loading').modal('hide');
+        }).always(function() {
+            $modal_loading.modal('hide');
+            renderSupensionsData();
         });
-    }
+    };
 
-    // 返金処理実行
-    $(document).on('click', '.btn-refund_process', function (e) {
-        var button = $(this);
-        var performanceId = $(e.currentTarget).closest('tr').attr('performance_id');
-        $.ajax({
-            dataType: 'json',
-            url: '/api/performances/suspended/' + performanceId + '/tasks/returnOrders',
-            type: 'POST',
-            data: {},
-            beforeSend: function () {
-            }
-        }).done(function (data) {
-            // ステータス表示変更
-            $('.td-refund_status_name', button.parent().parent()).html('指示済');
-            button.replaceWith('<p class="btn"><span>処理中</span></p>');
-        }).fail(function (jqxhr, textStatus, error) {
+    /**
+     * 返金指示APIに対象ツアーの performanceId をPOSTする
+     * @param {string} performanceId
+     */
+    var busy_refund = false;
+    var refund = function(performanceId) {
+        var targetSuspension = suspensionsByPid[performanceId];
+        var infoText = 'ツアー年月日: ' + targetSuspension.performance_day + '\nツアーNo: ' + targetSuspension.tour_number + '\n運転状況: ' + targetSuspension.ev_service_status_name;
+        if (busy_refund
+        || !confirm('このツアーへの返金処理を実行してよろしいですか？\n\n' + infoText)
+        || !confirm('この処理は取り消せませんが本当に返金を実行しますか？\n\n' + infoText)) {
+            return false;
+        }
+        busy_refund = true;
+        $modal_loading.modal();
+        $.post(window.ttts.API_SUSPENDED_ENDPOINT + '/' + performanceId + '/tasks/returnOrders').done(function() {
+            // ステータス表示更新
+            targetSuspension.refund_status_name = '指示済';
+            targetSuspension.refund_status = window.ttts.RefundStatus.Instructed;
+            renderSupensionsData();
+        }).fail(function(jqxhr, textStatus, error) {
             if (jqxhr.status === 500) {
                 var response = $.parseJSON(jqxhr.responseText);
                 console.error(jqxhr.res);
-
                 alert('返金処理の実行でエラーが発生しました\n' + response.errors[0].message);
             } else {
                 alert(error);
             }
-        }).always(function () {
+        }).always(function() {
+            $modal_loading.modal('hide');
+            busy_refund = false;
         });
-    });
+    };
 
-    // 検索
-    $(document).on('click', '.search-form .btn', function () {
+
+    // 検索ボタン
+    document.getElementById('btn_execsearch').onclick = function() {
         conditions.page = '1';
-        // 画面から検索条件セット
-        setConditions();
         search();
-    });
+    };
+
+    // 検索条件リセットボタン
+    document.getElementById('btn_clearconditions').onclick = function() {
+        $input_performancedate.data('daterangepicker').setStartDate(moments_default.input_performancedate1);
+        $input_performancedate.data('daterangepicker').setEndDate(moments_default.input_performancedate2);
+        $input_onlinedate.data('daterangepicker').setStartDate(moments_default.input_onlinedate1);
+        $input_onlinedate.data('daterangepicker').setEndDate(moments_default.input_onlinedate2);
+        conditions.page = '1';
+        search();
+    };
 
     // ページ変更
-    $(document).on('click', '.change-page', function () {
-        conditions.page = $(this).attr('data-page');
+    $(document).on('click', '.change-page', function() {
+        conditions.page = this.getAttribute('data-page');
         search();
     });
 
-    // A4印刷
-    $(document).on('click', '.btn-print', function (e) {
-        var id = e.currentTarget.getAttribute('data-targetid');
-        window.open('/reserve/print?ids=' + JSON.stringify([id]));
+    // 返金処理実行ボタン
+    $(document).on('click', '.btn-refund_process', function(e) {
+        var performanceId = e.currentTarget.getAttribute('data-pid');
+        refund(performanceId);
     });
 
-    // まとめて操作
-    $(document).on('click', '.action-to-reservations', function () {
-        var ids = $('.td-checkbox input[type="checkbox"]:checked').map(function () {
-            return this.parentNode.parentNode.getAttribute('data-reservation-id');
-        }).get();
-        if (!ids.length) {
-            return alert('対象にする予約が選択されていません');
-        }
 
-        var action = document.getElementById('select_action').value;
-        if (action === 'cancel') {
-            cancel(ids);
-        } else if (action === 'print') {
-            window.open('/reserve/print?ids=' + JSON.stringify(ids));
-        } else if (action === 'thermalprint') {
-            if (mode_thermalprint !== 'pc') {
-                if (!can_thermalprint) {
-                    return alert('サーマルプリンタが利用できません');
-                }
-                window.starThermalPrint.printReservationArray(ids.map(function (id) { return reservationsById[id]; }));
-            } else {
-                window.open('/reserve/print_pcthermal?ids=' + JSON.stringify(ids));
-            }
-        } else {
-            alert('操作を選択してください');
-        }
-    });
-
-    // 全てチェックする
-    $(document).on('click', '.check-all', function () {
-        $('.td-checkbox input[type="checkbox"]').prop('checked', true);
-    });
-
-    // エラー表示クリア
-    $('.error-message').hide();
-    // 画面から検索条件セット
-    setConditions();
-    // 予約リスト表示
     search();
 });
