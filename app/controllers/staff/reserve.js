@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * 内部関係者座席予約コントローラー
- *
  * @namespace controller/staff/reserve
  */
 const ttts = require("@motionpicture/ttts-domain");
@@ -247,11 +246,25 @@ function confirm(req, res, next) {
             if (req.method === 'POST') {
                 try {
                     // 仮押さえ有効期限チェック
-                    if (reservationModel.expiredAt !== undefined && reservationModel.expiredAt < moment().valueOf()) {
+                    if (reservationModel.expires <= moment().toDate()) {
                         throw new Error(req.__('Expired'));
                     }
                     // 予約確定
-                    yield reserveBaseController.processFixReservations(reservationModel, res);
+                    const transactionResult = yield ttts.service.transaction.placeOrderInProgress.confirm({
+                        agentId: reservationModel.agentId,
+                        transactionId: reservationModel.id,
+                        paymentMethod: reservationModel.paymentMethod
+                    })(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.action.authorize.CreditCard(ttts.mongoose.connection), new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection));
+                    debug('transaction confirmed. orderNumber:', transactionResult.order.orderNumber);
+                    try {
+                        // 完了メールキュー追加(あれば更新日時を更新するだけ)
+                        const emailQueue = yield reserveBaseController.createEmailQueue(transactionResult.eventReservations, reservationModel, res);
+                        yield ttts.Models.EmailQueue.create(emailQueue);
+                    }
+                    catch (error) {
+                        console.error(error);
+                        // 失敗してもスルー(ログと運用でなんとかする)
+                    }
                     session_1.default.REMOVE(req);
                     res.redirect(`/staff/reserve/${reservationModel.performance.day}/${reservationModel.paymentNo}/complete`);
                 }

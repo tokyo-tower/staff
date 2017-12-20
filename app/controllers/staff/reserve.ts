@@ -1,6 +1,5 @@
 /**
  * 内部関係者座席予約コントローラー
- *
  * @namespace controller/staff/reserve
  */
 import * as ttts from '@motionpicture/ttts-domain';
@@ -244,12 +243,33 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
         if (req.method === 'POST') {
             try {
                 // 仮押さえ有効期限チェック
-                if (reservationModel.expiredAt !== undefined && reservationModel.expiredAt < moment().valueOf()) {
+                if (reservationModel.expires <= moment().toDate()) {
                     throw new Error(req.__('Expired'));
                 }
 
                 // 予約確定
-                await reserveBaseController.processFixReservations(reservationModel, res);
+                const transactionResult = await ttts.service.transaction.placeOrderInProgress.confirm({
+                    agentId: reservationModel.agentId,
+                    transactionId: reservationModel.id,
+                    paymentMethod: reservationModel.paymentMethod
+                })(
+                    new ttts.repository.Transaction(ttts.mongoose.connection),
+                    new ttts.repository.action.authorize.CreditCard(ttts.mongoose.connection),
+                    new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection)
+                    );
+                debug('transaction confirmed. orderNumber:', transactionResult.order.orderNumber);
+
+                try {
+                    // 完了メールキュー追加(あれば更新日時を更新するだけ)
+                    const emailQueue = await reserveBaseController.createEmailQueue(
+                        transactionResult.eventReservations, reservationModel, res
+                    );
+                    await ttts.Models.EmailQueue.create(emailQueue);
+                } catch (error) {
+                    console.error(error);
+                    // 失敗してもスルー(ログと運用でなんとかする)
+                }
+
                 ReserveSessionModel.REMOVE(req);
                 res.redirect(`/staff/reserve/${reservationModel.performance.day}/${reservationModel.paymentNo}/complete`);
             } catch (error) {

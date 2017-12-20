@@ -59,7 +59,6 @@ function processFixSeatsAndTickets(reservationModel, req) {
         // セッション中の予約リストを初期化
         reservationModel.seatCodes = [];
         reservationModel.seatCodesExtra = [];
-        reservationModel.expiredAt = moment().add(conf.get('temporary_reservation_valid_period_seconds'), 'seconds').valueOf();
         // 座席承認アクション
         const offers = checkInfo.choicesAll.map((choice) => {
             // チケット情報
@@ -265,9 +264,9 @@ function processStart(purchaserGroup, req) {
             // パフォーマンス指定遷移の場合 パフォーマンスFIX
             yield processFixPerformance(reservationModel, req.query.performance, req);
         }
+        reservationModel.expires = moment().add(conf.get('temporary_reservation_valid_period_seconds'), 'seconds').toDate();
         const transaction = yield ttts.service.transaction.placeOrderInProgress.start({
-            // tslint:disable-next-line:no-magic-numbers
-            expires: moment().add(30, 'minutes').toDate(),
+            expires: reservationModel.expires,
             agentId: req.staffUser.get('_id'),
             sellerIdentifier: 'TokyoTower',
             purchaserGroup: purchaserGroup
@@ -358,31 +357,6 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
 }
 exports.processFixPerformance = processFixPerformance;
 /**
- * 購入番号から全ての予約を完了にする
- *
- * @param {string} paymentNo 購入番号
- * @param {Object} update 追加更新パラメータ
- */
-function processFixReservations(reservationModel, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const transactionResult = yield ttts.service.transaction.placeOrderInProgress.confirm({
-            agentId: reservationModel.agentId,
-            transactionId: reservationModel.id,
-            paymentMethod: reservationModel.paymentMethod
-        })(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.action.authorize.CreditCard(ttts.mongoose.connection), new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection));
-        try {
-            // 完了メールキュー追加(あれば更新日時を更新するだけ)
-            const emailQueue = yield createEmailQueue(transactionResult.eventReservations, reservationModel, res);
-            yield ttts.Models.EmailQueue.create(emailQueue);
-        }
-        catch (error) {
-            console.error(error);
-            // 失敗してもスルー(ログと運用でなんとかする)
-        }
-    });
-}
-exports.processFixReservations = processFixReservations;
-/**
  * 予約完了メールを作成する
  * @memberof ReserveBaseController
  */
@@ -464,6 +438,7 @@ function createEmailQueue(reservations, reservationModel, res) {
         });
     });
 }
+exports.createEmailQueue = createEmailQueue;
 /**
  * チケット情報(券種ごとの枚数)取得
  *

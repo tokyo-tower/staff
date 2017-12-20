@@ -58,7 +58,6 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
     // セッション中の予約リストを初期化
     reservationModel.seatCodes = [];
     reservationModel.seatCodesExtra = [];
-    reservationModel.expiredAt = moment().add(conf.get<number>('temporary_reservation_valid_period_seconds'), 'seconds').valueOf();
 
     // 座席承認アクション
     const offers = checkInfo.choicesAll.map((choice) => {
@@ -323,9 +322,9 @@ export async function processStart(purchaserGroup: string, req: Request): Promis
         await processFixPerformance(reservationModel, req.query.performance, req);
     }
 
+    reservationModel.expires = moment().add(conf.get<number>('temporary_reservation_valid_period_seconds'), 'seconds').toDate();
     const transaction = await ttts.service.transaction.placeOrderInProgress.start({
-        // tslint:disable-next-line:no-magic-numbers
-        expires: moment().add(30, 'minutes').toDate(),
+        expires: reservationModel.expires,
         agentId: (<Express.StaffUser>req.staffUser).get('_id'),
         sellerIdentifier: 'TokyoTower', // 組織識別子(現時点で固定)
         purchaserGroup: purchaserGroup
@@ -441,33 +440,6 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
 }
 
 /**
- * 購入番号から全ての予約を完了にする
- *
- * @param {string} paymentNo 購入番号
- * @param {Object} update 追加更新パラメータ
- */
-export async function processFixReservations(reservationModel: ReserveSessionModel, res: Response): Promise<void> {
-    const transactionResult = await ttts.service.transaction.placeOrderInProgress.confirm({
-        agentId: reservationModel.agentId,
-        transactionId: reservationModel.id,
-        paymentMethod: reservationModel.paymentMethod
-    })(
-        new ttts.repository.Transaction(ttts.mongoose.connection),
-        new ttts.repository.action.authorize.CreditCard(ttts.mongoose.connection),
-        new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection)
-        );
-
-    try {
-        // 完了メールキュー追加(あれば更新日時を更新するだけ)
-        const emailQueue = await createEmailQueue(transactionResult.eventReservations, reservationModel, res);
-        await ttts.Models.EmailQueue.create(emailQueue);
-    } catch (error) {
-        console.error(error);
-        // 失敗してもスルー(ログと運用でなんとかする)
-    }
-}
-
-/**
  * 完了メールキューインタフェース
  *
  * @interface IEmailQueue
@@ -495,7 +467,7 @@ interface IEmailQueue {
  * @memberof ReserveBaseController
  */
 // tslint:disable-next-line:max-func-body-length
-async function createEmailQueue(
+export async function createEmailQueue(
     reservations: ttts.factory.reservation.event.IReservation[],
     reservationModel: ReserveSessionModel,
     res: Response
