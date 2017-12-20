@@ -100,6 +100,10 @@ export interface ISuspendedPerformances {
     performance_id: string;
     // 対象ツアー年月日
     performance_day: string;
+    start_time: string;
+    end_time: string;
+    start_date: Date;
+    end_date: Date;
     // 対象ツアーNo
     tour_number: string;
     // 運転状況
@@ -107,19 +111,19 @@ export interface ISuspendedPerformances {
     // 運転状況(名称)
     ev_service_status_name: string;
     // 販売停止処理日時
-    online_sales_update_at: Date;
+    online_sales_update_at?: Date;
     // 処理実施者
-    online_sales_update_user: string;
+    online_sales_update_user?: string;
     // 一般予約数
     canceled: number;
     // 来塔数
     arrived: number;
     // 返金状態
-    refund_status: string;
+    refund_status?: string;
     // 返金状態(名称)
-    refund_status_name: string;
+    refund_status_name?: string;
     // 返金済数
-    refunded: number;
+    refunded?: number;
 }
 
 /**
@@ -137,7 +141,7 @@ async function findSuspendedPerformances(conditions: any[], limit: number, page:
         })
         .skip(limit * (page - 1))
         .limit(limit)
-        .exec();
+        .exec().then((docs) => docs.map((doc) => <ttts.factory.performance.IPerformance>doc.toObject()));
     debug('suspended performances found.', performances);
 
     return Promise.all(performances.map(async (performance) => {
@@ -159,12 +163,16 @@ async function findSuspendedPerformances(conditions: any[], limit: number, page:
             }
         ).exec();
 
-        const extension = performance.get('ttts_extension');
+        const extension = performance.ttts_extension;
 
         return {
             performance_id: performanceId,
-            performance_day: moment(performance.get('day'), 'YYYYMMDD').format('YYYY/MM/DD'),
-            tour_number: extension.tour_number === '' ? EMPTY_STRING : extension.tour_number,
+            performance_day: moment(performance.day, 'YYYYMMDD').format('YYYY/MM/DD'),
+            start_time: performance.start_time,
+            end_time: performance.end_time,
+            start_date: performance.start_date,
+            end_date: performance.end_date,
+            tour_number: performance.tour_number,
             ev_service_status: extension.ev_service_status,
             ev_service_status_name: EV_SERVICE_STATUS_NAMES[extension.ev_service_status],
             online_sales_update_at: extension.online_sales_update_at,
@@ -172,7 +180,7 @@ async function findSuspendedPerformances(conditions: any[], limit: number, page:
             canceled: numberOfReservations,
             arrived: numberOfReservations - nubmerOfUncheckedReservations,
             refund_status: extension.refund_status,
-            refund_status_name: REFUND_STATUS_NAMES[extension.refund_status],
+            refund_status_name: (extension.refund_status !== undefined) ? REFUND_STATUS_NAMES[extension.refund_status] : undefined,
             refunded: extension.refunded_count
         };
     }));

@@ -327,7 +327,7 @@ export async function processStart(purchaserGroup: string, req: Request): Promis
         // tslint:disable-next-line:no-magic-numbers
         expires: moment().add(30, 'minutes').toDate(),
         agentId: (<Express.StaffUser>req.staffUser).get('_id'),
-        sellerId: 'TokyoTower',
+        sellerIdentifier: 'TokyoTower',
         purchaserGroup: purchaserGroup
     })(
         new ttts.repository.Transaction(ttts.mongoose.connection),

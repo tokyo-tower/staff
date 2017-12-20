@@ -269,7 +269,7 @@ function processStart(purchaserGroup, req) {
             // tslint:disable-next-line:no-magic-numbers
             expires: moment().add(30, 'minutes').toDate(),
             agentId: req.staffUser.get('_id'),
-            sellerId: 'TokyoTower',
+            sellerIdentifier: 'TokyoTower',
             purchaserGroup: purchaserGroup
         })(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.Owner(ttts.mongoose.connection));
         debug('transaction started.', transaction.id);

@@ -113,7 +113,7 @@ function findSuspendedPerformances(conditions, limit, page) {
         })
             .skip(limit * (page - 1))
             .limit(limit)
-            .exec();
+            .exec().then((docs) => docs.map((doc) => doc.toObject()));
         debug('suspended performances found.', performances);
         return Promise.all(performances.map((performance) => __awaiter(this, void 0, void 0, function* () {
             const performanceId = performance.id;
@@ -128,11 +128,15 @@ function findSuspendedPerformances(conditions, limit, page) {
                 performance: performanceId,
                 checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
             }).exec();
-            const extension = performance.get('ttts_extension');
+            const extension = performance.ttts_extension;
             return {
                 performance_id: performanceId,
-                performance_day: moment(performance.get('day'), 'YYYYMMDD').format('YYYY/MM/DD'),
-                tour_number: extension.tour_number === '' ? EMPTY_STRING : extension.tour_number,
+                performance_day: moment(performance.day, 'YYYYMMDD').format('YYYY/MM/DD'),
+                start_time: performance.start_time,
+                end_time: performance.end_time,
+                start_date: performance.start_date,
+                end_date: performance.end_date,
+                tour_number: performance.tour_number,
                 ev_service_status: extension.ev_service_status,
                 ev_service_status_name: EV_SERVICE_STATUS_NAMES[extension.ev_service_status],
                 online_sales_update_at: extension.online_sales_update_at,
@@ -140,7 +144,7 @@ function findSuspendedPerformances(conditions, limit, page) {
                 canceled: numberOfReservations,
                 arrived: numberOfReservations - nubmerOfUncheckedReservations,
                 refund_status: extension.refund_status,
-                refund_status_name: REFUND_STATUS_NAMES[extension.refund_status],
+                refund_status_name: (extension.refund_status !== undefined) ? REFUND_STATUS_NAMES[extension.refund_status] : undefined,
                 refunded: extension.refunded_count
             };
         })));
