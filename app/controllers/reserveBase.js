@@ -271,7 +271,7 @@ function processStart(purchaserGroup, req) {
             agentId: req.staffUser.get('_id'),
             sellerIdentifier: 'TokyoTower',
             purchaserGroup: purchaserGroup
-        })(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.Owner(ttts.mongoose.connection));
+        })(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.Organization(ttts.mongoose.connection), new ttts.repository.Owner(ttts.mongoose.connection));
         debug('transaction started.', transaction.id);
         reservationModel.id = transaction.id;
         reservationModel.agentId = transaction.agent.id;

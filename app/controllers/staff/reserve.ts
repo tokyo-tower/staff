@@ -283,7 +283,7 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
 export async function complete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const transactionRepo = new ttts.repository.Transaction(ttts.mongoose.connection);
-        const transaction = await transactionRepo.transactionModel.findOne(
+        const transactionDoc = await transactionRepo.transactionModel.findOne(
             {
                 'result.eventReservations.performance_day': req.params.performanceDay,
                 'result.eventReservations.payment_no': req.params.paymentNo,
@@ -295,18 +295,17 @@ export async function complete(req: Request, res: Response, next: NextFunction):
                 }
             }
         ).exec();
-        if (transaction === null) {
+        if (transactionDoc === null) {
             next(new Error(req.__('NotFound')));
 
             return;
         }
 
+        const transaction = <ttts.factory.transaction.placeOrder.ITransaction>transactionDoc.toObject();
         debug('confirmed transaction:', transaction.id);
-        let reservations: ttts.mongoose.Document[] = transaction.get('result').get('eventReservations');
+        let reservations = (<ttts.factory.transaction.placeOrder.IResult>transaction.result).eventReservations;
         debug(reservations.length, 'reservation(s) found.');
-        reservations = reservations.filter(
-            (reservation) => reservation.get('status') === ttts.factory.reservationStatusType.ReservationConfirmed
-        );
+        reservations = reservations.filter((r) => r.status === ttts.factory.reservationStatusType.ReservationConfirmed);
 
         if (reservations.length === 0) {
             next(new Error(req.__('NotFound')));
@@ -314,12 +313,10 @@ export async function complete(req: Request, res: Response, next: NextFunction):
             return;
         }
 
-        reservations.sort((a, b) => {
-            return ttts.factory.place.screen.sortBySeatCode(a.get('seat_code'), b.get('seat_code'));
-        });
+        reservations.sort((a, b) => ttts.factory.place.screen.sortBySeatCode(a.seat_code, b.seat_code));
 
         res.render('staff/reserve/complete', {
-            reservationDocuments: reservations,
+            reservations: reservations,
             layout: layout
         });
     } catch (error) {

@@ -1,6 +1,5 @@
 <%
-const reservations = reservationDocuments.map((doc)=>doc.toObject());
-const printIds = reservationDocuments.map((doc)=>`"${doc.get('id')}"`);
+const printIds = reservations.map((doc)=>`"${doc.id}"`);
 %>
 <input type="hidden" id="input_reservations" value="<%= JSON.stringify(reservations) %>">
 <script src="/js/reserve/complete.js"></script>
@@ -10,7 +9,7 @@ const printIds = reservationDocuments.map((doc)=>`"${doc.get('id')}"`);
 <h1 class="pagetitle"><%- __('ReservationCompleted') %></h1>
 <p class="guidetext guidetext-customer"><%- __('CompleteReservationGuideText') %></p>
 <p class="rednotice qrnotice"><%- __('CompleteReservationNoticeText') %></p>
-<% if (reservationDocuments[0].purchaser_group === 'Staff') { %>
+<% if (reservations[0].purchaser_group === 'Staff') { %>
 <p class="guidetext">代理予約が完了いたしました。<br>「印刷」ボタンを押してチケットを発見してください。</p>
 <% } %>
 
@@ -19,28 +18,28 @@ const printIds = reservationDocuments.map((doc)=>`"${doc.get('id')}"`);
         <tr class="tr-number">
             <th><%- __('PaymentNo') %></th>
             <td>
-                <span class="rsrvno"><%- reservationDocuments[0].get('payment_no') %></span>
+                <span class="rsrvno"><%- reservations[0].payment_no %></span>
                 <p class="numbernotice"><%- __('TransactionNumberNotice') %></p>
             </td>
         </tr>
         <tr class="tr-date">
             <th><%- __('PurchaseContentDate') %></th>
             <td>
-                <%= moment(reservationDocuments[0].performance_day).format('Y-MM-DD') %>&nbsp;&nbsp;<%= `${moment(reservationDocuments[0].performance_start_time, 'hmm').format('HH:mm')} - ${moment(reservationDocuments[0].performance_end_time, 'hmm').format('HH:mm')}` %> 
+                <%= moment(reservations[0].performance_day).format('Y-MM-DD') %>&nbsp;&nbsp;<%= `${moment(reservations[0].performance_start_time, 'hmm').format('HH:mm')} - ${moment(reservations[0].performance_end_time, 'hmm').format('HH:mm')}` %> 
             </td>
         </tr>
         <tr class="tr-tourno">
             <th><%- __('TourNumber') %></th>
             <td>
                 <p>
-                    <%- reservationDocuments[0].performance_ttts_extension.tour_number %> 
+                    <%- reservations[0].performance_ttts_extension.tour_number %> 
                 </p>
             </td>
         </tr>
         <tr class="tr-qr">
             <th><%- __('QRCode') %></th>
             <td>
-                <% reservationDocuments.forEach((reservation, index) => { %>
+                <% reservations.forEach((reservation, index) => { %>
                 <div class="wrapper-qrcodes">
                     <div>
                         <p>
@@ -59,13 +58,13 @@ const printIds = reservationDocuments.map((doc)=>`"${doc.get('id')}"`);
         <tr class="tr-email">
             <th><%= __('Email') %></th>
             <td>
-                <%= reservationDocuments[0].get('purchaser_email') %>
+                <%= reservations[0].purchaser_email %>
             </td>
         </tr>
         <tr class="tr-price">
             <th><%- __('TotalPrice') %></th>
             <td>
-                <% var totalAmount = reservationDocuments.reduce((a,b)=>a+b.charge,0); %>
+                <% var totalAmount = reservations.reduce((a,b)=>a+b.charge,0); %>
                 <span class="price"><span class="is-ja">&yen;</span><%= totalAmount %><span class="is-not-ja">JPY</span></span>
             </td>
         </tr>
@@ -75,7 +74,7 @@ const printIds = reservationDocuments.map((doc)=>`"${doc.get('id')}"`);
 
 <a class="btn btn-blue visible-pc" id="btn_print_a4" target="_blank" href='<%- process.env.INQUIRY_SITE_URL %>print/print?ids=[<%- printIds.join(',') %>]'><span><%- __('PrintTicket') %></span></a>
 
-<% if (reservationDocuments[0].purchaser_group === 'Staff') { %>
+<% if (reservations[0].purchaser_group === 'Staff') { %>
 <div class="thermalprint">
     <a class="btn btn-big btn-thermalprint" id="btn_thermalprint" target="_blank" href='<%- process.env.INQUIRY_SITE_URL %>print/print_pcthermal/?ids=[<%- printIds.join(',') %>]'><span>サーマル印刷</span></a>
 </div>
