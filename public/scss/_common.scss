@@ -80,11 +80,15 @@ $breakpoint_mobile:481px;
 }
 
 body {
-    font-family: '游ゴシック', sans-serif;
+    font-family: sans-serif;
     background-color: #fff;
     @media screen and (max-width: $breakpoint_tablet) {
         font-size:14px;
     }
+}
+
+.page-ja {
+    font-family: '游ゴシック', sans-serif;
 }
 
 * {
@@ -113,13 +117,26 @@ select {
     margin: 0 0 20px 0;
 }
 
+.is-ja {
+    display: none;
+}
+
+.page-ja {
+    .is-ja {
+        display: inline;
+    }
+    .is-not-ja {
+        display: none;
+    }
+}
+
 .form-inline .form-control {
     @media screen and (max-width: $breakpoint_tablet) {
         width:100%;
     }
 }
 
-.errmsg {
+.red, .errmsg {
     color: red;
 }
 
@@ -478,6 +495,21 @@ select {
         padding: 30px;
         @media screen and (max-width: $breakpoint_tablet) {
             border-radius:6px;
+        }
+        .btn-close {
+            cursor: pointer;
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-size: 48px;
+            background-color: #3f3f3f;
+            color: #fff;
+            &:hover {
+                background-color: #5f5f5f;
+            }
+            @media screen and (max-width: $breakpoint_tablet) {
+                font-size: 36px;
+            }
         }
     }
     .modal-footer {

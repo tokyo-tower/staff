@@ -35,6 +35,6 @@ export async function performances(req: Request, res: Response, next: NextFuncti
             RefundStatus: ttts.factory.performance.RefundStatus
         });
     } catch (error) {
-        next(new Error(req.__('Message.UnexpectedError')));
+        next(new Error(req.__('UnexpectedError')));
     }
 }

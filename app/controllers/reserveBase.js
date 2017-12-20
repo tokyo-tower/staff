@@ -66,7 +66,7 @@ function processFixSeatsAndTickets(reservationModel, req) {
             // tslint:disable-next-line:max-line-length
             const ticketType = reservationModel.ticketTypes.find((ticketTypeInArray) => (ticketTypeInArray.id === choice.ticket_type));
             if (ticketType === undefined) {
-                throw new Error(req.__('Message.UnexpectedError'));
+                throw new Error(req.__('UnexpectedError'));
             }
             return {
                 ticket_type: ticketType.id,
@@ -74,7 +74,7 @@ function processFixSeatsAndTickets(reservationModel, req) {
             };
         });
         debug(`creating seatReservation authorizeAction on ${offers.length} offers...`);
-        const action = yield ttts.service.transaction.placeOrderInProgress.action.authorize.seatReservation.create(reservationModel.agentId, reservationModel.id, reservationModel.performance.id, offers)(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.Performance(ttts.mongoose.connection), new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection), new ttts.repository.PaymentNo(ttts.mongoose.connection), new ttts.repository.WheelchairReservationCount(redisClient));
+        const action = yield ttts.service.transaction.placeOrderInProgress.action.authorize.seatReservation.create(reservationModel.agentId, reservationModel.id, reservationModel.performance.id, offers)(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.Performance(ttts.mongoose.connection), new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection), new ttts.repository.PaymentNo(ttts.mongoose.connection), new ttts.repository.rateLimit.TicketTypeCategory(redisClient));
         reservationModel.seatReservationAuthorizeActionId = action.id;
         // この時点で購入番号が発行される
         reservationModel.paymentNo = action.result.tmpReservations[0].payment_no;
@@ -112,13 +112,13 @@ function checkFixSeatsAndTickets(reservationModel, req) {
         reserveTicketForm_1.default(req);
         const validationResult = yield req.getValidationResult();
         if (!validationResult.isEmpty()) {
-            checkInfo.message = req.__('Message.Invalid');
+            checkInfo.message = req.__('Invalid"');
             return checkInfo;
         }
         // 画面から座席選択情報が生成できなければエラー
         const choices = JSON.parse(req.body.choices);
         if (!Array.isArray(choices)) {
-            checkInfo.message = req.__('Message.UnexpectedError');
+            checkInfo.message = req.__('UnexpectedError');
             return checkInfo;
         }
         checkInfo.choices = choices;
@@ -186,7 +186,7 @@ function getInfoFixSeatsAndTickets(reservationModel, req, selectedCount) {
         // チケット枚数より少ない場合は、購入不可としてリターン
         if (count < selectedCount) {
             // "予約可能な席がございません"
-            info.message = req.__('Message.NoAvailableSeats');
+            info.message = req.__('NoAvailableSeats');
             return info;
         }
         // 予約情報取得
@@ -202,7 +202,7 @@ function getInfoFixSeatsAndTickets(reservationModel, req, selectedCount) {
         // チケット枚数より少ない場合は、購入不可としてリターン
         if (info.results.length < selectedCount) {
             // "予約可能な席がございません"
-            info.message = req.__('Message.NoAvailableSeats');
+            info.message = req.__('NoAvailableSeats');
             return info;
         }
         info.status = true;
@@ -222,12 +222,19 @@ function processFixProfile(reservationModel, req, res) {
         res.locals.validation = validationResult.mapped();
         res.locals.paymentMethod = req.body.paymentMethod;
         if (!validationResult.isEmpty()) {
-            throw new Error(req.__('Message.Invalid'));
+            throw new Error(req.__('Invalid"'));
         }
         // 購入情報を保存
-        // tslint:disable-next-line:no-suspicious-comment
-        // TODO factoryに決済方法を定義
         reservationModel.paymentMethod = req.body.paymentMethod;
+        yield ttts.service.transaction.placeOrderInProgress.setCustomerContact(reservationModel.agentId, reservationModel.id, {
+            last_name: reservationModel.purchaser.lastName,
+            first_name: reservationModel.purchaser.firstName,
+            tel: reservationModel.purchaser.tel,
+            email: reservationModel.purchaser.email,
+            age: reservationModel.purchaser.age,
+            address: reservationModel.purchaser.address,
+            gender: reservationModel.purchaser.gender
+        })(new ttts.repository.Transaction(ttts.mongoose.connection));
         // セッションに購入者情報格納
         req.session.purchaser = {
             lastName: reservationModel.purchaser.lastName,
@@ -264,7 +271,7 @@ function processStart(purchaserGroup, req) {
             agentId: req.staffUser.get('_id'),
             sellerId: 'TokyoTower',
             purchaserGroup: purchaserGroup
-        });
+        })(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.Owner(ttts.mongoose.connection));
         debug('transaction started.', transaction.id);
         reservationModel.id = transaction.id;
         reservationModel.agentId = transaction.agent.id;
@@ -293,7 +300,7 @@ function initializePayment(reservationModel, req) {
     reservationModel.purchaser = {
         lastName: 'ナイブ',
         firstName: 'カンケイシャ',
-        tel: '0362263025',
+        tel: '0334335111',
         email: req.staffUser.get('email'),
         age: '00',
         address: '',
@@ -311,7 +318,7 @@ function processCancelSeats(reservationModel) {
         reservationModel.seatCodes = [];
         // 座席仮予約があればキャンセル
         if (reservationModel.seatReservationAuthorizeActionId !== undefined) {
-            yield ttts.service.transaction.placeOrderInProgress.action.authorize.seatReservation.cancel(reservationModel.agentId, reservationModel.id, reservationModel.seatReservationAuthorizeActionId)(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection), new ttts.repository.WheelchairReservationCount(redisClient));
+            yield ttts.service.transaction.placeOrderInProgress.action.authorize.seatReservation.cancel(reservationModel.agentId, reservationModel.id, reservationModel.seatReservationAuthorizeActionId)(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection), new ttts.repository.rateLimit.TicketTypeCategory(redisClient));
         }
     });
 }
@@ -358,16 +365,14 @@ exports.processFixPerformance = processFixPerformance;
  */
 function processFixReservations(reservationModel, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        const transaction = yield ttts.service.transaction.placeOrderInProgress.confirm({
+        const transactionResult = yield ttts.service.transaction.placeOrderInProgress.confirm({
             agentId: reservationModel.agentId,
             transactionId: reservationModel.id,
             paymentMethod: reservationModel.paymentMethod
-        });
-        debug('transaction confirmed.', transaction.id);
+        })(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.action.authorize.CreditCard(ttts.mongoose.connection), new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection));
         try {
-            const result = transaction.result;
             // 完了メールキュー追加(あれば更新日時を更新するだけ)
-            const emailQueue = yield createEmailQueue(result.eventReservations, reservationModel, res);
+            const emailQueue = yield createEmailQueue(transactionResult.eventReservations, reservationModel, res);
             yield ttts.Models.EmailQueue.create(emailQueue);
         }
         catch (error) {
@@ -394,7 +399,7 @@ function createEmailQueue(reservations, reservationModel, res) {
             throw new Error('email to unknown');
         }
         const title = res.__('Title');
-        const titleEmail = res.__('Email.Title');
+        const titleEmail = res.__('EmailTitle');
         // 券種ごとに合計枚数算出
         const ticketInfos = {};
         for (const reservation of reservations) {
@@ -413,11 +418,10 @@ function createEmailQueue(reservations, reservationModel, res) {
             }
         }
         // 券種ごとの表示情報編集
-        const leaf = res.__('Email.Leaf');
         const ticketInfoArray = [];
         Object.keys(ticketInfos).forEach((key) => {
             const ticketInfo = ticketInfos[key];
-            ticketInfoArray.push(`${ticketInfo.ticket_type_name[res.locale]} ${ticketInfo.count}${leaf}`);
+            ticketInfoArray.push(`${ticketInfo.ticket_type_name[res.locale]} ${res.__('{{n}}Leaf', { n: ticketInfo.count })}`);
         });
         const day = moment(reservations[0].performance_day, 'YYYYMMDD').format('YYYY/MM/DD');
         // tslint:disable-next-line:no-magic-numbers

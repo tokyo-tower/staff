@@ -1,16 +1,16 @@
-<%- include('../../common/reserve/_step') %>
+<%- include('../../common/reserve/_step', {currentStepName: 'confirm'}) %>
 
 <h1 class="pagetitle">代理予約内容確認</h1>
 <p class="guidetext">代理予約内容をご確認いただき、「代理予約確定」ボタンを押してください。</p>
 
 <div class="wrapper-confirm">
 
-    <h2><%- __('h2.SeatInformation') %></h2>
+    <h2>予約情報</h2>
     <table class="table table-confirm">
         <tbody>
             <%- /* 日時/場所 */ %>
             <tr>
-                <th><%- __('Label.DatetimeAndLocation') %></th>
+                <th>予約日時</th>
                 <td>
                     <p>
                         <%- reservationModel.performance[`start_str`][locale] %>
@@ -28,12 +28,12 @@
             <%- /* 券種/枚数/メモ */ %>
             <tr>
                 <th>
-                    <%- __('Label.TicketType') %> / <%- __('Label.TicketCount') %> / <%- __('Label.WatcherName') %>
+                    <%- __('TicketType') %> / <%- __('TicketCount') %> / メモ
                 </th>
                 <td>
                 <% Object.keys(ticketInfos).forEach(function(key) { %>
                     <p><%= ticketInfos[key].info %></p>
-                    <p><%- __('Label.WatcherName') %>: <strong><%= ticketInfos[key].watcher_name %></strong></p>
+                    <p>予約メモ: <strong><%= ticketInfos[key].watcher_name %></strong></p>
                 <% }); %>
                 </td>
             </tr>
@@ -45,11 +45,11 @@
         <tbody>
             <%- /* 決算手段 */ %>
             <tr>
-                <th><% console.log(); %>
-                    <%- __('Label.HowToPayStaff') %>
+                <th>
+                    お支払い方法
                 </th>
                 <td>
-                    <p><%- __(`Label.PaymentMethodName.${reservationModel.paymentMethod}`) %></p>
+                    <p><%- __(`PaymentMethodName.${reservationModel.paymentMethod}`) %></p>
                 </td>
             </tr>
         </tbody>
@@ -58,7 +58,7 @@
 
 <div class="navbtns">
     <a class="btn btn-lg btn-next" href="javascript:void(0);"><span>代理予約確定</span></a>
-    <a class="btn-back" href="/staff/reserve/profile"><span><%- __('Button.Back') %></span></a>
+    <a class="btn-back" href="/staff/reserve/profile"><span><%- __('Back') %></span></a>
 </div>
 
 <script>

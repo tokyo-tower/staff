@@ -46,41 +46,28 @@ scssビルド
 npm run css
 ```
 
-## Required environment variables
-```shell
-set NODE_ENV=**********環境名(development,test,productionなど)**********
-set SENDGRID_API_KEY=**********sendgrid api key**********
-set TTTS_PERFORMANCE_STATUSES_REDIS_HOST=**********パフォーマンス空席状況保管先redis host**********
-set TTTS_PERFORMANCE_STATUSES_REDIS_PORT=**********パフォーマンス空席状況保管先redis port**********
-set TTTS_PERFORMANCE_STATUSES_REDIS_KEY=**********パフォーマンス空席状況保管先redis key**********
-set FRONTEND_GMO_RESULT_ENDPOINT=**********GMOリンク決済からの戻り先エンドポイント**********
-set API_ENDPOINT=**********frontと連携するttts apiのエンドポイント**********
-set API_CLIENT_ID=**********APIクライアントID**********
-set API_CLIENT_SECRET=**********APIクライアントシークレット**********
-set API_AUTHORIZE_SERVER_DOMAIN=**********API認可サーバードメイン**********
-set API_RESOURECE_SERVER_IDENTIFIER=**********APIリソースサーバー識別子**********
-set REDIS_HOST=**********session保管先redis host**********
-set REDIS_PORT=**********session保管先redis port**********
-set REDIS_KEY=**********session保管先redis key**********
-set MONGOLAB_URI=**********mongodb接続URI**********
-set GMO_ENDPOINT=**********gmo apiのエンドポイント**********
-set GMO_SITE_ID=**********gmo サイトID**********
-set GMO_SHOP_ID=**********gmo ショップID**********
-set GMO_SHOP_PASS=**********gmo ショップパスワード**********
-set WHEELCHAIR_RATE_LIMIT_THRESHOLD=**********車椅子流入制限閾値**********
-set WHEELCHAIR_RATE_LIMIT_UNIT_IN_SECONDS=**********車椅子流入制限単位(秒)**********
-```
-only on Aure WebApps
+### Environment variables
 
-```shell
-set WEBSITE_NODE_DEFAULT_VERSION=**********node.jsバージョン**********
-set WEBSITE_TIME_ZONE=Tokyo Standard Time
-```
-DEBUG
-
-```shell
-set DEBUG=ttts-staff*
-```
+| Name                              | Required | Value           | Purpose                               |
+| --------------------------------- | -------- | --------------- | ------------------------------------- |
+| `DEBUG`                           | false    | ttts-frontend:* | Debug                                 |
+| `NPM_TOKEN`                       | true     |                 | NPM auth token                        |
+| `NODE_ENV`                        | true     |                 | 環境名(development,test,productionなど) |
+| `SENDGRID_API_KEY`                | true     |                 | GMOリンク決済からの戻り先エンドポイント             |
+| `FRONTEND_GMO_RESULT_ENDPOINT`    | true     |                 | frontと連携するttts apiのエンドポイント          |
+| `API_ENDPOINT`                    | true     |                 | frontと連携するttts apiのエンドポイント          |
+| `API_CLIENT_ID`                   | true     |                 | APIクライアントID                           |
+| `API_CLIENT_SECRET`               | true     |                 | APIクライアントシークレット                       |
+| `API_AUTHORIZE_SERVER_DOMAIN`     | true     |                 | API認可サーバードメイン                       |
+| `API_RESOURECE_SERVER_IDENTIFIER` | true     |                 | APIリソースサーバー識別子                     |
+| `REDIS_HOST`                      | true     |                 | redis host                            |
+| `REDIS_PORT`                      | true     |                 | redis port                            |
+| `REDIS_KEY`                       | true     |                 | redis key                             |
+| `MONGOLAB_URI`                    | true     |                 | mongodb接続URI                        |
+| `GMO_ENDPOINT`                    | true     |                 | GMO apiのエンドポイント                       |
+| `GMO_SHOP_ID`                     | true     |                 | GMO サイトID                             |
+| `GMO_SHOP_ID`                     | true     |                 | GMO ショップID                            |
+| `GMO_SHOP_PASS`                   | true     |                 | GMO ショップパスワード                         |
 
 
 # tslint

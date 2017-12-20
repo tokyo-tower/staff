@@ -2,6 +2,7 @@
 'use strict';
 window.ttts = {};
 window.ttts.mode = (location.href.indexOf('staff') === -1) ? 'customer' : 'staff';
+window.ttts.str_thousandsSeparator = ',';
 
 // プライベートブラウジング時のsessionStorage.setItemエラー回避用
 window.ttts.setSessionStorage = function(key, value) {

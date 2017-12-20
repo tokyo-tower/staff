@@ -21,7 +21,12 @@
 <script src="/js/lib/jquery.ddslick.min.js"></script>
 <script>
 window.ttts.locales = <%- JSON.stringify(conf.get('locales')) %>;
-window.ttts.currentLocale = window.sessionStorage.getItem('locale') || '<%- (typeof locale === 'string') ? locale : '' %>' || 'ja';
+window.ttts.currentLocale = '<%- (typeof locale === 'string') ? locale : '' %>' || window.sessionStorage.getItem('locale') || 'ja';
+if (window.ttts.currentLocale === 'de' || window.ttts.currentLocale === 'es' || window.ttts.currentLocale === 'id' || window.ttts.currentLocale === 'it') {
+    window.ttts.str_thousandsSeparator = '.';
+} else if (window.ttts.currentLocale === 'fr' || window.ttts.currentLocale === 'ru') {
+    window.ttts.str_thousandsSeparator = ' ';
+}
 window.ttts.domurl = new Url();
 (function(){
     var isLocalesAlreadyInitialzed = false;

@@ -1,28 +1,28 @@
-<%- __('Email.Title') %>
+<%- __('EmailTitle') %>
 
 <%= __('Mr{{name}}', {name: reservations[0].get('purchaser_name')[locale]}) %>
 
-<%- __('Email.Head1').replace('$theater_name$', reservations[0].get('theater_name')[locale]) %>
-<%- __('Email.Head2') %>
+<%- __('EmailHead1').replace('$theater_name$', reservations[0].get('theater_name')[locale]) %>
+<%- __('EmailHead2') %>
 
-<% /* 購入番号 */ %><%- __('Label.PaymentNo') %> : <%- reservations[0].get('payment_no') %>
-<% /* ご来塔日時 */ %><%- __('Label.Day') %> : <%- dayTime %>
-<% /* 券種、枚数 */ %><%- __('Label.TicketType') %> <%- __('Label.TicketCount') %>
+<% /* 購入番号 */ %><%- __('PaymentNo') %> : <%- reservations[0].get('payment_no') %>
+<% /* ご来塔日時 */ %><%- __('EmailReserveDate') %> : <%- dayTime %>
+<% /* 券種、枚数 */ %><%- __('TicketType') %> <%- __('TicketCount') %>
 <% ticketInfoArray.forEach((ticketInfo, index) => { %><%- ticketInfo %>
 <% }) %>-------------------------------------
-<% /*合計枚数 */ %><%- __('Email.TotalTicketCount').replace('$reservations_length$',reservations.length) %>
+<% /*合計枚数 */ %><%- __('EmailTotalTicketCount{{n}}', {n: reservations.length}) %>
 -------------------------------------
 
-<%- __('Email.Notice1') %>
-<%- __('Email.Notice2') %>
-<%- __('Email.Notice3') %>
-<%- __('Email.Notice4') %>
-<%- __('Email.Notice5') %>
+<%- __('EmailNotice1') %>
+<%- __('EmailNotice2') %>
+<%- __('EmailNotice3') %>
+<%- __('EmailNotice4') %>
+<%- __('EmailNotice5') %>
 
-<%- __('Email.Foot1').replace('$theater_name$', reservations[0].get('theater_name')[locale]) %>
-<%- __('Email.Foot2') %>
-<%- __('Email.Foot3') %>
+<%- __('EmailFoot1Can').replace('$theater_name$', reservations[0].get('theater_name')[locale]) %>
+<%- __('EmailFoot2') %>
+<%- __('EmailFoot3') %>
 
-<%- __('Email.Access1') %>
+<%- __('EmailAccess1') %>
 <%- reservations[0].get('theater_name')[locale] %>
-<%- __('Email.Access2') %> : <%= conf.get('official_tel_number') %>
+<%- __('EmailAccess2') %> : <%= conf.get('official_tel_number') %>

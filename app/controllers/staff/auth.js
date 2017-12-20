@@ -54,14 +54,14 @@ function login(req, res, next) {
                     res.locals.signature = req.body.signature;
                     if (owner === null) {
                         res.locals.validation = [
-                            { msg: req.__('Message.invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
+                            { msg: req.__('Invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
                         ];
                     }
                     else {
                         // パスワードチェック
                         if (owner.get('password_hash') !== ttts.CommonUtil.createHash(req.body.password, owner.get('password_salt'))) {
                             res.locals.validation = [
-                                { msg: req.__('Message.invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
+                                { msg: req.__('Invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
                             ];
                         }
                         else {
@@ -91,7 +91,7 @@ function login(req, res, next) {
             res.render('staff/auth/login', { layout: 'layouts/staff/login' });
         }
         catch (error) {
-            next(new Error(req.__('Message.UnexpectedError')));
+            next(new Error(req.__('UnexpectedError')));
         }
     });
 }
@@ -100,7 +100,7 @@ function logout(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (req.session === undefined) {
-                next(new Error(req.__('Message.UnexpectedError')));
+                next(new Error(req.__('UnexpectedError')));
                 return;
             }
             delete req.session[staff_1.default.AUTH_SESSION_NAME];

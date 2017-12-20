@@ -7,28 +7,30 @@ const printIds = reservationDocuments.map((doc)=>`"${doc.get('id')}"`);
 
 <%- include('./_step', {currentStepName: 'complete'}) %>
 
-<h1 class="pagetitle"><%- __('h1.CompleteReservation') %></h1>
-<p class="guidetext guidetext-customer"><%- __('Label.CompleteReservationGuideText') %></p>
-<p class="rednotice qrnotice"><%- __('Label.CompleteReservationCautionText') %></p>
+<h1 class="pagetitle"><%- __('ReservationCompleted') %></h1>
+<p class="guidetext guidetext-customer"><%- __('CompleteReservationGuideText') %></p>
+<p class="rednotice qrnotice"><%- __('CompleteReservationNoticeText') %></p>
+<% if (reservationDocuments[0].purchaser_group === 'Staff') { %>
 <p class="guidetext">代理予約が完了いたしました。<br>「印刷」ボタンを押してチケットを発見してください。</p>
+<% } %>
 
 <table class="table table-complete">
     <tbody>
         <tr class="tr-number">
-            <th><%- __('Label.PaymentNo') %></th>
+            <th><%- __('PaymentNo') %></th>
             <td>
                 <span class="rsrvno"><%- reservationDocuments[0].get('payment_no') %></span>
-                <p class="numbernotice"><%- __('Message.TransactionNumberDescription') %></p>
+                <p class="numbernotice"><%- __('TransactionNumberNotice') %></p>
             </td>
         </tr>
         <tr class="tr-date">
-            <th><%- __('Label.PurchaseContentDate') %></th>
+            <th><%- __('PurchaseContentDate') %></th>
             <td>
                 <%= moment(reservationDocuments[0].performance_day).format('Y-MM-DD') %>&nbsp;&nbsp;<%= `${moment(reservationDocuments[0].performance_start_time, 'hmm').format('HH:mm')} - ${moment(reservationDocuments[0].performance_end_time, 'hmm').format('HH:mm')}` %> 
             </td>
         </tr>
         <tr class="tr-tourno">
-            <th>ツアーナンバー</th>
+            <th><%- __('TourNumber') %></th>
             <td>
                 <p>
                     <%- reservationDocuments[0].performance_ttts_extension.tour_number %> 
@@ -36,7 +38,7 @@ const printIds = reservationDocuments.map((doc)=>`"${doc.get('id')}"`);
             </td>
         </tr>
         <tr class="tr-qr">
-            <th><%- __('Label.QRCode') %></th>
+            <th><%- __('QRCode') %></th>
             <td>
                 <% reservationDocuments.forEach((reservation, index) => { %>
                 <div class="wrapper-qrcodes">
@@ -55,13 +57,13 @@ const printIds = reservationDocuments.map((doc)=>`"${doc.get('id')}"`);
             </td>
         </tr>
         <tr class="tr-email">
-            <th><%- __('Label.Email') %> %></th>
+            <th><%= __('Email') %></th>
             <td>
                 <%= reservationDocuments[0].get('purchaser_email') %>
             </td>
         </tr>
         <tr class="tr-price">
-            <th><%- __('Label.TotalPrice') %> %></th>
+            <th><%- __('TotalPrice') %></th>
             <td>
                 <% var totalAmount = reservationDocuments.reduce((a,b)=>a+b.charge,0); %>
                 <span class="price"><span class="is-ja">&yen;</span><%= totalAmount %><span class="is-not-ja">JPY</span></span>
@@ -71,16 +73,19 @@ const printIds = reservationDocuments.map((doc)=>`"${doc.get('id')}"`);
 </table>
 
 
-<a class="btn btn-blue visible-pc" id="btn_print_a4" target="_blank" href='<%- process.env.INQUIRY_SITE_URL %>print/print?ids=[<%- printIds.join(',') %>]'><span><%- __('Label.Print') %></span></a>
+<a class="btn btn-blue visible-pc" id="btn_print_a4" target="_blank" href='<%- process.env.INQUIRY_SITE_URL %>print/print?ids=[<%- printIds.join(',') %>]'><span><%- __('PrintTicket') %></span></a>
 
+<% if (reservationDocuments[0].purchaser_group === 'Staff') { %>
 <div class="thermalprint">
     <a class="btn btn-big btn-thermalprint" id="btn_thermalprint" target="_blank" href='<%- process.env.INQUIRY_SITE_URL %>print/print_pcthermal/?ids=[<%- printIds.join(',') %>]'><span>サーマル印刷</span></a>
 </div>
+<% } %>
+
 
 <p class="mailnotice"><%- __('CompleteNotesText') %></p>
 
 <div class="enteringguide">
-    <h3><%- __('Label.AboutEntry') %></h3>
-    <p><%- __('Message.AboutEntryDescription') %></p>
-    <a class="btn btn-blue btn-entering" href="/aboutenter" target="_blank"><span><%- __('Button.AboutEntry') %></span></a>
+    <h3><%- __('HowToEnter') %></h3>
+    <p><%- __('AboutEntryDescription') %></p>
+    <a class="btn btn-blue btn-entering" href="/aboutenter" target="_blank"><span><%- __('AboutHowToEnter') %></span></a>
 </div>

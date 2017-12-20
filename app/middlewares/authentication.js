@@ -17,7 +17,7 @@ const staff_1 = require("../models/user/staff");
 exports.default = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
     req.staffUser = staff_1.default.parse(req.session);
     // if (req.staffUser === undefined) {
-    //     next(new Error(req.__('Message.UnexpectedError')));
+    //     next(new Error(req.__('UnexpectedError')));
     //     return;
     // }
     // 既ログインの場合

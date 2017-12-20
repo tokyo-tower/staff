@@ -42,7 +42,7 @@ function performances(req, res, next) {
             });
         }
         catch (error) {
-            next(new Error(req.__('Message.UnexpectedError')));
+            next(new Error(req.__('UnexpectedError')));
         }
     });
 }

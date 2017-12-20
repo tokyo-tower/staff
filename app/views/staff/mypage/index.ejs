@@ -4,7 +4,7 @@
         <input type="hidden" name="limit" value="20">
 
         <h3>
-            <%- __('Label.Day') %>
+            日時
         </h3>
         <div class="wrapper-inputs wrapper-time form-group">
             <input name="day" id="input_performancedate" class="form-control" value="">
@@ -36,7 +36,7 @@
                     <option value="22">22</option>
                     <option value="23">23</option>
                 </select>
-                <%- __('Label.Hour') %>
+                時
                     <select class="form-control" name="start_minute1">
                         <option value=""></option>
                         <option value="00">00</option>
@@ -44,8 +44,8 @@
                         <option value="30">30</option>
                         <option value="45">45</option>
                     </select>
-                    <%- __('Label.Minute') %>
-                        <%- __('Label.FromTo') %>
+                    分
+                        ～
                             <%- /* 終了時刻 */ %>
                                 <select class="form-control" name="start_hour2">
                                     <option value=""></option>
@@ -74,7 +74,7 @@
                                     <option value="22">22</option>
                                     <option value="23">23</option>
                                 </select>
-                                <%- __('Label.Hour') %>
+                                時
                                     <select class="form-control" name="start_minute2">
                                         <option value=""></option>
                                         <option value="00">00</option>
@@ -82,14 +82,14 @@
                                         <option value="30">30</option>
                                         <option value="45">45</option>
                                     </select>
-                                    <%- __('Label.Minute') %>
+                                    分
         </div>
 
         <h3>購入情報から検索</h3>
         <div class="wrapper-inputs form-inline">
             <div class="form-group">
                 <label>
-                    <%- __('Label.PaymentNo') %>
+                    <%- __('PaymentNo') %>
                 </label>
                 <input type="text" class="form-control" name="payment_no">
             </div>
@@ -168,7 +168,7 @@
 
         <a class="btn btn-next" href="javascript:void(0)">
             <span>
-                <%- __('Button.Search') %>
+                予約を検索
             </span>
         </a>
 
@@ -185,12 +185,12 @@
                     <input type="checkbox" class="check-all">
                 </th>
                 <th>
-                    <%- __('Label.PaymentNo') %>
+                    <%- __('PaymentNo') %>
                 </th>
                 <th>氏名</th>
                 <th>メモ</th>
                 <th>
-                    <%- __('Label.SeatCode') %>
+                    席コード
                 </th>
                 <th>券種</th>
                 <th>予約方法</th>
@@ -212,7 +212,7 @@
         <div class="form-group">
             <select class="form-control" id="select_action" name="action">
                 <option value="">
-                    <%- __('Label.Actions') %>
+                    操作を選択
                 </option>
                 <option value="cancel">キャンセル</option>
                 <option value="print">A4チケット印刷</option>
@@ -222,7 +222,7 @@
         <div class="form-group">
             <p class="btn action-to-reservations">
                 <span>
-                    <%- __('Label.Apply') %>
+                    実行
                 </span>
             </p>
         </div>
@@ -315,7 +315,7 @@
         <div class="modal-content">
             <div class="modal-body">
                 <div class="text-center">
-                    <%- __('Message.Searching') %>
+                    <%- __('Processing') %>
                 </div>
             </div>
         </div>

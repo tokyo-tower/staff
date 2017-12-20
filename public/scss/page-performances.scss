@@ -1,5 +1,27 @@
 // パフォーマンス検索ページ
 .page-performances {
+    .pagetitle {
+        .is-wheelchair {
+            display: block;
+            margin-bottom: 10px;
+        }
+    }
+    .guidetext-reservation {
+        text-align: left;
+        font-size: 0.8em;
+        a {
+            text-decoration: underline;
+        }
+    }
+    .daynotice {
+        font-size: 0.8em;
+        margin-left: 1em;
+        @media screen and (max-width: $breakpoint_tablet) {
+            margin-top: 10px;
+            margin-left: 0;
+            display: block;
+        }        
+    }
     .performancesearchform {
         margin-top: 10px;
         margin-bottom: 2em;

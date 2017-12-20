@@ -1,18 +1,18 @@
 $(function() {
-    var isSubmitting = false;    
+    var isSubmitting = false;
 
     var isAgreed = function() {
         if (window.ttts.mode !== 'customer') {
             return true;
         }
-        return document.getElementById('checkbox_agreed').checked;        
+        return document.getElementById('checkbox_agreed').checked;
     };
 
     // 合計金額の更新
     var isValidTicketsSelected = false;
     var dom_tickets_tr = document.querySelectorAll('.table-tickets tbody tr');
     var dom_tfoot = document.querySelector('tfoot');
-    var dom_price = document.querySelector('.price');
+    var dom_price = document.getElementById('echo_total');
     var dom_btnnext = document.querySelector('.btn-next');
     var $alertTicketOvermax = $('.alert-ticket-overmax');
     var $alertsTicket = $('.alert-ticket');
@@ -35,8 +35,8 @@ $(function() {
         }
         isValidTicketsSelected = true;
 
-        // 数字をコンマ区切りに
-        var text = total.toString().replace(/(\d)(?=(\d{3})+$)/g, '$1,') + ((window.ttts.currentLocale === 'ja') ? '円' : 'JPY');
+        // 数字をコンマ区切り(言語によってはドットまたはスペース区切り)に
+        var text = total.toString().replace(/(\d)(?=(\d{3})+$)/g, '$1' + window.ttts.str_thousandsSeparator);
         dom_price.innerText = text;
         dom_tfoot.classList.remove('hidden');
         if (isAgreed()) {

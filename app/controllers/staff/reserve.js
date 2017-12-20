@@ -47,7 +47,7 @@ function start(req, res, next) {
             }
         }
         catch (error) {
-            next(new Error(req.__('Message.UnexpectedError')));
+            next(new Error(req.__('UnexpectedError')));
         }
     });
 }
@@ -70,7 +70,7 @@ function performances(req, res, next) {
         try {
             const reservationModel = session_1.default.FIND(req);
             if (reservationModel === null) {
-                next(new Error(req.__('Message.Expired')));
+                next(new Error(req.__('Expired')));
                 return;
             }
             const token = yield ttts.CommonUtil.getToken({
@@ -93,7 +93,7 @@ function performances(req, res, next) {
                 reservePerformanceForm_1.default(req);
                 const validationResult = yield req.getValidationResult();
                 if (!validationResult.isEmpty()) {
-                    next(new Error(req.__('Message.UnexpectedError')));
+                    next(new Error(req.__('UnexpectedError')));
                     return;
                 }
                 try {
@@ -104,7 +104,7 @@ function performances(req, res, next) {
                     return;
                 }
                 catch (error) {
-                    next(new Error(req.__('Message.UnexpectedError')));
+                    next(new Error(req.__('UnexpectedError')));
                     return;
                 }
             }
@@ -122,7 +122,7 @@ function performances(req, res, next) {
         }
         catch (error) {
             console.error(error);
-            next(new Error(req.__('Message.UnexpectedError')));
+            next(new Error(req.__('UnexpectedError')));
         }
     });
 }
@@ -135,7 +135,7 @@ function tickets(req, res, next) {
         try {
             const reservationModel = session_1.default.FIND(req);
             if (reservationModel === null) {
-                next(new Error(req.__('Message.Expired')));
+                next(new Error(req.__('Expired')));
                 return;
             }
             reservationModel.paymentMethod = '';
@@ -175,7 +175,7 @@ function tickets(req, res, next) {
             }
         }
         catch (error) {
-            next(new Error(req.__('Message.UnexpectedError')));
+            next(new Error(req.__('UnexpectedError')));
         }
     });
 }
@@ -188,7 +188,7 @@ function profile(req, res, next) {
         try {
             const reservationModel = session_1.default.FIND(req);
             if (reservationModel === null) {
-                next(new Error(req.__('Message.Expired')));
+                next(new Error(req.__('Expired')));
                 return;
             }
             if (req.method === 'POST') {
@@ -200,7 +200,8 @@ function profile(req, res, next) {
                 catch (error) {
                     console.error(error);
                     res.render('staff/reserve/profile', {
-                        reservationModel: reservationModel
+                        reservationModel: reservationModel,
+                        layout: layout
                     });
                 }
             }
@@ -221,12 +222,13 @@ function profile(req, res, next) {
                 res.render('staff/reserve/profile', {
                     reservationModel: reservationModel,
                     GMO_ENDPOINT: process.env.GMO_ENDPOINT,
-                    GMO_SHOP_ID: process.env.GMO_SHOP_ID
+                    GMO_SHOP_ID: process.env.GMO_SHOP_ID,
+                    layout: layout
                 });
             }
         }
         catch (error) {
-            next(new Error(req.__('Message.UnexpectedError')));
+            next(new Error(req.__('UnexpectedError')));
         }
     });
 }
@@ -239,14 +241,14 @@ function confirm(req, res, next) {
         try {
             const reservationModel = session_1.default.FIND(req);
             if (reservationModel === null) {
-                next(new Error(req.__('Message.Expired')));
+                next(new Error(req.__('Expired')));
                 return;
             }
             if (req.method === 'POST') {
                 try {
                     // 仮押さえ有効期限チェック
                     if (reservationModel.expiredAt !== undefined && reservationModel.expiredAt < moment().valueOf()) {
-                        throw new Error(req.__('Message.Expired'));
+                        throw new Error(req.__('Expired'));
                     }
                     // 予約確定
                     yield reserveBaseController.processFixReservations(reservationModel, res);
@@ -262,11 +264,10 @@ function confirm(req, res, next) {
                 const reservations = reserveBaseController.getReservations(reservationModel);
                 const ticketInfos = reserveBaseController.getTicketInfos(reservations);
                 // 券種ごとの表示情報編集
-                const leaf = res.__('Email.Leaf');
                 Object.keys(ticketInfos).forEach((key) => {
                     const ticketInfo = ticketInfos[key];
                     ticketInfos[key].info =
-                        `${ticketInfo.ticket_type_name[res.locale]} ${ticketInfo.charge} × ${ticketInfo.count}${leaf}`;
+                        `${ticketInfo.ticket_type_name[res.locale]} ${ticketInfo.charge} × ${res.__('{{n}}Leaf', { n: ticketInfo.count })}`;
                 });
                 res.render('staff/reserve/confirm', {
                     reservationModel: reservationModel,
@@ -277,7 +278,7 @@ function confirm(req, res, next) {
             }
         }
         catch (error) {
-            next(new Error(req.__('Message.UnexpectedError')));
+            next(new Error(req.__('UnexpectedError')));
         }
     });
 }
@@ -300,7 +301,7 @@ function complete(req, res, next) {
                 }
             }).exec();
             if (transaction === null) {
-                next(new Error(req.__('Message.NotFound')));
+                next(new Error(req.__('NotFound')));
                 return;
             }
             debug('confirmed transaction:', transaction.id);
@@ -308,7 +309,7 @@ function complete(req, res, next) {
             debug(reservations.length, 'reservation(s) found.');
             reservations = reservations.filter((reservation) => reservation.get('status') === ttts.factory.reservationStatusType.ReservationConfirmed);
             if (reservations.length === 0) {
-                next(new Error(req.__('Message.NotFound')));
+                next(new Error(req.__('NotFound')));
                 return;
             }
             reservations.sort((a, b) => {
@@ -320,7 +321,7 @@ function complete(req, res, next) {
             });
         }
         catch (error) {
-            next(new Error(req.__('Message.UnexpectedError')));
+            next(new Error(req.__('UnexpectedError')));
         }
     });
 }

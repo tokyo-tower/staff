@@ -21,7 +21,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
         // パフォーマンスIDリストをjson形式で受け取る
         const performanceIds = req.body.performanceIds;
         if (!Array.isArray(performanceIds)) {
-            throw new Error(req.__('Message.UnexpectedError'));
+            throw new Error(req.__('UnexpectedError'));
         }
 
         // パフォーマンス・予約(入塔記録のないもの)のステータス更新
@@ -170,14 +170,14 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
     // 東京タワー TOP DECK Ticket
     const title = res.__('Title');
     // 東京タワー TOP DECK エレベータ運行停止のお知らせ
-    const titleEmail = res.__('Email.TitleSus');
+    const titleEmail = res.__('EmailTitleSus');
     //トウキョウ タロウ 様
     const purchaserName: string = `${res.__('Mr{{name}}', { name: (<any>reservation).purchaser_name[res.locale] })}`;
 
     // 購入チケット情報
     const paymentTicketInfos: string[] = [];
     // 購入番号 : 850000001
-    paymentTicketInfos.push(`${res.__('Label.PaymentNo')} : ${reservation.payment_no}`);
+    paymentTicketInfos.push(`${res.__('PaymentNo')} : ${reservation.payment_no}`);
 
     // ご来塔日時 : 2017/12/10 09:15
     const day: string = moment(reservation.performance_day, 'YYYYMMDD').format('YYYY/MM/DD');
@@ -186,10 +186,9 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
     paymentTicketInfos.push(`${res.__('Label.Day')} : ${day} ${time}`);
 
     // 券種 枚数
-    paymentTicketInfos.push(`${res.__('Label.TicketType')} ${res.__('Label.TicketCount')}`);
+    paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`);
     // TOP DECKチケット(大人) 1枚
-    const leaf: string = res.__('Email.Leaf');
-    const infos = getTicketInfo(reservations, leaf, res.locale);
+    const infos = getTicketInfo(reservations, res.__, res.locale);
     paymentTicketInfos.push(infos.join('\n'));
     // 本文セット
     const content: string = `${titleEmail}\n\n${purchaserName}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}`;
@@ -221,7 +220,7 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
  * チケット情報取得
  *
  */
-export function getTicketInfo(reservations: any[], leaf: string, locale: string): string[] {
+export function getTicketInfo(reservations: any[], __: Function, locale: string): string[] {
     // 券種ごとに合計枚数算出
     const keyName: string = 'ticket_type';
     const ticketInfos: {} = {};
@@ -243,7 +242,7 @@ export function getTicketInfo(reservations: any[], leaf: string, locale: string)
     const ticketInfoArray: string[] = [];
     Object.keys(ticketInfos).forEach((key) => {
         const ticketInfo = (<any>ticketInfos)[key];
-        ticketInfoArray.push(`${ticketInfo.ticket_type_name} ${ticketInfo.count}${leaf}`);
+        ticketInfoArray.push(`${ticketInfo.ticket_type_name} ${__('{{n}}Leaf', { n: ticketInfo.count })}`);
     });
 
     return ticketInfoArray;

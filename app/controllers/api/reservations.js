@@ -210,7 +210,7 @@ exports.search = search;
 function validate(req) {
     return __awaiter(this, void 0, void 0, function* () {
         // 来塔日
-        req.checkQuery('day', req.__('Message.required{{fieldName}}', { fieldName: req.__('Label.Day') })).notEmpty();
+        req.checkQuery('day', req.__('NoInput{{fieldName}}', { fieldName: req.__('Label.Day') })).notEmpty();
         // 検証
         const validatorResult = yield req.getValidationResult();
         const errors = (!validatorResult.isEmpty()) ? req.validationErrors(true) : {};
@@ -246,7 +246,7 @@ function isInputEven(value1, value2) {
 function updateWatcherName(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (req.staffUser === undefined) {
-            next(new Error(req.__('Message.UnexpectedError')));
+            next(new Error(req.__('UnexpectedError')));
             return;
         }
         const reservationId = req.body.reservationId;
@@ -274,7 +274,7 @@ function updateWatcherName(req, res, next) {
         catch (error) {
             res.status(http_status_1.INTERNAL_SERVER_ERROR).json({
                 errors: [{
-                        message: req.__('Message.UnexpectedError')
+                        message: req.__('UnexpectedError')
                     }]
             });
         }
@@ -289,7 +289,7 @@ exports.updateWatcherName = updateWatcherName;
 function cancel(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (req.staffUser === undefined) {
-            next(new Error(req.__('Message.UnexpectedError')));
+            next(new Error(req.__('UnexpectedError')));
             return;
         }
         const successIds = [];
@@ -297,7 +297,7 @@ function cancel(req, res, next) {
         try {
             const reservationIds = req.body.reservationIds;
             if (!Array.isArray(reservationIds)) {
-                throw new Error(req.__('Message.UnexpectedError'));
+                throw new Error(req.__('UnexpectedError'));
             }
             const promises = reservationIds.map((id) => __awaiter(this, void 0, void 0, function* () {
                 // 予約データの解放

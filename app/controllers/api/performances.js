@@ -28,7 +28,7 @@ function updateOnlineStatus(req, res) {
             // パフォーマンスIDリストをjson形式で受け取る
             const performanceIds = req.body.performanceIds;
             if (!Array.isArray(performanceIds)) {
-                throw new Error(req.__('Message.UnexpectedError'));
+                throw new Error(req.__('UnexpectedError'));
             }
             // パフォーマンス・予約(入塔記録のないもの)のステータス更新
             const onlineStatus = req.body.onlineStatus;
@@ -136,23 +136,22 @@ function createEmail(res, reservations, notice) {
         // 東京タワー TOP DECK Ticket
         const title = res.__('Title');
         // 東京タワー TOP DECK エレベータ運行停止のお知らせ
-        const titleEmail = res.__('Email.TitleSus');
+        const titleEmail = res.__('EmailTitleSus');
         //トウキョウ タロウ 様
         const purchaserName = `${res.__('Mr{{name}}', { name: reservation.purchaser_name[res.locale] })}`;
         // 購入チケット情報
         const paymentTicketInfos = [];
         // 購入番号 : 850000001
-        paymentTicketInfos.push(`${res.__('Label.PaymentNo')} : ${reservation.payment_no}`);
+        paymentTicketInfos.push(`${res.__('PaymentNo')} : ${reservation.payment_no}`);
         // ご来塔日時 : 2017/12/10 09:15
         const day = moment(reservation.performance_day, 'YYYYMMDD').format('YYYY/MM/DD');
         // tslint:disable-next-line:no-magic-numbers
         const time = `${reservation.performance_start_time.substr(0, 2)}:${reservation.performance_start_time.substr(2, 2)}`;
         paymentTicketInfos.push(`${res.__('Label.Day')} : ${day} ${time}`);
         // 券種 枚数
-        paymentTicketInfos.push(`${res.__('Label.TicketType')} ${res.__('Label.TicketCount')}`);
+        paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`);
         // TOP DECKチケット(大人) 1枚
-        const leaf = res.__('Email.Leaf');
-        const infos = getTicketInfo(reservations, leaf, res.locale);
+        const infos = getTicketInfo(reservations, res.__, res.locale);
         paymentTicketInfos.push(infos.join('\n'));
         // 本文セット
         const content = `${titleEmail}\n\n${purchaserName}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}`;
@@ -182,7 +181,7 @@ function createEmail(res, reservations, notice) {
  * チケット情報取得
  *
  */
-function getTicketInfo(reservations, leaf, locale) {
+function getTicketInfo(reservations, __, locale) {
     // 券種ごとに合計枚数算出
     const keyName = 'ticket_type';
     const ticketInfos = {};
@@ -205,7 +204,7 @@ function getTicketInfo(reservations, leaf, locale) {
     const ticketInfoArray = [];
     Object.keys(ticketInfos).forEach((key) => {
         const ticketInfo = ticketInfos[key];
-        ticketInfoArray.push(`${ticketInfo.ticket_type_name} ${ticketInfo.count}${leaf}`);
+        ticketInfoArray.push(`${ticketInfo.ticket_type_name} ${__('{{n}}Leaf', { n: ticketInfo.count })}`);
     });
     return ticketInfoArray;
 }
