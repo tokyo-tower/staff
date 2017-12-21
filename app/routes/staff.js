@@ -13,6 +13,7 @@ const staffSuspensionSettingController = require("../controllers/staff/suspensio
 const authentication_1 = require("../middlewares/authentication");
 const staffRouter = express.Router();
 staffRouter.all('/mypage', authentication_1.default, staffMyPageController.index);
+staffRouter.get('/mypage/print', authentication_1.default, staffMyPageController.print);
 staffRouter.get('/reserve/start', authentication_1.default, staffReserveController.start);
 staffRouter.all('/reserve/terms', authentication_1.default, staffReserveController.terms);
 staffRouter.all('/reserve/performances', authentication_1.default, staffReserveController.performances);

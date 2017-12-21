@@ -15,6 +15,7 @@ import authentication from '../middlewares/authentication';
 const staffRouter = express.Router();
 
 staffRouter.all('/mypage', authentication, staffMyPageController.index);
+staffRouter.get('/mypage/print', authentication, staffMyPageController.print);
 staffRouter.get('/reserve/start', authentication, staffReserveController.start);
 staffRouter.all('/reserve/terms', authentication, staffReserveController.terms);
 staffRouter.all('/reserve/performances', authentication, staffReserveController.performances);

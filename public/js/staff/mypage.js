@@ -4,13 +4,10 @@ $(function () {
     // idごとにまとめた予約ドキュメントリスト
     var reservationsById = {};
 
-    // 印刷URLエンドポイント
-    var INQUIRY_SITE_URL = document.getElementById('INQUIRY_SITE_URL').value;
-
     // サーマル印刷実行ボタン
     $(document).on('click', '.btn-thermalprint', function (e) {
         var id = e.currentTarget.getAttribute('data-targetid');
-        window.open(INQUIRY_SITE_URL + 'print/print_pcthermal?ids=' + JSON.stringify([id]));
+        window.open('/staff/mypage/print?output=thermal&ids[]=' + id);
     });
 
     // 日付選択カレンダー (再読込時のために日付はsessionStorageにキープしておく)
@@ -242,7 +239,8 @@ $(function () {
     // A4印刷
     $(document).on('click', '.btn-print', function (e) {
         var id = e.currentTarget.getAttribute('data-targetid');
-        window.open(INQUIRY_SITE_URL + 'print/print?ids=' + JSON.stringify([id]));
+        window.open('/staff/mypage/print?output=a4&ids[]=' + id);
+        console.log('/staff/mypage/print?output=a4&ids[]=' + id);
     });
 
     // 予約詳細モーダル呼び出し
@@ -297,9 +295,9 @@ $(function () {
         if (action === 'cancel') {
             cancel(ids);
         } else if (action === 'print') {
-            window.open(INQUIRY_SITE_URL + 'print/print?ids=' + JSON.stringify(ids));
+            window.open('/staff/mypage/print?output=a4&' + ids.map(function (id) { return 'ids[]=' + id }).join('&'));
         } else if (action === 'thermalprint') {
-            window.open(INQUIRY_SITE_URL + 'print/print_pcthermal?ids=' + JSON.stringify(ids));
+            window.open('/staff/mypage/print?output=thermal&' + ids.map(function (id) { return 'ids[]=' + id }).join('&'));
         } else {
             alert('操作を選択してください');
         }

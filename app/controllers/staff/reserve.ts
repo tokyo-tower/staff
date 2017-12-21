@@ -21,6 +21,14 @@ const PAY_TYPE_FREE: string = 'F';
 const paymentMethodNames: any = { F: '無料招待券', I: '請求書支払い' };
 const reserveMaxDateInfo: any = conf.get<any>('reserve_max_date');
 
+const redisClient = ttts.redis.createClient({
+    host: <string>process.env.REDIS_HOST,
+    // tslint:disable-next-line:no-magic-numbers
+    port: parseInt(<string>process.env.REDIS_PORT, 10),
+    password: <string>process.env.REDIS_KEY,
+    tls: { servername: <string>process.env.REDIS_HOST }
+});
+
 export async function start(req: Request, res: Response, next: NextFunction): Promise<void> {
     // 期限指定
     if (moment() < moment(conf.get<string>('datetimes.reservation_start_staffs'))) {
@@ -335,8 +343,14 @@ export async function complete(req: Request, res: Response, next: NextFunction):
 
         reservations.sort((a, b) => ttts.factory.place.screen.sortBySeatCode(a.seat_code, b.seat_code));
 
+        // 印刷トークン発行
+        const tokenRepo = new ttts.repository.Token(redisClient);
+        const printToken = await tokenRepo.createPrintToken(reservations.map((r) => r.id));
+        debug('printToken created.', printToken);
+
         res.render('staff/reserve/complete', {
             reservations: reservations,
+            printToken: printToken,
             layout: layout
         });
     } catch (error) {
