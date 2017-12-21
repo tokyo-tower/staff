@@ -69,15 +69,12 @@ $(function() {
         var html = '';
         var page = parseInt(conditions.page, 10);
         var limit = parseInt(conditions.limit, 10);
-
         if (page > 1) {
             html += '' +
                 '<span><a href="javascript:void(0)" class="change-page" data-page="' + (page - 1) + '">&lt;</a></span>' +
                 '<span><a href="javascript:void(0)" class="change-page" data-page="1">最初</a></span>';
         }
-
         var pages = Math.ceil(count / parseInt(limit, 10));
-
         for (var i = 0; i < pages; i++) {
             var _page = i + 1;
             if (parseInt(page, 10) === i + 1) {
@@ -86,13 +83,11 @@ $(function() {
                 html += '<span><a href="javascript:void(0)" class="change-page" data-page="' + _page + '">' + _page + '</a></span>';
             }
         }
-
         if (parseInt(page, 10) < pages) {
             html += '' +
                 '<span><a href="javascript:void(0)" class="change-page" data-page="' + pages + '">最後</a></span>' +
                 '<span><a href="javascript:void(0)" class="change-page" data-page="' + (page + 1) + '">&gt;</a></span>';
         }
-
         $('.navigation').html(html);
     }
 
@@ -116,16 +111,18 @@ $(function() {
                 '<td class="td-refund_status_name">' + suspension.refund_status_name + '</td>' +
                 '<td class="td-refunded">' + suspension.refunded + '</td>' +
                 '<td class="td-actions">';
-            // 返金することがどれだけ早く確定していたとしても返金の実行はツアー終了予定時刻後にしかできない
-            if (moment().isBefore(moment(suspension.performance_day, 'YYYY/MM/DD'))) { // *TODO* performance_end_timeが含まれるようになったらそれも使う
-                html += '<p><span>まだ返金できません</span></p>';
-                // 未指示
-            } else if (suspension.refund_status === window.ttts.RefundStatus.NotInstructed) {
-                html += '<p class="btn btn-refund_process" data-pid="' + suspension.performance_id + '"><span>処理実行</span></p>';
-                // 指示済
+            // 未指示
+            if (suspension.refund_status === window.ttts.RefundStatus.NotInstructed) {
+                // 返金することがどれだけ早く確定していたとしても返金の実行はツアー終了予定時刻後にしかできない
+                if (moment().isBefore(moment(suspension.end_date))) {
+                    html += '<p><span>まだ返金できません</span></p>';
+                } else {
+                    html += '<p class="btn btn-refund_process" data-pid="' + suspension.performance_id + '"><span>処理実行</span></p>';
+                }
+            // 指示済
             } else if (suspension.refund_status === window.ttts.RefundStatus.Instructed) {
                 html += '<p class="btn btn-disabled"><span>処理中</span></p>';
-                // 完了済
+            // 完了済
             } else if (suspension.refund_status === window.ttts.RefundStatus.Compeleted) {
                 html += '<p><span>処理完了</span></p>';
             } else {
@@ -181,7 +178,7 @@ $(function() {
     var busy_refund = false;
     var refund = function(performanceId) {
         var targetSuspension = suspensionsByPid[performanceId];
-        var infoText = 'ツアー年月日: ' + targetSuspension.performance_day + '\nツアーNo: ' + targetSuspension.tour_number + '\n運転状況: ' + targetSuspension.ev_service_status_name;
+        var infoText = 'ツアー年月日: ' + moment(targetSuspension.start_date).format('YYYY/MM/DD HH:mm') + '～' + moment(targetSuspension.end_date).format('HH:mm') + '\nツアーNo: ' + targetSuspension.tour_number + '\n運転状況: ' + targetSuspension.ev_service_status_name;
         if (busy_refund
         || !confirm('このツアーへの返金処理を実行してよろしいですか？\n\n' + infoText)
         || !confirm('この処理は取り消せませんが本当に返金を実行しますか？\n\n' + infoText)) {
