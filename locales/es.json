@@ -7,7 +7,7 @@
     "ContactUs": "Contáctenos",
     "SelectPerformance": "Selección de la fecha y hora deseada de Top Deck Tour",
     "SelectPerformanceGuideText": "Seleccione la fecha y hora deseada de Top Deck Tour ",
-    "LinkContainedPerformanceMessage": "* Puede visitar el Main Deck (Plataforma Principal ) y al Top Deck (Plataforma Superior) con la entrada de Top Deck Tour. Por favor tenga en cuenta que los visitantes del Top Deck Tour no pueden entrar por la escalera del Main Deck (Plataforma Principal). El método detallado para entrar en el Top Deck Tour está indicado aquí.<br>※Los visitantes que vienen en silla de ruedas al Top Deck Tour, deben hacer la reserva aquí.<br>※ Se acepta solo el pago por tarjeta de crédito. Los visitantes que deseen pagar en efectivo, deben reservar / comprar en Tokyo Tower Foot Town 1F Ticket Counter.<br>※ El equipaje grande/cochecitos, etc. deberán dejarse encargados en Foot Town 1F Tour Office(Service Counter).",
+    "LinkContainedPerformanceMessage": "* Puede visitar el Main Deck (Plataforma Principal ) y al Top Deck (Plataforma Superior) con la entrada de Top Deck Tour. Por favor tenga en cuenta que los visitantes del Top Deck Tour no pueden entrar por la escalera del Main Deck (Plataforma Principal). El método detallado para entrar en el Top Deck Tour está indicado <a href='/aboutenter' target='_blank'>aquí</a>.<br><span class='red'>※Los visitantes que vienen en silla de ruedas al Top Deck Tour, deben hacer la reserva <a href='./wheelchair'>aquí</a>.</span><br>※ Se acepta solo el pago por tarjeta de crédito. Los visitantes que deseen pagar en efectivo, deben reservar / comprar en Tokyo Tower Foot Town 1F Ticket Counter.<br>※ El equipaje grande/cochecitos, etc. deberán dejarse encargados en Foot Town 1F Tour Office(Service Counter).",
     "PreferredDateSelect": "Seleccione la fecha deseada",
     "ReservableMaxDate{{ymd}}": "Es posible reservar hasta el {{ymd}} (Hasta 60 días posteriores)",
     "PreferredTimeSelect": "Seleccione la hora deseada",
@@ -20,7 +20,7 @@
     "NoSchedule": "No hay horario reservable para el año / mes seleccionado",
     "SelectTickets": "Selección del tipo y número de entradas",
     "SelectTicketsGuideText": "Seleccione el tipo y el número de entradas y presione el botón \"Siguiente\".",
-    "LinkContainedForWCGuide": "※ Se ruega a los visitantes de Top Deck Tour que vienen en silla de ruedas hacer la reserva aquí.",
+    "LinkContainedForWCGuide": "※ Se ruega a los visitantes de Top Deck Tour que vienen en silla de ruedas hacer la reserva <a href='/customer/reserve/performances/wheelchair'>aquí</a>.",
     "AboutTicket": "Aquí para los tipos de entradas",
     "TicketType": "Tipos de entrada",
     "TicketCount": "Número de entradas",
@@ -87,7 +87,7 @@
     "Change": "Modificación",
     "ConfirmNotes": "Notas (Importante)",
     "ConfirmAgreementGuideText": "Después de verificar el contenido de los siguientes ítems, marque \"Acepto\" y presione el botón \"Confirmación de compra\".",
-    "LinkContainedConfirmNotesText": "(1) La cancelación de entradas es posible hasta las 23:59 de 3 días anteriores del día reservado.<br>(2) Para la cancelación de entradas, se le cobrará 1000 JPY por cada compra sin relación al número de personas.<br>(3) No es posible cambiar la fecha y la hora después de la compra. Por favor compre de nuevo después de la cancelación. * Tenga en cuenta el valor de cancelación no será devuelto.<br>(4) De no venir a la torre a la fecha y hora reservada, no podrá participar en el tour.<br>(5) No podemos modificar, cancelar ni devolver el importe de la entrada cuando pase de las 23:59 horas de los 3 días anteriores de la reserva.<br>(6) La reventa de las entradas compradas está estrictamente prohibida. No asumimos ninguna responsabilidad de desventajas o daños entre la gente causados por la reventa.<br>(7) Algunas veces podemos verificar su edad.<br>* Aquí se encuentran las preguntas más frecuentes (FAQ). Se abre por otra página.",
+    "LinkContainedConfirmNotesText": "(1) La cancelación de entradas es posible hasta las 23:59 de 3 días anteriores del día reservado.<br>(2) Para la cancelación de entradas, se le cobrará 1000 JPY por cada compra sin relación al número de personas.<br>(3) No es posible cambiar la fecha y la hora después de la compra. Por favor compre de nuevo después de la cancelación. * Tenga en cuenta el valor de cancelación no será devuelto.<br>(4) De no venir a la torre a la fecha y hora reservada, no podrá participar en el tour.<br>(5) No podemos modificar, cancelar ni devolver el importe de la entrada cuando pase de las 23:59 horas de los 3 días anteriores de la reserva.<br>(6) La reventa de las entradas compradas está estrictamente prohibida. No asumimos ninguna responsabilidad de desventajas o daños entre la gente causados por la reventa.<br>(7) Algunas veces podemos verificar su edad.<br>* <a href='/faq' target='_blank'>Aquí</a> se encuentran las preguntas más frecuentes (FAQ). Se abre por otra página.",
     "AgreeAbove": "Acepto lo descrito arriba.",
     "RequiredAgree": "De no aceptar, no se podrá hacer la compra.",
     "GoToPayment": "Confirmación de la compra",
@@ -143,7 +143,7 @@
     "UrlContainedContactAvailableDay": "03 - 3433 - 5111 / 9: 00 a.m. - 17:00 p.m.<br>(se atiende todos los días del año) Preguntas frecuentes (FAQ) ",
     "UrlContainedOfficialSiteWithUrl": "Sitio oficial https://www.tokyotower.co.jp/",
     "ForWCReserveTitle": "Reservas incluyendo los usuarios de sillas de ruedas",
-    "LinkContainedWheelChairGuideMessage": "※Existe restricción en el tamaño de la silla de ruedas. En caso de una silla de ruedas de gran tamaño, es posible que le roguemos cambiar provisionalmente con nuestra silla de ruedas. Para los detalles de nuestras sillas de ruedas, consulte aquí.<br>※Con la entrada de Top Deck Tour puede visitar Main Deck (Plataforma Principal) así como también Top Deck (Plataforma Superior). Consulte aquí para los detalles para el ingreso con la entrada Top Deck Tour.<br>※Se acepta solo el pago por tarjeta de crédito. Los visitantes que deseen pagar en efectivo, deben reservar / comprar en Tokyo Tower Foot Town 1F Ticket Counter.",
+    "LinkContainedWheelChairGuideMessage": "※Existe restricción en el tamaño de la silla de ruedas. En caso de una silla de ruedas de gran tamaño, es posible que le roguemos cambiar provisionalmente con nuestra silla de ruedas. Para los detalles de nuestras sillas de ruedas, consulte <a href='/wheelchairinfo' target='_blank'>aquí</a>.<br>※Con la entrada de Top Deck Tour puede visitar Main Deck (Plataforma Principal) así como también Top Deck (Plataforma Superior). Consulte <a href='/aboutenter' target='_blank'>aquí</a> para los detalles para el ingreso con la entrada Top Deck Tour.<br>※Se acepta solo el pago por tarjeta de crédito. Los visitantes que deseen pagar en efectivo, deben reservar / comprar en Tokyo Tower Foot Town 1F Ticket Counter.",
     "EmailTitle": "Información sobre la finalización de compra de entrada de Tokyo Tower Top Deck Tour",
     "EmailHead1": "Muchas gracias por su compra en nuestro sitio WEB  de reserva de entradas de \"Tokyo Tower Top Deck Tour\".",
     "EmailHead2": "La información de la entrada adquirida por usted es como sigue: ",
@@ -187,5 +187,6 @@
     "Close": "",
     "{{n}}Leaf": "",
     "InquiryResultCan": "",
-    "NotFoundGuideText": ""
+    "NotFoundGuideText": "",
+	"EmailDestinationName{{name}}": "Sr./Sra./ Srta. {{name}}"
 }

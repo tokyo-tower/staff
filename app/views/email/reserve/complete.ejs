@@ -1,6 +1,6 @@
 <%- __('EmailTitle') %>
 
-<%= __('Mr{{name}}', {name: reservations[0].get('purchaser_name')[locale]}) %>
+<%- __('EmailDestinationName{{name}}', {name: reservations[0].get('purchaser_name')[locale]}) %>
 
 <%- __('EmailHead1').replace('$theater_name$', reservations[0].get('theater_name')[locale]) %>
 <%- __('EmailHead2') %>
@@ -12,17 +12,30 @@
 <% }) %>-------------------------------------
 <% /*合計枚数 */ %><%- __('EmailTotalTicketCount{{n}}', {n: reservations.length}) %>
 -------------------------------------
+<%- __('EmailAboutQR') %>
+
+<%- __('EmailInquiryUrl') %>
+<%= conf.get('official_url_inquiry_by_locale')[locale] %>
+
+<%- __('EmailEnterURL') %>
+<%= conf.get('official_url_aboutentering_by_locale')[locale] %>
 
 <%- __('EmailNotice1') %>
 <%- __('EmailNotice2') %>
 <%- __('EmailNotice3') %>
 <%- __('EmailNotice4') %>
 <%- __('EmailNotice5') %>
+<%- __('EmailNotice6') %>
+<%- __('EmailNotice7') %>
+<%- __('EmailNotice8') %>
 
-<%- __('EmailFoot1Can').replace('$theater_name$', reservations[0].get('theater_name')[locale]) %>
+<%- __('EmailFAQURL') %>
+<%= conf.get('official_url_top_by_locale')[locale] %>
+
+
+<%- __('EmailFoot1').replace('$theater_name$', reservations[0].get('theater_name')[locale]) %>
 <%- __('EmailFoot2') %>
 <%- __('EmailFoot3') %>
 
 <%- __('EmailAccess1') %>
-<%- reservations[0].get('theater_name')[locale] %>
-<%- __('EmailAccess2') %> : <%= conf.get('official_tel_number') %>
+<%- __('EmailAccess2') %>

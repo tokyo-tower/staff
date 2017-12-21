@@ -10,9 +10,9 @@
     request "^2.83.0"
     request-promise-native "^1.0.5"
 
-"@motionpicture/ttts-domain@^12.0.0-alpha.32":
-  version "12.0.0-alpha.33"
-  resolved "https://registry.yarnpkg.com/@motionpicture/ttts-domain/-/ttts-domain-12.0.0-alpha.33.tgz#3dbd7dc7f9d1feea5aceda8a069ffd9caf530113"
+"@motionpicture/ttts-domain@^12.0.0-alpha.34":
+  version "12.0.0-alpha.34"
+  resolved "https://registry.yarnpkg.com/@motionpicture/ttts-domain/-/ttts-domain-12.0.0-alpha.34.tgz#87fd2835dbe3bd99cfb53162046576b5ae4b658d"
   dependencies:
     "@motionpicture/gmo-service" "^4.1.0"
     "@motionpicture/waiter-domain" "^2.0.2"

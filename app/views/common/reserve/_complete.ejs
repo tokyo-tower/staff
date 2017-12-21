@@ -1,6 +1,3 @@
-<%
-const printIds = reservations.map((doc)=>`"${doc.id}"`);
-%>
 <input type="hidden" id="input_reservations" value="<%= JSON.stringify(reservations) %>">
 <script src="/js/reserve/complete.js"></script>
 
@@ -72,11 +69,11 @@ const printIds = reservations.map((doc)=>`"${doc.id}"`);
 </table>
 
 
-<a class="btn btn-blue visible-pc" id="btn_print_a4" target="_blank" href='<%= process.env.RESERVATIONS_PRINT_URL %>?output=a4&token=<%= printToken %>'><span><%- __('PrintTicket') %></span></a>
+<a class="btn btn-blue visible-pc" id="btn_print_a4" target="_blank" href='<%- process.env.RESERVATIONS_PRINT_URL %>?output=a4&token=<%= printToken %>'><span><%- __('PrintTicket') %></span></a>
 
 <% if (reservations[0].purchaser_group === 'Staff') { %>
 <div class="thermalprint">
-    <a class="btn btn-big btn-thermalprint" id="btn_thermalprint" target="_blank" href='<%= process.env.RESERVATIONS_PRINT_URL %>?output=thermal&token=<%= printToken %>'><span>サーマル印刷</span></a>
+    <a class="btn btn-big btn-thermalprint" id="btn_thermalprint" target="_blank" href='<%- process.env.RESERVATIONS_PRINT_URL %>?output=thermal&token=<%= printToken %>'><span>サーマル印刷</span></a>
 </div>
 <% } %>
 

@@ -17,7 +17,7 @@
                 <th><%- __('PurchaseContentDate') %></th>
                 <td>
                     <p>
-                        <%= moment(reservationModel.performance.day).format('Y-MM-DD') %>&nbsp;&nbsp;<%= `${moment(reservationModel.performance.start_time, 'hmm').format('HH:mm')} - ${moment(reservationModel.performance.end_time, 'hmm').format('HH:mm')}` %> 
+                        <%= moment(reservationModel.transactionInProgress.performance.day).format('Y-MM-DD') %>&nbsp;&nbsp;<%= `${moment(reservationModel.transactionInProgress.performance.start_time, 'hmm').format('HH:mm')} - ${moment(reservationModel.transactionInProgress.performance.end_time, 'hmm').format('HH:mm')}` %> 
                     </p>
                 </td>
             </tr>
@@ -26,7 +26,7 @@
                 <th><%- __('TourNumber') %></th>
                 <td>
                     <p>
-                        <%- reservationModel.performance.ttts_extension.tour_number %> 
+                        <%- reservationModel.transactionInProgress.performance.ttts_extension.tour_number %> 
                     </p>
                 </td>
             </tr>
@@ -37,9 +37,9 @@
                 </th>
                 <td>
                     <p>
-                        <% reservationModel.seatCodes.forEach((seatCode) => { %>
-                            <% let reservation = reservationModel.seatCode2reservationDocument(seatCode); %>
-                            <%- reservation.ticket_type_detail_str[locale] %>
+                        <% reservationModel.transactionInProgress.reservations.forEach((reservation) => { %>
+                            <% let reservationDoc = reservationModel.seatCode2reservationDocument(reservation.seat_code); %>
+                            <%- reservationDoc.ticket_type_detail_str[locale] %>
                             <br>
                         <% }) %>
                     </p>
@@ -62,7 +62,7 @@
             <tr>
                 <th><%- __('FullName') %></th>
                 <td>
-                    <p><%= reservationModel.purchaser.lastName %> <%= reservationModel.purchaser.firstName %></p>
+                    <p><%= reservationModel.transactionInProgress.purchaser.lastName %> <%= reservationModel.transactionInProgress.purchaser.firstName %></p>
                 </td>
             </tr>
 
@@ -70,14 +70,14 @@
             <tr>
                 <th><%- __('Email') %></th>
                 <td>
-                    <p><%= reservationModel.purchaser.email %></p>
+                    <p><%= reservationModel.transactionInProgress.purchaser.email %></p>
                 </td>
             </tr>
 
             <tr>
                 <th><%- __('Tel') %></th>
                 <td>
-                    <p><%= reservationModel.purchaser.tel %></p>
+                    <p><%= reservationModel.transactionInProgress.purchaser.tel %></p>
                 </td>
             </tr>
 
@@ -98,7 +98,7 @@
                 <th><%- __('PaymentMethod') %></th>
                 <td>
                     <p>
-                    <% if (reservationModel.paymentMethod === '0') { %>
+                    <% if (reservationModel.transactionInProgress.paymentMethod === 'CreditCard') { %>
                     <%- __('PaymentMethodName0') %>
                     <% } %>
                     </p>

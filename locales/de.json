@@ -7,7 +7,7 @@
     "ContactUs":"Kontakt",
     "SelectPerformance":"Top Deck Tour - Ticketbuchung",
     "SelectPerformanceGuideText":"Bitte wählen Sie Tag und Uhrzeit Ihrer Tickets.",
-    "LinkContainedPerformanceMessage":"(*) Mit einem Ticket der Top Deck Tour haben Sie Zutritt zum Main Deck und zum Top Deck. Aber: Inhaber des Top Deck Tour Tickets haben über die Treppe keinen Zutritt zum Main Deck. Hier finden Sie genauere Angaben zum Einlass mit Top Deck Tour Tickets.<br>(*) Besucher mit Rollstuhl, die an der Top Deck Tour teilnehmen möchten, buchen Ihre Tickets bitte hier.<br>(*) Eine Zahlung ist nur mit Kreditkarte möglich. Wenn Sie mit Bargeld zahlen möchten, bitten wir Sie Ihre Tickets am Tokyo Tower Foot Town 1F Ticket Counter (Erdgeschoss) zu reservieren bzw. zu erwerben. (*) Besucher mit großem Gepäck oder Kinderwägen etc. können diese am Tokyo Tower Foot Town 1F Tour Office (Erdgeschoss) abgeben.",
+    "LinkContainedPerformanceMessage":"(*) Mit einem Ticket der Top Deck Tour haben Sie Zutritt zum Main Deck und zum Top Deck. Aber: Inhaber des Top Deck Tour Tickets haben über die Treppe keinen Zutritt zum Main Deck. <a href='/aboutenter' target='_blank'>Hier</a> finden Sie genauere Angaben zum Einlass mit Top Deck Tour Tickets.<br><span class='red'>(*) Besucher mit Rollstuhl, die an der Top Deck Tour teilnehmen möchten, buchen Ihre Tickets bitte <a href='./wheelchair'>hier</a>.</span><br>(*) Eine Zahlung ist nur mit Kreditkarte möglich. Wenn Sie mit Bargeld zahlen möchten, bitten wir Sie Ihre Tickets am Tokyo Tower Foot Town 1F Ticket Counter (Erdgeschoss) zu reservieren bzw. zu erwerben. (*) Besucher mit großem Gepäck oder Kinderwägen etc. können diese am Tokyo Tower Foot Town 1F Tour Office (Erdgeschoss) abgeben.",
     "PreferredDateSelect":"Datum wählen",
     "ReservableMaxDate{{ymd}}":"Buchungen möglich bis {{ymd}}. (max. bis 60 Tage im Voraus)",
     "PreferredTimeSelect":"Uhrzeit wählen",
@@ -20,7 +20,7 @@
     "NoSchedule":"Für das gewählte Datum sind keine Tickets verfügbar.",
     "SelectTickets":"Artikel wählen",
     "SelectTicketsGuideText":"Wählen Sie Artikel und Anzahl und klicken Sie dann auf „Weiter“.",
-    "LinkContainedForWCGuide":"(*) Besucher mit Rollstuhl, die an der Top Deck Tour teilnehmen möchten, buchen Ihre Tickets bitte hier.",
+    "LinkContainedForWCGuide":"(*) Besucher mit Rollstuhl, die an der Top Deck Tour teilnehmen möchten, buchen Ihre Tickets bitte <a href='/customer/reserve/performances/wheelchair'>hier</a>.",
     "AboutTicket":"Hinweise zu den Ticketarten",
     "TicketType":"Artikel",
     "TicketCount":"Anzahl",
@@ -87,7 +87,7 @@
     "Change":"Bearbeiten",
     "ConfirmNotes":"Wichtige Hinweise",
     "ConfirmAgreementGuideText":"Lesen Sie sich die nachstehenden Punkte genau durch. Wenn Sie einverstanden sind, setzen Sie bei „Ich stimme oben genannten Punkten zu“ ein Häkchen und klicken Sie dann auf „Kostenpflichtig buchen“.",
-    "LinkContainedConfirmNotesText":"(1) Ihre Buchung kann bis 23:59 Uhr drei Tage vor dem gebuchten Datum storniert werden.<br>(2) Bei einer Stornierung fallen einmalig 1000 JPY Stornierungsgebühren an, unabhängig von der Anzahl der gebuchten Tickets.<br>(3) Nach dem Kauf können Datum und Uhrzeit nicht mehr geändert werden. Sie könnenSie können aber Ihre Tickets stornieren und neue Tickets erwerben. (*) Die Stornierungsgebühr kann nicht erstattet oder auf neue Tickets angerechnet werden.<br>(4) Wer zum gebuchten Zeitpunkt nicht vor Ort erscheint, wird von der Tour ausgeschlossen.<br>(5) Tickets können nach Überschreiten der Stornierungsfrist (bis 23:59 Uhr drei Tage vor Buchungsdatum) nicht mehr storniert, zurückgegeben oder umgetauscht werden.<br>(6) Der Weiterverkauf erworbener Tickets ist strengstens verboten. Wir übernehmen keinerlei Haftung für Besucher, die aufgrund eines Ticketerwerbs von Dritten Verluste oder Schäden etc. erleiden.<br>(7) Unter Umständen werden wir sie vor Ort darum bitten, Ihr Alter nachzuweisen.<br>(*) Hier geht es zu den FAQ. Öffnet in neuem Fenster.",
+    "LinkContainedConfirmNotesText":"(1) Ihre Buchung kann bis 23:59 Uhr drei Tage vor dem gebuchten Datum storniert werden.<br>(2) Bei einer Stornierung fallen einmalig 1000 JPY Stornierungsgebühren an, unabhängig von der Anzahl der gebuchten Tickets.<br>(3) Nach dem Kauf können Datum und Uhrzeit nicht mehr geändert werden. Sie könnenSie können aber Ihre Tickets stornieren und neue Tickets erwerben. (*) Die Stornierungsgebühr kann nicht erstattet oder auf neue Tickets angerechnet werden.<br>(4) Wer zum gebuchten Zeitpunkt nicht vor Ort erscheint, wird von der Tour ausgeschlossen.<br>(5) Tickets können nach Überschreiten der Stornierungsfrist (bis 23:59 Uhr drei Tage vor Buchungsdatum) nicht mehr storniert, zurückgegeben oder umgetauscht werden.<br>(6) Der Weiterverkauf erworbener Tickets ist strengstens verboten. Wir übernehmen keinerlei Haftung für Besucher, die aufgrund eines Ticketerwerbs von Dritten Verluste oder Schäden etc. erleiden.<br>(7) Unter Umständen werden wir sie vor Ort darum bitten, Ihr Alter nachzuweisen.<br>(*) <a href='/faq' target='_blank'>Hier</a> geht es zu den FAQ. Öffnet in neuem Fenster.",
     "AgreeAbove":"Ich stimme oben genannten Punkten zu",
     "RequiredAgree":"Der Verkauf erfolgt nur nach Zustimmung.",
     "GoToPayment":"Kostenpflichtig buchen",
@@ -143,7 +143,7 @@
     "UrlContainedContactAvailableDay":"Tel. +81 (0)3-3433-5111 / 9:00 - 17:00 (ganzjährig)<br>FAQ: Häufig gestellte Fragen",
     "UrlContainedOfficialSiteWithUrl":"Offizielle Webseite https://www.tokyotower.co.jp/",
     "ForWCReserveTitle":"Buchung mit Teilnehmern im Rollstuhl",
-    "LinkContainedWheelChairGuideMessage":"(*) Für Rollstühle gibt es Maximalgrößen. Sollte Ihr persönlicher Rollstuhl die Maximalgröße überschreiten werden wir Sie auffordern, sich in einen von uns gestellten kleineren Rollstuhl umzusetzen. Weitere Einzelheiten zu unseren Rollstühlen finden Sie hier.<br>(*) Mit einem Ticket der Top Deck Tour haben Sie Zutritt zum Main Deck und zum Top Deck. Hier finden Sie genauere Angaben zum Einlass mit Top Deck Tour Tickets.<br>(*) Eine Zahlung ist nur mit Kreditkarte möglich. Wenn Sie mit Bargeld zahlen möchten, bitten wir Sie Ihre Tickets am Tokyo Tower Foot Town 1F Ticket Counter (Erdgeschoss) zu reservieren bzw. zu erwerben.",
+    "LinkContainedWheelChairGuideMessage":"(*) Für Rollstühle gibt es Maximalgrößen. Sollte Ihr persönlicher Rollstuhl die Maximalgröße überschreiten werden wir Sie auffordern, sich in einen von uns gestellten kleineren Rollstuhl umzusetzen. Weitere Einzelheiten zu unseren Rollstühlen finden Sie <a href='/wheelchairinfo' target='_blank'>hier</a>.<br>(*) Mit einem Ticket der Top Deck Tour haben Sie Zutritt zum Main Deck und zum Top Deck. <a href='/aboutenter' target='_blank'>Hier</a> finden Sie genauere Angaben zum Einlass mit Top Deck Tour Tickets.<br>(*) Eine Zahlung ist nur mit Kreditkarte möglich. Wenn Sie mit Bargeld zahlen möchten, bitten wir Sie Ihre Tickets am Tokyo Tower Foot Town 1F Ticket Counter (Erdgeschoss) zu reservieren bzw. zu erwerben.",
     "EmailTitle":"Tokyo Tower - Top Deck Tour - Zahlungsbestätigung",
     "EmailHead1":"Herzlichen Dank für Ihre Online-Buchung der „Tokyo Tower - Top Deck Tour“.",
     "EmailHead2":"Informationen zu Ihren gebuchten Tickets:",
@@ -187,5 +187,6 @@
     "Close":"",
     "{{n}}Leaf":"",
     "InquiryResultCan":"",
-    "NotFoundGuideText":""	
+    "NotFoundGuideText":"",
+	"EmailDestinationName{{name}}": "Guten Tag {{name}}"
 }

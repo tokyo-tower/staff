@@ -53,7 +53,7 @@
 	"RetypeToConfirm": "確認のためもう一度入力してください。",
 	"SettingForLimitingEmailReception": "※【ドメイン指定受信をご利用の場合について】<br>※ 携帯電話のドメイン指定受信をされている場合、「@xxxx.xx」を追加設定してください。<br>※ au(@ezweb.ne.jp)をご利用の場合、上記に加え「なりすまし規制回避リスト」にも「@xxxx.xx」の追加設定をしてください。",
 	"Tel": "電話番号",
-	"UseHalfWidthAlphanumericWithoutHyphens": "国番号を選択し半角数字、ハイフン「-」なしで入力して下さい。国番号が存在しない場合、「Other Area」を選択し番号を入力してください。",
+	"UseHalfWidthAlphanumericWithoutHyphens": "国番号を選択し半角数字、ハイフン「-」なしで入力してください。国番号が存在しない場合、「Other Area」を選択し番号を入力してください。",
 	"Gender": "性別",
 	"NotSelected": "選択しない",
 	"Male": "男性",
@@ -122,6 +122,7 @@
 	"InquiryOther": "他のチケットを照会",
 	"TicketCancel": "チケットキャンセル",
 	"SpanContainedCancelingTicketMessage": "「キャンセル実行」ボタンを押すと下記チケットがキャンセルされます。<span class='red'>※キャンセル手数料1000円が発生します。</span>",
+	"CancellationFee{{fee}}": "キャンセル料  \\{{fee}}",
 	"CancellationFee": "キャンセル料",
 	"TicketCancellationCautionTitle": "チケットキャンセルに関する注意事項",
 	"TicketCancellationCaution": "（１）キャンセル確定後の取り消しはできませんので、ご注意ください。<br>（２）ご購入された上記すべてのチケットがキャンセルになります。1枚毎のキャンセルはできません。<br>（３）チケット購入金額全額をチケット購入時のクレジットカードに返金した後、チケットキャンセル料【1000円】を引き落としさせていただきます。<br>（４）チケットの再購入をされる場合は、最初のお手続きよりご購入ください。※キャンセル手数料は返金いたしませんのでご了承ください。",
@@ -201,5 +202,10 @@
 	"Close": "閉じる",
 	"{{n}}Leaf": "{{n}}枚",
 	"InquiryResultCan": "キャンセルを行う場合は「チケットをキャンセルする」ボタンを押してください。",
-	"NotFoundGuideText": "既に存在しないか、もしくはアドレスの入力が間違っている可能性があります。"
+	"NotFoundGuideText": "既に存在しないか、もしくはアドレスの入力が間違っている可能性があります。",
+	"EmailDestinationName{{name}}": "{{name}} 様",
+	"EmailConfirm": "メールアドレス(確認入力)",
+	"EmailConfirmDomain": "メールアドレス(確認入力)のドメイン",
+	"EmailConfirmInvalid": "入力されたメールアドレスが確認入力と一致しません",
+	"QrCheckpoint": "QR認証場所"
 }

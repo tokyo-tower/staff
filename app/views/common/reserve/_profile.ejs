@@ -13,14 +13,12 @@
 
     <table class="table table-profile table-profile-staff">
         <tbody>
-            <% /*ご利用金額*/ %>
             <tr class="tr-price">
                 <th><label><%- __('TotalPrice') %></label></th>
                 <td>
                     <p><span class="price">&yen;<%- numeral(reservationModel.getTotalCharge()).format('0,0') %></span></p>
                 </td>
             </tr>
-            <% /*決済手段*/ %>
             <tr class="tr-payment">
                 <th>お支払い方法<span class="required">*</span></th>
                 <td>
@@ -58,7 +56,8 @@
             invalid: "<%-__('Invalid{{fieldName}}', { fieldName: '{{fieldName}}' }) %>",
             match: "<%-__('Match{{fieldName}}', { fieldName: '{{fieldName}}' }) %>",
             maxLength: "<%-__('MaxLength{{fieldName}}{{max}}', { fieldName: '{{fieldName}}', max: '{{max}}' }) %>",
-            cardtoken: "<%- __('CheckCreditInfo') %>"
+            cardtoken: "<%- __('CheckCreditInfo') %>",
+            EmailConfirmInvalid: "<%- __('EmailConfirmInvalid') %>"
         };
         window.ttts.local = {
             address: '<%- address %>',
@@ -99,8 +98,8 @@
                     <div class="wrapper-emailconfirm">
                         <input type="text" name="emailConfirm" id="id_emailConfirm" class="form-control input-required input-emailconfirm" value="<%= emailConfirm %>" data-pattern="^[a-zA-Z0-9@\.!#$%&'*+/=?^_`{|}~-]*$" data-parentSelector=".wrapper-emailconfirm" data-fieldname="<%- __('EmailConfirm') %>">
                         <span>@</span>
-                        <input type="text" name="emailConfirmDomain" id="id_emailConfirmDomain" class="form-control input-required input-emailconfirm" value="<%= emailConfirmDomain %>" data-pattern="^[a-zA-Z0-9@\.!#$%&'*+/=?^_`{|}~-]*$" data-parentSelector=".wrapper-emailconfirm" data-fieldname="<%- __('emailConfirmDomain') %>">
-                        <input type="hidden" id="input_emailconfirmconcat" class="input-required" name="emailconfirmconcat" data-parentSelector=".wrapper-emailconfirm" data-fieldname="<%- __('emailConfirmInvalid') %>">
+                        <input type="text" name="emailConfirmDomain" id="id_emailConfirmDomain" class="form-control input-required input-emailconfirm" value="<%= emailConfirmDomain %>" data-pattern="^[a-zA-Z0-9@\.!#$%&'*+/=?^_`{|}~-]*$" data-parentSelector=".wrapper-emailconfirm" data-fieldname="<%- __('EmailConfirmDomain') %>">
+                        <input type="hidden" id="input_emailconfirmconcat" class="input-required" name="emailconfirmconcat" data-parentSelector=".wrapper-emailconfirm" data-fieldname="<%- __('EmailConfirmInvalid') %>">
                     </div>
                     <p class="errmsg errmsg-email"><%- (validation && validation.email ? validation.email.msg : '') %></p>
                     <p class="errmsg errmsg-emailConfirm"><%- (validation && validation.emailConfirm ? validation.emailConfirm.msg : '') %></p>

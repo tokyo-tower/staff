@@ -122,7 +122,7 @@
 	"BackToInquiry": "Return to the Ticket Check",
 	"TicketAndReceipt": "Tickets and Receipt",
 	"TicketInfoMsg": "Thank you very much. Submit the tickets' QR code to the staff at the entrance on the day of reservation.",
-	"TicketQRInfoSpanContainedTicketQRInfo": "Submit this QR code to the staff at the entrance.<br>(The QR code must be submitted at two locations: at the Foot Town first floor Top Deck lane and at the Main Deck second floor Top Deck gate.)",
+	"SpanContainedTicketQRInfo": "Submit this QR code to the staff at the entrance.<br>(The QR code must be submitted at two locations: at the Foot Town first floor Top Deck lane and at the Main Deck second floor Top Deck gate.)",
 	"PurchaseContentDay": "Tour Reservation Date",
 	"PurchaseContentTime": "Tour Reservation Time (Foot Town 1F Top Deck Lane)",
 	"PurchaseEntryTime": "Waiting time to the Top Deck gate",
@@ -192,5 +192,6 @@
 	"Close": "Close",	
 	"{{n}}Leaf": "Quantity: {{n}}",
 	"InquiryResultCan": "InquiryResultCan",
-	"NotFoundGuideText": "NotFoundGuideText"
+	"NotFoundGuideText": "NotFoundGuideText",
+	"EmailDestinationName{{name}}": "Mr./Ms. {{name}}"
 }

@@ -120,9 +120,13 @@ $(function() {
         var input_emailConfirm = document.getElementById('id_emailConfirm');    
         var input_emailConfirmDomain = document.getElementById('id_emailConfirmDomain');
         var setEmailConfirm = function() {
-            if (!input_email || !input_emailconfirmconcat) { return false; }        
+            if (!input_email || !input_emailconfirmconcat) { return false; }
             var val = input_emailConfirm.value + '@' +input_emailConfirmDomain.value;
-            input_emailconfirmconcat.value = (input_email.value === val) ? val : '!';
+            if (input_email.value) {
+                input_emailconfirmconcat.value = (input_email.value === val) ? val : '!';
+            } else {
+                input_emailconfirmconcat.value = '';
+            }
         }
 
         // カード有効期限のYYYYとMMのセレクト要素の値を結合してhiddenのinputに保存
@@ -158,8 +162,8 @@ $(function() {
                         error = 'invalid';
                     }
                 // 確認メールアドレスは一致してなかった場合値が '!' になっている
-                } else if (elm.id === 'input_emailconfirmconcat' && elm.value === '!') {
-                    error = 'match';
+                } else if (elm.id === 'input_emailconfirmconcat') {
+                    error = (elm.value === '!') ? 'EmailConfirmInvalid' : null;
                 } else if (!elm.value) {
                     error = 'empty';
                 } else if (maxLength && !elm.value.length > maxLength) {
