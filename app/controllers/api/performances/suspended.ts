@@ -24,6 +24,10 @@ REFUND_STATUS_NAMES[ttts.factory.performance.RefundStatus.NotInstructed] = '未�
 REFUND_STATUS_NAMES[ttts.factory.performance.RefundStatus.Instructed] = '指示済';
 REFUND_STATUS_NAMES[ttts.factory.performance.RefundStatus.Compeleted] = '返金済';
 
+if (process.env.API_CLIENT_ID === undefined) {
+    throw new Error('Please set an environment variable \'API_CLIENT_ID\'');
+}
+
 /**
  * 販売中止一覧検索(api)
  */
@@ -194,7 +198,9 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
         // パフォーマンスと予約情報の返金ステータス更新(指示済に)
         const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
         const taskRepo = new ttts.repository.Task(ttts.mongoose.connection);
-        const task = await ttts.service.order.returnAllByPerformance(req.params.performanceId)(performanceRepo, taskRepo);
+        const task = await ttts.service.order.returnAllByPerformance(
+            <string>process.env.API_CLIENT_ID, req.params.performanceId
+        )(performanceRepo, taskRepo);
         debug('returnAllByPerformance task created.', task);
 
         res.status(CREATED).json(task);
