@@ -2,6 +2,7 @@
     const isStaff = (reservationModel.purchaserGroup === 'Staff');
     const tempReservationModel = (isStaff) ? reservationModel : reservationModel.transactionInProgress;
     const isWheelchair = (tempReservationModel.category === 'wheelchair');
+    const tempReservationModel_reservations = tempReservationModel.reservations || tempReservationModel.seatCodes.concat((tempReservationModel.seatCodesExtra || [])).map((seatCode) => { return tempReservationModel[`reservation_${seatCode}`]; });
 %>
 
 <%- include('./_step', {currentStepName: 'tickets'}) %>
@@ -31,7 +32,17 @@
                 </tr>
             </thead>
             <tbody>
-                <% tempReservationModel.ticketTypes.forEach(function(ticketType) {
+                <% /* スタッフ予約時 => 券種ごとの予約メモを回収 */
+                    const memosByTicketType = {};
+                    if (isStaff) {
+                        tempReservationModel_reservations.forEach((reservation) => {
+                            let ticketId = reservation.ticket_type;
+                            if (typeof memosByTicketType[ticketId] !== 'string') {
+                                memosByTicketType[ticketId] = reservation.watcher_name;
+                            }
+                        });
+                    }
+                    tempReservationModel.ticketTypes.forEach(function(ticketType) {
                     // 一般予約(general)だったら一般券種以外を弾く
                     if (tempReservationModel.category === 'general' && ticketType.ttts_extension.category !== 'Normal') {
                         return true;
@@ -43,7 +54,7 @@
                             <%
                                 if (isStaff) {
                             %>
-                                <input type="text" name="watcherName" class="form-control" placeholder="予約メモ" data-ticket-code="<%- ticketType._id %>" value="<%- ticketType.watcher_name %>">
+                                <input type="text" name="watcherName" class="form-control" placeholder="予約メモ" data-ticket-code="<%- ticketType._id %>" value="<%- memosByTicketType[ticketType._id] %>">
                             <% } %>
                         </th>
                         <td>
