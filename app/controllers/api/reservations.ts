@@ -126,10 +126,8 @@ export async function search(req: Request, res: Response): Promise<void> {
     }
     // 電話番号
     if (purchaserTel !== null) {
-        //conditions.push({ purchaser_tel: purchaserTel });
         conditions.push({
-            $or: [{ purchaser_international_tel: purchaserTel },
-            { purchaser_tel: purchaserTel }]
+            purchaser_tel: { $regex: new RegExp(`${purchaserTel}$`) }
         });
     }
     // メモ
