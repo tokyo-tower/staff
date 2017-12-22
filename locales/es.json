@@ -113,6 +113,7 @@
     "InquiryOther": "Referencia de otra entrada",
     "TicketCancel": "Cancelación de la entrada.",
     "SpanContainedCancelingTicketMessage": "Al presionar el botón \"Ejecución de cancelación\", se anula la compra de la entrada indicada abajo.<br>※Se cobra 1000 JPY por la cancelación de entradas.",
+	"CancellationFee{{fee}}": "Tarifa de cancelación {{fee}} JPY",
     "CancellationFee": "Tarifa de cancelación",
     "TicketCancellationCautionTitle": "Notas sobre la cancelación de entradas",
     "TicketCancellationCaution": "(1) Tenga en cuenta que no se puede anular la cancelación después de su determinación.<br>(2) Se cancelarán todas las entradas compradas previamente. No se pueden cancelar las entradas una por una.<br>(3) Después de la devolución del importe total de la compra de entradas a la tarjeta de crédito, cobramos  [1000 JPY] por la cancelación hecha.<br>(4) Para volver a comprar entradas, siga el procedimiento de compra desde el principio.<br>※ Tenga a bien que el cargo por cancelación no será devuelto.",

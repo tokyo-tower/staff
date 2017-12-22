@@ -189,6 +189,7 @@
                 <td>
                     <input type="text" name="cardNumber" id="cardNumber" class="form-control input-required" value="" maxlength="16" data-pattern="^[0-9]+$" data-fieldname="<%- __('CardNumber') %>" required>
                     <p class="errmsg errmsg-cardNumber"><% (validation && validation.cardNumber ? validation.cardNumber.msg : '') %></p>
+                    <p class="errmsg errmsg-gmoTransaction"><%- (typeof GMOERROR === 'string' ? GMOERROR : '') %></p>
                     <figure class="figure-availablecards"><img src="/images/common/available_credit_cards.png" alt="available credit cards"></figure>
                     <p><%- __('CreditAvailable') %></p>
                     <p class="notice"><%- __('CardNumberMessage') %></p>

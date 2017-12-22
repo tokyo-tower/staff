@@ -207,5 +207,6 @@
 	"EmailConfirm": "メールアドレス(確認入力)",
 	"EmailConfirmDomain": "メールアドレス(確認入力)のドメイン",
 	"EmailConfirmInvalid": "入力されたメールアドレスが確認入力と一致しません",
-	"QrCheckpoint": "QR認証場所"
+	"QrCheckpoint": "QR認証場所",
+	"CommercialNotice": "特定商取引法に基づく表記"
 }

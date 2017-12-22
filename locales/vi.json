@@ -113,6 +113,7 @@
 	"InquiryOther": "Tham chiếu các vé khác",
 	"TicketCancel": "Huỷ vé ",
 	"SpanContainedCancelingTicketMessage": "Khi quý khách bấm nút “Thực hiện huỷ” thì tấm vé phía dưới sẽ bị huỷ. Phí huỷ vé là 1000 yên.",
+	"CancellationFee{{fee}}": "Phí huỷ vé {{fee}} JPY",
 	"CancellationFee": "Phí huỷ vé",
 	"TicketCancellationCautionTitle": "Điều khoản lưu ý khi huỷ vé",
 	"TicketCancellationCaution": "1. Xin hãy chú ý là không thể làm lại thao tác huỷ vé sau khi đã huỷ xong.<br>2. Khi thực hiện thao tác huỷ vé thì tất cả các vé sẽ bị huỷ đồng thời. Không thể huỷ từng vé một.<br>3. Số tiền đã dùng để mua vé sẽ được hoàn trả lại vào Thẻ tín dụng lúc quý khách mua, sau đó chúng tôi sẽ thu 1000 yên phí huỷ vé.<br>4. Xin quý khách hãy lặp lại quy trình mua vé từ đầu để mua vé mới.<br>※ Riêng phí huỷ vé sẽ không được hoàn trả lại, mong quý khách thông cảm.",

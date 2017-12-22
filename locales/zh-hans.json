@@ -113,6 +113,7 @@
 	"InquiryOther": "核对其他门票",
 	"TicketCancel": "退票",
 	"SpanContainedCancelingTicketMessage": "点击“确定取消”后将取消以下门票。<br>※会产生退票手续费1000日元。",
+	"CancellationFee{{fee}}": "退票费 {{fee}} JPY",
 	"CancellationFee": "退票费",
 	"TicketCancellationCautionTitle": "关于退票的注意事项",
 	"TicketCancellationCaution": "（1）一旦退票无法取消，敬请注意。<br>（2）以上购买的所有门票都会取消。无法分别退票。<br>（3）在购买门票的金额全额退还至购买时使用的信用卡账户后，会扣除退票费【1000日元】。<br>（4）再次购买门票时，请从第一步开始重新购买。※不会返还退票手续费，敬请理解。",

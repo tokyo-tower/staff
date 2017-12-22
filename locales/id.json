@@ -113,6 +113,7 @@
 	"InquiryOther": "Cocokkan tiket yang lain",
 	"TicketCancel": "Pembatalan tiket",
 	"SpanContainedCancelingTicketMessage": "Tekan tombol \"Jalankan pembatalan\" untuk membatalkan tiket berikut.<br>*Akan timbul biaya pembatalan sebesar 1000 JPY.",
+	"CancellationFee{{fee}}": "Biaya pembatalan {{fee}} JPY",
 	"CancellationFee": "Biaya pembatalan",
 	"TicketCancellationCautionTitle": "Perhatian terkait pembatalan tiket",
 	"TicketCancellationCaution": "(1) Mohon diperhatikan bahwa pembatalan yang sudah dilakukan tidak dapat ditarik kembali.<br>(2) Pembatalan berlaku untuk semua tiket di atas yang Anda beli. Pembatalan untuk 1 lembar tiket tidak dapat dilakukan.<br>(3) Jumlah harga pembelian tiket akan dikembalikan ke kartu kredit yang digunakan pada waktu membeli tiket dan setelah itu akan dikenakan biaya pembatalan sebesar 1000 JPY.<br>(4) Bila Anda akan membeli tiket kembali, silakan beli tiket dari prosedur awal kembali.<br>*Mohon diperhatikan bahwa biaya pembatalan tiket tidak akan dikembalikan.",

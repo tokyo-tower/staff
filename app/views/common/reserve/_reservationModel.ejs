@@ -1,7 +1,3 @@
-<%
-    const isStaff = (reservationModel.purchaserGroup === 'Staff');
-    const tempReservationModel = (isStaff) ? reservationModel : reservationModel.transactionInProgress;
-%>
 <div class="reservationstatus row">
     <h2 class="accordion_mobile_toggle"><%- __('PurchaseContent') %></h2>
     <div class="reservationstatus-inner accordion_mobile_inner">

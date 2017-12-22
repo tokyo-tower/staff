@@ -113,6 +113,7 @@
 	"InquiryOther": "查詢其他入場券",
 	"TicketCancel": "取消入場券預約",
 	"SpanContainedCancelingTicketMessage": "點選「取消」鍵即可取消以下入場券預約。<br>※將會產生1000日圓之手續費。",
+	"CancellationFee{{fee}}": "取消費用 {{fee}} JPY",
 	"CancellationFee": "取消費用",
 	"TicketCancellationCautionTitle": "入場券取消之相關注意事項",
 	"TicketCancellationCaution": "（１）請注意，取消完成後將無法恢復。<br>（２）取消時以上您所購買的入場券將全數取消。無法個別取消。<br>（３）當我們將您所購買之入場券金額退回信用卡後，會另行扣除取消費用【1000日圓】。<br>（４）如您要重新購買入場券，請從開始的步驟購買。※我們將無法退還取消手續費，敬請見諒。",

@@ -113,6 +113,7 @@
 	"InquiryOther": "Check Other Tickets",
 	"TicketCancel": "Ticket Cancellation",
 	"SpanContainedCancelingTicketMessage": "Press the [Cancel Tickets] button to cancel the following tickets.<br>* A cancellation charge of 1,000 JPY will be incurred.",
+	"CancellationFee{{fee}}": "Cancellation Fees {{fee}} JPY",
 	"CancellationFee": "Cancellation Fees",
 	"TicketCancellationCautionTitle": "Points to Note When Cancelling Your Tickets",
 	"TicketCancellationCaution": "(1) Note that it is not possible to revive tickets once they have been cancelled.<br>(2) All of the purchased tickets listed above will be cancelled. It is not possible to cancel individual tickets.<br>(3) Once the full cost of purchased tickets are refunded to the credit card, a cancellation charge of 1,000 JPY will be deducted.<br>(4) To re-purchase tickets, follow the original procedure again from the beginning. * Note that cancellation charges will not be refunded.",

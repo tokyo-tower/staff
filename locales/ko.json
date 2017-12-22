@@ -113,6 +113,7 @@
 	"InquiryOther": "다른 티켓 조회",
 	"TicketCancel": "티켓 취소",
 	"SpanContainedCancelingTicketMessage": "취소 실행\" 버튼을 누르면 아래 티켓이 취소됩니다.<br>※취소 수수료 1,000엔이 부과됩니다.",
+	"CancellationFee{{fee}}": "취소 수수료 {{fee}} JPY",
 	"CancellationFee": "취소 수수료",
 	"TicketCancellationCautionTitle": "티켓 취소에 관한 주의사항",
 	"TicketCancellationCaution": "(1) 취소 확정 후에는 이를 취소할 수 없으므로 주의하십시오.<br>(2) 구매한 위의 모든 티켓이 취소됩니다. 1장씩 취소할 수는 없습니다.<br>(3) 티켓 구매 전액을 티켓 구매 시 사용한 신용카드로 환불 처리한 후 티켓 취소 수수료 【1,000엔】을 이체받습니다.<br>(4) 티켓을 재구매할 경우는 처음부터 다시 순서에 따라 구매해 주십시오. ※취소 수수료는 반환하지 않으므로 양해 바랍니다.",
