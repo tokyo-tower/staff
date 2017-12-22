@@ -65,6 +65,75 @@
     }
 }
 
+.page-suspension.page-list {
+    .container {
+        width: 100%;
+        padding: 0;
+    }
+    .daterangepicker {
+        .btn {
+            width: 120px;
+            margin-bottom: 10px;
+            &.applyBtn {
+                background-color: #cc0000;
+            }
+        }
+    }
+    .wrapper-searchform {
+        background-color: #eee;
+        padding: 2em 0;
+        .form-control {
+            font-size: 18px;
+            height: 40px;
+        }
+        #btn_clearconditions {
+            box-shadow: none;
+            background-color: transparent !important;
+            color: #898989;
+            border: 2px solid #898989;
+            border-radius: 10px;
+            height: 40px;
+            width: 180px;
+            &:hover {
+                color: #bbb;
+            }
+        }
+    }
+    .search-form,
+    .wrapper-reservations {
+        max-width: 1170px;
+        margin: auto;
+        padding: 1em;
+    }
+    .wrapper-reservations {
+        padding-top: 2em;
+        thead {
+            background-color: #898989;
+            color: #fff;
+            th {
+                font-size: 14px;
+            }
+        }
+        tbody {
+            background-color: #eee;
+            td {
+                vertical-align: middle;
+            }
+        }
+        .td-actions {
+            text-align: center;
+            font-size: 14px;
+        }
+        .btn {
+            width: 100px;
+            height: 40px;
+        }
+        .btn-refund_process {
+            @include btn-blue;
+        }
+    }
+}
+
 #modal_suspension {
     &.mode-suspend {
         .for-resume {

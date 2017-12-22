@@ -12,13 +12,23 @@ if (req.hasOwnProperty('route')) {
         <div class="menu-staff">
             <div class="menu-staff">
                 <p class="myname"><%= req.staffUser.get('name').ja %> <%= // req.staffUser.get('signature') %></p>
-                <% if (routeName === '/mypage') { %>
+
+                <% if (!/reserve/.test(routeName)) { %>
                     <a class="btn-newticket" href="/staff/reserve/start"><span>代理予約</span></a>
-                <% } else { %>
+                <% } %>
+
+                <% if (routeName !== '/mypage') { %>
                     <a class="btn-mypage" href="/staff/mypage"><span>予約一覧</span></a>
                 <% } %>
-                <a class="btn-suspension-setting" href="/staff/suspension/setting/performances"><span>オンライン<br>販売停止</span></a>
-                <a class="btn-suspension-list" href="/staff/suspension/list"><span>販売停止<br>一覧表示</span></a>
+
+                <% if (routeName !== '/suspension/setting/performances') { %>
+                    <a class="btn-suspension-setting" href="/staff/suspension/setting/performances"><span>オンライン<br>販売停止</span></a>
+                <% } %>
+
+                <% if (routeName !== '/suspension/list') { %>
+                    <a class="btn-suspension-list" href="/staff/suspension/list"><span>販売停止<br>一覧表示</span></a>
+                <% } %>
+
                 <a class="btn-logout" href="/auth/logout"><span>ログアウト</span></a>
             </div>
 
