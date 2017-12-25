@@ -35,7 +35,7 @@
 	"SeatsLimit{{limit}}": "จำนวนตั๋วที่สามารถเลือกได้ในหนึ่งครั้งคือ (จำนวนตั๋ว) ใบ ",
 	"EditProfile": "กรอกข้อมูลผู้ซื้อ",
 	"EnterProfileGuideText": "โปรดกรอกข้อมูลของผู้ซื้อและบัตรเครดิต แล้วกดปุ่ม \"ต่อไป\"",
-	"Required": "*ช่องที่ต้องป้อนข้อมูล",
+	"SpanContainedRequired": "<span class='requiredmark'></span>ช่องที่ต้องป้อนข้อมูล",
 	"NameInSpecifiedLetters": "กรอกชื่อ-นามสกุล (ตัวอักษรภาษาอังกฤษ)",
 	"LastName": "นามสกุล",
 	"FirstName": "ชื่อ",

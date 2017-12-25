@@ -35,7 +35,7 @@
 	"SeatsLimit{{limit}}": "Il numero di biglietti prenotabili in una sola volta è {{limit}}.",
 	"EditProfile": "Dati dell'acquirente",
 	"EnterProfileGuideText": "In questa pagina inserire i propri dati personali e della carta di credito e fare clic su [Avanti].",
-	"Required": "*Campi obbligatori",
+	"SpanContainedRequired": "<span class='requiredmark'></span>Campi obbligatori",
 	"NameInSpecifiedLetters": "Nome completo",
 	"LastName": "Cognome",
 	"FirstName": "Nome",

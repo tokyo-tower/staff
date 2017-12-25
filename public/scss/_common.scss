@@ -211,6 +211,13 @@ select {
     color: #fff;
 }
 
+.requiredmark {
+    color: #c30d23;    
+    &::before {
+        content: '*';
+    }
+}
+
 .remainingtickets {
     margin: 1em 0;
     strong {

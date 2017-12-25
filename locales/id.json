@@ -35,7 +35,7 @@
 	"SeatsLimit{{limit}}": "Jumlah tiket yang dapat dipilih sekaligus adalah {{limit}} lembar.",
 	"EditProfile": "Input informasi pembeli",
 	"EnterProfileGuideText": "Masukkan informasi pembeli dan kartu kredit lalu tekan tombol \"Berikutnya\".",
-	"Required": "*Item wajib.",
+	"SpanContainedRequired": "<span class='requiredmark'></span>Item wajib.",
 	"NameInSpecifiedLetters": "Nama",
 	"LastName": "Nama keluarga",
 	"FirstName": "Nama diri",

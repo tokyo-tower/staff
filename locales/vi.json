@@ -35,7 +35,7 @@
 	"SeatsLimit{{limit}}": "Số vé có thể chọn tối đa một lần là {{limit}} vé",
 	"EditProfile": "Nhập thông tin người mua vé ",
 	"EnterProfileGuideText": "Sau khi nhập đầy đủ thông tin người mua và thông tin Thẻ tín dụng xin bấm nút “Tiếp tục”",
-	"Required": "Những chỗ đánh dấu “※”  là chỗ bắt buộc phải điền vào",
+	"SpanContainedRequired": "Những chỗ đánh dấu “<span class='requiredmark'></span>”  là chỗ bắt buộc phải điền vào",
 	"NameInSpecifiedLetters": "Tên đầy đủ (phiên âm ra chữ Cứng hoặc viết tiếng Anh không dấu)",
 	"LastName": "Họ ",
 	"FirstName": "Tên",

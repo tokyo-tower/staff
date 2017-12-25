@@ -47,7 +47,12 @@
             background-color: #898989;
             color: #fff;
             @media screen and (max-width: $breakpoint_tablet) {
-                display:none;
+                th:first-child {
+                    display: block;
+                }
+                th:last-child {
+                    display: none;
+                }
             }
             th:last-child {
                 width: 110px;

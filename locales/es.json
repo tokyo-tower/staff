@@ -35,7 +35,7 @@
     "SeatsLimit{{limit}}": "El número máximo de entradas que puede seleccionarse por vez es de {{limit}}.",
     "EditProfile": "Ingresar los datos del comprador",
     "EnterProfileGuideText": "Ingrese los datos del comprador y de la tarjeta de crédito, y presione el botón \"Siguiente\".",
-    "Required": "※significa indispensable.",
+    "SpanContainedRequired": "<span class='requiredmark'></span>significa indispensable.",
     "NameInSpecifiedLetters": "Nombre y apellido",
     "LastName": "Apellido ",
     "FirstName": "Nombre  ",

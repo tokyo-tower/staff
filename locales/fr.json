@@ -35,7 +35,7 @@
 	"SeatsLimit{{limit}}": "Le nombre maximum de billets pouvant être réservés en même temps est de {{limit}} billets.",
 	"EditProfile": "Saisie des informations concernant l'acheteur",
 	"EnterProfileGuideText": "Entrez les informations concernant l'acheteur et les informations relatives à la carte de crédit et cliquez sur [Suivant].",
-	"Required": "Les champs marqués d'un astérisque (*) sont obligatoires.",
+	"SpanContainedRequired": "Les champs marqués d'un astérisque (<span class='requiredmark'></span>) sont obligatoires.",
 	"NameInSpecifiedLetters": "Identité",
 	"LastName": "Nom",
 	"FirstName": "Prénom",

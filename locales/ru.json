@@ -35,7 +35,7 @@
 	"SeatsLimit{{limit}}": "Количество билетов, которое можно выбрать за один раз, равно {{limit}}.",
 	"EditProfile": "Ввод информации о покупателе",
 	"EnterProfileGuideText": "Введите данные покупателя и кредитной карты, нажмите кнопку \"Далее\".",
-	"Required": "*Поля обязательные к заполнению.",
+	"SpanContainedRequired": "<span class='requiredmark'></span>Поля обязательные к заполнению.",
 	"NameInSpecifiedLetters": "Полное имя (азбука кана или латинский алфавит)",
 	"LastName": "Фамилия",
 	"FirstName": "Имя",

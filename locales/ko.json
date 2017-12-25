@@ -35,7 +35,7 @@
 	"SeatsLimit{{limit}}": "한 번에 선택 가능한 매수는 (매수)매까지입니다.",
 	"EditProfile": "구매자 정보 입력",
 	"EnterProfileGuideText": "구매자 및 신용카드 정보를 입력하고 \"다음\" 버튼을 눌러 주십시오.",
-	"Required": "※는 필수 항목입니다.",
+	"SpanContainedRequired": "<span class='requiredmark'></span>는 필수 항목입니다.",
 	"NameInSpecifiedLetters": "이름(Kana 또는 알파벳)",
 	"LastName": "성",
 	"FirstName": "이름",

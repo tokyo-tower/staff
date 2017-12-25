@@ -44,7 +44,7 @@
 	"SeatsLimit{{limit}}": "一度に選択できる枚数は{{limit}}枚までとなります。",
 	"EditProfile": "購入者情報入力",
 	"EnterProfileGuideText": "ご購入者及びクレジットカード情報を入力し「次へ」ボタンを押してください。",
-	"Required": "は必須項目です。",
+	"SpanContainedRequired": "<span class='requiredmark'></span>は必須項目です。",
 	"NameInSpecifiedLetters": "お名前（カナまたはアルファベット）",
 	"LastName": "セイ",
 	"FirstName": "メイ",

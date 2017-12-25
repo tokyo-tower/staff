@@ -35,7 +35,7 @@
 	"SeatsLimit{{limit}}": "單次可選擇之張數限制為{{limit}}張。",
 	"EditProfile": "填寫購買者資訊",
 	"EnterProfileGuideText": "填寫完購買者及信用卡資訊後，請按「下一步」。",
-	"Required": "※為必填項目。",
+	"SpanContainedRequired": "<span class='requiredmark'></span>為必填項目。",
 	"NameInSpecifiedLetters": "姓名（請填寫英文字母）",
 	"LastName": "姓",
 	"FirstName": "名",

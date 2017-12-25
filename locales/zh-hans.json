@@ -35,7 +35,7 @@
 	"SeatsLimit{{limit}}": "一次可选数量为{{limit}}}张。",
 	"EditProfile": "输入购买者信息",
 	"EnterProfileGuideText": "请输入购买者和信用卡信息后点击“下一步”。",
-	"Required": "※为必填项目。",
+	"SpanContainedRequired": "<span class='requiredmark'></span>为必填项目。",
 	"NameInSpecifiedLetters": "名字（拼音）",
 	"LastName": "姓",
 	"FirstName": "名",
