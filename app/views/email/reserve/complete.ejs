@@ -1,11 +1,11 @@
 <%- __('EmailTitle') %>
 
-<%- __('EmailDestinationName{{name}}', {name: reservations[0].get('purchaser_name')[locale]}) %>
+<%- __('EmailDestinationName{{name}}', {name: reservations[0].purchaser_name}) %>
 
-<%- __('EmailHead1').replace('$theater_name$', reservations[0].get('theater_name')[locale]) %>
+<%- __('EmailHead1').replace('$theater_name$', reservations[0].theater_name[locale]) %>
 <%- __('EmailHead2') %>
 
-<% /* 購入番号 */ %><%- __('PaymentNo') %> : <%- reservations[0].get('payment_no') %>
+<% /* 購入番号 */ %><%- __('PaymentNo') %> : <%- reservations[0].payment_no %>
 <% /* ご来塔日時 */ %><%- __('EmailReserveDate') %> : <%- dayTime %>
 <% /* 券種、枚数 */ %><%- __('TicketType') %> <%- __('TicketCount') %>
 <% ticketInfoArray.forEach((ticketInfo, index) => { %><%- ticketInfo %>
@@ -33,7 +33,7 @@
 <%= conf.get('official_url_top_by_locale')[locale] %>
 
 
-<%- __('EmailFoot1').replace('$theater_name$', reservations[0].get('theater_name')[locale]) %>
+<%- __('EmailFoot1').replace('$theater_name$', reservations[0].theater_name[locale]) %>
 <%- __('EmailFoot2') %>
 <%- __('EmailFoot3') %>
 

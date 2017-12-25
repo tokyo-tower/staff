@@ -77,6 +77,21 @@
         "zh-hant": "https://www.tokyotower.co.jp/privacypolicy/zh.html",
         "ko": "https://www.tokyotower.co.jp/privacypolicy/kr.html"
     },
+    "official_url_inquiry_by_locale": {
+        "ja": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=ja",
+        "en": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=en",
+        "zh-hant": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=zh-hant",
+        "zh-hans": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=zh-hans",
+        "ko": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=ko",
+        "th": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=th",
+        "id": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=id",
+        "vi": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=vi",
+        "fr": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=fr",
+        "de": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=de",
+        "it": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=it",
+        "es": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=es",
+        "ru": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=ru"
+    },
     "official_url_contact_by_locale": {
         "ja": "https://www.tokyotower.co.jp/contact/",
         "en": "https://www.tokyotower.co.jp/contact/en.html"

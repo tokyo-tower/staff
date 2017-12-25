@@ -255,27 +255,32 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                     throw new Error(req.__('Expired'));
                 }
 
+                const taskRepo = new ttts.repository.Task(ttts.mongoose.connection);
+                const transactionRepo = new ttts.repository.Transaction(ttts.mongoose.connection);
+                const creditCardAuthorizeActionRepo = new ttts.repository.action.authorize.CreditCard(ttts.mongoose.connection);
+                const seatReservationAuthorizeActionRepo = new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection);
+
                 // 予約確定
                 const transactionResult = await ttts.service.transaction.placeOrderInProgress.confirm({
                     agentId: reservationModel.agentId,
                     transactionId: reservationModel.id,
                     paymentMethod: reservationModel.paymentMethod
-                })(
-                    new ttts.repository.Transaction(ttts.mongoose.connection),
-                    new ttts.repository.action.authorize.CreditCard(ttts.mongoose.connection),
-                    new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection)
-                    );
+                })(transactionRepo, creditCardAuthorizeActionRepo, seatReservationAuthorizeActionRepo);
                 debug('transaction confirmed. orderNumber:', transactionResult.order.orderNumber);
 
                 try {
                     // 完了メールキュー追加(あれば更新日時を更新するだけ)
-                    const emailQueue = await reserveBaseController.createEmailQueue(
-                        transactionResult.eventReservations, reservationModel, res
+                    const emailAttributes = await reserveBaseController.createEmailAttributes(
+                        transactionResult.eventReservations, reservationModel.getTotalCharge(), res
                     );
-                    await ttts.Models.EmailQueue.create(emailQueue);
+
+                    await ttts.service.transaction.placeOrder.sendEmail(
+                        reservationModel.id,
+                        emailAttributes
+                    )(taskRepo, transactionRepo);
+                    debug('email sent.');
                 } catch (error) {
-                    console.error(error);
-                    // 失敗してもスルー(ログと運用でなんとかする)
+                    // 失敗してもスルー
                 }
 
                 ReserveSessionModel.REMOVE(req);

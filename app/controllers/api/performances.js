@@ -138,7 +138,7 @@ function createEmail(res, reservations, notice) {
         // 東京タワー TOP DECK エレベータ運行停止のお知らせ
         const titleEmail = res.__('EmailTitleSus');
         //トウキョウ タロウ 様
-        const purchaserName = `${res.__('Mr{{name}}', { name: reservation.purchaser_name[res.locale] })}`;
+        const purchaserName = `${res.__('Mr{{name}}', { name: reservation.purchaser_name })}`;
         // 購入チケット情報
         const paymentTicketInfos = [];
         // 購入番号 : 850000001
@@ -156,25 +156,50 @@ function createEmail(res, reservations, notice) {
         // 本文セット
         const content = `${titleEmail}\n\n${purchaserName}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}`;
         // メール編集
-        const emailQueue = {
-            from: {
-                address: conf.get('email.from'),
-                name: conf.get('email.fromname')
+        const emailAttributes = {
+            sender: {
+                name: conf.get('email.fromname'),
+                email: conf.get('email.from')
             },
-            to: {
-                address: reservation.purchaser_email
+            toRecipient: {
+                // tslint:disable-next-line:max-line-length
+                name: reservation.purchaser_name,
+                email: reservation.purchaser_email
             },
-            subject: `${title} ${titleEmail}`,
-            content: {
-                mimetype: 'text/plain',
-                text: content
-            },
-            status: ttts.EmailQueueUtil.STATUS_UNSENT
+            about: `${title} ${titleEmail}`,
+            text: content
         };
         // メール作成
-        debug('creating email queue...', emailQueue);
-        yield ttts.Models.EmailQueue.create(emailQueue);
-        debug('email queue created.');
+        const taskRepo = new ttts.repository.Task(ttts.mongoose.connection);
+        const emailMessage = ttts.factory.creativeWork.message.email.create({
+            identifier: `updateOnlineStatus-${reservation.id}`,
+            sender: {
+                typeOf: 'Corporation',
+                name: emailAttributes.sender.name,
+                email: emailAttributes.sender.email
+            },
+            toRecipient: {
+                typeOf: ttts.factory.personType.Person,
+                name: emailAttributes.toRecipient.name,
+                email: emailAttributes.toRecipient.email
+            },
+            about: emailAttributes.about,
+            text: emailAttributes.text
+        });
+        // その場で送信ではなく、DBにタスクを登録
+        const taskAttributes = ttts.factory.task.sendEmailNotification.createAttributes({
+            status: ttts.factory.taskStatus.Ready,
+            runsAt: new Date(),
+            remainingNumberOfTries: 10,
+            lastTriedAt: null,
+            numberOfTried: 0,
+            executionResults: [],
+            data: {
+                emailMessage: emailMessage
+            }
+        });
+        yield taskRepo.save(taskAttributes);
+        debug('sendEmail task created.');
     });
 }
 /**
