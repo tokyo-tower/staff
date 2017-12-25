@@ -21,14 +21,16 @@ We sincerely apologize for the inconvenience we caused you.
 <%- reservations[0].get('payment_no') %>
 
 劇場 (Location) :
-<%- reservations[0].get('location_str').ja %>
 <%- reservations[0].get('theater_address').ja %>
 <%- reservations[0].get('theater_name').en %> <%- reservations[0].get('screen_name').en %>
 <%- reservations[0].get('theater_address').en %>
 
 時間 (Date and time) :
-<%- reservations[0].get('performance_start_str').ja %>
-<%- reservations[0].get('performance_start_str').en %>
+<%
+const doorTime = moment(reservations[0].get('performance_door_time'));
+const startDate = moment(reservations[0].get('performance_start_date'));
+%>
+<%- `${doorTime.format('YYYY/MM/DD')} 開場 ${doorTime.format('mm:ss')} 開演 ${startDate.format('mm:ss')}` %>
 
 券種 (Type of ticket) :
 <%= reservations.map((reservation) => reservation.get('ticket_type_detail_str').ja.replace(/\\/g, '￥')).join('\n') %>

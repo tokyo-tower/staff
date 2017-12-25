@@ -13,7 +13,11 @@
                 <th>予約日時</th>
                 <td>
                     <p>
-                        <%- reservationModel.performance[`start_str`][locale] %>
+                        <%
+                        const doorTime = moment(reservationModel.performance.door_time);
+                        const startDate = moment(reservationModel.performance.start_date);
+                        %>
+                        <%- `${doorTime.format('YYYY/MM/DD')} 開場 ${doorTime.format('mm:ss')} 開演 ${startDate.format('mm:ss')}` %>
                     </p>
                 </td>
             </tr>
