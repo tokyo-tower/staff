@@ -145,26 +145,3 @@ function auth(req, res) {
     });
 }
 exports.auth = auth;
-// async function getToken(): Promise<any> {
-//     return new Promise((resolve, reject) => {
-//         request.post(`${process.env.API_ENDPOINT}oauth/token`, {
-//             body: {
-//                 grant_type: 'client_credentials',
-//                 client_id: 'motionpicture',
-//                 client_secret: 'motionpicture',
-//                 state: 'state123456789',
-//                 scopes: [
-//                     'performances.read-only'
-//                 ]
-//             },
-//             json: true
-//             },       (error, response, body) => {
-//             // tslint:disable-next-line:no-magic-numbers
-//             if (response.statusCode === 200) {
-//                 resolve(body);
-//             } else {
-//                 reject(error);
-//             }
-//         });
-//     });
-// }
