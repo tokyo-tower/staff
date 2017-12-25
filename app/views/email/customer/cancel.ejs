@@ -33,8 +33,8 @@ const startDate = moment(reservations[0].get('performance_start_date'));
 <%- `${doorTime.format('YYYY/MM/DD')} 開場 ${doorTime.format('mm:ss')} 開演 ${startDate.format('mm:ss')}` %>
 
 券種 (Type of ticket) :
-<%= reservations.map((reservation) => reservation.get('ticket_type_detail_str').ja.replace(/\\/g, '￥')).join('\n') %>
-<%= reservations.map((reservation) => reservation.get('ticket_type_detail_str').en.replace(/\\/g, '￥')).join('\n') %>
+<%= reservations.map((reservation) => reservation.get('ticket_type_name').ja).join('\n') %>
+<%= reservations.map((reservation) => reservation.get('ticket_type_name').en).join('\n') %>
 
 購入枚数 (Number of tickets purchased) :
 <%- reservations.length %>枚

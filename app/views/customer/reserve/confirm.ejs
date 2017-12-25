@@ -38,8 +38,7 @@
                 <td>
                     <p>
                         <% reservationModel.transactionInProgress.reservations.forEach((reservation) => { %>
-                            <% let reservationDoc = reservationModel.seatCode2reservationDocument(reservation.seat_code); %>
-                            <%- reservationDoc.ticket_type_detail_str[locale] %>
+                            <%- reservation.ticket_type_name[locale] %>
                             <br>
                         <% }) %>
                     </p>
