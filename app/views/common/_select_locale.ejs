@@ -46,7 +46,7 @@ window.ttts.domurl = new Url();
             }
             window.ttts.domurl.query.locale = null;
             window.ttts.setSessionStorage('locale', ev.selectedData.value);
-            return location.replace('/language/update/' + ev.selectedData.value + '?cb=' + window.ttts.domurl.toString());
+            return location.replace('/language/update/' + ev.selectedData.value + '?cb=' + encodeURIComponent(window.ttts.domurl.toString()));
         },
         width: '200px',
         background: 'transparent'
