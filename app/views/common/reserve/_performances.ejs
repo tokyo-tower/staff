@@ -27,7 +27,7 @@
 
 <p class="guidetext guidetext-reservation is-customer"><%- (isWheelchair) ? __('LinkContainedWheelChairGuideMessage') : __('LinkContainedPerformanceMessage') %></p>
 
-<h3><span class="redcircle">1</span><%- __('PreferredDateSelect') %><span class="daynotice"><%- __('ReservableMaxDate{{ymd}}', {ymd: reserveMaxDate}) %></span></h3>
+<h3><span class="redcircle">1</span><%- __('PreferredDateSelect') %><span class="daynotice"><%- __('ReservableMaxDate{{ymd}}', { ymd: moment(reserveMaxDate, 'YYYY/MM/DD').format('LL') }) %></span></h3>
 <div class="performancesearchform">
     <form>
         <div class="input-date input-group">

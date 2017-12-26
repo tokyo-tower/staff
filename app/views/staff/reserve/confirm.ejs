@@ -14,10 +14,10 @@
                 <td>
                     <p>
                         <%
-                        const doorTime = moment(reservationModel.performance.door_time);
                         const startDate = moment(reservationModel.performance.start_date);
+                        const endTime = moment(reservationModel.performance.end_date);
                         %>
-                        <%- `${doorTime.format('YYYY/MM/DD')} 開場 ${doorTime.format('mm:ss')} 開演 ${startDate.format('mm:ss')}` %>
+                        <%- `${startDate.format('YYYY/MM/DD')} ${startDate.format('HH:mm')} - ${endTime.format('HH:mm')}` %>
                     </p>
                 </td>
             </tr>

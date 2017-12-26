@@ -1,13 +1,11 @@
 <%
-let routeName = '';
-if (req.hasOwnProperty('route')) {
-    routeName = req.path;
-}
+let routeName = req.path;
 
 let currentLang = locale;
 let pageId = (routeName) ? 'page_'+routeName.replace(/\//,'').replace(/:[^\/]*\//g,'').replace(/\//g,'_') : '';
 let pageClassName = (routeName) ? 'page-'+routeName.replace(/\//,'').replace(/:[^\/]*\//g,'').replace(/\//g,' page-') : '';
 pageClassName = pageClassName + ' page-'+currentLang;
+const path_header = /staff/.test(routeName) ? './layouts/staff/_header' : './layouts/_header';
 %>
 
 <!DOCTYPE html>
@@ -33,7 +31,7 @@ pageClassName = pageClassName + ' page-'+currentLang;
 
 <body id="<%- pageId %>" class="<%- pageClassName %>">
 
-<%- include('./layouts/_header') %>
+<%- include(path_header) %>
 
 <div class="container">
     <%- body %>

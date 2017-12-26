@@ -9,6 +9,16 @@ const conf = require("config");
 const moment = require("moment");
 const numeral = require("numeral");
 exports.default = (req, res, next) => {
+    let momentLocale = req.getLocale() || '';
+    if (momentLocale === 'zh-hans') {
+        momentLocale = 'zh-cn';
+    }
+    else if (momentLocale === 'zh-hant') {
+        momentLocale = 'zh-tw';
+    }
+    if (momentLocale) {
+        moment.locale(momentLocale);
+    }
     res.locals.req = req;
     res.locals.moment = moment;
     res.locals.numeral = numeral;

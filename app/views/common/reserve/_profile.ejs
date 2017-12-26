@@ -75,7 +75,7 @@
                     <div class="wrapper-names">
                         <div class="wrapper-nameinput wrapper-nameinput-lastname">
                             <label for="id_lastName"><%- __('LastName') %></label>
-                            <input type="text" name="lastName" id="id_lastName" class="form-control input-required" data-pattern="^[ァ-ロワヲンーa-zA-Z・\.\s　]*$" data-parentSelector=".wrapper-nameinput-lastname" data-fieldname="<%- __('LastName') %>" value="<%= lastName %>" required>
+                            <input type="tel" name="lastName" id="id_lastName" class="form-control input-required" data-pattern="^[ァ-ロワヲンーa-zA-Z・\.\s　]*$" data-parentSelector=".wrapper-nameinput-lastname" data-fieldname="<%- __('LastName') %>" value="<%= lastName %>" required>
                             <p class="errmsg errmsg-lastName"><%- (validation && validation.lastName) ? validation.lastName.msg : '' %></p>
                         </div>
                         <div class="wrapper-nameinput wrapper-nameinput-firstname">
@@ -92,7 +92,7 @@
                 <th><%- __('Email') %><span class="requiredmark"></span></th>
                 <td>
                     <div class="wrapper-emailinput">
-                        <input type="text" name="email" id="id_email" class="form-control input-required" data-pattern="^[a-zA-Z0-9@\.!#$%&'*+/=?^_`{|}~-]*@[a-zA-Z0-9@\.!#$%&'*+/=?^_`{|}~-]*$" data-parentSelector=".wrapper-emailinput" data-fieldname="<%- __('Email') %>" value="<%= email %>">
+                        <input type="email" name="email" id="id_email" class="form-control input-required" data-pattern="^[a-zA-Z0-9@\.!#$%&'*+/=?^_`{|}~-]*@[a-zA-Z0-9@\.!#$%&'*+/=?^_`{|}~-]*$" data-parentSelector=".wrapper-emailinput" data-fieldname="<%- __('Email') %>" value="<%= email %>">
                     </div>
                     <p class="notice">※<%- __('RetypeToConfirm') %></p>
                     <div class="wrapper-emailconfirm">
@@ -112,7 +112,7 @@
             <tr class="tr-tel <% (validation && validation.tel ? 'has-error' : '') %>">
                 <th><label for="id_tel"><%- __('Tel') %></label><span class="requiredmark"></span></th>
                 <td>
-                    <input type="text" name="tel" id="id_tel" class="form-control input-required" minlength="6" maxlength="15" data-pattern="^[0-9]{6,15}$" data-fieldname="<%- __('Tel') %>" value="<%= tel %>">
+                    <input type="tel" name="tel" id="id_tel" class="form-control input-required" minlength="6" maxlength="15" data-pattern="^[0-9]{6,15}$" data-fieldname="<%- __('Tel') %>" value="<%= tel %>">
                     <label for="checkbox_otherregion">
                         <input type="checkbox" id="checkbox_otherregion">Other Area
                     </label>
@@ -179,8 +179,8 @@
 
             <tr class="tr-price">
                 <th><label><%- __('TotalPrice') %></label></th>
-                <td>
-                    <p><span class="price"><span class="is-ja">&yen;</span><%- numeral(reservationModel.getTotalCharge()).format('0,0') %></span><span class="is-not-ja"> JPY</span></p>
+                <td>  
+                    <p><span class="price"><%- __('{{price}} yen', { price: numeral(reservationModel.getTotalCharge()).format('0,0') } ) %></span></p>
                 </td>
             </tr>
 

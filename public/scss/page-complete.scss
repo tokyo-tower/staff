@@ -59,35 +59,32 @@
                 }
             }
             .wrapper-qrcodes {
-                display: inline-block;
-                width: 50%;
-                float: left;
                 padding: 10px;
-                @media screen and (max-width: $breakpoint_tablet) {
-                    float: none;
-                    width: 100%;
-                }
                 >div {
                     background-color: #fff;
-                    display: table;
-                    width: 100%;
-                    text-align: center;
+                    display: block;
+                    padding-bottom: 10px;
+                    margin-bottom: 10px;
                     @media screen and (max-width: $breakpoint_tablet) {
-                        display: block;
-                        padding-bottom: 10px;
-                        margin-bottom: 10px;
+                        text-align: center;
                     }
                     >p {
                         display: table-cell;
-                        width: 50%;
                         vertical-align: middle;
                         font-size: 16px;
-                        img {
-                            vertical-align: top;
+                        line-height: 1.5;
+                        &:first-child {
+                            width: 160px;
                         }
                         @media screen and (max-width: $breakpoint_tablet) {
                             display: block;
                             width: 100%;
+                            &:first-child {
+                                width: 100%;
+                            }
+                        }
+                        img {
+                            vertical-align: top;
                         }
                     }
                 }

@@ -17,7 +17,7 @@
                 <th><%- __('PurchaseContentDate') %></th>
                 <td>
                     <p>
-                        <%= moment(reservationModel.transactionInProgress.performance.day).format('Y-MM-DD') %>&nbsp;&nbsp;<%= `${moment(reservationModel.transactionInProgress.performance.start_time, 'hmm').format('HH:mm')} - ${moment(reservationModel.transactionInProgress.performance.end_time, 'hmm').format('HH:mm')}` %> 
+                        <%- `${moment(reservationModel.transactionInProgress.performance.day, 'YYYYMMDD').format('LL')}&nbsp;&nbsp;${moment(reservationModel.transactionInProgress.performance.start_time, 'hmm').format('HH:mm')} - ${moment(reservationModel.transactionInProgress.performance.end_time, 'hmm').format('HH:mm')} <span class="is-not-ja">(JST)</span>` %>
                     </p>
                 </td>
             </tr>

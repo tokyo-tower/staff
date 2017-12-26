@@ -42,15 +42,29 @@
                             }
                         });
                     }
-                    tempReservationModel.ticketTypes.forEach(function(ticketType) {
-                    // 一般予約(general)だったら一般券種以外を弾く
-                    if (tempReservationModel.category === 'general' && ticketType.ttts_extension.category !== 'Normal') {
-                        return true;
+                    // 車椅子予約なので車椅子の券を上位に持ってくる
+                    if (isWheelchair) {
+                        tempReservationModel.ticketTypes.sort((a, b) => {
+                            if (b.ttts_extension.category === 'Wheelchair') {
+                                if (a.ttts_extension.category === b.ttts_extension.category) {
+                                    return 0;
+                                }
+                                return 1;
+                            } else if (a._id > b._id) {
+                                return -1;
+                            }
+                            return 0;
+                        });
                     }
+                    tempReservationModel.ticketTypes.forEach(function(ticketType) {
+                        // 一般予約(general)だったら一般券種以外を弾く
+                        if (tempReservationModel.category === 'general' && ticketType.ttts_extension.category !== 'Normal') {
+                            return true;
+                        }
                 %>
                     <tr data-ticket-code="<%- ticketType._id %>" data-ticket-charge="<%= ticketType.charge %>">
                         <th>
-                            <span><%- ticketType.name[locale] %> <span class="is-ja">&yen;</span><%= ticketType.charge %><span class="is-not-ja"> JPY</span></span>
+                            <span><%- ticketType.name[locale] %> <%- __('{{price}} yen', { price: ticketType.charge } ) %></span>
                             <%
                                 if (isStaff) {
                             %>
@@ -71,7 +85,7 @@
             </tbody>
             <tfoot class="hidden">
                 <tr><td colspan="2">
-                    <%- __('TotalPrice') %> <span class="price"><span class="is-ja">&yen;</span><span id="echo_total"></span><span class="is-not-ja"> JPY</span></span>
+                    <%- __('TotalPrice') %> <span class="price"><span id="echo_total"></span><%- __('{{price}} yen') %></span>
                 </td></tr>
             </tfoot>
         </table>

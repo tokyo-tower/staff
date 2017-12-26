@@ -1,4 +1,3 @@
-<input type="hidden" id="input_reservations" value="<%= JSON.stringify(reservations) %>">
 <script src="/js/reserve/complete.js"></script>
 
 <%- include('./_step', {currentStepName: 'complete'}) %>
@@ -22,7 +21,7 @@
         <tr class="tr-date">
             <th><%- __('PurchaseContentDate') %></th>
             <td>
-                <%= moment(reservations[0].performance_day).format('Y-MM-DD') %>&nbsp;&nbsp;<%= `${moment(reservations[0].performance_start_time, 'hmm').format('HH:mm')} - ${moment(reservations[0].performance_end_time, 'hmm').format('HH:mm')}` %> 
+                <%- `${moment(reservations[0].performance_day, 'YYYYMMDD').format('LL')}&nbsp;&nbsp;${moment(reservations[0].performance_start_time, 'hmm').format('HH:mm')} - ${moment(reservations[0].performance_end_time, 'hmm').format('HH:mm')} <span class="is-not-ja">(JST)</span>` %>
             </td>
         </tr>
         <tr class="tr-tourno">
@@ -43,9 +42,10 @@
                             <img class="codeimg-barcode" src="//chart.apis.google.com/chart?chs=150x150&cht=qr&chl=<%= reservation.qr_str %>" alt="">
                         </p>
                         <p>
-                            <%- reservation.ticket_type_name[locale] || reservation.ticket_type_name.en %><br>
-                            &yen;<%- reservation.ticket_type_charge %><br>
-                            <%- reservation.seat_code %>
+                            <%- reservation.ticket_type_name[locale] || reservation.ticket_type_name.en %> <%- __('{{price}} yen', { price: reservation.ticket_type_charge } ) %><br>
+                            <%- `${__('EmailReserveDate')}: ${moment(`${reservations[0].performance_day}${reservations[0].performance_start_time}`, 'YYYYMMDDHHmm').format('LLL')}` %><br>
+                            <%- `${__('TourNumber')}: ${reservation.performance_ttts_extension.tour_number}` %><br>
+                            <%- reservation.seat_code %><br>
                         </p>
                     </div>
                 </div>
@@ -62,7 +62,7 @@
             <th><%- __('TotalPrice') %></th>
             <td>
                 <% var totalAmount = reservations.reduce((a,b)=>a+b.charge,0); %>
-                <span class="price"><span class="is-ja">&yen;</span><%= totalAmount %><span class="is-not-ja">JPY</span></span>
+                <span class="price"><%- __('{{price}} yen', { price: totalAmount } ) %></span>
             </td>
         </tr>
     </tbody>

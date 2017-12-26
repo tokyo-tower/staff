@@ -3,8 +3,8 @@
     <div class="reservationstatus-inner accordion_mobile_inner">
         <p class="reservationstatus-title"><%- __('PurchaseContentDate') %></p>
         <div class="reservationstatus-info">
-            <%= moment(tempReservationModel.performance.day).format('Y-MM-DD') %><br>
-            <%= `${moment(tempReservationModel.performance.start_time, 'hmm').format('HH:mm')} - ${moment(tempReservationModel.performance.end_time, 'hmm').format('HH:mm')}` %>
+            <%= moment(tempReservationModel.performance.day).format('LL') %><br>
+            <%= `${moment(tempReservationModel.performance.start_time, 'hmm').format('HH:mm')} - ${moment(tempReservationModel.performance.end_time, 'hmm').format('HH:mm')}` %> <span class="is-not-ja">(JST)</span>
         </div>
         <p class="reservationstatus-title"><%- __('TourNumber') %></p>
         <div class="reservationstatus-info">

@@ -14,7 +14,7 @@ window.ttts.dom_input_tel_otherregion = {};
 function someCallbackFunction(response) {
     if (response.resultCode !== '000') {
         $('.btn-next').removeClass('btn-disabled').find('span').text(window.ttts.commonlocales.Next);
-        window.ttts.profileformsubmitting = false;        
+        window.ttts.profileformsubmitting = false;
         return alert(window.ttts.errmsgLocales.cardtoken);
     }
     // カード情報は念のため値を除去
@@ -63,7 +63,7 @@ $(function() {
         window.ttts.dom_input_tel = $input_tel[0];
         var $input_tel_otherregion = $('#input_tel_otherregion');
         window.ttts.dom_input_tel_otherregion = $input_tel_otherregion[0];
-        
+
         var setCountry = function(val) {
             document.getElementById('input_country').value = (val || $input_tel.intlTelInput('getSelectedCountryData').iso2 || local_address || '').toUpperCase();
         };
@@ -74,8 +74,11 @@ $(function() {
             preferredCountries = (preferredCountries) ? JSON.parse(preferredCountries) : ['jp', 'tw', 'cn', 'kr', 'us', 'fr', 'de', 'it', 'es', 'vn', 'id', 'th', 'ru'];
 
             $input_tel.intlTelInput({
+                utilsScript: '/js/lib/intl-tel-input/utils.js',                
                 preferredCountries: preferredCountries,
-                utilsScript: '/js/lib/intl-tel-input/utils.js'
+                customPlaceholder: function(selectedCountryPlaceholder) {
+                    return selectedCountryPlaceholder.replace(/-/g, '');
+                }
             }).done(function() {
                 // セッションの値があったら適用する
                 if (local_address && local_address !== 'XX') {
@@ -108,38 +111,37 @@ $(function() {
                     setCountry();
                 }
             });
-
         } else {
             alert('failed to load intl-tel-input');
         }
 
 
         // メールアドレスの確認欄2つを結合してhiddenのinputに保存
-        var input_email = document.getElementById('id_email');        
+        var input_email = document.getElementById('id_email');
         var input_emailconfirmconcat = document.getElementById('input_emailconfirmconcat');
-        var input_emailConfirm = document.getElementById('id_emailConfirm');    
+        var input_emailConfirm = document.getElementById('id_emailConfirm');
         var input_emailConfirmDomain = document.getElementById('id_emailConfirmDomain');
         var setEmailConfirm = function() {
             if (!input_email || !input_emailconfirmconcat) { return false; }
-            var val = input_emailConfirm.value + '@' +input_emailConfirmDomain.value;
+            var val = input_emailConfirm.value + '@' + input_emailConfirmDomain.value;
             if (input_email.value) {
                 input_emailconfirmconcat.value = (input_email.value === val) ? val : '!';
             } else {
                 input_emailconfirmconcat.value = '';
             }
-        }
+        };
 
         // カード有効期限のYYYYとMMのセレクト要素の値を結合してhiddenのinputに保存
         var input_expire = document.getElementById('expire');
-        var select_cardExpirationYear = document.getElementById('cardExpirationYear');    
+        var select_cardExpirationYear = document.getElementById('cardExpirationYear');
         var select_cardExpirationMonth = document.getElementById('cardExpirationMonth');
         var setExpiredate = function() {
             if (!input_expire || !select_cardExpirationYear || !select_cardExpirationMonth) { return false; }
             var val = select_cardExpirationYear.value + select_cardExpirationMonth.value;
             input_expire.value = (val.length === 'YYYYMM'.length) ? val : '';
-        }
+        };
 
-        
+
         /*
             バリデーション
         */
@@ -148,7 +150,7 @@ $(function() {
         var validateCreditCardInputs = function() {
             var bool_valid = true;
             Array.prototype.forEach.call(document.getElementsByClassName('input-required'), function(elm) {
-                var error = null;            
+                var error = null;
                 var parentSelector = elm.getAttribute('data-parentSelector') || '.tr-' + elm.name;
                 var elm_parent = document.querySelector(parentSelector);
                 var elm_errmsg = document.querySelector('.errmsg-' + elm.name);
@@ -172,6 +174,7 @@ $(function() {
                     error = 'invalid';
                 }
                 if (error) {
+                    window.navigator.vibrate(200);
                     elm_parent.classList.add('has-error');
                     elm_errmsg.innerText = window.ttts.errmsgLocales[error].replace('{{fieldName}}', filedname).replace('{{max}}', maxLength);
                     bool_valid = false;
@@ -192,7 +195,7 @@ $(function() {
         if (paymentMethod === '0') {
             setCountry();
             setExpiredate();
-            setEmailConfirm();            
+            setEmailConfirm();
             if (!validateCreditCardInputs()) {
                 return document.querySelector('.has-error').scrollIntoView();
             }
