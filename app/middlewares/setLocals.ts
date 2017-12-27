@@ -10,13 +10,13 @@ import * as moment from 'moment';
 import * as numeral from 'numeral';
 
 export default (req: Request, res: Response, next: NextFunction) => {
-    let momentLocale = req.getLocale() || '';
+    let momentLocale = (typeof req.getLocale() === 'string') ? req.getLocale() : '';
     if (momentLocale === 'zh-hans') {
         momentLocale = 'zh-cn';
     } else if (momentLocale === 'zh-hant') {
         momentLocale = 'zh-tw';
     }
-    if (momentLocale) {
+    if (momentLocale !== '') {
         moment.locale(momentLocale);
     }
 
