@@ -1,7 +1,7 @@
 /**
  * 座席予約ベースコントローラー
  *
- * @namespace controller/reserveBase
+ * @namepace controller/reserveBase
  */
 
 import * as ttts from '@motionpicture/ttts-domain';
@@ -102,7 +102,7 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
         reservationModel.setReservation(tmpReservation.seat_code, tmpReservation);
     });
     // 座席コードのソート(文字列順に)
-    reservationModel.seatCodes.sort(ttts.factory.place.screen.sortBySeatCode);
+    // reservationModel.seatCodes.sort(ttts.factory.place.screen.sortBySeatCode);
 }
 
 export interface ICheckInfo {

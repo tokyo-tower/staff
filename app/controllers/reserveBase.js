@@ -2,7 +2,7 @@
 /**
  * 座席予約ベースコントローラー
  *
- * @namespace controller/reserveBase
+ * @namepace controller/reserveBase
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -86,7 +86,7 @@ function processFixSeatsAndTickets(reservationModel, req) {
             reservationModel.setReservation(tmpReservation.seat_code, tmpReservation);
         });
         // 座席コードのソート(文字列順に)
-        reservationModel.seatCodes.sort(ttts.factory.place.screen.sortBySeatCode);
+        // reservationModel.seatCodes.sort(ttts.factory.place.screen.sortBySeatCode);
     });
 }
 exports.processFixSeatsAndTickets = processFixSeatsAndTickets;

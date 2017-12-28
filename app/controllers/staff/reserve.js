@@ -20,6 +20,7 @@ const _ = require("underscore");
 const reservePerformanceForm_1 = require("../../forms/reserve/reservePerformanceForm");
 const session_1 = require("../../models/reserve/session");
 const reserveBaseController = require("../reserveBase");
+//import reservation from '@motionpicture/ttts-domain/lib/repo/mongoose/model/reservation';
 const debug = createDebug('ttts-staff:controller:reserve');
 const PURCHASER_GROUP = ttts.factory.person.Group.Staff;
 const layout = 'layouts/staff/layout';
@@ -286,6 +287,8 @@ function confirm(req, res, next) {
             }
             else {
                 const reservations = reserveBaseController.getReservations(reservationModel);
+                // チケットをticket_type(id)でソート
+                sortReservationstByTicketType(reservations);
                 const ticketInfos = reserveBaseController.getTicketInfos(reservations);
                 // 券種ごとの表示情報編集
                 Object.keys(ticketInfos).forEach((key) => {
@@ -337,7 +340,9 @@ function complete(req, res, next) {
                 next(new Error(req.__('NotFound')));
                 return;
             }
-            reservations.sort((a, b) => ttts.factory.place.screen.sortBySeatCode(a.seat_code, b.seat_code));
+            //reservations.sort((a, b) => ttts.factory.place.screen.sortBySeatCode(a.seat_code, b.seat_code));
+            // チケットをticket_type(id)でソート
+            sortReservationstByTicketType(reservations);
             // 印刷トークン発行
             const tokenRepo = new ttts.repository.Token(redisClient);
             const printToken = yield tokenRepo.createPrintToken(reservations.map((r) => r.id));
@@ -354,3 +359,20 @@ function complete(req, res, next) {
     });
 }
 exports.complete = complete;
+/**
+ * チケットをticket_type(id)でソートする
+ * @method sortReservationstByTicketType
+ */
+function sortReservationstByTicketType(reservations) {
+    // チケットをticket_type(id)でソート
+    reservations.sort((a, b) => {
+        // 入塔日
+        if (a.ticket_type > b.ticket_type) {
+            return 1;
+        }
+        if (a.ticket_type < b.ticket_type) {
+            return -1;
+        }
+        return 0;
+    });
+}
