@@ -117,7 +117,7 @@
                         <input type="checkbox" id="checkbox_otherregion">Other Area
                     </label>
                     <div id="wrapper_tel_otherregion">
-                        <p>Enter your telephone number start with calling code (without "+" and "-")</p>
+                        <p>Enter your telephone number start with country code (without "+" and "-")</p>
                         <input type="text" name="tel" id="input_tel_otherregion" class="form-control" minlength="4" maxlength="15" data-pattern="^[0-9]{4,15}$" data-fieldname="<%- __('Tel') %>" value="<%= tel %>" disabled="disabled">
                     </div>
                     <p class="errmsg errmsg-tel"><%- (validation && validation.tel ? validation.tel.msg : '') %></p>
