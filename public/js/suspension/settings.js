@@ -98,15 +98,15 @@ $(function() {
                 '<div class="items">';
             performancesByHour[hour].forEach(function(performance) {
                 var suspensionStatusStr = '';
-                var separatorStr = '';
-                if (performance.online_sales_status === 'Suspended') {
-                    suspensionStatusStr += '販売中止';
-                }
-                separatorStr += (suspensionStatusStr) ? ' / ' : '';
+                //var separatorStr = '';
+                //if (performance.online_sales_status === 'Suspended') {
+                //    suspensionStatusStr += '販売中止';
+                //}
+                //separatorStr += (suspensionStatusStr) ? ' / ' : '';
                 if (performance.ev_service_status === 'Slowdown') {
-                    suspensionStatusStr += separatorStr + 'EV 減速';
+                    suspensionStatusStr += '販売休止中';
                 } else if (performance.ev_service_status === 'Suspended') {
-                    suspensionStatusStr += separatorStr + 'EV 停止';
+                    suspensionStatusStr += '販売中止中';
                 }
                 html += '<div class="item ' + getClassNameByStatus(performance) + '" data-performance-id="' + performance.id + '">' +
                             '<p class="time">' + spliceStr(performance.start_time, 2, ':') + ' - ' + spliceStr(performance.end_time, 2, ':') + '</p>' +

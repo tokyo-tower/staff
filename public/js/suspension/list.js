@@ -105,7 +105,6 @@ $(function() {
                 '<td class="td-tour_number">' + suspension.tour_number + '</td>' +
                 '<td class="td-ev_service_status_name">' + suspension.ev_service_status_name + '</td>' +
                 '<td class="td-online_sales_update_at">' + moment(suspension.online_sales_update_at).format('YYYY/MM/DD HH:mm:ss') + '</td>' +
-                '<td class="td-online_sales_update_user">' + suspension.online_sales_update_user + '</td>' +
                 '<td class="td-caceled">' + suspension.canceled + '</td>' +
                 '<td class="td-arrived">' + suspension.arrived + '</td>' +
                 '<td class="td-refund_status_name">' + suspension.refund_status_name + '</td>' +

@@ -11,7 +11,7 @@
 <script src="/js/suspension/settings.js"></script>
 
 <h1 class="pagetitle">
-    <%- __('SelectPerformance') %>
+    販売中止・休止／再開
 </h1>
 <p class="guidetext is-staff-block">対応するスケジュールを選択してください</p>
 
@@ -67,25 +67,36 @@
                 <p class="btn-close" data-dismiss="modal">
                     <span>×</span>
                 </p>
-                <h2 class="modal-title">オンライン販売・EV運行対応</h2>
-                <p>エレベーター運行状況を選択して実行ボタンを押してください。</p>
+                <h2 class="modal-title">オンライン販売・休止／中止対応</h2>
+                <p>オンライン販売状況を選択して実行ボタンを押してください。</p>
             </div>
             <div class="modal-body">
                 <form>
-                    <h3>エレベータ運転状況</h3>
+                    <h3>オンライン販売状況</h3>
                     <div>
                         <p>状況を選択してください。</p>
                         <label class="for-suspend">
-                            <input class="radio-ev" type="radio" id="radio_ev_slow" name="ev" value="<%- EvServiceStatus.Slowdown %>" checked>減速運転</label>
+                            <input class="radio-ev" type="radio" id="radio_ev_slow" name="ev" value="<%- EvServiceStatus.Slowdown %>" checked>一時休止</label>
                         <label class="for-suspend">
-                            <input class="radio-ev" type="radio" id="radio_ev_stop" name="ev" value="<%- EvServiceStatus.Suspended %>">運転停止</label>
+                            <input class="radio-ev" type="radio" id="radio_ev_stop" name="ev" value="<%- EvServiceStatus.Suspended %>">完全中止（メールが送信されます。）</label>
                         <label class="for-resume">
-                            <input class="radio-ev" type="radio" id="radio_ev_restart" name="ev" value="<%- EvServiceStatus.Normal %>">運行再開</label>
+                            <input class="radio-ev" type="radio" id="radio_ev_restart" name="ev" value="<%- EvServiceStatus.Normal %>">販売再開</label>
                     </div>
                     <div class="for-suspend for-evstop">
                         <h3>お客様通知内容</h3>
                         <p>お客様に送信する通知内容を確認・編集してください。</p>
-                        <textarea id="textarea_announcemail" rows="10" placeholder="運転停止の通知テキスト(日・英を併記)"></textarea>
+                        <textarea id="textarea_announcemail" rows="10" placeholder="運転停止の通知テキスト(日・英を併記)">
+                            ○○のため、ご予約いただいた下記トップデッキツアーが中止となりました。
+                            チケットをご購入いただいております皆様方には、大変ご迷惑をお掛けし申し訳ございません。
+                            深くお詫び申し上げます。
+                            Reservations for the following Top Deck Tour have been cancelled due to ○○.
+                            We apologize for the inconvenience to all visitors who have purchased tickets for this tour.
+
+                            ツアーご購入金額全額を、ご購入時にご利用のクレジットカードへ返金いたします。
+                            弊社の返金手続きが完了しましたら、メールにてお知らせいたします。
+                            The total cost of the tickets purchased will be refunded to the credit card used at the time of purchase.
+                            You will be notified by e-mail when all refund procedures have been completed.
+                        </textarea>
                     </div>
                 </form>
             </div>
