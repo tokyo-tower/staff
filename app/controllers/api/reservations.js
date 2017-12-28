@@ -15,8 +15,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ttts = require("@motionpicture/ttts-domain");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
+const moment = require("moment");
 const _ = require("underscore");
 const debug = createDebug('ttts-staff:controllers:api:reservations');
+const redisClient = ttts.redis.createClient({
+    host: process.env.REDIS_HOST,
+    // tslint:disable-next-line:no-magic-numbers
+    port: parseInt(process.env.REDIS_PORT, 10),
+    password: process.env.REDIS_KEY,
+    tls: { servername: process.env.REDIS_HOST }
+});
 /**
  * 予約検索
  */
@@ -181,8 +189,8 @@ function search(req, res) {
             })
                 .skip(limit * (page - 1))
                 .limit(limit)
-                .exec();
-            //---
+                .exec()
+                .then((docs) => docs.map((doc) => doc.toObject()));
             res.json({
                 results: reservations,
                 count: count,
@@ -201,8 +209,7 @@ function search(req, res) {
 exports.search = search;
 /**
  * マイページ予約検索画面検証
- *
- * @param {any} req
+ * @param {Request} req
  * @return {any}
  */
 function validate(req) {
@@ -354,20 +361,16 @@ function cancelById(reservationId) {
                 yield stockRepo.stockModel.findByIdAndUpdate(cancelingReservation.get('stock'), { availability: cancelingReservation.get('stock_availability_before') }).exec();
             })));
             debug(cancelingReservations.length, 'reservation(s) canceled.');
-            // tslint:disable-next-line:no-suspicious-comment
-            // TODO 車椅子流入制限解放
-            // if (reservation.ticket_ttts_extension !== ttts.TicketTypeGroupUtil.TICKET_TYPE_CATEGORY_NORMAL) {
-            //     await ttts.Models.ReservationPerHour.findOneAndUpdate(
-            //         { reservation_id: reservationId },
-            //         {
-            //             $set: { status: ttts.factory.itemAvailability.InStock },
-            //             $unset: { expired_at: 1, reservation_id: 1 }
-            //         },
-            //         {
-            //             new: true
-            //         }
-            //     ).exec();
-            // }
+            // 券種による流入制限解放
+            if (reservation.rate_limit_unit_in_seconds > 0) {
+                const rateLimitRepo = new ttts.repository.rateLimit.TicketTypeCategory(redisClient);
+                yield rateLimitRepo.unlock({
+                    ticketTypeCategory: reservation.ticket_ttts_extension.category,
+                    performanceStartDate: moment(reservation.performance_start_date).toDate(),
+                    unitInSeconds: reservation.rate_limit_unit_in_seconds
+                });
+                debug('rate limit reset.');
+            }
         }
         catch (error) {
             return false;

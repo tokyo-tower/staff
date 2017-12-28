@@ -7,9 +7,18 @@ import * as ttts from '@motionpicture/ttts-domain';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 import { INTERNAL_SERVER_ERROR, NO_CONTENT, NOT_FOUND } from 'http-status';
+import * as moment from 'moment';
 import * as _ from 'underscore';
 
 const debug = createDebug('ttts-staff:controllers:api:reservations');
+
+const redisClient = ttts.redis.createClient({
+    host: <string>process.env.REDIS_HOST,
+    // tslint:disable-next-line:no-magic-numbers
+    port: parseInt(<string>process.env.REDIS_PORT, 10),
+    password: <string>process.env.REDIS_KEY,
+    tls: { servername: <string>process.env.REDIS_HOST }
+});
 
 /**
  * 予約検索
@@ -178,7 +187,7 @@ export async function search(req: Request, res: Response): Promise<void> {
         // });
 
         // データ検索(検索→ソート→指定ページ分切取り)
-        const reservations = <any[]>await reservationRepo.reservationModel.find({ $and: conditions })
+        const reservations = await reservationRepo.reservationModel.find({ $and: conditions })
             .sort({
                 performance_day: 1,
                 performance_start_time: 1,
@@ -187,8 +196,8 @@ export async function search(req: Request, res: Response): Promise<void> {
             })
             .skip(limit * (page - 1))
             .limit(limit)
-            .exec();
-        //---
+            .exec()
+            .then((docs) => docs.map((doc) => <ttts.factory.reservation.event.IReservation>doc.toObject()));
 
         res.json({
             results: reservations,
@@ -203,10 +212,10 @@ export async function search(req: Request, res: Response): Promise<void> {
         });
     }
 }
+
 /**
  * マイページ予約検索画面検証
- *
- * @param {any} req
+ * @param {Request} req
  * @return {any}
  */
 async function validate(req: Request): Promise<any> {
@@ -342,7 +351,7 @@ async function cancelById(reservationId: string): Promise<boolean> {
         const stockRepo = new ttts.repository.Stock(ttts.mongoose.connection);
 
         // idから予約データ取得
-        const reservation = <any>await reservationRepo.reservationModel.findOne(
+        const reservation = await reservationRepo.reservationModel.findOne(
             {
                 _id: reservationId,
                 status: ttts.factory.reservationStatusType.ReservationConfirmed
@@ -352,7 +361,7 @@ async function cancelById(reservationId: string): Promise<boolean> {
                 throw new Error('Reservation not found.');
             }
 
-            return doc.toObject();
+            return <ttts.factory.reservation.event.IReservation>doc.toObject();
         });
 
         // 同じseat_code_baseのチケット一式を予約キャンセル(車椅子予約の場合は、システムホールドのデータもキャンセルする必要があるので)
@@ -380,20 +389,16 @@ async function cancelById(reservationId: string): Promise<boolean> {
         }));
         debug(cancelingReservations.length, 'reservation(s) canceled.');
 
-        // tslint:disable-next-line:no-suspicious-comment
-        // TODO 車椅子流入制限解放
-        // if (reservation.ticket_ttts_extension !== ttts.TicketTypeGroupUtil.TICKET_TYPE_CATEGORY_NORMAL) {
-        //     await ttts.Models.ReservationPerHour.findOneAndUpdate(
-        //         { reservation_id: reservationId },
-        //         {
-        //             $set: { status: ttts.factory.itemAvailability.InStock },
-        //             $unset: { expired_at: 1, reservation_id: 1 }
-        //         },
-        //         {
-        //             new: true
-        //         }
-        //     ).exec();
-        // }
+        // 券種による流入制限解放
+        if (reservation.rate_limit_unit_in_seconds > 0) {
+            const rateLimitRepo = new ttts.repository.rateLimit.TicketTypeCategory(redisClient);
+            await rateLimitRepo.unlock({
+                ticketTypeCategory: reservation.ticket_ttts_extension.category,
+                performanceStartDate: moment(reservation.performance_start_date).toDate(),
+                unitInSeconds: reservation.rate_limit_unit_in_seconds
+            });
+            debug('rate limit reset.');
+        }
     } catch (error) {
         return false;
     }

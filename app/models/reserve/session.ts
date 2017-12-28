@@ -258,7 +258,7 @@ type IPerformance = ttts.factory.performance.IPerformanceWithDetails & {
 /**
  * チケット情報インターフェース
  */
-type ITicketType = ttts.factory.performance.ITicketType & {
+type ITicketType = ttts.factory.offer.seatReservation.ITicketType & {
     count: number;  // 枚数
     watcher_name: string;
 };
