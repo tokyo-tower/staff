@@ -15,6 +15,7 @@ $(function () {
     var input_day = document.getElementById('input_performancedate');
     var $modal_calender = $('.modal-calender');
     var calendar = new window.flatpickr(input_day, {
+        allowInput: true,
         appendTo: $('#calendercontainer').on('click', function (e) { e.stopPropagation(); })[0], // モーダル内コンテナに挿入しつつカレンダークリックでモーダルが閉じるのを防止
         defaultDate: 'today',
         disableMobile: true, // 端末自前の日付選択UIを使わない

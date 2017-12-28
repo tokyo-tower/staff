@@ -32,7 +32,14 @@ const redisClient = ttts.redis.createClient({
 function search(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         // バリデーション
-        const errors = yield validate(req);
+        const errors = {};
+        // 片方入力エラーチェック
+        if (!isInputEven(req.query.start_hour1, req.query.start_minute1)) {
+            errors.start_hour1 = { msg: '時分Fromが片方しか指定されていません' };
+        }
+        if (!isInputEven(req.query.start_hour2, req.query.start_minute2)) {
+            errors.start_hour2 = { msg: '時分Toが片方しか指定されていません' };
+        }
         if (Object.keys(errors).length > 0) {
             res.json({
                 success: false,
@@ -207,28 +214,6 @@ function search(req, res) {
     });
 }
 exports.search = search;
-/**
- * マイページ予約検索画面検証
- * @param {Request} req
- * @return {any}
- */
-function validate(req) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // 来塔日
-        req.checkQuery('day', req.__('NoInput{{fieldName}}', { fieldName: req.__('Label.Day') })).notEmpty();
-        // 検証
-        const validatorResult = yield req.getValidationResult();
-        const errors = (!validatorResult.isEmpty()) ? req.validationErrors(true) : {};
-        // 片方入力エラーチェック
-        if (!isInputEven(req.query.start_hour1, req.query.start_minute1)) {
-            errors.start_hour1 = { msg: '時分Fromが片方しか指定されていません' };
-        }
-        if (!isInputEven(req.query.start_hour2, req.query.start_minute2)) {
-            errors.start_hour2 = { msg: '時分Toが片方しか指定されていません' };
-        }
-        return errors;
-    });
-}
 /**
  * 両方入力チェック(両方入力、または両方未入力の時true)
  *

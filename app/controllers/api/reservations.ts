@@ -26,7 +26,16 @@ const redisClient = ttts.redis.createClient({
 // tslint:disable-next-line:cyclomatic-complexity max-func-body-length
 export async function search(req: Request, res: Response): Promise<void> {
     // バリデーション
-    const errors = await validate(req);
+    const errors: any = {};
+
+    // 片方入力エラーチェック
+    if (!isInputEven(req.query.start_hour1, req.query.start_minute1)) {
+        errors.start_hour1 = { msg: '時分Fromが片方しか指定されていません' };
+    }
+    if (!isInputEven(req.query.start_hour2, req.query.start_minute2)) {
+        errors.start_hour2 = { msg: '時分Toが片方しか指定されていません' };
+    }
+
     if (Object.keys(errors).length > 0) {
         res.json({
             success: false,
@@ -213,29 +222,6 @@ export async function search(req: Request, res: Response): Promise<void> {
     }
 }
 
-/**
- * マイページ予約検索画面検証
- * @param {Request} req
- * @return {any}
- */
-async function validate(req: Request): Promise<any> {
-    // 来塔日
-    req.checkQuery('day', req.__('NoInput{{fieldName}}', { fieldName: req.__('Label.Day') })).notEmpty();
-
-    // 検証
-    const validatorResult = await req.getValidationResult();
-    const errors = (!validatorResult.isEmpty()) ? req.validationErrors(true) : {};
-
-    // 片方入力エラーチェック
-    if (!isInputEven(req.query.start_hour1, req.query.start_minute1)) {
-        (<any>errors).start_hour1 = { msg: '時分Fromが片方しか指定されていません' };
-    }
-    if (!isInputEven(req.query.start_hour2, req.query.start_minute2)) {
-        (<any>errors).start_hour2 = { msg: '時分Toが片方しか指定されていません' };
-    }
-
-    return errors;
-}
 /**
  * 両方入力チェック(両方入力、または両方未入力の時true)
  *
