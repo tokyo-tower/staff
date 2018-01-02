@@ -122,19 +122,13 @@ export async function performances(req: Request, res: Response, next: NextFuncti
                 return;
             }
         } else {
-            // 仮予約あればキャンセルする
-            await reserveBaseController.processCancelSeats(<ReserveSessionModel>reservationModel);
-            reservationModel.save(req);
-
             res.render('staff/reserve/performances', {
-                // FilmUtil: ttts.FilmUtil,
                 token: token,
                 reserveMaxDate: reserveMaxDate,
                 layout: layout
             });
         }
     } catch (error) {
-        console.error(error);
         next(new Error(req.__('UnexpectedError')));
     }
 }
@@ -150,19 +144,47 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
 
             return;
         }
+
+        // パフォーマンスは指定済みのはず
+        if (reservationModel.transactionInProgress.performance === undefined) {
+            throw new Error(req.__('UnexpectedError'));
+        }
+
         reservationModel.transactionInProgress.paymentMethod = ttts.factory.paymentMethodType.Invitation;
+
         if (req.method === 'POST') {
             // 仮予約あればキャンセルする
             try {
-                await reserveBaseController.processCancelSeats(reservationModel);
+                // セッション中の予約リストを初期化
+                reservationModel.transactionInProgress.reservations = [];
+
+                // 座席仮予約があればキャンセル
+                if (reservationModel.transactionInProgress.seatReservationAuthorizeActionId !== undefined) {
+                    debug('canceling seat reservation authorize action...');
+                    await ttts.service.transaction.placeOrderInProgress.action.authorize.seatReservation.cancel(
+                        reservationModel.transactionInProgress.agentId,
+                        reservationModel.transactionInProgress.id,
+                        reservationModel.transactionInProgress.seatReservationAuthorizeActionId
+                    )(
+                        new ttts.repository.Transaction(ttts.mongoose.connection),
+                        new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection),
+                        new ttts.repository.rateLimit.TicketTypeCategory(redisClient)
+                        );
+                    debug('seat reservation authorize action canceled.');
+                }
             } catch (error) {
-                // tslint:disable-next-line:no-console
-                console.log(error);
                 next(error);
 
                 return;
             }
+
             try {
+                // 現在時刻が開始時刻を過ぎている時
+                if (moment(reservationModel.transactionInProgress.performance.start_date).toDate() < moment().toDate()) {
+                    //「ご希望の枚数が用意できないため予約できません。」
+                    throw new Error(req.__('NoAvailableSeats'));
+                }
+
                 // 予約処理
                 await reserveBaseController.processFixSeatsAndTickets(reservationModel, req);
                 reservationModel.save(req);
@@ -170,6 +192,13 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
             } catch (error) {
                 // "予約可能な席がございません"などのメッセージ表示
                 res.locals.message = error.message;
+
+                // 車椅子レート制限を超過した場合
+                if (error instanceof ttts.factory.errors.RateLimitExceeded ||
+                    error instanceof ttts.factory.errors.AlreadyInUse) {
+                    res.locals.message = req.__('NoAvailableSeats');
+                }
+
                 res.render('staff/reserve/tickets', {
                     reservationModel: reservationModel,
                     layout: layout
@@ -207,7 +236,6 @@ export async function profile(req: Request, res: Response, next: NextFunction): 
                 reservationModel.save(req);
                 res.redirect('/staff/reserve/confirm');
             } catch (error) {
-                console.error(error);
                 res.render('staff/reserve/profile', {
                     reservationModel: reservationModel,
                     layout: layout
@@ -232,8 +260,6 @@ export async function profile(req: Request, res: Response, next: NextFunction): 
 
             res.render('staff/reserve/profile', {
                 reservationModel: reservationModel,
-                GMO_ENDPOINT: process.env.GMO_ENDPOINT,
-                GMO_SHOP_ID: process.env.GMO_SHOP_ID,
                 layout: layout
             });
         }
