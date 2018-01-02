@@ -18,7 +18,6 @@ const debug = createDebug('ttts-staff:controller:reserve');
 const PURCHASER_GROUP: string = ttts.factory.person.Group.Staff;
 const layout: string = 'layouts/staff/layout';
 
-const PAY_TYPE_FREE: string = 'F';
 const paymentMethodNames: any = { F: '無料招待券', I: '請求書支払い' };
 const reserveMaxDateInfo: any = conf.get<any>('reserve_max_date');
 
@@ -39,10 +38,14 @@ export async function start(req: Request, res: Response, next: NextFunction): Pr
     }
 
     try {
+        // 購入結果セッション初期化
+        delete (<Express.Session>req.session).transactionResult;
+        delete (<Express.Session>req.session).printToken;
+
         const reservationModel = await reserveBaseController.processStart(PURCHASER_GROUP, req);
         reservationModel.save(req);
 
-        if (reservationModel.performance !== undefined) {
+        if (reservationModel.transactionInProgress.performance !== undefined) {
             const cb = '/staff/reserve/tickets';
             res.redirect(`/staff/reserve/terms?cb=${encodeURIComponent(cb)}`);
         } else {
@@ -147,7 +150,7 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
 
             return;
         }
-        reservationModel.paymentMethod = <any>'';
+        reservationModel.transactionInProgress.paymentMethod = ttts.factory.paymentMethodType.Invitation;
         if (req.method === 'POST') {
             // 仮予約あればキャンセルする
             try {
@@ -212,18 +215,20 @@ export async function profile(req: Request, res: Response, next: NextFunction): 
             }
         } else {
             // セッションに情報があれば、フォーム初期値設定
-            const email = reservationModel.purchaser.email;
-            res.locals.lastName = reservationModel.purchaser.lastName;
-            res.locals.firstName = reservationModel.purchaser.firstName;
-            res.locals.tel = reservationModel.purchaser.tel;
-            res.locals.age = reservationModel.purchaser.age;
-            res.locals.address = reservationModel.purchaser.address;
-            res.locals.gender = reservationModel.purchaser.gender;
+            const email = reservationModel.transactionInProgress.purchaser.email;
+            res.locals.lastName = reservationModel.transactionInProgress.purchaser.lastName;
+            res.locals.firstName = reservationModel.transactionInProgress.purchaser.firstName;
+            res.locals.tel = reservationModel.transactionInProgress.purchaser.tel;
+            res.locals.age = reservationModel.transactionInProgress.purchaser.age;
+            res.locals.address = reservationModel.transactionInProgress.purchaser.address;
+            res.locals.gender = reservationModel.transactionInProgress.purchaser.gender;
             res.locals.email = (!_.isEmpty(email)) ? email : '';
             res.locals.emailConfirm = (!_.isEmpty(email)) ? email.substr(0, email.indexOf('@')) : '';
             res.locals.emailConfirmDomain = (!_.isEmpty(email)) ? email.substr(email.indexOf('@') + 1) : '';
             res.locals.paymentMethod =
-                (!_.isEmpty(reservationModel.paymentMethod)) ? reservationModel.paymentMethod : PAY_TYPE_FREE;
+                (!_.isEmpty(reservationModel.transactionInProgress.paymentMethod))
+                    ? reservationModel.transactionInProgress.paymentMethod
+                    : ttts.factory.paymentMethodType.Invitation;
 
             res.render('staff/reserve/profile', {
                 reservationModel: reservationModel,
@@ -243,7 +248,7 @@ export async function profile(req: Request, res: Response, next: NextFunction): 
 export async function confirm(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const reservationModel = ReserveSessionModel.FIND(req);
-        if (reservationModel === null) {
+        if (reservationModel === null || moment(reservationModel.transactionInProgress.expires).toDate() <= moment().toDate()) {
             next(new Error(req.__('Expired')));
 
             return;
@@ -251,11 +256,6 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
 
         if (req.method === 'POST') {
             try {
-                // 仮押さえ有効期限チェック
-                if (reservationModel.expires <= moment().toDate()) {
-                    throw new Error(req.__('Expired'));
-                }
-
                 const taskRepo = new ttts.repository.Task(ttts.mongoose.connection);
                 const transactionRepo = new ttts.repository.Transaction(ttts.mongoose.connection);
                 const creditCardAuthorizeActionRepo = new ttts.repository.action.authorize.CreditCard(ttts.mongoose.connection);
@@ -263,9 +263,9 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
 
                 // 予約確定
                 const transactionResult = await ttts.service.transaction.placeOrderInProgress.confirm({
-                    agentId: reservationModel.agentId,
-                    transactionId: reservationModel.id,
-                    paymentMethod: reservationModel.paymentMethod
+                    agentId: reservationModel.transactionInProgress.agentId,
+                    transactionId: reservationModel.transactionInProgress.id,
+                    paymentMethod: reservationModel.transactionInProgress.paymentMethod
                 })(transactionRepo, creditCardAuthorizeActionRepo, seatReservationAuthorizeActionRepo);
                 debug('transaction confirmed. orderNumber:', transactionResult.order.orderNumber);
 
@@ -279,7 +279,7 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                     );
 
                     await ttts.service.transaction.placeOrder.sendEmail(
-                        reservationModel.id,
+                        reservationModel.transactionInProgress.id,
                         emailAttributes
                     )(taskRepo, transactionRepo);
                     debug('email sent.');
@@ -300,20 +300,18 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                 return;
             }
         } else {
-            const reservations: any[] = reserveBaseController.getReservations(reservationModel);
-            // チケットをticket_type(id)でソート
-            sortReservationstByTicketType(reservations);
-            const ticketInfos: any = reserveBaseController.getTicketInfos(reservations);
+            const ticketInfos: any = reserveBaseController.getTicketInfos(reservationModel.transactionInProgress.reservations);
             // 券種ごとの表示情報編集
             Object.keys(ticketInfos).forEach((key) => {
                 const ticketInfo = (<any>ticketInfos)[key];
                 (<any>ticketInfos)[key].info =
                     `${ticketInfo.ticket_type_name[res.locale]} ${ticketInfo.charge} × ${res.__('{{n}}Leaf', { n: ticketInfo.count })}`;
             });
+
             res.render('staff/reserve/confirm', {
                 reservationModel: reservationModel,
                 ticketInfos: ticketInfos,
-                paymentMethodName: paymentMethodNames[reservationModel.paymentMethod],
+                paymentMethodName: paymentMethodNames[reservationModel.transactionInProgress.paymentMethod],
                 layout: layout
             });
         }

@@ -24,7 +24,6 @@ const reserveBaseController = require("../reserveBase");
 const debug = createDebug('ttts-staff:controller:reserve');
 const PURCHASER_GROUP = ttts.factory.person.Group.Staff;
 const layout = 'layouts/staff/layout';
-const PAY_TYPE_FREE = 'F';
 const paymentMethodNames = { F: '無料招待券', I: '請求書支払い' };
 const reserveMaxDateInfo = conf.get('reserve_max_date');
 const redisClient = ttts.redis.createClient({
@@ -42,9 +41,12 @@ function start(req, res, next) {
             return;
         }
         try {
+            // 購入結果セッション初期化
+            delete req.session.transactionResult;
+            delete req.session.printToken;
             const reservationModel = yield reserveBaseController.processStart(PURCHASER_GROUP, req);
             reservationModel.save(req);
-            if (reservationModel.performance !== undefined) {
+            if (reservationModel.transactionInProgress.performance !== undefined) {
                 const cb = '/staff/reserve/tickets';
                 res.redirect(`/staff/reserve/terms?cb=${encodeURIComponent(cb)}`);
             }
@@ -145,7 +147,7 @@ function tickets(req, res, next) {
                 next(new Error(req.__('Expired')));
                 return;
             }
-            reservationModel.paymentMethod = '';
+            reservationModel.transactionInProgress.paymentMethod = ttts.factory.paymentMethodType.Invitation;
             if (req.method === 'POST') {
                 // 仮予約あればキャンセルする
                 try {
@@ -214,18 +216,20 @@ function profile(req, res, next) {
             }
             else {
                 // セッションに情報があれば、フォーム初期値設定
-                const email = reservationModel.purchaser.email;
-                res.locals.lastName = reservationModel.purchaser.lastName;
-                res.locals.firstName = reservationModel.purchaser.firstName;
-                res.locals.tel = reservationModel.purchaser.tel;
-                res.locals.age = reservationModel.purchaser.age;
-                res.locals.address = reservationModel.purchaser.address;
-                res.locals.gender = reservationModel.purchaser.gender;
+                const email = reservationModel.transactionInProgress.purchaser.email;
+                res.locals.lastName = reservationModel.transactionInProgress.purchaser.lastName;
+                res.locals.firstName = reservationModel.transactionInProgress.purchaser.firstName;
+                res.locals.tel = reservationModel.transactionInProgress.purchaser.tel;
+                res.locals.age = reservationModel.transactionInProgress.purchaser.age;
+                res.locals.address = reservationModel.transactionInProgress.purchaser.address;
+                res.locals.gender = reservationModel.transactionInProgress.purchaser.gender;
                 res.locals.email = (!_.isEmpty(email)) ? email : '';
                 res.locals.emailConfirm = (!_.isEmpty(email)) ? email.substr(0, email.indexOf('@')) : '';
                 res.locals.emailConfirmDomain = (!_.isEmpty(email)) ? email.substr(email.indexOf('@') + 1) : '';
                 res.locals.paymentMethod =
-                    (!_.isEmpty(reservationModel.paymentMethod)) ? reservationModel.paymentMethod : PAY_TYPE_FREE;
+                    (!_.isEmpty(reservationModel.transactionInProgress.paymentMethod))
+                        ? reservationModel.transactionInProgress.paymentMethod
+                        : ttts.factory.paymentMethodType.Invitation;
                 res.render('staff/reserve/profile', {
                     reservationModel: reservationModel,
                     GMO_ENDPOINT: process.env.GMO_ENDPOINT,
@@ -247,25 +251,21 @@ function confirm(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const reservationModel = session_1.default.FIND(req);
-            if (reservationModel === null) {
+            if (reservationModel === null || moment(reservationModel.transactionInProgress.expires).toDate() <= moment().toDate()) {
                 next(new Error(req.__('Expired')));
                 return;
             }
             if (req.method === 'POST') {
                 try {
-                    // 仮押さえ有効期限チェック
-                    if (reservationModel.expires <= moment().toDate()) {
-                        throw new Error(req.__('Expired'));
-                    }
                     const taskRepo = new ttts.repository.Task(ttts.mongoose.connection);
                     const transactionRepo = new ttts.repository.Transaction(ttts.mongoose.connection);
                     const creditCardAuthorizeActionRepo = new ttts.repository.action.authorize.CreditCard(ttts.mongoose.connection);
                     const seatReservationAuthorizeActionRepo = new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection);
                     // 予約確定
                     const transactionResult = yield ttts.service.transaction.placeOrderInProgress.confirm({
-                        agentId: reservationModel.agentId,
-                        transactionId: reservationModel.id,
-                        paymentMethod: reservationModel.paymentMethod
+                        agentId: reservationModel.transactionInProgress.agentId,
+                        transactionId: reservationModel.transactionInProgress.id,
+                        paymentMethod: reservationModel.transactionInProgress.paymentMethod
                     })(transactionRepo, creditCardAuthorizeActionRepo, seatReservationAuthorizeActionRepo);
                     debug('transaction confirmed. orderNumber:', transactionResult.order.orderNumber);
                     // 購入結果セッション作成
@@ -273,7 +273,7 @@ function confirm(req, res, next) {
                     try {
                         // 完了メールキュー追加(あれば更新日時を更新するだけ)
                         const emailAttributes = yield reserveBaseController.createEmailAttributes(transactionResult.eventReservations, reservationModel.getTotalCharge(), res);
-                        yield ttts.service.transaction.placeOrder.sendEmail(reservationModel.id, emailAttributes)(taskRepo, transactionRepo);
+                        yield ttts.service.transaction.placeOrder.sendEmail(reservationModel.transactionInProgress.id, emailAttributes)(taskRepo, transactionRepo);
                         debug('email sent.');
                     }
                     catch (error) {
@@ -291,10 +291,7 @@ function confirm(req, res, next) {
                 }
             }
             else {
-                const reservations = reserveBaseController.getReservations(reservationModel);
-                // チケットをticket_type(id)でソート
-                sortReservationstByTicketType(reservations);
-                const ticketInfos = reserveBaseController.getTicketInfos(reservations);
+                const ticketInfos = reserveBaseController.getTicketInfos(reservationModel.transactionInProgress.reservations);
                 // 券種ごとの表示情報編集
                 Object.keys(ticketInfos).forEach((key) => {
                     const ticketInfo = ticketInfos[key];
@@ -304,7 +301,7 @@ function confirm(req, res, next) {
                 res.render('staff/reserve/confirm', {
                     reservationModel: reservationModel,
                     ticketInfos: ticketInfos,
-                    paymentMethodName: paymentMethodNames[reservationModel.paymentMethod],
+                    paymentMethodName: paymentMethodNames[reservationModel.transactionInProgress.paymentMethod],
                     layout: layout
                 });
             }

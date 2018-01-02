@@ -14,8 +14,8 @@
                 <td>
                     <p>
                         <%
-                        const startDate = moment(reservationModel.performance.start_date);
-                        const endTime = moment(reservationModel.performance.end_date);
+                        const startDate = moment(reservationModel.transactionInProgress.performance.start_date);
+                        const endTime = moment(reservationModel.transactionInProgress.performance.end_date);
                         %>
                         <%- `${startDate.format('YYYY/MM/DD')} ${startDate.format('HH:mm')} - ${endTime.format('HH:mm')}` %>
                     </p>
@@ -25,7 +25,7 @@
                 <th>ツアーナンバー</th>
                 <td>
                     <p>
-                        <%- reservationModel.performance.ttts_extension.tour_number %>
+                        <%- reservationModel.transactionInProgress.performance.ttts_extension.tour_number %>
                     </p>
                 </td>
             </tr>
@@ -53,7 +53,7 @@
                     お支払い方法
                 </th>
                 <td>
-                    <p><%- __(`PaymentMethodName.${reservationModel.paymentMethod}`) %></p>
+                    <p><%- __(`PaymentMethodName.${reservationModel.transactionInProgress.paymentMethod}`) %></p>
                 </td>
             </tr>
         </tbody>

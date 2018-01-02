@@ -1,8 +1,8 @@
 <%
-    const isStaff = (reservationModel.purchaserGroup === 'Staff');
-    const tempReservationModel = (isStaff) ? reservationModel : reservationModel.transactionInProgress;
+    const isStaff = (reservationModel.transactionInProgress.purchaserGroup === 'Staff');
+    const tempReservationModel = reservationModel.transactionInProgress;
     const isWheelchair = (tempReservationModel.category === 'wheelchair');
-    const tempReservationModel_reservations = tempReservationModel.reservations || tempReservationModel.seatCodes.concat((tempReservationModel.seatCodesExtra || [])).map((seatCode) => { return tempReservationModel[`reservation_${seatCode}`]; });
+    const tempReservationModel_reservations = tempReservationModel.reservations;
 %>
 
 <%- include('./_step', {currentStepName: 'tickets'}) %>
