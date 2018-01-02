@@ -268,6 +268,8 @@ function confirm(req, res, next) {
                         paymentMethod: reservationModel.paymentMethod
                     })(transactionRepo, creditCardAuthorizeActionRepo, seatReservationAuthorizeActionRepo);
                     debug('transaction confirmed. orderNumber:', transactionResult.order.orderNumber);
+                    // 購入結果セッション作成
+                    req.session.transactionResult = transactionResult;
                     try {
                         // 完了メールキュー追加(あれば更新日時を更新するだけ)
                         const emailAttributes = yield reserveBaseController.createEmailAttributes(transactionResult.eventReservations, reservationModel.getTotalCharge(), res);
@@ -277,12 +279,15 @@ function confirm(req, res, next) {
                     catch (error) {
                         // 失敗してもスルー
                     }
+                    //　購入フローセッションは削除
                     session_1.default.REMOVE(req);
-                    res.redirect(`/staff/reserve/${reservationModel.performance.day}/${reservationModel.paymentNo}/complete`);
+                    res.redirect('/staff/reserve/complete');
+                    return;
                 }
                 catch (error) {
                     session_1.default.REMOVE(req);
                     next(error);
+                    return;
                 }
             }
             else {
@@ -316,40 +321,27 @@ exports.confirm = confirm;
 function complete(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const transactionRepo = new ttts.repository.Transaction(ttts.mongoose.connection);
-            const transactionDoc = yield transactionRepo.transactionModel.findOne({
-                'result.eventReservations.performance_day': req.params.performanceDay,
-                'result.eventReservations.payment_no': req.params.paymentNo,
-                'result.eventReservations.purchaser_group': PURCHASER_GROUP,
-                'result.eventReservations.status': ttts.factory.reservationStatusType.ReservationConfirmed,
-                'result.eventReservations.owner': req.staffUser.get('id'),
-                'result.eventReservations.purchased_at': {
-                    $gt: moment().add(-30, 'minutes').toDate() // tslint:disable-line:no-magic-numbers
-                }
-            }).exec();
-            if (transactionDoc === null) {
+            // セッションに取引結果があるはず
+            const transactionResult = req.session.transactionResult;
+            if (transactionResult === undefined) {
                 next(new Error(req.__('NotFound')));
                 return;
             }
-            const transaction = transactionDoc.toObject();
-            debug('confirmed transaction:', transaction.id);
-            let reservations = transaction.result.eventReservations;
+            let reservations = transactionResult.eventReservations;
             debug(reservations.length, 'reservation(s) found.');
             reservations = reservations.filter((r) => r.status === ttts.factory.reservationStatusType.ReservationConfirmed);
-            if (reservations.length === 0) {
-                next(new Error(req.__('NotFound')));
-                return;
-            }
-            //reservations.sort((a, b) => ttts.factory.place.screen.sortBySeatCode(a.seat_code, b.seat_code));
             // チケットをticket_type(id)でソート
             sortReservationstByTicketType(reservations);
-            // 印刷トークン発行
-            const tokenRepo = new ttts.repository.Token(redisClient);
-            const printToken = yield tokenRepo.createPrintToken(reservations.map((r) => r.id));
-            debug('printToken created.', printToken);
+            // 初めてのアクセスであれば印刷トークン発行
+            if (req.session.printToken === undefined) {
+                const tokenRepo = new ttts.repository.Token(redisClient);
+                const printToken = yield tokenRepo.createPrintToken(reservations.map((r) => r.id));
+                debug('printToken created.', printToken);
+                req.session.printToken = printToken;
+            }
             res.render('staff/reserve/complete', {
                 reservations: reservations,
-                printToken: printToken,
+                printToken: req.session.printToken,
                 layout: layout
             });
         }

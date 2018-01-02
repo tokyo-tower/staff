@@ -22,7 +22,7 @@ staffRouter.all('/reserve/performances', authentication, staffReserveController.
 staffRouter.all('/reserve/tickets', authentication, staffReserveController.tickets);
 staffRouter.all('/reserve/profile', authentication, staffReserveController.profile);
 staffRouter.all('/reserve/confirm', authentication, staffReserveController.confirm);
-staffRouter.get('/reserve/:performanceDay/:paymentNo/complete', authentication, staffReserveController.complete);
+staffRouter.get('/reserve/complete', authentication, staffReserveController.complete);
 
 // 運行・オンライン販売停止設定コントローラー
 staffRouter.get('/suspension/setting/performances', authentication, staffSuspensionSettingController.performances);

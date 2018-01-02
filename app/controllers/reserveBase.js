@@ -73,7 +73,7 @@ function processFixSeatsAndTickets(reservationModel, req) {
             };
         });
         debug(`creating seatReservation authorizeAction on ${offers.length} offers...`);
-        const action = yield ttts.service.transaction.placeOrderInProgress.action.authorize.seatReservation.create(reservationModel.agentId, reservationModel.id, reservationModel.performance.id, offers)(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.Performance(ttts.mongoose.connection), new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection), new ttts.repository.PaymentNo(ttts.mongoose.connection), new ttts.repository.rateLimit.TicketTypeCategory(redisClient));
+        const action = yield ttts.service.transaction.placeOrderInProgress.action.authorize.seatReservation.create(reservationModel.agentId, reservationModel.id, reservationModel.performance.id, offers)(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.Performance(ttts.mongoose.connection), new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection), new ttts.repository.PaymentNo(redisClient), new ttts.repository.rateLimit.TicketTypeCategory(redisClient));
         reservationModel.seatReservationAuthorizeActionId = action.id;
         // この時点で購入番号が発行される
         reservationModel.paymentNo = action.result.tmpReservations[0].payment_no;
