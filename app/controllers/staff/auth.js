@@ -24,7 +24,6 @@ const debug = createDebug('ttts-staff:controller:staff:auth');
  * @method login
  * @returns {Promise<void>}
  */
-// tslint:disable-next-line:max-func-body-length
 function login(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (req.staffUser !== undefined && req.staffUser.isAuthenticated()) {
@@ -43,69 +42,44 @@ function login(req, res, next) {
                 res.locals.remember = req.body.remember;
                 res.locals.validation = validationResult.array();
                 if (validationResult.isEmpty()) {
-                    // ユーザー認証
-                    const ownerRepo = new ttts.repository.Owner(ttts.mongoose.connection);
-                    const owner = yield ownerRepo.ownerModel.findOne({
-                        username: req.body.userId,
-                        group: ttts.factory.person.Group.Staff
-                    }).exec();
-                    res.locals.userId = req.body.userId;
-                    res.locals.password = '';
-                    res.locals.language = req.body.language;
-                    res.locals.remember = req.body.remember;
-                    if (owner === null) {
+                    try {
+                        // ログイン情報が有効であれば、Cognitoでもログイン
+                        req.session.cognitoCredentials =
+                            yield getCognitoCredentials(req.body.userId, req.body.password);
+                        debug('cognito credentials published.', req.session.cognitoCredentials);
+                    }
+                    catch (error) {
                         res.locals.validation = [
                             { msg: req.__('Invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
                         ];
                     }
-                    else {
-                        // パスワードチェック
-                        if (owner.get('password_hash') !== ttts.CommonUtil.createHash(req.body.password, owner.get('password_salt'))) {
-                            res.locals.validation = [
-                                { msg: req.__('Invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
-                            ];
-                        }
-                        else {
-                            try {
-                                // ログイン情報が有効であれば、Cognitoでもログイン
-                                req.session.cognitoCredentials =
-                                    yield getCognitoCredentials(req.body.userId, req.body.password);
-                                debug('cognito credentials published.', req.session.cognitoCredentials);
-                            }
-                            catch (error) {
-                                res.locals.validation = [
-                                    { msg: req.__('Invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
-                                ];
-                            }
-                            const cognitoCredentials = req.session.cognitoCredentials;
-                            if (cognitoCredentials !== undefined) {
-                                const cognitoUser = yield getCognitoUser(cognitoCredentials.AccessToken);
-                                // ログイン記憶
-                                // tslint:disable-next-line:no-suspicious-comment
-                                // TODO Cognitoユーザーに合わせて調整
-                                // if (req.body.remember === 'on') {
-                                //     // トークン生成
-                                //     const authentication = await ttts.Models.Authentication.create(
-                                //         {
-                                //             token: ttts.CommonUtil.createToken(),
-                                //             owner: owner.get('id'),
-                                //             locale: req.body.language
-                                //         }
-                                //     );
-                                //     // tslint:disable-next-line:no-cookies
-                                //     res.cookie(
-                                //         'remember_staff',
-                                //         authentication.get('token'),
-                                //         { path: '/', httpOnly: true, maxAge: 604800000 }
-                                //     );
-                                // }
-                                // ログイン
-                                req.session.staffUser = cognitoUser;
-                                const cb = (!_.isEmpty(req.query.cb)) ? req.query.cb : '/staff/mypage';
-                                res.redirect(cb);
-                                return;
-                            }
-                        }
+                    const cognitoCredentials = req.session.cognitoCredentials;
+                    if (cognitoCredentials !== undefined) {
+                        const cognitoUser = yield getCognitoUser(cognitoCredentials.AccessToken);
+                        // ログイン記憶
+                        // tslint:disable-next-line:no-suspicious-comment
+                        // TODO Cognitoユーザーに合わせて調整
+                        // if (req.body.remember === 'on') {
+                        //     // トークン生成
+                        //     const authentication = await ttts.Models.Authentication.create(
+                        //         {
+                        //             token: ttts.CommonUtil.createToken(),
+                        //             owner: owner.get('id'),
+                        //             locale: req.body.language
+                        //         }
+                        //     );
+                        //     // tslint:disable-next-line:no-cookies
+                        //     res.cookie(
+                        //         'remember_staff',
+                        //         authentication.get('token'),
+                        //         { path: '/', httpOnly: true, maxAge: 604800000 }
+                        //     );
+                        // }
+                        // ログイン
+                        req.session.staffUser = cognitoUser;
+                        const cb = (!_.isEmpty(req.query.cb)) ? req.query.cb : '/staff/mypage';
+                        res.redirect(cb);
+                        return;
                     }
                 }
             }
@@ -120,11 +94,10 @@ exports.login = login;
 function logout(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            if (req.session === undefined) {
-                next(new Error(req.__('UnexpectedError')));
-                return;
+            if (req.session !== undefined) {
+                delete req.session.staffUser;
+                delete req.session.cognitoCredentials;
             }
-            delete req.session.staffUser;
             yield ttts.Models.Authentication.remove({ token: req.cookies.remember_staff }).exec();
             res.clearCookie('remember_staff');
             res.redirect('/staff/mypage');

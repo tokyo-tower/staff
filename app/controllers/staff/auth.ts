@@ -19,7 +19,6 @@ const debug = createDebug('ttts-staff:controller:staff:auth');
  * @method login
  * @returns {Promise<void>}
  */
-// tslint:disable-next-line:max-func-body-length
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
     if (req.staffUser !== undefined && req.staffUser.isAuthenticated()) {
         res.redirect('/staff/mypage');
@@ -41,75 +40,48 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
             res.locals.validation = validationResult.array();
 
             if (validationResult.isEmpty()) {
-                // ユーザー認証
-                const ownerRepo = new ttts.repository.Owner(ttts.mongoose.connection);
-                const owner = await ownerRepo.ownerModel.findOne(
-                    {
-                        username: req.body.userId,
-                        group: ttts.factory.person.Group.Staff
-                    }
-                ).exec();
-
-                res.locals.userId = req.body.userId;
-                res.locals.password = '';
-                res.locals.language = req.body.language;
-                res.locals.remember = req.body.remember;
-
-                if (owner === null) {
+                try {
+                    // ログイン情報が有効であれば、Cognitoでもログイン
+                    (<Express.Session>req.session).cognitoCredentials =
+                        await getCognitoCredentials(req.body.userId, req.body.password);
+                    debug('cognito credentials published.', (<Express.Session>req.session).cognitoCredentials);
+                } catch (error) {
                     res.locals.validation = [
                         { msg: req.__('Invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
                     ];
-                } else {
-                    // パスワードチェック
-                    if (owner.get('password_hash') !== ttts.CommonUtil.createHash(req.body.password, owner.get('password_salt'))) {
-                        res.locals.validation = [
-                            { msg: req.__('Invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
-                        ];
-                    } else {
-                        try {
-                            // ログイン情報が有効であれば、Cognitoでもログイン
-                            (<Express.Session>req.session).cognitoCredentials =
-                                await getCognitoCredentials(req.body.userId, req.body.password);
-                            debug('cognito credentials published.', (<Express.Session>req.session).cognitoCredentials);
-                        } catch (error) {
-                            res.locals.validation = [
-                                { msg: req.__('Invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
-                            ];
-                        }
+                }
 
-                        const cognitoCredentials = (<Express.Session>req.session).cognitoCredentials;
-                        if (cognitoCredentials !== undefined) {
-                            const cognitoUser = await getCognitoUser(<string>cognitoCredentials.AccessToken);
+                const cognitoCredentials = (<Express.Session>req.session).cognitoCredentials;
+                if (cognitoCredentials !== undefined) {
+                    const cognitoUser = await getCognitoUser(<string>cognitoCredentials.AccessToken);
 
-                            // ログイン記憶
-                            // tslint:disable-next-line:no-suspicious-comment
-                            // TODO Cognitoユーザーに合わせて調整
-                            // if (req.body.remember === 'on') {
-                            //     // トークン生成
-                            //     const authentication = await ttts.Models.Authentication.create(
-                            //         {
-                            //             token: ttts.CommonUtil.createToken(),
-                            //             owner: owner.get('id'),
-                            //             locale: req.body.language
-                            //         }
-                            //     );
-                            //     // tslint:disable-next-line:no-cookies
-                            //     res.cookie(
-                            //         'remember_staff',
-                            //         authentication.get('token'),
-                            //         { path: '/', httpOnly: true, maxAge: 604800000 }
-                            //     );
-                            // }
+                    // ログイン記憶
+                    // tslint:disable-next-line:no-suspicious-comment
+                    // TODO Cognitoユーザーに合わせて調整
+                    // if (req.body.remember === 'on') {
+                    //     // トークン生成
+                    //     const authentication = await ttts.Models.Authentication.create(
+                    //         {
+                    //             token: ttts.CommonUtil.createToken(),
+                    //             owner: owner.get('id'),
+                    //             locale: req.body.language
+                    //         }
+                    //     );
+                    //     // tslint:disable-next-line:no-cookies
+                    //     res.cookie(
+                    //         'remember_staff',
+                    //         authentication.get('token'),
+                    //         { path: '/', httpOnly: true, maxAge: 604800000 }
+                    //     );
+                    // }
 
-                            // ログイン
-                            (<Express.Session>req.session).staffUser = cognitoUser;
+                    // ログイン
+                    (<Express.Session>req.session).staffUser = cognitoUser;
 
-                            const cb = (!_.isEmpty(req.query.cb)) ? req.query.cb : '/staff/mypage';
-                            res.redirect(cb);
+                    const cb = (!_.isEmpty(req.query.cb)) ? req.query.cb : '/staff/mypage';
+                    res.redirect(cb);
 
-                            return;
-                        }
-                    }
+                    return;
                 }
             }
         }
@@ -122,13 +94,11 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 
 export async function logout(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        if (req.session === undefined) {
-            next(new Error(req.__('UnexpectedError')));
-
-            return;
+        if (req.session !== undefined) {
+            delete req.session.staffUser;
+            delete req.session.cognitoCredentials;
         }
 
-        delete req.session.staffUser;
         await ttts.Models.Authentication.remove({ token: req.cookies.remember_staff }).exec();
 
         res.clearCookie('remember_staff');
