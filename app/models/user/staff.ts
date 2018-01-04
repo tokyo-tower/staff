@@ -2,22 +2,26 @@ import BaseUser from './base';
 
 /**
  * 内部関係者ユーザー
- *
  * @export
  * @class StaffUser
  * @extends {BaseUser}
  */
 export default class StaffUser extends BaseUser {
-    public static AUTH_SESSION_NAME: string = 'TTTSFrontendStaffAuth';
+    public familyName: string;
+    public givenName: string;
+    public email: string;
+    public telephone: string;
+    public username: string;
 
-    // tslint:disable-next-line:function-name
-    public static parse(session: Express.Session | undefined): StaffUser {
+    public static PARSE(session: Express.Session | undefined): StaffUser {
         const user = new StaffUser();
 
         // セッション値からオブジェクトにセット
-        if (session !== undefined && session.hasOwnProperty(StaffUser.AUTH_SESSION_NAME)) {
-            Object.keys(session[StaffUser.AUTH_SESSION_NAME]).forEach((propertyName) => {
-                (<any>user)[propertyName] = session[StaffUser.AUTH_SESSION_NAME][propertyName];
+        if (session !== undefined &&
+            session.staffUser !== undefined &&
+            session.staffUser !== null) {
+            Object.keys(session.staffUser).forEach((propertyName) => {
+                (<any>user)[propertyName] = (<any>session.staffUser)[propertyName];
             });
         }
 

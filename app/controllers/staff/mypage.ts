@@ -25,7 +25,7 @@ const redisClient = ttts.redis.createClient({
 export async function index(__: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const ownerRepo = new ttts.repository.Owner(ttts.mongoose.connection);
-        const owners = await ownerRepo.ownerModel.find({}, '_id name', { sort: { _id: 1 } }).exec();
+        const owners = await ownerRepo.ownerModel.find().sort({ _id: 1 }).exec();
         res.render('staff/mypage/index', {
             owners: owners,
             layout: layout

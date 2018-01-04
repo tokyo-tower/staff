@@ -79,16 +79,9 @@ function search(req, res) {
         // 検索条件を作成
         const conditions = [];
         // 管理者の場合、内部関係者の予約全て&確保中
-        if (req.staffUser.get('is_admin') === true) {
-            conditions.push({
-                status: ttts.factory.reservationStatusType.ReservationConfirmed
-            });
-        }
-        else {
-            conditions.push({
-                status: ttts.factory.reservationStatusType.ReservationConfirmed
-            });
-        }
+        conditions.push({
+            status: ttts.factory.reservationStatusType.ReservationConfirmed
+        });
         // 来塔日
         if (day !== null) {
             conditions.push({ performance_day: day });
@@ -116,7 +109,7 @@ function search(req, res) {
         }
         // アカウント
         if (owner !== null) {
-            conditions.push({ owner: owner });
+            conditions.push({ owner_username: owner });
         }
         // 予約方法
         if (purchaserGroup !== null) {
@@ -245,14 +238,11 @@ function updateWatcherName(req, res, next) {
             _id: reservationId,
             status: ttts.factory.reservationStatusType.ReservationConfirmed
         };
-        // 自分の予約のみ
-        condition.owner = req.staffUser.get('id');
         const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
         try {
             const reservation = yield reservationRepo.reservationModel.findOneAndUpdate(condition, {
                 watcher_name: watcherName,
-                watcher_name_updated_at: Date.now(),
-                owner_signature: req.staffUser.get('signature')
+                watcher_name_updated_at: Date.now()
             }, { new: true }).exec();
             if (reservation === null) {
                 res.status(http_status_1.NOT_FOUND).json(null);

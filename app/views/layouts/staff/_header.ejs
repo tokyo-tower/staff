@@ -11,7 +11,7 @@ if (req.hasOwnProperty('route')) {
 
         <div class="menu-staff">
             <div class="menu-staff">
-                <p class="myname"><%= req.staffUser.get('name') %> <%= // req.staffUser.get('signature') %></p>
+                <p class="myname"><%= req.staffUser.familyName %> <%= req.staffUser.givenName %></p>
 
                 <% if (!/reserve/.test(routeName)) { %>
                     <a class="btn-newticket" href="/staff/reserve/start"><span>代理予約</span></a>

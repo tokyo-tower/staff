@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * 内部関係者座席予約コントローラー
+ * @namespace controllers.staff.reserve
+ */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -8,10 +12,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * 内部関係者座席予約コントローラー
- * @namespace controller/staff/reserve
- */
+const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const ttts = require("@motionpicture/ttts-domain");
 const conf = require("config");
 const createDebug = require("debug");
@@ -20,7 +21,6 @@ const _ = require("underscore");
 const reservePerformanceForm_1 = require("../../forms/reserve/reservePerformanceForm");
 const session_1 = require("../../models/reserve/session");
 const reserveBaseController = require("../reserveBase");
-//import reservation from '@motionpicture/ttts-domain/lib/repo/mongoose/model/reservation';
 const debug = createDebug('ttts-staff:controller:reserve');
 const PURCHASER_GROUP = ttts.factory.person.Group.Staff;
 const layout = 'layouts/staff/layout';
@@ -56,6 +56,7 @@ function start(req, res, next) {
             }
         }
         catch (error) {
+            console.error(error);
             next(new Error(req.__('UnexpectedError')));
         }
     });
@@ -82,17 +83,7 @@ function performances(req, res, next) {
                 next(new Error(req.__('Expired')));
                 return;
             }
-            const token = yield ttts.CommonUtil.getToken({
-                authorizeServerDomain: process.env.API_AUTHORIZE_SERVER_DOMAIN,
-                clientId: process.env.API_CLIENT_ID,
-                clientSecret: process.env.API_CLIENT_SECRET,
-                scopes: [
-                    `${process.env.API_RESOURECE_SERVER_IDENTIFIER}/performances.read-only`
-                ],
-                state: ''
-            });
-            // tslint:disable-next-line:no-console
-            // console.log('token=' + JSON.stringify(token));
+            const token = req.tttsAuthClient.credentials;
             const maxDate = moment();
             Object.keys(reserveMaxDateInfo).forEach((key) => {
                 maxDate.add(key, reserveMaxDateInfo[key]);
@@ -154,8 +145,17 @@ function tickets(req, res, next) {
                     reservationModel.transactionInProgress.reservations = [];
                     // 座席仮予約があればキャンセル
                     if (reservationModel.transactionInProgress.seatReservationAuthorizeActionId !== undefined) {
+                        const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
+                            endpoint: process.env.API_ENDPOINT,
+                            auth: req.tttsAuthClient
+                        });
                         debug('canceling seat reservation authorize action...');
-                        yield ttts.service.transaction.placeOrderInProgress.action.authorize.seatReservation.cancel(reservationModel.transactionInProgress.agentId, reservationModel.transactionInProgress.id, reservationModel.transactionInProgress.seatReservationAuthorizeActionId)(new ttts.repository.Transaction(ttts.mongoose.connection), new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection), new ttts.repository.rateLimit.TicketTypeCategory(redisClient));
+                        const actionId = reservationModel.transactionInProgress.seatReservationAuthorizeActionId;
+                        delete reservationModel.transactionInProgress.seatReservationAuthorizeActionId;
+                        yield placeOrderTransactionService.cancelSeatReservationAuthorization({
+                            transactionId: reservationModel.transactionInProgress.id,
+                            actionId: actionId
+                        });
                         debug('seat reservation authorize action canceled.');
                     }
                 }
@@ -268,23 +268,25 @@ function confirm(req, res, next) {
             }
             if (req.method === 'POST') {
                 try {
-                    const taskRepo = new ttts.repository.Task(ttts.mongoose.connection);
-                    const transactionRepo = new ttts.repository.Transaction(ttts.mongoose.connection);
-                    const creditCardAuthorizeActionRepo = new ttts.repository.action.authorize.CreditCard(ttts.mongoose.connection);
-                    const seatReservationAuthorizeActionRepo = new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection);
                     // 予約確定
-                    const transactionResult = yield ttts.service.transaction.placeOrderInProgress.confirm({
-                        agentId: reservationModel.transactionInProgress.agentId,
+                    const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
+                        endpoint: process.env.API_ENDPOINT,
+                        auth: req.tttsAuthClient
+                    });
+                    const transactionResult = yield placeOrderTransactionService.confirm({
                         transactionId: reservationModel.transactionInProgress.id,
                         paymentMethod: reservationModel.transactionInProgress.paymentMethod
-                    })(transactionRepo, creditCardAuthorizeActionRepo, seatReservationAuthorizeActionRepo);
+                    });
                     debug('transaction confirmed. orderNumber:', transactionResult.order.orderNumber);
                     // 購入結果セッション作成
                     req.session.transactionResult = transactionResult;
                     try {
                         // 完了メールキュー追加(あれば更新日時を更新するだけ)
                         const emailAttributes = yield reserveBaseController.createEmailAttributes(transactionResult.eventReservations, reservationModel.getTotalCharge(), res);
-                        yield ttts.service.transaction.placeOrder.sendEmail(reservationModel.transactionInProgress.id, emailAttributes)(taskRepo, transactionRepo);
+                        yield placeOrderTransactionService.sendEmailNotification({
+                            transactionId: reservationModel.transactionInProgress.id,
+                            emailMessageAttributes: emailAttributes
+                        });
                         debug('email sent.');
                     }
                     catch (error) {

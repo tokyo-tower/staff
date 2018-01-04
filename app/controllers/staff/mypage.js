@@ -31,7 +31,7 @@ function index(__, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const ownerRepo = new ttts.repository.Owner(ttts.mongoose.connection);
-            const owners = yield ownerRepo.ownerModel.find({}, '_id name', { sort: { _id: 1 } }).exec();
+            const owners = yield ownerRepo.ownerModel.find().sort({ _id: 1 }).exec();
             res.render('staff/mypage/index', {
                 owners: owners,
                 layout: layout

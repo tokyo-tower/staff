@@ -1,21 +1,14 @@
+import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 import * as ttts from '@motionpicture/ttts-domain';
+import * as AWS from 'aws-sdk';
 import * as express from 'express';
+import StaffUser from '../app/models/user/staff';
 
 declare global {
     namespace Express {
         export interface Request {
             staffUser?: StaffUser;
-            windowUser?: WindowUser;
-        }
-
-        export class BaseUser {
-            public isAuthenticated(): boolean;
-            public get(key: string): any;
-        }
-
-        export class StaffUser extends BaseUser {
-        }
-        export class WindowUser extends BaseUser {
+            tttsAuthClient: tttsapi.auth.OAuth2;
         }
 
         interface ITransactionInProgress {
@@ -113,8 +106,19 @@ declare global {
             count: number;
         }
 
+        interface IStaffUser {
+            id: string;
+            familyName: string;
+            givenName: string;
+            email: string;
+            telephone: string;
+            username: string;
+        }
+
         // tslint:disable-next-line:interface-name
         export interface Session {
+            staffUser?: IStaffUser;
+            cognitoCredentials?: AWS.CognitoIdentityServiceProvider.AuthenticationResultType;
             /**
              * 購入者情報(一度入力するとセッションが保持)
              */

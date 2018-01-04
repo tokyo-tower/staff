@@ -1,7 +1,9 @@
 /**
  * 内部関係者座席予約コントローラー
- * @namespace controller/staff/reserve
+ * @namespace controllers.staff.reserve
  */
+
+import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 import * as ttts from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import * as createDebug from 'debug';
@@ -12,7 +14,6 @@ import * as _ from 'underscore';
 import reservePerformanceForm from '../../forms/reserve/reservePerformanceForm';
 import ReserveSessionModel from '../../models/reserve/session';
 import * as reserveBaseController from '../reserveBase';
-//import reservation from '@motionpicture/ttts-domain/lib/repo/mongoose/model/reservation';
 
 const debug = createDebug('ttts-staff:controller:reserve');
 const PURCHASER_GROUP: string = ttts.factory.person.Group.Staff;
@@ -53,6 +54,7 @@ export async function start(req: Request, res: Response, next: NextFunction): Pr
             res.redirect(`/staff/reserve/terms?cb=${encodeURIComponent(cb)}`);
         }
     } catch (error) {
+        console.error(error);
         next(new Error(req.__('UnexpectedError')));
     }
 }
@@ -80,17 +82,8 @@ export async function performances(req: Request, res: Response, next: NextFuncti
             return;
         }
 
-        const token = await ttts.CommonUtil.getToken({
-            authorizeServerDomain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
-            clientId: <string>process.env.API_CLIENT_ID,
-            clientSecret: <string>process.env.API_CLIENT_SECRET,
-            scopes: [
-                `${<string>process.env.API_RESOURECE_SERVER_IDENTIFIER}/performances.read-only`
-            ],
-            state: ''
-        });
-        // tslint:disable-next-line:no-console
-        // console.log('token=' + JSON.stringify(token));
+        const token = req.tttsAuthClient.credentials;
+
         const maxDate = moment();
         Object.keys(reserveMaxDateInfo).forEach((key: any) => {
             maxDate.add(key, reserveMaxDateInfo[key]);
@@ -160,16 +153,17 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
 
                 // 座席仮予約があればキャンセル
                 if (reservationModel.transactionInProgress.seatReservationAuthorizeActionId !== undefined) {
+                    const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
+                        endpoint: <string>process.env.API_ENDPOINT,
+                        auth: req.tttsAuthClient
+                    });
                     debug('canceling seat reservation authorize action...');
-                    await ttts.service.transaction.placeOrderInProgress.action.authorize.seatReservation.cancel(
-                        reservationModel.transactionInProgress.agentId,
-                        reservationModel.transactionInProgress.id,
-                        reservationModel.transactionInProgress.seatReservationAuthorizeActionId
-                    )(
-                        new ttts.repository.Transaction(ttts.mongoose.connection),
-                        new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection),
-                        new ttts.repository.rateLimit.TicketTypeCategory(redisClient)
-                        );
+                    const actionId = reservationModel.transactionInProgress.seatReservationAuthorizeActionId;
+                    delete reservationModel.transactionInProgress.seatReservationAuthorizeActionId;
+                    await placeOrderTransactionService.cancelSeatReservationAuthorization({
+                        transactionId: reservationModel.transactionInProgress.id,
+                        actionId: actionId
+                    });
                     debug('seat reservation authorize action canceled.');
                 }
             } catch (error) {
@@ -282,17 +276,15 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
 
         if (req.method === 'POST') {
             try {
-                const taskRepo = new ttts.repository.Task(ttts.mongoose.connection);
-                const transactionRepo = new ttts.repository.Transaction(ttts.mongoose.connection);
-                const creditCardAuthorizeActionRepo = new ttts.repository.action.authorize.CreditCard(ttts.mongoose.connection);
-                const seatReservationAuthorizeActionRepo = new ttts.repository.action.authorize.SeatReservation(ttts.mongoose.connection);
-
                 // 予約確定
-                const transactionResult = await ttts.service.transaction.placeOrderInProgress.confirm({
-                    agentId: reservationModel.transactionInProgress.agentId,
+                const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
+                    endpoint: <string>process.env.API_ENDPOINT,
+                    auth: req.tttsAuthClient
+                });
+                const transactionResult = await placeOrderTransactionService.confirm({
                     transactionId: reservationModel.transactionInProgress.id,
                     paymentMethod: reservationModel.transactionInProgress.paymentMethod
-                })(transactionRepo, creditCardAuthorizeActionRepo, seatReservationAuthorizeActionRepo);
+                });
                 debug('transaction confirmed. orderNumber:', transactionResult.order.orderNumber);
 
                 // 購入結果セッション作成
@@ -304,10 +296,10 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                         transactionResult.eventReservations, reservationModel.getTotalCharge(), res
                     );
 
-                    await ttts.service.transaction.placeOrder.sendEmail(
-                        reservationModel.transactionInProgress.id,
-                        emailAttributes
-                    )(taskRepo, transactionRepo);
+                    await placeOrderTransactionService.sendEmailNotification({
+                        transactionId: reservationModel.transactionInProgress.id,
+                        emailMessageAttributes: emailAttributes
+                    });
                     debug('email sent.');
                 } catch (error) {
                     // 失敗してもスルー
