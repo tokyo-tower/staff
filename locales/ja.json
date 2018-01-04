@@ -19,6 +19,7 @@
 	"LinkContainedPerformanceMessage": "※トップデッキツアーチケットでメインデッキ、トップデッキへご入場いただけます。<br>また。トップデッキツアーのお客様は、メインデッキ行階段でのご入場はできませんのでご了承ください。<br>詳しいトップデッキツアー入場方法は<a href='/aboutenter' target='_blank'>こちら</a>。<br><span class='red'>※トップデッキツアーへ車いすでご入場されるお客様は<a href='./wheelchair'>こちら</a>からご予約ください。</span><br>※お支払い方法はクレジットカードのみとなります。現金でのお支払いをご希望のお客様は、東京タワーフットタウン1Fチケットカウンターにてご予約・ご購入ください。<br>※大きなお荷物・ベビーカー等は、フットタウン1Fサービスカウンターでお預かりいたします。",
 	"PreferredDateSelect": "希望日選択",
 	"ReservableMaxDate{{ymd}}": "{{ymd}}まで予約可能です。（60日後まで）",
+	"ReservableMaxDateStaff{{ymd}}": "{{ymd}}まで予約可能です。（90日後まで）",
 	"PreferredTimeSelect": "希望時間選択",
 	"PerformanceIconDescription": "アイコンの説明",
 	"StatusCapable": "予約可能",
