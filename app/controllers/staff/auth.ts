@@ -157,7 +157,7 @@ async function getCognitoUser(accesssToken: string) {
                 } else {
                     resolve({
                         username: data.Username,
-                        id: <string>(<CognitoUserAttributeType>data.UserAttributes.find((a) => a.Name === 'sub')).Value,
+                        // id: <string>(<CognitoUserAttributeType>data.UserAttributes.find((a) => a.Name === 'sub')).Value,
                         familyName: <string>(<CognitoUserAttributeType>data.UserAttributes.find((a) => a.Name === 'family_name')).Value,
                         givenName: <string>(<CognitoUserAttributeType>data.UserAttributes.find((a) => a.Name === 'given_name')).Value,
                         email: <string>(<CognitoUserAttributeType>data.UserAttributes.find((a) => a.Name === 'email')).Value,

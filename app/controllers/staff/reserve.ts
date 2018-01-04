@@ -20,7 +20,7 @@ const PURCHASER_GROUP: string = ttts.factory.person.Group.Staff;
 const layout: string = 'layouts/staff/layout';
 
 const paymentMethodNames: any = { F: '無料招待券', I: '請求書支払い' };
-const reserveMaxDateInfo: any = conf.get<any>('reserve_max_date');
+const reserveMaxDateInfo = conf.get<{ [period: string]: number }>('reserve_max_date');
 
 const redisClient = ttts.redis.createClient({
     host: <string>process.env.REDIS_HOST,
@@ -86,7 +86,7 @@ export async function performances(req: Request, res: Response, next: NextFuncti
 
         const maxDate = moment();
         Object.keys(reserveMaxDateInfo).forEach((key: any) => {
-            maxDate.add(key, reserveMaxDateInfo[key]);
+            maxDate.add(reserveMaxDateInfo[key], key);
         });
         const reserveMaxDate: string = maxDate.format('YYYY/MM/DD');
 

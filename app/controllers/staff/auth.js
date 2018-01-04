@@ -151,7 +151,7 @@ function getCognitoUser(accesssToken) {
                 else {
                     resolve({
                         username: data.Username,
-                        id: data.UserAttributes.find((a) => a.Name === 'sub').Value,
+                        // id: <string>(<CognitoUserAttributeType>data.UserAttributes.find((a) => a.Name === 'sub')).Value,
                         familyName: data.UserAttributes.find((a) => a.Name === 'family_name').Value,
                         givenName: data.UserAttributes.find((a) => a.Name === 'given_name').Value,
                         email: data.UserAttributes.find((a) => a.Name === 'email').Value,

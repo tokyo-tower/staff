@@ -93,7 +93,7 @@ function getConditionsFromTo(value1: string | null, value2: string | null, conve
         conditionsFromTo.$gte = value1;
     }
     if (value2 !== null) {
-        value2 = convert ? moment(value2, 'YYYY/MM/DD').add('days', 1).format('YYYY/MM/DD HH:mm:ss') : value2;
+        value2 = convert ? moment(value2, 'YYYY/MM/DD').add(1, 'day').format('YYYY/MM/DD HH:mm:ss') : value2;
         conditionsFromTo.$lt = value2;
     }
 

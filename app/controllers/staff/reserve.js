@@ -86,7 +86,7 @@ function performances(req, res, next) {
             const token = req.tttsAuthClient.credentials;
             const maxDate = moment();
             Object.keys(reserveMaxDateInfo).forEach((key) => {
-                maxDate.add(key, reserveMaxDateInfo[key]);
+                maxDate.add(reserveMaxDateInfo[key], key);
             });
             const reserveMaxDate = maxDate.format('YYYY/MM/DD');
             if (req.method === 'POST') {

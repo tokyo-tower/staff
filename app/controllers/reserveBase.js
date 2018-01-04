@@ -60,7 +60,7 @@ function processStart(purchaserGroup, req) {
             purchaser: {
                 lastName: '',
                 firstName: '',
-                tel: '0334335111',
+                tel: '',
                 email: '',
                 age: '',
                 address: '',

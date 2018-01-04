@@ -107,7 +107,6 @@ declare global {
         }
 
         interface IStaffUser {
-            id: string;
             familyName: string;
             givenName: string;
             email: string;

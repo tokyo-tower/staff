@@ -59,7 +59,7 @@ export async function processStart(purchaserGroup: string, req: Request): Promis
         purchaser: {
             lastName: '',
             firstName: '',
-            tel: '0334335111',
+            tel: '',
             email: '',
             age: '',
             address: '',

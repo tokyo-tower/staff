@@ -1,12 +1,9 @@
-import BaseUser from './base';
-
 /**
  * 内部関係者ユーザー
  * @export
  * @class StaffUser
- * @extends {BaseUser}
  */
-export default class StaffUser extends BaseUser {
+export default class StaffUser {
     public familyName: string;
     public givenName: string;
     public email: string;
@@ -17,14 +14,21 @@ export default class StaffUser extends BaseUser {
         const user = new StaffUser();
 
         // セッション値からオブジェクトにセット
-        if (session !== undefined &&
-            session.staffUser !== undefined &&
-            session.staffUser !== null) {
-            Object.keys(session.staffUser).forEach((propertyName) => {
-                (<any>user)[propertyName] = (<any>session.staffUser)[propertyName];
-            });
+        if (session !== undefined && session.staffUser !== undefined) {
+            user.familyName = session.staffUser.familyName;
+            user.givenName = session.staffUser.givenName;
+            user.email = session.staffUser.email;
+            user.telephone = session.staffUser.telephone;
+            user.username = session.staffUser.username;
         }
 
         return user;
+    }
+
+    /**
+     * サインイン中かどうか
+     */
+    public isAuthenticated(): boolean {
+        return (this.username !== undefined);
     }
 }
