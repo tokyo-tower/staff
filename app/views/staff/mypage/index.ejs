@@ -107,8 +107,8 @@
                 <select class="form-control" name="owner">
                     <option value="">指定無し</option>
                     <% owners.forEach((owner) => { %>
-                        <option value="<%= owner.username %>">
-                            <%= owner.name %>
+                        <option value="<%= owner.Username %>">
+                            <%= owner.Attributes.find((a)=>a.Name === 'family_name').Value %><%= owner.Attributes.find((a)=>a.Name === 'given_name').Value %>
                         </option>
                         <% }) %>
                 </select>

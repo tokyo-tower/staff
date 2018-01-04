@@ -4,6 +4,7 @@
  */
 
 import * as ttts from '@motionpicture/ttts-domain';
+import * as AWS from 'aws-sdk';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 import * as querystring from 'querystring';
@@ -24,8 +25,7 @@ const redisClient = ttts.redis.createClient({
  */
 export async function index(__: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const ownerRepo = new ttts.repository.Owner(ttts.mongoose.connection);
-        const owners = await ownerRepo.ownerModel.find().sort({ _id: 1 }).exec();
+        const owners = await getCognitoUsers();
         res.render('staff/mypage/index', {
             owners: owners,
             layout: layout
@@ -33,6 +33,35 @@ export async function index(__: Request, res: Response, next: NextFunction): Pro
     } catch (error) {
         next(error);
     }
+}
+
+async function getCognitoUsers() {
+    return new Promise<AWS.CognitoIdentityServiceProvider.UsersListType>((resolve, reject) => {
+        const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
+            apiVersion: 'latest',
+            region: 'ap-northeast-1'
+        });
+
+        cognitoIdentityServiceProvider.listUsers(
+            {
+                UserPoolId: <string>process.env.COGNITO_USER_POOL_ID
+                //    AttributesToGet?: SearchedAttributeNamesListType;
+                //    Limit?: QueryLimitType;
+                //    PaginationToken?: SearchPaginationTokenType;
+                //    Filter?: UserFilterType;
+            },
+            (err, data) => {
+                if (err instanceof Error) {
+                    reject(err);
+                } else {
+                    if (data.Users === undefined) {
+                        reject(new Error('Unexpected.'));
+                    } else {
+                        resolve(data.Users);
+                    }
+                }
+            });
+    });
 }
 
 /**

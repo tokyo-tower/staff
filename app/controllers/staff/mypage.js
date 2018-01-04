@@ -13,6 +13,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ttts = require("@motionpicture/ttts-domain");
+const AWS = require("aws-sdk");
 const createDebug = require("debug");
 const querystring = require("querystring");
 const debug = createDebug('ttts-staff:controllers:staff:mypage');
@@ -30,8 +31,7 @@ const redisClient = ttts.redis.createClient({
 function index(__, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const ownerRepo = new ttts.repository.Owner(ttts.mongoose.connection);
-            const owners = yield ownerRepo.ownerModel.find().sort({ _id: 1 }).exec();
+            const owners = yield getCognitoUsers();
             res.render('staff/mypage/index', {
                 owners: owners,
                 layout: layout
@@ -43,6 +43,35 @@ function index(__, res, next) {
     });
 }
 exports.index = index;
+function getCognitoUsers() {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
+                apiVersion: 'latest',
+                region: 'ap-northeast-1'
+            });
+            cognitoIdentityServiceProvider.listUsers({
+                UserPoolId: process.env.COGNITO_USER_POOL_ID
+                //    AttributesToGet?: SearchedAttributeNamesListType;
+                //    Limit?: QueryLimitType;
+                //    PaginationToken?: SearchPaginationTokenType;
+                //    Filter?: UserFilterType;
+            }, (err, data) => {
+                if (err instanceof Error) {
+                    reject(err);
+                }
+                else {
+                    if (data.Users === undefined) {
+                        reject(new Error('Unexpected.'));
+                    }
+                    else {
+                        resolve(data.Users);
+                    }
+                }
+            });
+        });
+    });
+}
 /**
  * A4印刷
  */
