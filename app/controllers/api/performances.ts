@@ -11,6 +11,8 @@ import { INTERNAL_SERVER_ERROR, NO_CONTENT } from 'http-status';
 import * as moment from 'moment';
 import * as numeral from 'numeral';
 
+import StaffUser from '../../models/user/staff';
+
 const debug = createDebug('ttts-staff:controllers:api:performances');
 
 /**
@@ -48,13 +50,13 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             { _id: { $in: performanceIds } },
             {
                 'ttts_extension.online_sales_status': onlineStatus,
-                'ttts_extension.online_sales_update_user': req.staffUser,
+                'ttts_extension.online_sales_update_user': (<StaffUser>req.staffUser).username,
                 'ttts_extension.online_sales_update_at': now,
                 'ttts_extension.ev_service_status': evStatus,
-                'ttts_extension.ev_service_update_user': req.staffUser,
+                'ttts_extension.ev_service_update_user': (<StaffUser>req.staffUser).username,
                 'ttts_extension.ev_service_update_at': now,
                 'ttts_extension.refund_status': refundStatus,
-                'ttts_extension.refund_update_user': req.staffUser,
+                'ttts_extension.refund_update_user': (<StaffUser>req.staffUser).username,
                 'ttts_extension.refund_update_at': now
             },
             { multi: true }

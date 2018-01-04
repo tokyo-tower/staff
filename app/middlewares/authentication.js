@@ -12,20 +12,38 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const ttts = require("@motionpicture/ttts-domain");
 const staff_1 = require("../models/user/staff");
+// tslint:disable-next-line:max-func-body-length
 exports.default = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
-    req.staffUser = staff_1.default.parse(req.session);
-    // if (req.staffUser === undefined) {
-    //     next(new Error(req.__('UnexpectedError')));
-    //     return;
-    // }
+    req.staffUser = staff_1.default.PARSE(req.session);
     // 既ログインの場合
     if (req.staffUser.isAuthenticated()) {
-        // 言語設定
-        if (req.staffUser.get('locale') !== undefined && req.staffUser.get('locale') !== null) {
-            req.setLocale(req.staffUser.get('locale'));
+        // tttsapi認証クライアントをリクエストオブジェクトにセット
+        const cognitoCredentials = req.session.cognitoCredentials;
+        if (cognitoCredentials === undefined) {
+            next(new Error(res.__('UnexpectedError')));
+            return;
         }
+        const oauth2Client = new tttsapi.auth.OAuth2({
+            domain: process.env.API_AUTHORIZE_SERVER_DOMAIN,
+            clientId: process.env.API_CLIENT_ID,
+            clientSecret: process.env.API_CLIENT_SECRET,
+            scopes: [
+                `${process.env.API_RESOURECE_SERVER_IDENTIFIER}/performances.read-only`,
+                `${process.env.API_RESOURECE_SERVER_IDENTIFIER}/transactions`
+            ],
+            state: ''
+        });
+        oauth2Client.setCredentials({
+            refresh_token: cognitoCredentials.RefreshToken,
+            // expiry_date: moment().add(<number>authenticationResult.ExpiresIn, 'seconds').unix(),
+            // expiry_date: authenticationResult.ExpiresIn,
+            access_token: cognitoCredentials.AccessToken,
+            token_type: cognitoCredentials.TokenType
+        });
+        req.tttsAuthClient = oauth2Client;
         next();
         return;
     }
@@ -47,10 +65,11 @@ exports.default = (req, res, next) => __awaiter(this, void 0, void 0, function* 
                 res.cookie('remember_staff', token, { path: '/', httpOnly: true, maxAge: 604800000 });
                 const ownerRepo = new ttts.repository.Owner(ttts.mongoose.connection);
                 const owner = yield ownerRepo.ownerModel.findOne({ _id: authenticationDoc.get('owner') }).exec();
+                if (owner === null) {
+                    throw new Error(res.__('UnexpectedError'));
+                }
                 // ログインしてリダイレクト
-                req.session[staff_1.default.AUTH_SESSION_NAME] = (owner !== null) ? owner.toObject() : null;
-                req.session[staff_1.default.AUTH_SESSION_NAME].signature = authenticationDoc.get('signature');
-                req.session[staff_1.default.AUTH_SESSION_NAME].locale = authenticationDoc.get('locale');
+                req.session.staffUser = owner.toObject();
                 res.redirect(req.originalUrl);
                 return;
             }

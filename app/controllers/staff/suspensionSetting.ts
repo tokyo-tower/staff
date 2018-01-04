@@ -6,7 +6,6 @@
 import * as ttts from '@motionpicture/ttts-domain';
 import { NextFunction, Request, Response } from 'express';
 
-const VIEW_PATH: string = 'staff/suspension';
 const layout: string = 'layouts/staff/layout';
 
 /**
@@ -16,19 +15,9 @@ const layout: string = 'layouts/staff/layout';
  */
 export async function performances(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const token = await ttts.CommonUtil.getToken({
-            authorizeServerDomain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
-            clientId: <string>process.env.API_CLIENT_ID,
-            clientSecret: <string>process.env.API_CLIENT_SECRET,
-            scopes: [
-                `${<string>process.env.API_RESOURECE_SERVER_IDENTIFIER}/performances.read-only`
-            ],
-            state: ''
-        });
-
         // 運行・オンライン販売停止設定画面表示
-        res.render(`${VIEW_PATH}/performances`, {
-            token: token,
+        res.render('staff/suspension/performances', {
+            token: req.tttsAuthClient.credentials,
             layout: layout,
             EvServiceStatus: ttts.factory.performance.EvServiceStatus,
             OnlineSalesStatus: ttts.factory.performance.OnlineSalesStatus,

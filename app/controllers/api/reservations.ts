@@ -79,19 +79,12 @@ export async function search(req: Request, res: Response): Promise<void> {
     const conditions: any[] = [];
 
     // 管理者の場合、内部関係者の予約全て&確保中
-    if ((<Express.StaffUser>req.staffUser).get('is_admin') === true) {
-        conditions.push(
-            {
-                status: ttts.factory.reservationStatusType.ReservationConfirmed
-            }
-        );
-    } else {
-        conditions.push(
-            {
-                status: ttts.factory.reservationStatusType.ReservationConfirmed
-            }
-        );
-    }
+    conditions.push(
+        {
+            status: ttts.factory.reservationStatusType.ReservationConfirmed
+        }
+    );
+
     // 来塔日
     if (day !== null) {
         conditions.push({ performance_day: day });
@@ -119,7 +112,7 @@ export async function search(req: Request, res: Response): Promise<void> {
     }
     // アカウント
     if (owner !== null) {
-        conditions.push({ owner: owner });
+        conditions.push({ owner_username: owner });
     }
     // 予約方法
     if (purchaserGroup !== null) {
@@ -258,17 +251,13 @@ export async function updateWatcherName(req: Request, res: Response, next: NextF
         status: ttts.factory.reservationStatusType.ReservationConfirmed
     };
 
-    // 自分の予約のみ
-    (<any>condition).owner = req.staffUser.get('id');
-
     const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
     try {
         const reservation = await reservationRepo.reservationModel.findOneAndUpdate(
             condition,
             {
                 watcher_name: watcherName,
-                watcher_name_updated_at: Date.now(),
-                owner_signature: req.staffUser.get('signature')
+                watcher_name_updated_at: Date.now()
             },
             { new: true }
         ).exec();
