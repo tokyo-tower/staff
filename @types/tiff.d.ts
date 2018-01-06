@@ -1,6 +1,5 @@
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 import * as ttts from '@motionpicture/ttts-domain';
-import * as AWS from 'aws-sdk';
 import * as express from 'express';
 import StaffUser from '../app/models/user/staff';
 
@@ -116,8 +115,8 @@ declare global {
 
         // tslint:disable-next-line:interface-name
         export interface Session {
-            staffUser?: IStaffUser;
-            cognitoCredentials?: AWS.CognitoIdentityServiceProvider.AuthenticationResultType;
+            staffUser?: ttts.service.admin.IAdmin;
+            cognitoCredentials?: ttts.service.admin.ICredentials;
             /**
              * 購入者情報(一度入力するとセッションが保持)
              */

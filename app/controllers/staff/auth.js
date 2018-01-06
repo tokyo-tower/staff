@@ -13,8 +13,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ttts = require("@motionpicture/ttts-domain");
-const AWS = require("aws-sdk");
-const crypto = require("crypto");
 const createDebug = require("debug");
 const _ = require("underscore");
 const staffLoginForm_1 = require("../../forms/staff/staffLoginForm");
@@ -45,7 +43,7 @@ function login(req, res, next) {
                     try {
                         // ログイン情報が有効であれば、Cognitoでもログイン
                         req.session.cognitoCredentials =
-                            yield getCognitoCredentials(req.body.userId, req.body.password);
+                            yield ttts.service.admin.login(process.env.AWS_ACCESS_KEY_ID, process.env.AWS_SECRET_ACCESS_KEY, process.env.API_CLIENT_ID, process.env.API_CLIENT_SECRET, process.env.COGNITO_USER_POOL_ID, req.body.userId, req.body.password)();
                         debug('cognito credentials published.', req.session.cognitoCredentials);
                     }
                     catch (error) {
@@ -55,7 +53,7 @@ function login(req, res, next) {
                     }
                     const cognitoCredentials = req.session.cognitoCredentials;
                     if (cognitoCredentials !== undefined) {
-                        const cognitoUser = yield getCognitoUser(cognitoCredentials.AccessToken);
+                        const cognitoUser = yield ttts.service.admin.getUserByAccessToken(cognitoCredentials.accessToken)();
                         // ログイン記憶
                         // tslint:disable-next-line:no-suspicious-comment
                         // TODO Cognitoユーザーに合わせて調整
@@ -98,7 +96,7 @@ function logout(req, res, next) {
                 delete req.session.staffUser;
                 delete req.session.cognitoCredentials;
             }
-            yield ttts.Models.Authentication.remove({ token: req.cookies.remember_staff }).exec();
+            // await ttts.Models.Authentication.remove({ token: req.cookies.remember_staff }).exec();
             res.clearCookie('remember_staff');
             res.redirect('/staff/mypage');
         }
@@ -108,79 +106,6 @@ function logout(req, res, next) {
     });
 }
 exports.logout = logout;
-function getCognitoUser(accesssToken) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise((resolve, reject) => {
-            const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
-                apiVersion: 'latest',
-                region: 'ap-northeast-1'
-            });
-            cognitoIdentityServiceProvider.getUser({
-                AccessToken: accesssToken
-            }, (err, data) => {
-                if (err instanceof Error) {
-                    reject(err);
-                }
-                else {
-                    resolve({
-                        username: data.Username,
-                        // id: <string>(<CognitoUserAttributeType>data.UserAttributes.find((a) => a.Name === 'sub')).Value,
-                        familyName: data.UserAttributes.find((a) => a.Name === 'family_name').Value,
-                        givenName: data.UserAttributes.find((a) => a.Name === 'given_name').Value,
-                        email: data.UserAttributes.find((a) => a.Name === 'email').Value,
-                        telephone: data.UserAttributes.find((a) => a.Name === 'phone_number').Value
-                    });
-                }
-            });
-        });
-    });
-}
-/**
- * Cognito認証情報を取得する
- * @param {string} username ユーザーネーム
- * @param {string} password パスワード
- */
-function getCognitoCredentials(username, password) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise((resolve, reject) => {
-            const cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider({
-                region: 'ap-northeast-1',
-                accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-            });
-            const hash = crypto.createHmac('sha256', process.env.API_CLIENT_SECRET)
-                .update(`${username}${process.env.API_CLIENT_ID}`)
-                .digest('base64');
-            const params = {
-                UserPoolId: process.env.COGNITO_USER_POOL_ID,
-                ClientId: process.env.API_CLIENT_ID,
-                AuthFlow: 'ADMIN_NO_SRP_AUTH',
-                AuthParameters: {
-                    USERNAME: username,
-                    SECRET_HASH: hash,
-                    PASSWORD: password
-                }
-                // ClientMetadata?: ClientMetadataType;
-                // AnalyticsMetadata?: AnalyticsMetadataType;
-                // ContextData?: ContextDataType;
-            };
-            cognitoidentityserviceprovider.adminInitiateAuth(params, (err, data) => {
-                debug('adminInitiateAuth result:', err, data);
-                if (err instanceof Error) {
-                    reject(err);
-                }
-                else {
-                    if (data.AuthenticationResult === undefined) {
-                        reject(new Error('Unexpected.'));
-                    }
-                    else {
-                        resolve(data.AuthenticationResult);
-                    }
-                }
-            });
-        });
-    });
-}
 function auth(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {

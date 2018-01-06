@@ -1,10 +1,9 @@
 /**
  * 内部関係者マイページコントローラー
- * @namespace controller/staff/mypage
+ * @namespace controllers.staff.mypage
  */
 
 import * as ttts from '@motionpicture/ttts-domain';
-import * as AWS from 'aws-sdk';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 import * as querystring from 'querystring';
@@ -25,7 +24,12 @@ const redisClient = ttts.redis.createClient({
  */
 export async function index(__: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const owners = await getCognitoUsers();
+        const owners = await ttts.service.admin.findAllByGroup(
+            <string>process.env.AWS_ACCESS_KEY_ID,
+            <string>process.env.AWS_SECRET_ACCESS_KEY,
+            <string>process.env.COGNITO_USER_POOL_ID,
+            'Staff'
+        )();
         res.render('staff/mypage/index', {
             owners: owners,
             layout: layout
@@ -33,35 +37,6 @@ export async function index(__: Request, res: Response, next: NextFunction): Pro
     } catch (error) {
         next(error);
     }
-}
-
-async function getCognitoUsers() {
-    return new Promise<AWS.CognitoIdentityServiceProvider.UsersListType>((resolve, reject) => {
-        const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
-            apiVersion: 'latest',
-            region: 'ap-northeast-1'
-        });
-
-        cognitoIdentityServiceProvider.listUsers(
-            {
-                UserPoolId: <string>process.env.COGNITO_USER_POOL_ID
-                //    AttributesToGet?: SearchedAttributeNamesListType;
-                //    Limit?: QueryLimitType;
-                //    PaginationToken?: SearchPaginationTokenType;
-                //    Filter?: UserFilterType;
-            },
-            (err, data) => {
-                if (err instanceof Error) {
-                    reject(err);
-                } else {
-                    if (data.Users === undefined) {
-                        reject(new Error('Unexpected.'));
-                    } else {
-                        resolve(data.Users);
-                    }
-                }
-            });
-    });
 }
 
 /**
