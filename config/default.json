@@ -133,5 +133,19 @@
         "GroupReservation": "団体予約",
         "Charter": "貸切予約",
         "Invitation": "無料招待券"
+    },
+    "emailSus":{
+        "title":"東京タワートップデッキツアー中止のお知らせ",
+        "titleEn":"Tokyo Tower Top Deck Tour Cancelled",
+        "EmailFoot1": "なお、このメールは、「東京タワー トップデッキツアー」の予約システムでチケットをご購入頂いた方にお送りしておりますが、チケット購入に覚えのない方に届いております場合は、下記お問い合わせ先までご連絡ください。",
+	    "EmailFoot2": "※尚、このメールアドレスは送信専用となっておりますでので、ご返信頂けません。",
+	    "EmailFoot3": "ご不明な点がございましたら、下記番号までお問合わせください。",
+	    "EmailFootEn1": "This message is sent to people who have purchased tickets for the Tokyo Tower Top Deck Tour via the reservation system. If you have no recollection of purchasing these tickets, please contact the number listed below.",
+        "EmailFootEn2": "* The e-mail address is for transmission purposes only, and cannot be replied to.",
+        "EmailFootEn3": "Contact the following number if you have any inquiries.",
+        "EmailAccess1": "お問い合わせはこちら",
+        "EmailAccess2": "東京タワー　TEL : 03-3433-5111　/　9：00am～17：00pm（年中無休）",
+        "EmailAccessEn1": "Inquiries:",
+        "EmailAccessEn2": "Tokyo Tower Tel: 03-3433-5111 / 09:00 to 17:00 (365 days a year)"
     }
 }
