@@ -138,7 +138,9 @@ function createEmail(res, reservations, notice) {
         const title = conf.get('emailSus.title');
         const titleEn = conf.get('emailSus.titleEn');
         //トウキョウ タロウ 様
-        const purchaserName = `${res.__('{{name}}様', { name: reservation.purchaser_name })}`;
+        const purchaserNameJp = `${reservation.purchaser_last_name} ${reservation.purchaser_first_name}`;
+        const purchaserName = `${res.__('{{name}}様', { name: purchaserNameJp })}`;
+        //const purchaserName: string = `${res.__('{{name}}様', { name: (<any>reservation).purchaser_name })}`;
         const purchaserNameEn = `${res.__('Mr{{name}}', { name: reservation.purchaser_name })}`;
         // 購入チケット情報
         const paymentTicketInfos = [];

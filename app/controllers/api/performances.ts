@@ -151,7 +151,9 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
     const title = conf.get<string>('emailSus.title');
     const titleEn = conf.get<string>('emailSus.titleEn');
     //トウキョウ タロウ 様
-    const purchaserName: string = `${res.__('{{name}}様', { name: (<any>reservation).purchaser_name })}`;
+    const purchaserNameJp = `${(<any>reservation).purchaser_last_name} ${(<any>reservation).purchaser_first_name}`;
+    const purchaserName: string = `${res.__('{{name}}様', { name: purchaserNameJp })}`;
+    //const purchaserName: string = `${res.__('{{name}}様', { name: (<any>reservation).purchaser_name })}`;
     const purchaserNameEn: string = `${res.__('Mr{{name}}', { name: (<any>reservation).purchaser_name })}`;
 
     // 購入チケット情報
