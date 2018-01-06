@@ -79,13 +79,15 @@ $(function() {
         $('form input[name="choices"]').val('');
         // 座席コードリストを取得
         var choices = [];
+        var watcherName = $('input[name="watcherName"]').val();
         $('.table-tickets tbody tr').each(function() {
             var ticketCount = $('option:selected', this).val();
             if (ticketCount > 0) {
                 choices.push({
                     ticket_type: $(this).attr('data-ticket-code'),
                     ticket_count: ticketCount,
-                    watcher_name: $('input', this).val()
+                    //watcher_name: $('input', this).val()
+                    watcher_name: watcherName
                 });
             }
         });
