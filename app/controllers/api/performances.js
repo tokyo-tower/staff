@@ -166,6 +166,7 @@ function createEmail(res, reservations, notice) {
         const access2 = conf.get('emailSus.EmailAccess2');
         const accessEn2 = conf.get('emailSus.EmailAccessEn2');
         // 本文セット
+        // tslint:disable-next-line:max-line-length
         const content = `${title}\n${titleEn}\n\n${purchaserName}\n${purchaserNameEn}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}\n\n\n${foot1}\n${foot2}\n${foot3}\n\n${footEn1}\n${footEn2}\n${footEn3}\n\n${access1}\n${access2}\n\n${accessEn1}\n${accessEn2}`;
         // メール編集
         const emailAttributes = {
