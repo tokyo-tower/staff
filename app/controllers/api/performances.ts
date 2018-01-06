@@ -184,6 +184,7 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
     const accessEn2 = conf.get<string>('emailSus.EmailAccessEn2');
 
     // 本文セット
+    // tslint:disable-next-line:max-line-length
     const content: string = `${title}\n${titleEn}\n\n${purchaserName}\n${purchaserNameEn}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}\n\n\n${foot1}\n${foot2}\n${foot3}\n\n${footEn1}\n${footEn2}\n${footEn3}\n\n${access1}\n${access2}\n\n${accessEn1}\n${accessEn2}`;
 
     // メール編集

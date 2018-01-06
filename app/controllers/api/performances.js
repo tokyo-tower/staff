@@ -134,11 +134,12 @@ function createEmail(res, reservations, notice) {
         const reservation = reservations[0];
         // タイトル編集
         // 東京タワー TOP DECK Ticket
-        const title = res.__('Title');
         // 東京タワー TOP DECK エレベータ運行停止のお知らせ
-        const titleEmail = res.__('EmailTitleSus');
+        const title = conf.get('emailSus.title');
+        const titleEn = conf.get('emailSus.titleEn');
         //トウキョウ タロウ 様
-        const purchaserName = `${res.__('Mr{{name}}', { name: reservation.purchaser_name })}`;
+        const purchaserName = `${res.__('{{name}}様', { name: reservation.purchaser_name })}`;
+        const purchaserNameEn = `${res.__('Mr{{name}}', { name: reservation.purchaser_name })}`;
         // 購入チケット情報
         const paymentTicketInfos = [];
         // 購入番号 : 850000001
@@ -153,8 +154,19 @@ function createEmail(res, reservations, notice) {
         // TOP DECKチケット(大人) 1枚
         const infos = getTicketInfo(reservations, res.__, res.locale);
         paymentTicketInfos.push(infos.join('\n'));
+        // foot
+        const foot1 = conf.get('emailSus.EmailFoot1');
+        const footEn1 = conf.get('emailSus.EmailFootEn1');
+        const foot2 = conf.get('emailSus.EmailFoot2');
+        const footEn2 = conf.get('emailSus.EmailFootEn2');
+        const foot3 = conf.get('emailSus.EmailFoot3');
+        const footEn3 = conf.get('emailSus.EmailFootEn3');
+        const access1 = conf.get('emailSus.EmailAccess1');
+        const accessEn1 = conf.get('emailSus.EmailAccessEn1');
+        const access2 = conf.get('emailSus.EmailAccess2');
+        const accessEn2 = conf.get('emailSus.EmailAccessEn2');
         // 本文セット
-        const content = `${titleEmail}\n\n${purchaserName}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}`;
+        const content = `${title}\n${titleEn}\n\n${purchaserName}\n${purchaserNameEn}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}\n\n\n${foot1}\n${foot2}\n${foot3}\n\n${footEn1}\n${footEn2}\n${footEn3}\n\n${access1}\n${access2}\n\n${accessEn1}\n${accessEn2}`;
         // メール編集
         const emailAttributes = {
             sender: {
@@ -166,7 +178,7 @@ function createEmail(res, reservations, notice) {
                 name: reservation.purchaser_name,
                 email: reservation.purchaser_email
             },
-            about: `${title} ${titleEmail}`,
+            about: `${title} ${titleEn}`,
             text: content
         };
         // メール作成
