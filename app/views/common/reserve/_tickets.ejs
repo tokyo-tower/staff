@@ -3,6 +3,10 @@
     const tempReservationModel = reservationModel.transactionInProgress;
     const isWheelchair = (tempReservationModel.category === 'wheelchair');
     const tempReservationModel_reservations = tempReservationModel.reservations;
+    let watcherName = '';
+    if (isStaff && tempReservationModel_reservations.length > 0){
+        watcherName = tempReservationModel_reservations[0].watcher_name;
+    }
 %>
 
 <%- include('./_step', {currentStepName: 'tickets'}) %>
@@ -56,7 +60,7 @@
                             return 0;
                         });
                     }
-                    tempReservationModel.ticketTypes.forEach(function(ticketType, index) {
+                    tempReservationModel.ticketTypes.forEach(function(ticketType) {
                         // 一般予約(general)だったら一般券種以外を弾く
                         if (tempReservationModel.category === 'general' && ticketType.ttts_extension.category !== 'Normal') {
                             return true;
@@ -66,7 +70,7 @@
                         <th>
                             <span><%- ticketType.name[locale] %> <%- __('{{price}} yen', { price: ticketType.charge } ) %></span>
                             <%
-                                if (isStaff && index == 0) {
+                                if (isStaff && (!isStaff) ) {
                             %>
                                 <input type="text" name="watcherName" class="form-control" placeholder="予約メモ" data-ticket-code="<%- ticketType._id %>" value="<%- memosByTicketType[ticketType._id] %>">
                             <% } %>
@@ -82,6 +86,15 @@
                 <%
                 });
                 %>
+                <%
+                    if (isStaff) {
+                %>
+                    <tr>
+                        <td colspan="2">
+                            <input type="text" name="watcherName" class="form-control" placeholder="予約メモ"  value="<%- watcherName %>">
+                        </td>
+                    </tr>
+                <% } %>
             </tbody>
             <tfoot class="hidden">
                 <tr><td colspan="2">

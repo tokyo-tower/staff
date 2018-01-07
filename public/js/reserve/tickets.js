@@ -22,9 +22,11 @@ $(function() {
         var total = 0;
         var count = 0;
         [].forEach.call(dom_tickets_tr, function(tr) {
-            var q = parseInt(tr.querySelector('select').value, 10);
-            total += parseInt(tr.getAttribute('data-ticket-charge'), 10) * q;
-            count += q;
+            if (tr.querySelector('select') != null) {
+                var q = parseInt(tr.querySelector('select').value, 10);
+                total += parseInt(tr.getAttribute('data-ticket-charge'), 10) * q;
+                count += q;
+            }
         });
         if (isNaN(total) || !count || count > window.ttts.reservation_maxq) {
             if (count > window.ttts.reservation_maxq) {
@@ -65,21 +67,26 @@ $(function() {
 
     // 次へ
     $(document).on('click', '.btn-next', function(e) {
-        // 予約メモ欄を無視して買おうとしている券があったらアラート
-        if (Array.prototype.some.call(document.querySelectorAll('input[name="watcherName"]'), function(input_watcherName) {
-            var qselect = document.getElementById('select_ticketq_' + input_watcherName.getAttribute('data-ticket-code'));
-            return ((parseInt(qselect.value, 10) > 0) && !input_watcherName.value);
-        })) {
-            alert('購入するチケットの予約メモは必ず入力してください');
+        // 予約メモ欄を一つに変更
+        var watcherName = $('input[name="watcherName"]').val();
+        if (watcherName == '') {
+            alert('予約メモは必ず入力してください');
             return false;
         }
+        // 予約メモ欄を無視して買おうとしている券があったらアラート
+        // if (Array.prototype.some.call(document.querySelectorAll('input[name="watcherName"]'), function(input_watcherName) {
+        //     var qselect = document.getElementById('select_ticketq_' + input_watcherName.getAttribute('data-ticket-code'));
+        //     return ((parseInt(qselect.value, 10) > 0) && !input_watcherName.value);
+        // })) {
+        //     alert('購入するチケットの予約メモは必ず入力してください');
+        //     return false;
+        // }
         if (!isAgreed() || isSubmitting) {
             return false;
         }
         $('form input[name="choices"]').val('');
         // 座席コードリストを取得
         var choices = [];
-        var watcherName = $('input[name="watcherName"]').val();
         $('.table-tickets tbody tr').each(function() {
             var ticketCount = $('option:selected', this).val();
             if (ticketCount > 0) {
