@@ -127,6 +127,7 @@
         .btn {
             width: 100px;
             height: 40px;
+            margin: auto;
         }
         .btn-refund_process {
             @include btn-blue;

@@ -48,7 +48,8 @@ function login(req, res, next) {
                     }
                     catch (error) {
                         res.locals.validation = [
-                            { msg: req.__('Invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
+                            // { msg: req.__('Invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
+                            { msg: req.__('Invalid{{fieldName}}', { fieldName: 'パスワード' }) }
                         ];
                     }
                     const cognitoCredentials = req.session.cognitoCredentials;

@@ -1,5 +1,5 @@
 /* global moment, flatpickr */
-$(function () {
+$(function() {
     'use strict';
     if (!window.ttts.API_ENDPOINT) { return alert('API_ENDPOINT undefined'); }
     if (!window.ttts.API_TOKEN.VALUE) { return alert('API_TOKEN undefined'); }
@@ -14,7 +14,7 @@ $(function () {
     };
 
     // performanceのstatusからCSSクラス名を得る
-    var getItemClassNameByPerformance = function (performance) {
+    var getItemClassNameByPerformance = function(performance) {
         if (performance.online_sales_status !== 'Normal') {
             return 'item-unavailable'; // 「-」
         }
@@ -34,12 +34,12 @@ $(function () {
 
     // APIから得たパフォーマンス一覧を整形して表示
     var dom_performances = document.querySelector('.performances');
-    var showPerformances = function (performanceArray) {
+    var showPerformances = function(performanceArray) {
         // 1hごとにまとめる (start_timeの最初2文字を時間とする)
         var hourArray = [];
         var performancesByHour = {};
         var moment_now = moment();
-        performanceArray.forEach(function (performance) {
+        performanceArray.forEach(function(performance) {
             try {
                 var hour = performance.attributes.start_time.slice(0, 2);
                 // 現在時刻より前のperformanceは無視
@@ -64,34 +64,34 @@ $(function () {
             }
         });
         // 時間割を念のためソート
-        hourArray.sort(function (a, b) {
+        hourArray.sort(function(a, b) {
             if (a < b) { return -1; }
             if (a > b) { return 1; }
             return 0;
         });
 
         var html = '';
-        hourArray.forEach(function (hour) {
+        hourArray.forEach(function(hour) {
             // 時間割内のパフォーマンスを念のためソート
-            performancesByHour[hour].sort(function (a, b) {
+            performancesByHour[hour].sort(function(a, b) {
                 if (a.start_time < b.start_time) { return -1; }
                 if (a.start_time === b.start_time) { return 0; }
                 return 1;
             });
 
             html += '<div class="performance">' +
-                '<div class="hour"><span>' + hour + ':00～</span></div>' +
-                '<div class="items">';
-            performancesByHour[hour].forEach(function (performance) {
-                html += '<div class="item ' + getItemClassNameByPerformance(performance) + '" data-performance-id="' + performance.id + '">' +
-                    '<p class="time">' + window.ttts.fn_spliceStr(performance.start_time, 2, ':') + ' - ' + window.ttts.fn_spliceStr(performance.end_time, 2, ':') + '</p>' +
-                    '<div class="wrapper-status">' +
-                    '<p class="status">' + performance.seat_status + '</p>' +
-                    '</div>' +
-                    '</div>';
+                        '<div class="hour"><span>' + hour + ':00～</span></div>' +
+                        '<div class="items">';
+            performancesByHour[hour].forEach(function(performance) {
+                html +=     '<div class="item ' + getItemClassNameByPerformance(performance) + '" data-performance-id="' + performance.id + '">' +
+                                '<p class="time">' + window.ttts.fn_spliceStr(performance.start_time, 2, ':') + ' - ' + window.ttts.fn_spliceStr(performance.end_time, 2, ':') + '</p>' +
+                                '<div class="wrapper-status">' +
+                                    '<p class="status">' + performance.seat_status + '</p>' +
+                                '</div>' +
+                            '</div>';
             });
-            html += '</div>' +
-                '</div>';
+            html +=     '</div>' +
+                    '</div>';
         });
         dom_performances.innerHTML = html;
     };
@@ -99,7 +99,7 @@ $(function () {
 
     // 検索
     var $loading = $('.loading');
-    var search = function (condition) {
+    var search = function(condition) {
         if (window.ttts.isWheelchairReservation) {
             condition.wheelchair = true;
         }
@@ -108,19 +108,19 @@ $(function () {
             url: window.ttts.API_ENDPOINT + '/performances',
             type: 'GET',
             data: condition,
-            beforeSend: function (xhr) {
+            beforeSend: function(xhr) {
                 xhr.setRequestHeader('Authorization', 'Bearer ' + window.ttts.API_TOKEN.VALUE);
                 $loading.modal();
             }
-        }).done(function (body) {
+        }).done(function(body) {
             if ($.isArray(body.data) && body.data.length > 0) {
                 showPerformances(body.data);
             } else {
                 dom_performances.innerHTML = '';
             }
-        }).fail(function (jqxhr, textStatus, error) {
+        }).fail(function(jqxhr, textStatus, error) {
             console.log('API Error: /performance/search', error);
-        }).always(function () {
+        }).always(function() {
             $loading.modal('hide');
         });
     };
@@ -130,20 +130,20 @@ $(function () {
     flatpickr.localize(window.flatpickr.l10ns[window.ttts.currentLocale]);
     var $modal_calender = $('.modal-calender');
     var calendar = new flatpickr(document.getElementById('input_performancedate'), {
-        appendTo: $('#calendercontainer').on('click', function (e) { e.stopPropagation(); })[0], // モーダル内コンテナに挿入しつつカレンダークリックでモーダルが閉じるのを防止
+        appendTo: $('#calendercontainer').on('click', function(e) { e.stopPropagation(); })[0], // モーダル内コンテナに挿入しつつカレンダークリックでモーダルが閉じるのを防止
         defaultDate: window.sessionStorage.getItem('performance_ymd') || 'today',
         disableMobile: true, // 端末自前の日付選択UIを使わない
         locale: window.ttts.currentLocale,
         minDate: 'today',
         maxDate: CALENDER_MAXDATE || new Date().fp_incr(60),
-        onOpen: function () {
+        onOpen: function() {
             $modal_calender.fadeIn(200);
         },
-        onClose: function () {
+        onClose: function() {
             $modal_calender.hide();
         },
         // カレンダーの日付が変更されたら検索を実行
-        onValueUpdate: function (selectedDates, dateStr) {
+        onValueUpdate: function(selectedDates, dateStr) {
             window.ttts.setSessionStorage('performance_ymd', dateStr);
             search({
                 page: 1,
@@ -152,11 +152,11 @@ $(function () {
         }
     });
     // モーダルを閉じたら中のカレンダーも閉じる
-    $modal_calender.click(function () { calendar.close(); });
+    $modal_calender.click(function() { calendar.close(); });
 
 
     // パフォーマンス決定
-    $(document).on('click', '.item', function (e) {
+    $(document).on('click', '.item', function(e) {
         document.querySelector('input[name="performanceId"]').value = e.currentTarget.getAttribute('data-performance-id');
         document.getElementById('form_performanceId').submit();
     });

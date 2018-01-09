@@ -53,7 +53,8 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
                     debug('cognito credentials published.', (<Express.Session>req.session).cognitoCredentials);
                 } catch (error) {
                     res.locals.validation = [
-                        { msg: req.__('Invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
+                        // { msg: req.__('Invalid{{fieldName}}', { fieldName: req.__('Form.FieldName.password') }) }
+                        { msg: req.__('Invalid{{fieldName}}', { fieldName: 'パスワード' }) }
                     ];
                 }
 

@@ -139,7 +139,7 @@
                     <select class="form-control" name="gender">
                         <option value="">---</option>
                         <% for (let choice of genderChoices) { %>
-                        <option value="<%= choice.code %>"<% if (age === choice.code) { %> selected="selected"<% } %>><%- __(choice.name) %></option>
+                        <option value="<%= choice.code %>"<% if (gender === choice.code) { %> selected="selected"<% } %>><%- __(choice.name) %></option>
                         <% } %>
                     </select>
                 </td>
@@ -249,43 +249,38 @@
     </table>
     <input type="hidden" name="gmoTokenObject" value="">
     <input style="display:none;" type="radio" name="paymentMethod" value="0" checked="checked">
+    <div class="modal fade" id="modal_cardsecurirycode" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <p class="btn-close" data-dismiss="modal"><span>×</span></p>
+                    <h2 class="modal-title"><%- __('AboutSecuritycode') %></h2>
+                    <p class="guidetext"><%- __('SecuritycodePositionGuide') %></p>
+                    <p name="error-message"></p>
+                </div>
+                <div class="modal-body">
+                    <h3><%- __('SecuritycodePositionMain') %></h3>
+                    <p><%- __('SecuritycodePositionTextMain') %></p>
+                    <figure><img src="/images/common/figure_securitycode_common.png" alt="VISA / MASTER / DINERS / JCB"></figure>
+                    <h3><%- __('SecuritycodePositionOther') %></h3>
+                    <p><%- __('SecuritycodePositionTextOther') %></p>
+                    <figure><img src="/images/common/figure_securitycode_amex.png" alt="AMEX"></figure>
+                </div>
+                <div class="modal-footer">
+                    <p class="btn btn-close" data-dismiss="modal"><span><%- __('Close') %></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $('#modalbtn_cardsecurirycode').click(function() {
+            $('#modal_cardsecurirycode').modal();
+        });
+    </script>
     <script src="/js/lib/intl-tel-input/intlTelInput.min.js"></script>
+    <script src="<%= GMO_ENDPOINT %>/ext/js/token.js"></script>
+    <script>Multipayment.init('<%= GMO_SHOP_ID %>');</script>
 <% } %>
 </form>
-
-<div class="modal fade" id="modal_cardsecurirycode" tabindex="-1">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<p class="btn-close" data-dismiss="modal"><span>×</span></p>
-				<h2 class="modal-title"><%- __('AboutSecuritycode') %></h2>
-				<p class="guidetext"><%- __('SecuritycodePositionGuide') %></p>
-                <p name="error-message"></p>
-			</div>
-			<div class="modal-body">
-                <h3><%- __('SecuritycodePositionMain') %></h3>
-                <p><%- __('SecuritycodePositionTextMain') %></p>
-                <figure><img src="/images/common/figure_securitycode_common.png" alt="VISA / MASTER / DINERS / JCB"></figure>
-                <h3><%- __('SecuritycodePositionOther') %></h3>
-                <p><%- __('SecuritycodePositionTextOther') %></p>
-                <figure><img src="/images/common/figure_securitycode_amex.png" alt="AMEX"></figure>
-			</div>
-            <div class="modal-footer">
-				<p class="btn btn-close" data-dismiss="modal"><span><%- __('Close') %></span></p>
-            </div>
-		</div>
-	</div>
-</div>
-<script>
-    $('#modalbtn_cardsecurirycode').click(function() {
-        $('#modal_cardsecurirycode').modal();
-    });
-</script>
-
-
-<% if (reservationModel.transactionInProgress.purchaserGroup === 'Customer') { %>
-<script src="<%= GMO_ENDPOINT %>/ext/js/token.js"></script>
-<script>Multipayment.init('<%= GMO_SHOP_ID %>');</script>
-<% } %>
 
 <script src="/js/profile.js"></script>

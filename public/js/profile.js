@@ -74,7 +74,7 @@ $(function() {
             preferredCountries = (preferredCountries) ? JSON.parse(preferredCountries) : ['jp', 'tw', 'cn', 'kr', 'us', 'fr', 'de', 'it', 'es', 'vn', 'id', 'th', 'ru'];
 
             $input_tel.intlTelInput({
-                utilsScript: '/js/lib/intl-tel-input/utils.js',                
+                utilsScript: '/js/lib/intl-tel-input/utils.js',
                 preferredCountries: preferredCountries,
                 customPlaceholder: function(selectedCountryPlaceholder) {
                     return selectedCountryPlaceholder.replace(/-/g, '');
@@ -174,7 +174,9 @@ $(function() {
                     error = 'invalid';
                 }
                 if (error) {
-                    window.navigator.vibrate(200);
+                    if (typeof window.navigator.vibrate === 'function') {
+                        window.navigator.vibrate(200);
+                    }
                     elm_parent.classList.add('has-error');
                     elm_errmsg.innerText = window.ttts.errmsgLocales[error].replace('{{fieldName}}', filedname).replace('{{max}}', maxLength);
                     bool_valid = false;

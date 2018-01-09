@@ -1,6 +1,6 @@
 <%
-    const isStaff = (reservationModel.transactionInProgress.purchaserGroup === 'Staff');
     const tempReservationModel = reservationModel.transactionInProgress;
+    const isStaff = (tempReservationModel.purchaserGroup === 'Staff');
     const isWheelchair = (tempReservationModel.category === 'wheelchair');
     const tempReservationModel_reservations = tempReservationModel.reservations;
     let watcherName = '';
@@ -8,6 +8,9 @@
         watcherName = tempReservationModel_reservations[0].watcher_name;
     }
 %>
+<script>
+    window.ttts.isStaff = <%- isStaff %>;
+</script>
 
 <%- include('./_step', {currentStepName: 'tickets'}) %>
 
@@ -36,16 +39,7 @@
                 </tr>
             </thead>
             <tbody>
-                <% /* スタッフ予約時 => 券種ごとの予約メモを回収 */
-                    const memosByTicketType = {};
-                    if (isStaff) {
-                        tempReservationModel_reservations.forEach((reservation) => {
-                            let ticketId = reservation.ticket_type;
-                            if (typeof memosByTicketType[ticketId] !== 'string') {
-                                memosByTicketType[ticketId] = reservation.watcher_name;
-                            }
-                        });
-                    }
+                <%
                     // 車椅子予約なので車椅子の券を上位に持ってくる
                     if (isWheelchair) {
                         tempReservationModel.ticketTypes.sort((a, b) => {
@@ -69,11 +63,6 @@
                     <tr data-ticket-code="<%- ticketType._id %>" data-ticket-charge="<%= ticketType.charge %>">
                         <th>
                             <span><%- ticketType.name[locale] %> <%- __('{{price}} yen', { price: ticketType.charge } ) %></span>
-                            <%
-                                if (isStaff && (!isStaff) ) {
-                            %>
-                                <input type="text" name="watcherName" class="form-control" placeholder="予約メモ" data-ticket-code="<%- ticketType._id %>" value="<%- memosByTicketType[ticketType._id] %>">
-                            <% } %>
                         </th>
                         <td>
                             <select id="select_ticketq_<%- ticketType._id %>" class="form-control">
@@ -91,7 +80,7 @@
                 %>
                     <tr>
                         <td colspan="2">
-                            <input type="text" name="watcherName" class="form-control" placeholder="予約メモ"  value="<%- watcherName %>">
+                            <input type="text" id="input_watcherName" name="watcherName" class="form-control" placeholder="予約メモ"  value="<%- watcherName %>">
                         </td>
                     </tr>
                 <% } %>
@@ -114,6 +103,6 @@
     <input type="hidden" name="choices">
 </form>
 
-<p class="alert-ticket alert-ticket-overmax">選択出来る枚数は <%= conf.get('reservation_maxq') %>枚 までとなります。</p>
+<p class="alert-ticket alert-ticket-overmax"><%- (isStaff) ? `選択出来る枚数は ${conf.get('reservation_maxq')} 枚までとなります。` : __('SeatsLimit{{limit}}', { limit: conf.get('reservation_maxq') } ) %></p>
 
 <script src="/js/reserve/tickets.js"></script>
