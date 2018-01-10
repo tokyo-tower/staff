@@ -75,7 +75,7 @@
                     <div class="wrapper-names">
                         <div class="wrapper-nameinput wrapper-nameinput-lastname">
                             <label for="id_lastName"><%- __('LastName') %></label>
-                            <input type="tel" name="lastName" id="id_lastName" class="form-control input-required" data-pattern="^[ァ-ロワヲンーa-zA-Z・\.\s　]*$" data-parentSelector=".wrapper-nameinput-lastname" data-fieldname="<%- __('LastName') %>" value="<%= lastName %>" required>
+                            <input type="text" name="lastName" id="id_lastName" class="form-control input-required" data-pattern="^[ァ-ロワヲンーa-zA-Z・\.\s　]*$" data-parentSelector=".wrapper-nameinput-lastname" data-fieldname="<%- __('LastName') %>" value="<%= lastName %>" required>
                             <p class="errmsg errmsg-lastName"><%- (validation && validation.lastName) ? validation.lastName.msg : '' %></p>
                         </div>
                         <div class="wrapper-nameinput wrapper-nameinput-firstname">
@@ -137,7 +137,6 @@
                     ];
                     %>
                     <select class="form-control" name="gender">
-                        <option value="">---</option>
                         <% for (let choice of genderChoices) { %>
                         <option value="<%= choice.code %>"<% if (gender === choice.code) { %> selected="selected"<% } %>><%- __(choice.name) %></option>
                         <% } %>
@@ -187,7 +186,7 @@
             <tr class="tr-cardNumber <% (validation && validation.cardNumber ? 'has-error' : '') %>">
                 <th><label for="cardNumber"><%- __('CardNumber') %></label><span class="requiredmark"></span></th>
                 <td>
-                    <input type="text" name="cardNumber" id="cardNumber" class="form-control input-required" value="" maxlength="16" data-pattern="^[0-9]+$" data-fieldname="<%- __('CardNumber') %>" required>
+                    <input type="tel" name="cardNumber" id="cardNumber" class="form-control input-required" value="" maxlength="16" data-pattern="^[0-9]+$" data-fieldname="<%- __('CardNumber') %>" required>
                     <p class="errmsg errmsg-cardNumber"><% (validation && validation.cardNumber ? validation.cardNumber.msg : '') %></p>
                     <p class="errmsg errmsg-gmoTransaction"><%- (typeof GMOERROR === 'string' ? GMOERROR : '') %></p>
                     <figure class="figure-availablecards"><img src="/images/common/available_credit_cards.png" alt="available credit cards"></figure>
@@ -239,7 +238,7 @@
             <tr class="tr-securitycode <% (validation && validation.securitycode ? 'has-error' : '') %>">
                 <th><label for="securitycode"><%- __('Securitycode') %></label><span class="requiredmark"></span></th>
                 <td>
-                    <input type="text" name="securitycode" id="securitycode" class="form-control input-required" value="" maxlength="4" data-pattern="^[0-9]+$" data-fieldname="<%- __('Securitycode') %>" required>
+                    <input type="tel" name="securitycode" id="securitycode" class="form-control input-required" value="" maxlength="4" data-pattern="^[0-9]+$" data-fieldname="<%- __('Securitycode') %>" required>
                     <p class="errmsg errmsg-securitycode"><% (validation && validation.securitycode ? validation.securitycode.msg : '') %></p>
                     <p class="btn-securitycode" id="modalbtn_cardsecurirycode"><%- __('AboutSecuritycode') %></p>
                 </td>

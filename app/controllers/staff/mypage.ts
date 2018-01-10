@@ -53,6 +53,7 @@ export async function print(req: Request, res: Response, next: NextFunction): Pr
         debug('printToken created.', printToken);
 
         const query = querystring.stringify({
+            locale: 'ja',
             output: req.query.output,
             token: printToken
         });

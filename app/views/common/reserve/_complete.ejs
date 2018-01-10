@@ -69,11 +69,11 @@
 </table>
 
 
-<a class="btn btn-blue visible-pc" id="btn_print_a4" target="_blank" href='<%- process.env.RESERVATIONS_PRINT_URL %>?output=a4&token=<%= printToken %>'><span><%- __('PrintTicket') %></span></a>
+<a class="btn btn-blue visible-pc" id="btn_print_a4" target="_blank" href='<%- process.env.RESERVATIONS_PRINT_URL %>?output=a4&locale=<%- locale %>&token=<%= printToken %>'><span><%- __('PrintTicket') %></span></a>
 
 <% if (reservations[0].purchaser_group === 'Staff') { %>
 <div class="thermalprint">
-    <a class="btn btn-big btn-thermalprint" id="btn_thermalprint" target="_blank" href='<%- process.env.RESERVATIONS_PRINT_URL %>?output=thermal&token=<%= printToken %>'><span>サーマル印刷</span></a>
+    <a class="btn btn-big btn-thermalprint" id="btn_thermalprint" target="_blank" href='<%- process.env.RESERVATIONS_PRINT_URL %>?output=thermal&locale=<%- locale %>&token=<%= printToken %>'><span>サーマル印刷</span></a>
 </div>
 <% } %>
 

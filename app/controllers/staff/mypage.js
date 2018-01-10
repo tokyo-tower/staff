@@ -55,6 +55,7 @@ function print(req, res, next) {
             const printToken = yield tokenRepo.createPrintToken(ids);
             debug('printToken created.', printToken);
             const query = querystring.stringify({
+                locale: 'ja',
                 output: req.query.output,
                 token: printToken
             });
