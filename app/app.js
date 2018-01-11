@@ -4,6 +4,7 @@
  * @module app
  * @global
  */
+const middlewares = require("@motionpicture/express-middleware");
 const ttts = require("@motionpicture/ttts-domain");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -26,6 +27,10 @@ const router_1 = require("./routes/router");
 const staff_1 = require("./routes/staff");
 const mongooseConnectionOptions_1 = require("../mongooseConnectionOptions");
 const app = express();
+app.use(middlewares.basicAuth({
+    name: process.env.BASIC_AUTH_NAME,
+    pass: process.env.BASIC_AUTH_PASS
+}));
 app.use(partials()); // レイアウト&パーシャルサポート
 app.use(session_1.default); // セッション
 if (process.env.NODE_ENV !== 'production') {

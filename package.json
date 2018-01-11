@@ -17,6 +17,7 @@
     }
   ],
   "dependencies": {
+    "@motionpicture/express-middleware": "0.0.0",
     "@motionpicture/ttts-api-nodejs-client": "0.0.0-alpha.0",
     "@motionpicture/ttts-domain": "^12.0.0-alpha.63",
     "body-parser": "^1.18.2",

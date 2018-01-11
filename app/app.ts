@@ -4,6 +4,7 @@
  * @global
  */
 
+import * as middlewares from '@motionpicture/express-middleware';
 import * as ttts from '@motionpicture/ttts-domain';
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
@@ -30,6 +31,11 @@ import staffRouter from './routes/staff';
 import mongooseConnectionOptions from '../mongooseConnectionOptions';
 
 const app = express();
+
+app.use(middlewares.basicAuth({ // ベーシック認証
+    name: process.env.BASIC_AUTH_NAME,
+    pass: process.env.BASIC_AUTH_PASS
+}));
 
 app.use(partials()); // レイアウト&パーシャルサポート
 
