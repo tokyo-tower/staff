@@ -117,7 +117,7 @@ export async function getTargetReservationsForRefund(performanceIds: string[]): 
  * 運行・オンライン販売停止メール作成
  * @param {Response} res
  * @param {ttts.factory.transaction.placeOrder.ITransaction[]} transactions
- * @param {any} notice
+ * @param {string} notice
  * @return {Promise<void>}
  */
 async function createEmails(
@@ -132,7 +132,9 @@ async function createEmails(
     // 購入単位ごとにメール作成
     await Promise.all(transactions.map(async (transaction) => {
         const result = <ttts.factory.transaction.placeOrder.IResult>transaction.result;
-        await createEmail(res, result.eventReservations, notice);
+        const confirmedReservations = result.eventReservations
+            .filter((r) => r.status === ttts.factory.reservationStatusType.ReservationConfirmed);
+        await createEmail(res, confirmedReservations, notice);
     }));
 }
 
@@ -151,10 +153,9 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
     const title = conf.get<string>('emailSus.title');
     const titleEn = conf.get<string>('emailSus.titleEn');
     //トウキョウ タロウ 様
-    const purchaserNameJp = `${(<any>reservation).purchaser_last_name} ${(<any>reservation).purchaser_first_name}`;
+    const purchaserNameJp = `${reservation.purchaser_last_name} ${reservation.purchaser_first_name}`;
     const purchaserName: string = `${res.__('{{name}}様', { name: purchaserNameJp })}`;
-    //const purchaserName: string = `${res.__('{{name}}様', { name: (<any>reservation).purchaser_name })}`;
-    const purchaserNameEn: string = `${res.__('Mr{{name}}', { name: (<any>reservation).purchaser_name })}`;
+    const purchaserNameEn: string = `${res.__('Mr{{name}}', { name: reservation.purchaser_name })}`;
 
     // 購入チケット情報
     const paymentTicketInfos: string[] = [];
@@ -244,30 +245,30 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
  * チケット情報取得
  *
  */
-export function getTicketInfo(reservations: any[], __: Function, locale: string): string[] {
+export function getTicketInfo(reservations: ttts.factory.reservation.event.IReservation[], __: Function, locale: string): string[] {
     // 券種ごとに合計枚数算出
-    const keyName: string = 'ticket_type';
-    const ticketInfos: {} = {};
+    const ticketInfos: {
+        [ticketTypeId: string]: {
+            ticket_type_name: string;
+            charge: string;
+            count: number;
+        }
+    } = {};
     for (const reservation of reservations) {
-        // チケットタイプセット
-        const dataValue = reservation[keyName];
         // チケットタイプごとにチケット情報セット
-        if (!ticketInfos.hasOwnProperty(dataValue)) {
-            (<any>ticketInfos)[dataValue] = {
-                ticket_type_name: reservation.ticket_type_name[locale],
+        if (ticketInfos[reservation.ticket_type] === undefined) {
+            ticketInfos[reservation.ticket_type] = {
+                ticket_type_name: (<any>reservation.ticket_type_name)[locale],
                 charge: `\\${numeral(reservation.charge).format('0,0')}`,
                 count: 1
             };
         } else {
-            (<any>ticketInfos)[dataValue].count += 1;
+            ticketInfos[reservation.ticket_type].count += 1;
         }
     }
-    // 券種ごとの表示情報編集
-    const ticketInfoArray: string[] = [];
-    Object.keys(ticketInfos).forEach((key) => {
-        const ticketInfo = (<any>ticketInfos)[key];
-        ticketInfoArray.push(`${ticketInfo.ticket_type_name} ${__('{{n}}Leaf', { n: ticketInfo.count })}`);
-    });
 
-    return ticketInfoArray;
+    // 券種ごとの表示情報編集
+    return Object.keys(ticketInfos).map((ticketTypeId) => {
+        return `${ticketInfos[ticketTypeId].ticket_type_name} ${__('{{n}}Leaf', { n: ticketInfos[ticketTypeId].count })}`;
+    });
 }
