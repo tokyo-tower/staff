@@ -7,10 +7,11 @@ $(function() {
     // カレンダーを何日先まで表示するか
     var CALENDER_MAXDATE = window.ttts.reservableMaxDate || '';
 
-    // 空き状況表示切り替え閾値 (以下)
+    // 空き状況表示切り替え閾値
     var STATUS_THRESHOLD = {
         CROWDED: 19,
-        LAST: 9
+        LAST: 9,
+        WHEELCHAIR_SOLDOUT: 6
     };
 
     // performanceのstatusからCSSクラス名を得る
@@ -18,10 +19,10 @@ $(function() {
         if (performance.online_sales_status !== 'Normal') {
             return 'item-unavailable'; // 「-」
         }
-        if (window.ttts.isWheelchairReservation && !performance.wheelchair_available) {
+        var num = parseInt(performance.seat_status, 10);
+        if (window.ttts.isWheelchairReservation && (!performance.wheelchair_available || num < STATUS_THRESHOLD.WHEELCHAIR_SOLDOUT)) {
             return 'item-soldout';
         }
-        var num = parseInt(performance.seat_status, 10);
         if (num > STATUS_THRESHOLD.CROWDED) {
             return 'item-capable'; // 「⚪」
         } else if (num > STATUS_THRESHOLD.LAST) {

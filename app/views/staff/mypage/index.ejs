@@ -175,7 +175,7 @@
     </form>
 </div>
 
-<p class="total-count"></p>
+<p id="echo_totalcount"></p>
 
 <div class="wrapper-reservations">
     <table class="table table-bordered">
@@ -291,8 +291,8 @@
     </div>
 </div>
 
-<div id="modal_cancelcompleted" class="modal modal-cancel fade" tabindex="-1">
-    <div class="modal-dialog">
+<div id="modal_cancelcompleted" class="modal modal-cancel fade" role="dialog" aria-labelledby="myModalLabel" tabindex="-1" data-backdrop="static">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">チケットキャンセル完了</h2>
@@ -302,7 +302,7 @@
                 <p>上記チケットのキャンセル手続きが完了いたしました。</p>
             </div>
             <div class="modal-footer">
-                <p class="btn btn-close" data-dismiss="modal">
+                <p class="btn btn-close" id="btn_cancelcompleted" data-dismiss="modal">
                     <span>閉じる</span>
                 </p>
             </div>

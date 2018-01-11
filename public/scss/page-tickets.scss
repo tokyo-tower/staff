@@ -21,11 +21,10 @@
         padding-top: 0;
         a {
             text-decoration: underline;
-            color: red;
         }
     }
     .link-guide {
-        color: #71c9ff;
+        color: $color_linkBlue;
         display: inline-block;
         text-decoration: underline;
         margin-bottom: 1em;

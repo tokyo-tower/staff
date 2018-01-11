@@ -1,5 +1,5 @@
 {
-	"Title": "Tokyo Tower TOP DECK Ticket",
+	"Title": "TOKYO TOWER TOP DECK TOUR",
 	"{{price}} yen": "{{price}} JPY",
 
 	"Terms": "이용 규약",
@@ -141,7 +141,7 @@
 	"TopDeckGateInfo": "Main Deck 2F의 Top Deck 게이트로 Top Deck 게이트 통과 시간 내에 오시기 바랍니다.",
 	"ImportantNotes": "주의사항",
 	"TicketNotesContents": "※ 티켓 취소는 입장 3일 전 23시 59분까지 가능합니다.<br>※ 티켓을 취소할 경우 인원에 상관없이 1회 구매당 1,000엔의 취소 수수료가 부과됩니다.<br>※ 구매 후에는 날짜와 시간 변경이 불가합니다. 취소 후 다시 구매해 주십시오.※ 취소 수수료는 반환하지 않으므로 양해 바랍니다.<br>※ 예약 일시에 입장하지 못한 경우 투어에 참가하실 수 없습니다.<br>※ 입장 3일 전 23시 59분이 지난 티켓의 변경 및 취소, 환불은 불가합니다.<br>※ 구매한 티켓을 다른 사람에게 판매하는 행위는 금지됩니다. 재판매로 인한 고객 간의 불이익이나 손해 등에 대해서는 일체 책임을 지지 않습니다.<br>※ 나이를 확인하는 경우가 있습니다.",
-	"UrlContainedContactAvailableDay": "03-3433-5111 / 9:00 am ~ 17:00 pm (연중무휴)<br>자주 하는 질문(FAQ) https://www.tokyotower.co.jp/faq",
+	"UrlContainedContactAvailableDay": "03-3433-5111 / 9:00 am ~ 17:00 pm (연중무휴)<br>자주 하는 질문(FAQ) https://tdt.tokyotower.co.jp/ko/#faq",
 	"UrlContainedOfficialSiteWithUrl": "공식 사이트 https://www.tokyotower.co.jp/",
 	"ForWCReserveTitle": "휠체어 이용자를 포함한 예약",
 	"LinkContainedWheelChairGuideMessage": "※휠체어 사이즈에는 상한이 있습니다. 사이즈가 큰 경우는 당사에서 준비한 휠체어로 바꿔 타셔야 하는 경우가 있습니다. 당사 휠체어의 자세한 내용은 <a href='/wheelchairinfo' target='_blank'>여기</a>에서 확인해 주십시오.<br>※Top Deck Tour 티켓으로 Main Deck, Top Deck에 입장하실 수 있습니다. 자세한 Top Deck Tour 입장 방법은 <a href='/aboutenter' target='_blank'>여기</a>를 참조.<br>※결제는 신용카드로만 가능합니다. 현금 결제를 원하시는 고객은 Tokyo Tower Foot Town 1F Ticket Counter에서 예약 및 구매해 주십시오. ('Top Deck' 오픈 이후)",

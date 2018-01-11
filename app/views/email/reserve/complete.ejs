@@ -8,8 +8,8 @@
 <% /* 購入番号 */ %><%- __('PaymentNo') %> : <%- reservations[0].payment_no %>
 <% /* ご来塔日時 */ %><%- __('EmailReserveDate') %> : <%- dayTime %>
 <% /* 券種、枚数 */ %><%- __('TicketType') %> <%- __('TicketCount') %>
-<% ticketInfoArray.forEach((ticketInfo, index) => { %><%- ticketInfo %>
-<% }) %>-------------------------------------
+<%- ticketInfoStr %>
+-------------------------------------
 <% /*合計枚数 */ %><%- __('EmailTotalTicketCount{{n}}', {n: reservations.length}) %>
 -------------------------------------
 <%- __('EmailAboutQR') %>

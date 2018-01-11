@@ -22,8 +22,7 @@
         background-color: #fff;
         padding: 1em;
         @media screen and (max-width: $breakpoint_tablet) {
-            display:none;
-            padding: 1em 12%;
+            padding: 1em 2em;
             background-color: #e5e5e5;
             color: #000;
         }

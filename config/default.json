@@ -38,6 +38,49 @@
         "ko": [
             "kr",
             "kp"
+        ],
+        "th": [
+            "th"
+        ],
+        "id": [
+            "id"
+        ],
+        "vi": [
+            "vn",
+            "kh",
+            "la"
+        ],
+        "fr": [
+            "fr",
+            "cd",
+            "ca",
+            "be",
+            "ch",
+            "mc"
+        ],
+        "de": [
+            "de",
+            "at",
+            "be",
+            "ch"
+        ],
+        "it": [
+            "it",
+            "ch"
+        ],
+        "es": [
+            "es",
+            "mx",
+            "co",
+            "ar",
+            "pe",
+            "ve",
+            "cl"
+        ],
+        "ru": [
+            "ru",
+            "kz",
+            "by"
         ]
     },
     "official_website_url": "https://www.tokyotower.co.jp/",
@@ -47,54 +90,120 @@
         "en": "https://www.tokyotower.co.jp/en.html",
         "zh-hans": "https://www.tokyotower.co.jp/cn.html",
         "zh-hant": "https://www.tokyotower.co.jp/zh.html",
-        "ko": "https://www.tokyotower.co.jp/kr.html"
+        "ko": "https://www.tokyotower.co.jp/kr.html",
+        "th": "https://www.tokyotower.co.jp/en.html",
+        "id": "https://www.tokyotower.co.jp/en.html",
+        "vi": "https://www.tokyotower.co.jp/en.html",
+        "fr": "https://www.tokyotower.co.jp/en.html",
+        "de": "https://www.tokyotower.co.jp/en.html",
+        "it": "https://www.tokyotower.co.jp/en.html",
+        "es": "https://www.tokyotower.co.jp/en.html",
+        "ru": "https://www.tokyotower.co.jp/en.html"
+    },
+    "official_url_faq_by_locale": {
+        "ja": "https://tdt.tokyotower.co.jp/#faq",
+        "en": "https://tdt.tokyotower.co.jp/en/#faq",
+        "zh-hans": "https://tdt.tokyotower.co.jp/cn/#faq",
+        "zh-hant": "https://tdt.tokyotower.co.jp/zh/#faq",
+        "ko": "https://tdt.tokyotower.co.jp/ko/#faq",
+        "th": "https://tdt.tokyotower.co.jp/th/#faq",
+        "id": "https://tdt.tokyotower.co.jp/in/#faq",
+        "vi": "https://tdt.tokyotower.co.jp/vi/#faq",
+        "fr": "https://tdt.tokyotower.co.jp/fr/#faq",
+        "de": "https://tdt.tokyotower.co.jp/de/#faq",
+        "it": "https://tdt.tokyotower.co.jp/it/#faq",
+        "es": "https://tdt.tokyotower.co.jp/es/#faq",
+        "ru": "https://tdt.tokyotower.co.jp/ru/#faq"
     },
     "official_url_ticketinfo_by_locale": {
-        "ja": "https://www.tokyotower.co.jp/price/index.html",
-        "en": "https://www.tokyotower.co.jp/price/en.html",
-        "zh-hans": "https://www.tokyotower.co.jp/price/cn.html",
-        "zh-hant": "https://www.tokyotower.co.jp/price/zh.html",
-        "ko": "https://www.tokyotower.co.jp/price/kr.html"
+        "ja": "https://tdt.tokyotower.co.jp/#price",
+        "en": "https://tdt.tokyotower.co.jp/en/#price",
+        "zh-hans": "https://tdt.tokyotower.co.jp/cn/#price",
+        "zh-hant": "https://tdt.tokyotower.co.jp/zh/#price",
+        "ko": "https://tdt.tokyotower.co.jp/ko/#price",
+        "th": "https://tdt.tokyotower.co.jp/th/#price",
+        "id": "https://tdt.tokyotower.co.jp/in/#price",
+        "vi": "https://tdt.tokyotower.co.jp/vi/#price",
+        "fr": "https://tdt.tokyotower.co.jp/fr/#price",
+        "de": "https://tdt.tokyotower.co.jp/de/#price",
+        "it": "https://tdt.tokyotower.co.jp/it/#price",
+        "es": "https://tdt.tokyotower.co.jp/es/#price",
+        "ru": "https://tdt.tokyotower.co.jp/ru/#price"
     },
     "official_url_wheelchairinfo_by_locale": {
-        "ja": "https://www.tokyotower.co.jp/barrierfree/index.html",
-        "en": "https://www.tokyotower.co.jp/barrierfree/en.html",
-        "zh-hans": "https://www.tokyotower.co.jp/barrierfree/cn.html",
-        "zh-hant": "https://www.tokyotower.co.jp/barrierfree/zh.html",
-        "ko": "https://www.tokyotower.co.jp/barrierfree/kr.html"
+        "ja": "https://tdt.tokyotower.co.jp/#chair",
+        "en": "https://tdt.tokyotower.co.jp/en/#chair",
+        "zh-hans": "https://tdt.tokyotower.co.jp/cn/#chair",
+        "zh-hant": "https://tdt.tokyotower.co.jp/zh/#chair",
+        "ko": "https://tdt.tokyotower.co.jp/ko/#chair",
+        "th": "https://tdt.tokyotower.co.jp/th/#chair",
+        "id": "https://tdt.tokyotower.co.jp/in/#chair",
+        "vi": "https://tdt.tokyotower.co.jp/vi/#chair",
+        "fr": "https://tdt.tokyotower.co.jp/fr/#chair",
+        "de": "https://tdt.tokyotower.co.jp/de/#chair",
+        "it": "https://tdt.tokyotower.co.jp/it/#chair",
+        "es": "https://tdt.tokyotower.co.jp/es/#chair",
+        "ru": "https://tdt.tokyotower.co.jp/ru/#chair"
     },
     "official_url_aboutentering_by_locale": {
-        "ja": "https://www.tokyotower.co.jp/observatory/index.html",
-        "en": "https://www.tokyotower.co.jp/observatory/en.html",
-        "zh-hans": "https://www.tokyotower.co.jp/observatory/cn.html",
-        "zh-hant": "https://www.tokyotower.co.jp/observatory/zh.html",
-        "ko": "https://www.tokyotower.co.jp/observatory/kr.html"
+        "ja": "https://tdt.tokyotower.co.jp/#set",
+        "en": "https://tdt.tokyotower.co.jp/en/#set",
+        "zh-hans": "https://tdt.tokyotower.co.jp/cn/#set",
+        "zh-hant": "https://tdt.tokyotower.co.jp/zh/#set",
+        "ko": "https://tdt.tokyotower.co.jp/ko/#set",
+        "th": "https://tdt.tokyotower.co.jp/th/#set",
+        "id": "https://tdt.tokyotower.co.jp/en/#set",
+        "vi": "https://tdt.tokyotower.co.jp/vi/#set",
+        "fr": "https://tdt.tokyotower.co.jp/fr/#set",
+        "de": "https://tdt.tokyotower.co.jp/de/#set",
+        "it": "https://tdt.tokyotower.co.jp/it/#set",
+        "es": "https://tdt.tokyotower.co.jp/es/#set",
+        "ru": "https://tdt.tokyotower.co.jp/ru/#set"
     },
     "official_url_privacypolicy_by_locale": {
         "ja": "https://www.tokyotower.co.jp/privacypolicy/index.html",
         "en": "https://www.tokyotower.co.jp/privacypolicy/en.html",
         "zh-hans": "https://www.tokyotower.co.jp/privacypolicy/cn.html",
         "zh-hant": "https://www.tokyotower.co.jp/privacypolicy/zh.html",
-        "ko": "https://www.tokyotower.co.jp/privacypolicy/kr.html"
+        "ko": "https://www.tokyotower.co.jp/privacypolicy/kr.html",
+        "th": "https://www.tokyotower.co.jp/privacypolicy/en.html",
+        "id": "https://www.tokyotower.co.jp/privacypolicy/en.html",
+        "vi": "https://www.tokyotower.co.jp/privacypolicy/en.html",
+        "fr": "https://www.tokyotower.co.jp/privacypolicy/en.html",
+        "de": "https://www.tokyotower.co.jp/privacypolicy/en.html",
+        "it": "https://www.tokyotower.co.jp/privacypolicy/en.html",
+        "es": "https://www.tokyotower.co.jp/privacypolicy/en.html",
+        "ru": "https://www.tokyotower.co.jp/privacypolicy/en.html"
     },
     "official_url_inquiry_by_locale": {
-        "ja": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=ja",
-        "en": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=en",
-        "zh-hant": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=zh-hant",
-        "zh-hans": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=zh-hans",
-        "ko": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=ko",
-        "th": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=th",
-        "id": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=id",
-        "vi": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=vi",
-        "fr": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=fr",
-        "de": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=de",
-        "it": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=it",
-        "es": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=es",
-        "ru": "https://ttts-authentication-d.azurewebsites.net/inquiry/search/?locale=ru"
+        "ja": "https://ttts-authentication-test.azurewebsites.net/inquiry/search/?locale=ja",
+        "en": "https://ttts-authentication-test.azurewebsites.net/inquiry/search/?locale=en",
+        "zh-hant": "https://ttts-authentication-test.azurewebsites.net/inquiry/search/?locale=zh-hant",
+        "zh-hans": "https://ttts-authentication-test.azurewebsites.net/inquiry/search/?locale=zh-hans",
+        "ko": "https://ttts-authentication-test.azurewebsites.net/inquiry/search/?locale=ko",
+        "th": "https://ttts-authentication-test.azurewebsites.net/inquiry/search/?locale=th",
+        "id": "https://ttts-authentication-test.azurewebsites.net/inquiry/search/?locale=id",
+        "vi": "https://ttts-authentication-test.azurewebsites.net/inquiry/search/?locale=vi",
+        "fr": "https://ttts-authentication-test.azurewebsites.net/inquiry/search/?locale=fr",
+        "de": "https://ttts-authentication-test.azurewebsites.net/inquiry/search/?locale=de",
+        "it": "https://ttts-authentication-test.azurewebsites.net/inquiry/search/?locale=it",
+        "es": "https://ttts-authentication-test.azurewebsites.net/inquiry/search/?locale=es",
+        "ru": "https://ttts-authentication-test.azurewebsites.net/inquiry/search/?locale=ru"
     },
     "official_url_contact_by_locale": {
         "ja": "https://www.tokyotower.co.jp/contact/",
-        "en": "https://www.tokyotower.co.jp/contact/en.html"
+        "en": "https://www.tokyotower.co.jp/contact/en.html",
+        "zh-hant": "https://www.tokyotower.co.jp/contact/en.html",
+        "zh-hans": "https://www.tokyotower.co.jp/contact/en.html",
+        "ko": "https://www.tokyotower.co.jp/contact/en.html",
+        "th": "https://www.tokyotower.co.jp/contact/en.html",
+        "id": "https://www.tokyotower.co.jp/contact/en.html",
+        "vi": "https://www.tokyotower.co.jp/contact/en.html",
+        "fr": "https://www.tokyotower.co.jp/contact/en.html",
+        "de": "https://www.tokyotower.co.jp/contact/en.html",
+        "it": "https://www.tokyotower.co.jp/contact/en.html",
+        "es": "https://www.tokyotower.co.jp/contact/en.html",
+        "ru": "https://www.tokyotower.co.jp/contact/en.html"
     },
     "meta": {
         "keywords": "TOKYO TOWER TOP DECK TOUR",

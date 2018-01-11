@@ -9,6 +9,8 @@ const express_1 = require("express");
 const languageController = require("../controllers/language");
 // 本体サイトのトップページの言語別URL
 const topUrlByLocale = conf.get('official_url_top_by_locale');
+// 本体サイトのFAQページの言語別URL
+const faqUrlByLocale = conf.get('official_url_faq_by_locale');
 // 本体サイトのチケット案内ページの言語別URL
 const ticketInfoUrlByLocale = conf.get('official_url_ticketinfo_by_locale');
 // 本体サイトの入場案内ページの言語別URL
@@ -46,6 +48,10 @@ router.get('/asct/', (req, res) => {
     res.locals.description = 'TTTS Act on Specified Commercial Transactions';
     res.locals.keywords = 'TTTS Act on Specified Commercial Transactions';
     res.render('common/asct/');
+});
+// 本体サイトのFAQページに転送
+router.get('/faq', (req, res) => {
+    res.redirect(getRedirectOfficialUrl(req, faqUrlByLocale));
 });
 // 本体サイトのチケット案内ページに転送
 router.get('/ticketinfo', (req, res) => {

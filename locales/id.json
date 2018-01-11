@@ -1,5 +1,5 @@
 {
-	"Title": "Tokyo Tower TOP DECK Ticket",
+	"Title": "TOKYO TOWER TOP DECK TOUR",
 	"{{price}} JPY": "{{price}} JPY",
 
 	"Terms": "Ketentuan Penggunaan",
@@ -141,7 +141,7 @@
 	"TopDeckGateInfo": "Silakan datang dalam waktu transit Top Deck Gate di Main Deck 2F Top Deck Gate.",
 	"ImportantNotes": "Perhatian",
 	"TicketNotesContents": "* Pembatalan tiket dapat dilakukan sampai pukul 23.59 tiga hari sebelum hari kedatangan ke Tokyo Tower.<br>* Pembatalan tiket akan dikenakan biaya pembatalan sebesar 1000 JPY untuk setiap pembelian terlepas dari jumlah orang.<br>* Hari dan waktu setelah pembelian tiket tidak dapat diubah. Silakan beli tiket kembali setelah membatalkannya. *Biaya pembatalan tidak akan dikembalikan. Harap maklum.<br>* Anda tidak dapat ikut tur bila tidak dapat datang ke Tokyo Tower pada waktu dan hari reservasi.<br>* Perubahan, pembatalan, dan pengembalian pembayaran tiket tidak dapat dilakukan bila melewati pukul 23.59 tiga hari sebelum hari kedatangan ke Tokyo Tower.<br>* Dilarang keras menjual kembali tiket yang telah dibeli. Kami sama sekali tidak bertanggung jawab atas kerugian, kerusakan, dan sebagainya yang terjadi di antara pelanggan karena penjualan kembali.<br>* Ada kalanya usia Anda akan kami periksa.",
-	"UrlContainedContactAvailableDay": "03-3433-5111 / 9.00 ~ 17.00 (buka sepanjang tahun)<br>Pertanyaan yang sering ditanyakan (FAQ) https://www.tokyotower.co.jp/faq",
+	"UrlContainedContactAvailableDay": "03-3433-5111 / 9.00 ~ 17.00 (buka sepanjang tahun)<br>Pertanyaan yang sering ditanyakan (FAQ) https://tdt.tokyotower.co.jp/en/#faq",
 	"UrlContainedOfficialSiteWithUrl": "Situs resmi https://www.tokyotower.co.jp/",
 	"ForWCReserveTitle": "Reservasi termasuk pengguna kursi roda",
 	"LinkContainedWheelChairGuideMessage": "*Terdapat batas maksimal ukuran kursi roda. Bila ukuran kursi roda Anda besar, Anda dapat diminta untuk pindah ke kursi roda yang kami sediakan. Untuk informasi lebih lanjut tentang kursi roda kami, silakan periksa <a href='/wheelchairinfo' target='_blank'>di sini</a>.<br>*Anda dapat masuk ke Main Deck dan Top Deck dengan tiket Top Deck Toru. Mengenai cara masuk lebih lanjut ke Top Deck Tour, silakan periksa <a href='/aboutenter' target='_blank'>di sini</a>.<br>*Hanya menerima pembayaran dengan kartu kredit. Bila Anda ingin membayar dengan uang tunai, silakan lakukan reservasi dan pembayaran di Tokyo Tower Foot Town 1F Ticket Counter. (Setelah pembukaan \"Top Deck\")",

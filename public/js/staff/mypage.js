@@ -4,6 +4,8 @@ $(function() {
     // idごとにまとめた予約ドキュメントリスト
     var reservationsById = {};
 
+    var dom_totalcount = document.getElementById('echo_totalcount');
+
     // サーマル印刷実行ボタン
     $(document).on('click', '.btn-thermalprint', function(e) {
         var id = e.currentTarget.getAttribute('data-targetid');
@@ -168,7 +170,7 @@ $(function() {
             showReservations(data.results);
             showPager(parseInt(data.count, 10));
             showConditions();
-            $('.total-count').text(data.count + '件');
+            dom_totalcount.innerHTML = data.count + '件';
         }).fail(function(jqxhr, textStatus, error) {
             // エラーメッセージ表示
             try {
@@ -216,13 +218,16 @@ $(function() {
             });
             document.getElementById('echo_canceledreservations').innerHTML = tempHTML;
             $('#modal_cancelcompleted').modal();
-            // 再検索して表示を更新
-            search();
         }).fail(function(jqxhr, textStatus, error) {
             alert(error);
         }).always(function() {
         });
     }
+    // キャンセル完了モーダルの閉じるボタンで再検索 (※キャンセル完了のモーダルが出たままsearchするとモーダルが衝突してしまう)
+    document.getElementById('btn_cancelcompleted').onclick = function() {
+        search();
+        $('html, body').animate({ scrollTop: dom_totalcount.offsetTop }, 200);
+    };
 
     // 検索
     $(document).on('click', '.search-form .btn', function() {
@@ -236,6 +241,7 @@ $(function() {
     $(document).on('click', '.change-page', function() {
         conditions.page = $(this).attr('data-page');
         search();
+        $('html, body').animate({ scrollTop: dom_totalcount.offsetTop }, 200);
     });
 
     // A4印刷

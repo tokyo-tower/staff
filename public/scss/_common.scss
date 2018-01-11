@@ -3,7 +3,7 @@
         display: none !important;
     }
 }
-
+$color_linkBlue: #337ab7;
 $breakpoint_tablet:801px;
 $breakpoint_mobile:481px;
 @mixin clearfix {
@@ -370,14 +370,18 @@ select {
         height: 0;
         border-style: solid;
         border-width: 10.4px 6px 0 6px;
-        border-color: #ffffff transparent transparent transparent;
+        border-color: #999 transparent transparent transparent;
         @media screen and (max-width: $breakpoint_mobile) {
             display:block;
         }
     }
     &.accordion_mobile_toggleIsOpen::before {
+        display: none;
         border-width: 0 6px 10.4px 6px;
-        border-color: transparent transparent #ffffff transparent;
+        border-color: transparent transparent #999 transparent;
+        @media screen and (max-width: $breakpoint_mobile) {
+            display: block;
+        }
     }
 }
 

@@ -96,6 +96,9 @@
     .icondescription {
         margin-top: 10px;
         line-height: 2;
+        p {
+            display: inline-block;
+        }
         .mbr {
             display: none;
             @media screen and (max-width: 520px) {

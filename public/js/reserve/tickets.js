@@ -64,7 +64,7 @@ $(function() {
         } else {
             document.getElementById('btn_next').classList.add('btn-disabled');
         }
-    });
+    }).trigger('change');
 
     // 次へ
     $(document).on('click', '.btn-next', function(e) {

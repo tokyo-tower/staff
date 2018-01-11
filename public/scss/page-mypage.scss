@@ -3,20 +3,6 @@
     .btn-print {
         background-color: #4f89e1;
     }
-    &.no-thermal{
-        .btn-thermalprint {
-            background-color: #ddd;
-            box-shadow: none;
-            pointer-events: none;
-        }
-        option[value=thermalprint] {
-            display: none;
-        }
-    }
-    #msg_bluetooth {
-        text-align: center;
-        margin-bottom: 1em;
-    }
     .wrapper-searchform {
         background-color: #f9f9f9;
         padding: 2em;
@@ -61,7 +47,7 @@
             }
         }
     }
-    .total-count {
+    #echo_totalcount {
         margin-top: 1em;
     }
     .wrapper-reservations {
