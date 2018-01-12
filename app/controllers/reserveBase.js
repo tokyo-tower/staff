@@ -332,9 +332,16 @@ function createEmailAttributes(reservations, totalCharge, res) {
             const ticketInfo = ticketInfos[key];
             ticketInfoArray.push(`${ticketInfo.ticket_type_name[res.locale]} ${res.__('{{n}}Leaf', { n: ticketInfo.count })}`);
         });
+        const ticketInfoStr = ticketInfoArray.join('\n');
         const day = moment(reservations[0].performance_day, 'YYYYMMDD').format('YYYY/MM/DD');
         // tslint:disable-next-line:no-magic-numbers
         const time = `${reservations[0].performance_start_time.substr(0, 2)}:${reservations[0].performance_start_time.substr(2, 2)}`;
+        // 日本語の時は"姓名"他は"名姓"
+        const purchaserName = (res.locale === 'ja') ?
+            `${reservations[0].purchaser_last_name} ${reservations[0].purchaser_first_name}` :
+            `${reservations[0].purchaser_first_name} ${reservations[0].purchaser_last_name}`;
+        // staffでは金額なし
+        totalCharge = 0;
         debug('rendering template...');
         return new Promise((resolve, reject) => {
             res.render('email/reserve/complete', {
@@ -343,9 +350,10 @@ function createEmailAttributes(reservations, totalCharge, res) {
                 moment: moment,
                 numeral: numeral,
                 conf: conf,
-                ticketInfoArray: ticketInfoArray,
+                ticketInfoStr: ticketInfoStr,
                 totalCharge: totalCharge,
-                dayTime: `${day} ${time}`
+                dayTime: `${day} ${time}`,
+                purchaserName: purchaserName
             }, (renderErr, text) => __awaiter(this, void 0, void 0, function* () {
                 debug('email template rendered.', renderErr);
                 if (renderErr instanceof Error) {
