@@ -11,7 +11,7 @@
 <%- ticketInfoStr %>
 -------------------------------------
 <% /*合計枚数 */ %><%- __('EmailTotalTicketCount{{n}}', {n: reservations.length}) %>
-<% /* 合計金額 */ %><% if (totalCharge > 0) { %><%- __('{{price}} yen', {price: numeral(totalCharge).format('0,0')}) %><% } %>
+<% /* 合計金額 */ %><% if (totalCharge > 0) { %><%- __('TotalPrice') %> <%- __('{{price}} yen', {price: numeral(totalCharge).format('0,0')}) %><% } %>
 -------------------------------------
 <%- __('EmailAboutQR') %>
 
