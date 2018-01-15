@@ -304,6 +304,8 @@ function confirm(req, res, next) {
                 }
             }
             else {
+                // チケットをticket_type(id)でソート
+                sortReservationstByTicketType(reservationModel.transactionInProgress.reservations);
                 const ticketInfos = reserveBaseController.getTicketInfos(reservationModel.transactionInProgress.reservations);
                 // 券種ごとの表示情報編集
                 Object.keys(ticketInfos).forEach((key) => {
