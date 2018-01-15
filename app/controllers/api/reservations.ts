@@ -4,6 +4,7 @@
  */
 
 import * as ttts from '@motionpicture/ttts-domain';
+import * as conf from 'config';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 import { INTERNAL_SERVER_ERROR, NO_CONTENT, NOT_FOUND } from 'http-status';
@@ -19,6 +20,9 @@ const redisClient = ttts.redis.createClient({
     password: <string>process.env.REDIS_KEY,
     tls: { servername: <string>process.env.REDIS_HOST }
 });
+
+const paymentMethodsForCustomer = conf.get('paymentMethodsForCustomer');
+const paymentMethodsForStaff = conf.get('paymentMethodsForStaff');
 
 /**
  * 予約検索
@@ -157,37 +161,6 @@ export async function search(req: Request, res: Response): Promise<void> {
         ).exec();
         debug('reservation count:', count);
 
-        // 2017/11/14 データ検索、切り取り、ソートの順を変更
-        // データ検索
-        // const reservations = <any[]>await Models.Reservation.find({ $and: conditions })
-        //     .skip(limit * (page - 1))
-        //     .limit(limit)
-        //     .lean(true)
-        //     .exec();
-
-        // // ソート昇順(上映日→開始時刻→購入番号→座席コード)
-        // reservations.sort((a, b) => {
-        //     if (a.performance_day > b.performance_day) {
-        //         return 1;
-        //     }
-        //     if (a.performance_day < b.performance_day) {
-        //         return -1;
-        //     }
-        //     if (a.performance_start_time > b.performance_start_time) {
-        //         return 1;
-        //     }
-        //     if (a.performance_start_time < b.performance_start_time) {
-        //         return -1;
-        //     }
-        //     if (a.payment_no > b.payment_no) {
-        //         return 1;
-        //     }
-        //     if (a.payment_no < b.payment_no) {
-        //         return -1;
-        //     }
-        //     return ScreenUtil.sortBySeatCode(a.seat_code, b.seat_code);
-        // });
-
         // データ検索(検索→ソート→指定ページ分切取り)
         const reservations = await reservationRepo.reservationModel.find({ $and: conditions })
             .sort({
@@ -201,10 +174,30 @@ export async function search(req: Request, res: Response): Promise<void> {
             .exec()
             .then((docs) => docs.map((doc) => <ttts.factory.reservation.event.IReservation>doc.toObject()));
 
+        // 0件メッセージセット
+        const message : string = (reservations.length === 0) ?
+            '検索結果がありません。予約データが存在しないか、検索条件を見直してください' : '';
+
+        const getPaymentMethodName = (method: string) => {
+            if (paymentMethodsForCustomer.hasOwnProperty(method)) {
+                return (<any>paymentMethodsForCustomer)[method];
+            }
+            if (paymentMethodsForStaff.hasOwnProperty(method)) {
+                return (<any>paymentMethodsForStaff)[method];
+            }
+
+            return method;
+        };
+        // 決済手段名称追加
+        for (const reservation of reservations) {
+            (<any>reservation).payment_method_name = getPaymentMethodName(reservation.payment_method);
+        }
+
         res.json({
             results: reservations,
             count: count,
-            errors: null
+            errors: null,
+            message: message
         });
     } catch (error) {
         res.status(INTERNAL_SERVER_ERROR).json({

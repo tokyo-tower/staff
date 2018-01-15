@@ -78,6 +78,7 @@ $(function() {
                 + '<td class="td-seat">' + reservation.seat_code + '</td>'
                 + '<td class="td-ticket">' + reservation.ticket_type_name.ja + '</td>'
                 + '<td class="td-route">' + purchaseRoute[reservation.purchaser_group] + '</td>'
+                + '<td class="td-route">' + reservation.payment_method_name + '</td>'
                 + '<td class="td-checkin">' + ((reservation.checkins.length) ? '<span class="entered">入場済み</span>' : '<span class="unentered">未入場</span>') + '</td>'
                 + '<td class="td-actions">';
             if (reservation.payment_no && !reservation.performance_canceled) {
@@ -163,6 +164,11 @@ $(function() {
                 $('.wrapper-reservations input[type="checkbox"]').prop('checked', false);
             }
         }).done(function(data) {
+            // for test
+            if (data.message != '') {
+                alert(data.message);
+            }
+
             // データ表示
             data.results.forEach(function(reservation) {
                 reservationsById[reservation.id] = reservation;

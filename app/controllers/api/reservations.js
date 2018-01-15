@@ -13,6 +13,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ttts = require("@motionpicture/ttts-domain");
+const conf = require("config");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
 const moment = require("moment");
@@ -25,6 +26,8 @@ const redisClient = ttts.redis.createClient({
     password: process.env.REDIS_KEY,
     tls: { servername: process.env.REDIS_HOST }
 });
+const paymentMethodsForCustomer = conf.get('paymentMethodsForCustomer');
+const paymentMethodsForStaff = conf.get('paymentMethodsForStaff');
 /**
  * 予約検索
  */
@@ -150,35 +153,6 @@ function search(req, res) {
                 $and: conditions
             }).exec();
             debug('reservation count:', count);
-            // 2017/11/14 データ検索、切り取り、ソートの順を変更
-            // データ検索
-            // const reservations = <any[]>await Models.Reservation.find({ $and: conditions })
-            //     .skip(limit * (page - 1))
-            //     .limit(limit)
-            //     .lean(true)
-            //     .exec();
-            // // ソート昇順(上映日→開始時刻→購入番号→座席コード)
-            // reservations.sort((a, b) => {
-            //     if (a.performance_day > b.performance_day) {
-            //         return 1;
-            //     }
-            //     if (a.performance_day < b.performance_day) {
-            //         return -1;
-            //     }
-            //     if (a.performance_start_time > b.performance_start_time) {
-            //         return 1;
-            //     }
-            //     if (a.performance_start_time < b.performance_start_time) {
-            //         return -1;
-            //     }
-            //     if (a.payment_no > b.payment_no) {
-            //         return 1;
-            //     }
-            //     if (a.payment_no < b.payment_no) {
-            //         return -1;
-            //     }
-            //     return ScreenUtil.sortBySeatCode(a.seat_code, b.seat_code);
-            // });
             // データ検索(検索→ソート→指定ページ分切取り)
             const reservations = yield reservationRepo.reservationModel.find({ $and: conditions })
                 .sort({
@@ -191,10 +165,27 @@ function search(req, res) {
                 .limit(limit)
                 .exec()
                 .then((docs) => docs.map((doc) => doc.toObject()));
+            // 0件メッセージセット
+            const message = (reservations.length === 0) ?
+                '検索結果がありません。予約データが存在しないか、検索条件を見直してください' : '';
+            const getPaymentMethodName = (method) => {
+                if (paymentMethodsForCustomer.hasOwnProperty(method)) {
+                    return paymentMethodsForCustomer[method];
+                }
+                if (paymentMethodsForStaff.hasOwnProperty(method)) {
+                    return paymentMethodsForStaff[method];
+                }
+                return method;
+            };
+            // 決済手段名称追加
+            for (const reservation of reservations) {
+                reservation.payment_method_name = getPaymentMethodName(reservation.payment_method);
+            }
             res.json({
                 results: reservations,
                 count: count,
-                errors: null
+                errors: null,
+                message: message
             });
         }
         catch (error) {
