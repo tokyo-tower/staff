@@ -3,7 +3,15 @@
 
 <h1 class="pagetitle"><%- __('EditProfile') %></h1>
 
+<% if (reservationModel.transactionInProgress.purchaserGroup === 'Staff') {
+    // 代理予約はべた書き
+%>
+<p class="guidetext">ご購入者情報を入力し「次へ」ボタンを押してください。</p>
+<% } else {
+    // 代理予約以外はlocaleから
+%>
 <p class="guidetext"><%= __('EnterProfileGuideText') %></p>
+<% } %>
 
 <form id="form_profile" method="post">
 
@@ -20,7 +28,7 @@
                 </td>
             </tr>
             <tr class="tr-payment">
-                <th>お支払い方法<span class="requiredmark"></span></th>
+                <th>購入者情報<span class="requiredmark"></span></th>
                 <td>
                     <div class="wrapper-payment form-inline">
                         <%
