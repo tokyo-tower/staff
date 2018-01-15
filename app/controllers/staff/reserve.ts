@@ -384,7 +384,6 @@ export async function complete(req: Request, res: Response, next: NextFunction):
 function sortReservationstByTicketType(reservations: any[]): void {
     // チケットをticket_type(id)でソート
     reservations.sort((a: any, b: any) => {
-        // 入塔日
         if (a.ticket_type > b.ticket_type) {
             return 1;
         }

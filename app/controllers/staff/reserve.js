@@ -370,7 +370,6 @@ exports.complete = complete;
 function sortReservationstByTicketType(reservations) {
     // チケットをticket_type(id)でソート
     reservations.sort((a, b) => {
-        // 入塔日
         if (a.ticket_type > b.ticket_type) {
             return 1;
         }
