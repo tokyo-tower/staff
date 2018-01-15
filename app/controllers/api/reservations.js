@@ -159,7 +159,7 @@ function search(req, res) {
                 performance_day: 1,
                 performance_start_time: 1,
                 payment_no: 1,
-                seat_code: 1
+                ticket_type: 1
             })
                 .skip(limit * (page - 1))
                 .limit(limit)
