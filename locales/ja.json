@@ -5,11 +5,12 @@
 	"AreYouSureCancel": "本当にキャンセルしますか？",
 	"PaymentMethodName": {
 		"Cash": "現金",
-		"CP": "CP支払い",
-		"Invoice": "売掛（納品書・請求書支払い）",
-		"GroupReservation": "団体予約",
-		"Charter": "貸切予約",
-		"Invitation": "無料招待券"
+        "CP": "団体（CP支払い）",
+        "Invoice": "団体（納品書・請求書支払い）",
+        "GroupReservation": "団体（現金支払い）",
+        "Charter": "事前ブロック、貸切",
+        "OTC(Topdesk)": "トップデッキのみ（手売り）",
+        "Invitation": "無料招待、振替等対応"
 	},
 	"Terms": "利用規約",
 	"AboutPrivacy": "個人情報の取り扱いについて",

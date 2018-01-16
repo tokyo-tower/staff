@@ -143,7 +143,8 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
             throw new Error(req.__('UnexpectedError'));
         }
 
-        reservationModel.transactionInProgress.paymentMethod = ttts.factory.paymentMethodType.Invitation;
+        //reservationModel.transactionInProgress.paymentMethod = ttts.factory.paymentMethodType.Invitation;
+        reservationModel.transactionInProgress.paymentMethod = ttts.factory.paymentMethodType.CP;
 
         if (req.method === 'POST') {
             // 仮予約あればキャンセルする
@@ -250,7 +251,8 @@ export async function profile(req: Request, res: Response, next: NextFunction): 
             res.locals.paymentMethod =
                 (!_.isEmpty(reservationModel.transactionInProgress.paymentMethod))
                     ? reservationModel.transactionInProgress.paymentMethod
-                    : ttts.factory.paymentMethodType.Invitation;
+                    //: ttts.factory.paymentMethodType.Invitation;
+                    : ttts.factory.paymentMethodType.CP;
 
             res.render('staff/reserve/profile', {
                 reservationModel: reservationModel,
