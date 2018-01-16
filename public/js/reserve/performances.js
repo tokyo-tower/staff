@@ -4,6 +4,9 @@ $(function() {
     if (!window.ttts.API_ENDPOINT) { return alert('API_ENDPOINT undefined'); }
     if (!window.ttts.API_TOKEN.VALUE) { return alert('API_TOKEN undefined'); }
 
+    // カレンダーを何月何日から表示するか
+    var CALENDER_MINDATE = (window.ttts.mode !== 'staff') ? window.ttts.reserveStartDate : 'today';
+
     // カレンダーを何日先まで表示するか
     var CALENDER_MAXDATE = window.ttts.reservableMaxDate || '';
 
@@ -43,8 +46,8 @@ $(function() {
         performanceArray.forEach(function(performance) {
             try {
                 var hour = performance.attributes.start_time.slice(0, 2);
-                // 現在時刻より前のperformanceは無視
-                if (moment_now.isAfter(moment(performance.attributes.day + '' + performance.attributes.start_time, 'YYYYMMDDHHmm'))) {
+                // 時刻を見て無視 (一般: → 開始時刻 ／ 代理: 終了時刻)
+                if (moment_now.isAfter(moment(performance.attributes.day + '' + ((window.ttts.mode === 'staff') ? performance.attributes.end_time : performance.attributes.start_time), 'YYYYMMDDHHmm'))) {
                     return true;
                 }
                 if (hourArray.indexOf(hour) === -1) {
@@ -132,10 +135,10 @@ $(function() {
     var $modal_calender = $('.modal-calender');
     var calendar = new flatpickr(document.getElementById('input_performancedate'), {
         appendTo: $('#calendercontainer').on('click', function(e) { e.stopPropagation(); })[0], // モーダル内コンテナに挿入しつつカレンダークリックでモーダルが閉じるのを防止
-        defaultDate: window.sessionStorage.getItem('performance_ymd') || 'today',
+        defaultDate: window.sessionStorage.getItem('performance_ymd') || CALENDER_MINDATE,
         disableMobile: true, // 端末自前の日付選択UIを使わない
         locale: window.ttts.currentLocale,
-        minDate: 'today',
+        minDate: CALENDER_MINDATE,
         maxDate: CALENDER_MAXDATE || new Date().fp_incr(60),
         onOpen: function() {
             $modal_calender.fadeIn(200);

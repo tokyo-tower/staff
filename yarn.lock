@@ -36,6 +36,15 @@
     request "^2.83.0"
     request-promise-native "^1.0.5"
 
+"@motionpicture/gmo-service@^4.2.0-alpha.7":
+  version "4.2.0-alpha.7"
+  resolved "https://registry.yarnpkg.com/@motionpicture/gmo-service/-/gmo-service-4.2.0-alpha.7.tgz#d7442b22a437d55bfc25d44feac47b099cbbfb2e"
+  dependencies:
+    debug "^3.1.0"
+    http-status "^1.0.1"
+    request "^2.83.0"
+    request-promise-native "^1.0.5"
+
 "@motionpicture/ttts-api-abstract-client@0.0.0-alpha.0":
   version "0.0.0-alpha.0"
   resolved "https://registry.yarnpkg.com/@motionpicture/ttts-api-abstract-client/-/ttts-api-abstract-client-0.0.0-alpha.0.tgz#8984b705b4e2edd445fb08e8f734287edb275f00"
@@ -56,16 +65,16 @@
     isomorphic-fetch "^2.2.1"
 
 "@motionpicture/ttts-domain@^12.0.0-alpha.63":
-  version "12.0.0-alpha.71"
-  resolved "https://registry.yarnpkg.com/@motionpicture/ttts-domain/-/ttts-domain-12.0.0-alpha.71.tgz#7610c008afc551a35001f3e255eb49316c110d37"
+  version "12.0.0-alpha.79"
+  resolved "https://registry.yarnpkg.com/@motionpicture/ttts-domain/-/ttts-domain-12.0.0-alpha.79.tgz#1cf48b566b0b90a8ec65980f5795650eb6afd216"
   dependencies:
-    "@motionpicture/gmo-service" "^4.1.0"
-    "@motionpicture/ttts-factory" "0.0.0-alpha.8"
+    "@motionpicture/gmo-service" "^4.2.0-alpha.7"
+    "@motionpicture/ttts-factory" "0.0.0-alpha.10"
     "@motionpicture/waiter-domain" "^2.0.2"
-    "@sendgrid/mail" "^6.1.4"
+    "@sendgrid/mail" "^6.2.0"
     "@types/mongoose" "^4.7.32"
     "@types/redis" "^2.8.4"
-    aws-sdk "^2.179.0"
+    aws-sdk "^2.181.0"
     azure-storage "^2.7.0"
     debug "^3.1.0"
     email-templates "^3.3.2"
@@ -85,9 +94,9 @@
     uniqid "^4.1.1"
     validator "^9.2.0"
 
-"@motionpicture/ttts-factory@0.0.0-alpha.3":
-  version "0.0.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/@motionpicture/ttts-factory/-/ttts-factory-0.0.0-alpha.3.tgz#3259d52e55f406cf449dd80f6abe6ee29e577c49"
+"@motionpicture/ttts-factory@0.0.0-alpha.10":
+  version "0.0.0-alpha.10"
+  resolved "https://registry.yarnpkg.com/@motionpicture/ttts-factory/-/ttts-factory-0.0.0-alpha.10.tgz#6e5c6427e0238588fbc9584c58699818705a4e13"
   dependencies:
     "@motionpicture/gmo-service" "^4.1.0"
     "@motionpicture/waiter-domain" "^2.0.2"
@@ -95,9 +104,9 @@
     moment "^2.20.1"
     validator "^9.2.0"
 
-"@motionpicture/ttts-factory@0.0.0-alpha.8":
-  version "0.0.0-alpha.8"
-  resolved "https://registry.yarnpkg.com/@motionpicture/ttts-factory/-/ttts-factory-0.0.0-alpha.8.tgz#bd2b3dc96fd488403e87e4a4c5a7081381d30358"
+"@motionpicture/ttts-factory@0.0.0-alpha.3":
+  version "0.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/@motionpicture/ttts-factory/-/ttts-factory-0.0.0-alpha.3.tgz#3259d52e55f406cf449dd80f6abe6ee29e577c49"
   dependencies:
     "@motionpicture/gmo-service" "^4.1.0"
     "@motionpicture/waiter-domain" "^2.0.2"
@@ -116,26 +125,26 @@
     moment "^2.19.3"
     validator "^9.1.2"
 
-"@sendgrid/client@^6.1.4":
-  version "6.1.4"
-  resolved "https://registry.yarnpkg.com/@sendgrid/client/-/client-6.1.4.tgz#cee90801620a45e09f4bbb49d2cd5b3c69a44b5f"
+"@sendgrid/client@^6.2.0":
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/@sendgrid/client/-/client-6.2.0.tgz#73e52e33553db69a256dbb6d060990f1133886d3"
   dependencies:
-    "@sendgrid/helpers" "^6.1.3"
+    "@sendgrid/helpers" "^6.2.0"
     "@types/request" "^2.0.3"
     request "^2.81.0"
 
-"@sendgrid/helpers@^6.1.3":
-  version "6.1.5"
-  resolved "https://registry.yarnpkg.com/@sendgrid/helpers/-/helpers-6.1.5.tgz#bc105b330800c0af7098d5f9775929319b7437d6"
+"@sendgrid/helpers@^6.2.0":
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/@sendgrid/helpers/-/helpers-6.2.0.tgz#3fd74a3b225f81ae984e3ca801179f995fb38228"
   dependencies:
     chalk "^2.0.1"
 
-"@sendgrid/mail@^6.1.4":
-  version "6.1.4"
-  resolved "https://registry.yarnpkg.com/@sendgrid/mail/-/mail-6.1.4.tgz#b2d33bfb550e08ca0e7ffabda1d7a0c19ebf1736"
+"@sendgrid/mail@^6.2.0":
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/@sendgrid/mail/-/mail-6.2.0.tgz#228f7f054547f5676b5147d0422f565cc75fd51b"
   dependencies:
-    "@sendgrid/client" "^6.1.4"
-    "@sendgrid/helpers" "^6.1.3"
+    "@sendgrid/client" "^6.2.0"
+    "@sendgrid/helpers" "^6.2.0"
 
 "@types/bluebird@*", "@types/bluebird@^3.4.0":
   version "3.5.19"
@@ -267,8 +276,8 @@
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-2.2.46.tgz#b04713f7759d1cf752effdaae7b3969e285ebc16"
 
 "@types/mongodb@*":
-  version "2.2.18"
-  resolved "https://registry.yarnpkg.com/@types/mongodb/-/mongodb-2.2.18.tgz#6b62056c081c9bba42530c831cffb5da4e74804c"
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@types/mongodb/-/mongodb-3.0.1.tgz#5ab47b2b83ab1921dbe4a65433b1e1335fa4a43f"
   dependencies:
     "@types/bson" "*"
     "@types/events" "*"
@@ -304,11 +313,12 @@
     "@types/node" "*"
 
 "@types/request@^2.0.3":
-  version "2.0.9"
-  resolved "https://registry.yarnpkg.com/@types/request/-/request-2.0.9.tgz#125b8a60d8a439e8d87e6d1335c61cccdc18343a"
+  version "2.0.11"
+  resolved "https://registry.yarnpkg.com/@types/request/-/request-2.0.11.tgz#d4ad75777450bc080189fa4411b361c7be60b99f"
   dependencies:
     "@types/form-data" "*"
     "@types/node" "*"
+    "@types/tough-cookie" "*"
 
 "@types/serve-favicon@^2.2.28":
   version "2.2.30"
@@ -323,9 +333,13 @@
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
 
+"@types/tough-cookie@*":
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/@types/tough-cookie/-/tough-cookie-2.3.2.tgz#e0d481d8bb282ad8a8c9e100ceb72c995fb5e709"
+
 "@types/underscore@^1.8.6":
-  version "1.8.6"
-  resolved "https://registry.yarnpkg.com/@types/underscore/-/underscore-1.8.6.tgz#3f4b9c5915379b420fe7de75bd8cb58a7d9835ed"
+  version "1.8.7"
+  resolved "https://registry.yarnpkg.com/@types/underscore/-/underscore-1.8.7.tgz#5e4fe5d18376647fb8a1fe33f8ded0d8ccfa783c"
 
 abbrev@1, abbrev@^1.0.7:
   version "1.1.1"
@@ -353,8 +367,8 @@ acorn@^4.0.4, acorn@~4.0.2:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-4.0.13.tgz#105495ae5361d697bd195c825192e1ad7f253787"
 
 agent-base@^4.1.0:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-4.1.2.tgz#80fa6cde440f4dcf9af2617cf246099b5d99f0c8"
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-4.2.0.tgz#9838b5c3392b962bad031e6a4c5e1024abec45ce"
   dependencies:
     es6-promisify "^5.0.0"
 
@@ -600,9 +614,9 @@ autoprefixer@^6.0.0:
     postcss "^5.2.16"
     postcss-value-parser "^3.2.3"
 
-aws-sdk@^2.179.0:
-  version "2.179.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.179.0.tgz#48e07843c6ae83d6752e58547b168299f140cc11"
+aws-sdk@^2.181.0:
+  version "2.182.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.182.0.tgz#f769f3c34c92a0063389ffecaff9fd788743e4d1"
   dependencies:
     buffer "4.9.1"
     create-hash "^1.1.3"
@@ -884,8 +898,8 @@ camelcase@^4.1.0:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-4.1.0.tgz#d545635be1e33c542649c69173e5de6acfae34dd"
 
 caniuse-db@^1.0.30000634, caniuse-db@^1.0.30000639:
-  version "1.0.30000790"
-  resolved "https://registry.yarnpkg.com/caniuse-db/-/caniuse-db-1.0.30000790.tgz#a8023e6eb9fe9c0ef3d60b4427ce104ea87d381c"
+  version "1.0.30000792"
+  resolved "https://registry.yarnpkg.com/caniuse-db/-/caniuse-db-1.0.30000792.tgz#a7dac6dc9f5181b675fd69e5cb06fefb523157f8"
 
 capture-stack-trace@^1.0.0:
   version "1.0.0"
@@ -983,13 +997,12 @@ cipher-base@^1.0.1, cipher-base@^1.0.3:
     safe-buffer "^5.0.1"
 
 class-utils@^0.3.5:
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/class-utils/-/class-utils-0.3.5.tgz#17e793103750f9627b2176ea34cfd1b565903c80"
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/class-utils/-/class-utils-0.3.6.tgz#f93369ae8b9a7ce02fd41faad0ca83033190c463"
   dependencies:
     arr-union "^3.1.0"
     define-property "^0.2.5"
     isobject "^3.0.0"
-    lazy-cache "^2.0.2"
     static-extend "^0.1.1"
 
 clean-css@^3.3.0:
@@ -1189,8 +1202,8 @@ concat-with-sourcemaps@^1.0.0:
     source-map "^0.6.1"
 
 config@^1.29.0:
-  version "1.29.1"
-  resolved "https://registry.yarnpkg.com/config/-/config-1.29.1.tgz#155c9fbc5a8636120e9eb5c183c212add3b7fe18"
+  version "1.29.2"
+  resolved "https://registry.yarnpkg.com/config/-/config-1.29.2.tgz#2ebdc92639eb9d06fffd302f1ee32e2ad0e94e11"
   dependencies:
     json5 "0.4.0"
     os-homedir "1.0.2"
@@ -1360,9 +1373,9 @@ css-select@~1.2.0:
     domutils "1.5.1"
     nth-check "~1.0.1"
 
-css-tree@1.0.0-alpha25:
-  version "1.0.0-alpha25"
-  resolved "https://registry.yarnpkg.com/css-tree/-/css-tree-1.0.0-alpha25.tgz#1bbfabfbf6eeef4f01d9108ff2edd0be2fe35597"
+css-tree@1.0.0-alpha.27:
+  version "1.0.0-alpha.27"
+  resolved "https://registry.yarnpkg.com/css-tree/-/css-tree-1.0.0-alpha.27.tgz#f211526909c7dc940843d83b9376ed98ddb8de47"
   dependencies:
     mdn-data "^1.0.0"
     source-map "^0.5.3"
@@ -1390,10 +1403,10 @@ csscomb@^3.1.7:
     vow "0.4.4"
 
 csso@^3.0.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/csso/-/csso-3.4.0.tgz#57b27ef553cccbf5aa964c641748641e9af113f3"
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/csso/-/csso-3.5.0.tgz#acdbba5719e2c87bc801eadc032764b2e4b9d4e7"
   dependencies:
-    css-tree "1.0.0-alpha25"
+    css-tree "1.0.0-alpha.27"
 
 currently-unhandled@^0.4.1:
   version "0.4.1"
@@ -1488,9 +1501,13 @@ denque@^1.1.0:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/denque/-/denque-1.2.2.tgz#e06cf7cf0da8badc88cbdaabf8fc0a70d659f1d4"
 
-depd@1.1.1, depd@~1.1.1:
+depd@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/depd/-/depd-1.1.1.tgz#5783b4e1c459f06fa5ca27f991f3d06e7a310359"
+
+depd@~1.1.1:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/depd/-/depd-1.1.2.tgz#9bcd52e14c097763e749b274c4346ed2e560b5a9"
 
 deprecated@^0.0.1:
   version "0.0.1"
@@ -1865,8 +1882,8 @@ external-editor@^2.0.4:
     tmp "^0.0.33"
 
 extglob@^2.0.2:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/extglob/-/extglob-2.0.3.tgz#55e019d0c95bf873949c737b7e5172dba84ebb29"
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/extglob/-/extglob-2.0.4.tgz#ad00fe4dc612a9232e8718711dc5cb5ab0285543"
   dependencies:
     array-unique "^0.3.2"
     define-property "^1.0.0"
@@ -4288,8 +4305,8 @@ open@^0.0.5:
   resolved "https://registry.yarnpkg.com/open/-/open-0.0.5.tgz#42c3e18ec95466b6bf0dc42f3a2945c3f0cad8fc"
 
 opn@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/opn/-/opn-5.1.0.tgz#72ce2306a17dbea58ff1041853352b4a8fc77519"
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/opn/-/opn-5.2.0.tgz#71fdf934d6827d676cecbea1531f95d354641225"
   dependencies:
     is-wsl "^1.1.0"
 
@@ -5083,9 +5100,10 @@ safefs@^3.1.2:
     graceful-fs "*"
 
 sanitize-html@^1.13.0:
-  version "1.16.3"
-  resolved "https://registry.yarnpkg.com/sanitize-html/-/sanitize-html-1.16.3.tgz#96c1b44a36ff7312e1c22a14b05274370ac8bd56"
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/sanitize-html/-/sanitize-html-1.17.0.tgz#5c95e57044604d4797367efd9152acaf5b087bb4"
   dependencies:
+    chalk "^2.3.0"
     htmlparser2 "^3.9.0"
     lodash.clonedeep "^4.5.0"
     lodash.escaperegexp "^4.1.2"
@@ -5433,8 +5451,8 @@ snyk-try-require@^1.1.1, snyk-try-require@^1.2.0:
     then-fs "^2.0.0"
 
 snyk@^1.64.0:
-  version "1.67.0"
-  resolved "https://registry.yarnpkg.com/snyk/-/snyk-1.67.0.tgz#e81f8ab29c80862fb317f196069924a65d1527b0"
+  version "1.68.0"
+  resolved "https://registry.yarnpkg.com/snyk/-/snyk-1.68.0.tgz#d2ff1ae83cd5f9a7205b7834d5c41ef966c5a3c1"
   dependencies:
     abbrev "^1.0.7"
     ansi-escapes "^1.3.0"
@@ -5851,10 +5869,10 @@ tslib@^1.8.0, tslib@^1.8.1:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.8.1.tgz#6946af2d1d651a7b1863b531d6e5afa41aa44eac"
 
 tslint-microsoft-contrib@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/tslint-microsoft-contrib/-/tslint-microsoft-contrib-5.0.1.tgz#328ee9c28d07cdf793293204c96e2ffab9221994"
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/tslint-microsoft-contrib/-/tslint-microsoft-contrib-5.0.2.tgz#ecc2a797f777a12f0066944cec0c81a9e7c59ee9"
   dependencies:
-    tsutils "^1.4.0"
+    tsutils "^2.12.1"
 
 tslint@^5.8.0:
   version "5.9.1"
@@ -5873,13 +5891,9 @@ tslint@^5.8.0:
     tslib "^1.8.0"
     tsutils "^2.12.1"
 
-tsutils@^1.4.0:
-  version "1.9.1"
-  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-1.9.1.tgz#b9f9ab44e55af9681831d5f28d0aeeaf5c750cb0"
-
 tsutils@^2.12.1:
-  version "2.16.0"
-  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-2.16.0.tgz#ad8e83f47bef4f7d24d173cc6cd180990c831105"
+  version "2.18.0"
+  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-2.18.0.tgz#f97385709d348169002c12f6f5fd42c1df13b250"
   dependencies:
     tslib "^1.8.1"
 

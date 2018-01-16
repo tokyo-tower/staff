@@ -50,6 +50,13 @@
     #echo_totalcount {
         margin-top: 1em;
     }
+    #echo_searchmsg {
+        display: none;
+        background-color: #ddd;
+        padding: 1em;
+        margin: 1em;
+        text-align: center;
+    }
     .wrapper-reservations {
         thead {
             background-color: #898989;

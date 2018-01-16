@@ -191,19 +191,19 @@
         "ru": "https://ttts-authentication-test.azurewebsites.net/inquiry/search/?locale=ru"
     },
     "official_url_contact_by_locale": {
-        "ja": "https://www.tokyotower.co.jp/contact/",
+        "ja": "https://www.tokyotower.co.jp/contact/index.html",
         "en": "https://www.tokyotower.co.jp/contact/en.html",
-        "zh-hant": "https://www.tokyotower.co.jp/contact/en.html",
-        "zh-hans": "https://www.tokyotower.co.jp/contact/en.html",
-        "ko": "https://www.tokyotower.co.jp/contact/en.html",
-        "th": "https://www.tokyotower.co.jp/contact/en.html",
-        "id": "https://www.tokyotower.co.jp/contact/en.html",
-        "vi": "https://www.tokyotower.co.jp/contact/en.html",
-        "fr": "https://www.tokyotower.co.jp/contact/en.html",
-        "de": "https://www.tokyotower.co.jp/contact/en.html",
-        "it": "https://www.tokyotower.co.jp/contact/en.html",
-        "es": "https://www.tokyotower.co.jp/contact/en.html",
-        "ru": "https://www.tokyotower.co.jp/contact/en.html"
+        "zh-hant": "https://www.tokyotower.co.jp",
+        "zh-hans": "https://www.tokyotower.co.jp",
+        "ko": "https://www.tokyotower.co.jp",
+        "th": "https://www.tokyotower.co.jp",
+        "id": "https://www.tokyotower.co.jp",
+        "vi": "https://www.tokyotower.co.jp",
+        "fr": "https://www.tokyotower.co.jp",
+        "de": "https://www.tokyotower.co.jp",
+        "it": "https://www.tokyotower.co.jp",
+        "es": "https://www.tokyotower.co.jp",
+        "ru": "https://www.tokyotower.co.jp"
     },
     "meta": {
         "keywords": "TOKYO TOWER TOP DECK TOUR",

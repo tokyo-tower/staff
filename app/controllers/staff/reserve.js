@@ -112,6 +112,7 @@ function performances(req, res, next) {
                 res.render('staff/reserve/performances', {
                     token: token,
                     reserveMaxDate: reserveMaxDate,
+                    reserveStartDate: '',
                     layout: layout
                 });
             }

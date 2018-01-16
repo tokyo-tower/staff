@@ -118,6 +118,7 @@ export async function performances(req: Request, res: Response, next: NextFuncti
             res.render('staff/reserve/performances', {
                 token: token,
                 reserveMaxDate: reserveMaxDate,
+                reserveStartDate: '',
                 layout: layout
             });
         }

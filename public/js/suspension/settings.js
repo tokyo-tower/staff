@@ -47,8 +47,8 @@ $(function() {
         performanceArray.forEach(function(performance) {
             try {
                 var hour = performance.attributes.start_time.slice(0, 2);
-                // 現在時刻より前のperformanceは無視
-                if (moment_now.isAfter(moment(performance.attributes.day + '' + performance.attributes.start_time, 'YYYYMMDDHHmm'))) {
+                // 終了後のperformanceは無視
+                if (moment_now.isAfter(moment(performance.attributes.day + '' + performance.attributes.end_time, 'YYYYMMDDHHmm'))) {
                     return true;
                 }
                 if (!~hourArray.indexOf(hour)) {
