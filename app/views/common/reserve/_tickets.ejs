@@ -7,6 +7,7 @@
     if (isStaff && tempReservationModel_reservations.length > 0){
         watcherName = tempReservationModel_reservations[0].watcher_name;
     }
+    const ticketCountMax = isStaff ? 41 : 10;
 %>
 <script>
     window.ttts.isStaff = <%- isStaff %>;
@@ -66,7 +67,7 @@
                         </th>
                         <td>
                             <select id="select_ticketq_<%- ticketType._id %>" class="form-control">
-                                <% for (let ticketCount = 0; ticketCount < 11; ticketCount++) { %>
+                                <% for (let ticketCount = 0; ticketCount <= ticketCountMax; ticketCount++) { %>
                                     <option value="<%- ticketCount.toString() %>"<% if (ticketCount === ticketType.count) { %> selected="selected"<% } %>><%- ticketCount.toString() %></option>
                                 <% } %>
                             </select>

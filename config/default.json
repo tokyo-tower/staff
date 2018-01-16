@@ -229,7 +229,7 @@
     "temporary_reservation_valid_period_seconds": 900,
     "waiting_settlement_reservatioin_valid_period_hours": 72,
     "performanceIds4limit2": [],
-    "reservation_maxq": 10,
+    "reservation_maxq": 41,
     "reserve_max_date": {
         "days": 90
     },
