@@ -19,16 +19,7 @@ const debug = createDebug('ttts-staff:controller:reserve');
 const PURCHASER_GROUP: string = ttts.factory.person.Group.Staff;
 const layout: string = 'layouts/staff/layout';
 
-const paymentMethodNames: any = { F: '無料招待券', I: '請求書支払い' };
 const reserveMaxDateInfo = conf.get<{ [period: string]: number }>('reserve_max_date');
-
-const redisClient = ttts.redis.createClient({
-    host: <string>process.env.REDIS_HOST,
-    // tslint:disable-next-line:no-magic-numbers
-    port: parseInt(<string>process.env.REDIS_PORT, 10),
-    password: <string>process.env.REDIS_KEY,
-    tls: { servername: <string>process.env.REDIS_HOST }
-});
 
 export async function start(req: Request, res: Response, next: NextFunction): Promise<void> {
     // 期限指定
@@ -101,7 +92,7 @@ export async function performances(req: Request, res: Response, next: NextFuncti
             try {
                 // パフォーマンスFIX
                 await reserveBaseController.processFixPerformance(
-                    <ReserveSessionModel>reservationModel,
+                    reservationModel,
                     req.body.performanceId,
                     req
                 );
@@ -296,7 +287,7 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                 try {
                     // 完了メールキュー追加(あれば更新日時を更新するだけ)
                     const emailAttributes = await reserveBaseController.createEmailAttributes(
-                        transactionResult.eventReservations, reservationModel.getTotalCharge(), res
+                        transactionResult.eventReservations, res
                     );
 
                     await placeOrderTransactionService.sendEmailNotification({
@@ -308,7 +299,7 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                     // 失敗してもスルー
                 }
 
-                //　購入フローセッションは削除
+                // 購入フローセッションは削除
                 ReserveSessionModel.REMOVE(req);
 
                 res.redirect('/staff/reserve/complete');
@@ -327,15 +318,14 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
             const ticketInfos: any = reserveBaseController.getTicketInfos(reservationModel.transactionInProgress.reservations);
             // 券種ごとの表示情報編集
             Object.keys(ticketInfos).forEach((key) => {
-                const ticketInfo = (<any>ticketInfos)[key];
-                (<any>ticketInfos)[key].info =
+                const ticketInfo = ticketInfos[key];
+                ticketInfos[key].info =
                     `${ticketInfo.ticket_type_name[res.locale]} ${ticketInfo.charge} × ${res.__('{{n}}Leaf', { n: ticketInfo.count })}`;
             });
 
             res.render('staff/reserve/confirm', {
                 reservationModel: reservationModel,
                 ticketInfos: ticketInfos,
-                paymentMethodName: paymentMethodNames[reservationModel.transactionInProgress.paymentMethod],
                 layout: layout
             });
         }
@@ -357,23 +347,15 @@ export async function complete(req: Request, res: Response, next: NextFunction):
             return;
         }
 
-        let reservations = (<ttts.factory.transaction.placeOrder.IResult>transactionResult).eventReservations;
+        let reservations = transactionResult.eventReservations;
         debug(reservations.length, 'reservation(s) found.');
         reservations = reservations.filter((r) => r.status === ttts.factory.reservationStatusType.ReservationConfirmed);
         // チケットをticket_type(id)でソート
         sortReservationstByTicketType(reservations);
 
-        // 初めてのアクセスであれば印刷トークン発行
-        if ((<Express.Session>req.session).printToken === undefined) {
-            const tokenRepo = new ttts.repository.Token(redisClient);
-            const printToken = await tokenRepo.createPrintToken(reservations.map((r) => r.id));
-            debug('printToken created.', printToken);
-            (<Express.Session>req.session).printToken = printToken;
-        }
-
         res.render('staff/reserve/complete', {
             reservations: reservations,
-            printToken: (<Express.Session>req.session).printToken,
+            printToken: transactionResult.printToken,
             layout: layout
         });
     } catch (error) {

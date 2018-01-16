@@ -288,10 +288,8 @@ exports.processFixPerformance = processFixPerformance;
  * 予約完了メールを作成する
  * @memberof ReserveBaseController
  */
-function createEmailAttributes(reservations, totalCharge, res) {
+function createEmailAttributes(reservations, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        // 特殊チケットは除外
-        reservations = reservations.filter((reservation) => reservation.status === ttts.factory.reservationStatusType.ReservationConfirmed);
         // チケットコード順にソート
         reservations.sort((a, b) => {
             if (a.ticket_type < b.ticket_type) {
@@ -340,8 +338,6 @@ function createEmailAttributes(reservations, totalCharge, res) {
         const purchaserName = (res.locale === 'ja') ?
             `${reservations[0].purchaser_last_name} ${reservations[0].purchaser_first_name}` :
             `${reservations[0].purchaser_first_name} ${reservations[0].purchaser_last_name}`;
-        // staffでは金額なし
-        totalCharge = 0;
         debug('rendering template...');
         return new Promise((resolve, reject) => {
             res.render('email/reserve/complete', {
@@ -351,7 +347,7 @@ function createEmailAttributes(reservations, totalCharge, res) {
                 numeral: numeral,
                 conf: conf,
                 ticketInfoStr: ticketInfoStr,
-                totalCharge: totalCharge,
+                totalCharge: 0,
                 dayTime: `${day} ${time}`,
                 purchaserName: purchaserName
             }, (renderErr, text) => __awaiter(this, void 0, void 0, function* () {

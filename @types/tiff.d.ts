@@ -22,7 +22,7 @@ declare global {
             /**
              * 販売者ID
              */
-            seller: ttts.factory.organization.corporation.IOrganization;
+            seller: tttsapi.factory.organization.corporation.IOrganization;
             /**
              * 販売者ID
              */
@@ -44,7 +44,7 @@ declare global {
             /**
              * パフォーマンス
              */
-            performance?: ttts.factory.performance.IPerformanceWithDetails;
+            performance?: tttsapi.factory.performance.IPerformanceWithDetails;
             /**
              * 決済方法選択肢
              */
@@ -64,7 +64,7 @@ declare global {
             /**
              * 決済方法
              */
-            paymentMethod: ttts.factory.paymentMethodType;
+            paymentMethod: tttsapi.factory.paymentMethodType;
             /**
              * 購入者区分
              */
@@ -76,7 +76,7 @@ declare global {
             /**
              * 仮予約リスト
              */
-            reservations: ttts.factory.action.authorize.seatReservation.ITmpReservation[];
+            reservations: tttsapi.factory.action.authorize.seatReservation.ITmpReservation[];
         }
 
         /**
@@ -128,11 +128,7 @@ declare global {
             /**
              * 成立した取引結果
              */
-            transactionResult?: ttts.factory.transaction.placeOrder.IResult;
-            /**
-             * 成立した取引の予約印刷トークン
-             */
-            printToken?: string;
+            transactionResult?: tttsapi.factory.transaction.placeOrder.IResult;
         }
     }
 }

@@ -252,7 +252,7 @@ export function getTicketInfo(reservations: ttts.factory.reservation.event.IRese
             ticket_type_name: string;
             charge: string;
             count: number;
-        }
+        };
     } = {};
     for (const reservation of reservations) {
         // チケットタイプごとにチケット情報セット

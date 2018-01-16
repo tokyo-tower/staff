@@ -64,12 +64,7 @@ npm run css
 | `REDIS_PORT`                      | true     |                 | redis port                            |
 | `REDIS_KEY`                       | true     |                 | redis key                             |
 | `MONGOLAB_URI`                    | true     |                 | mongodb接続URI                        |
-| `GMO_ENDPOINT`                    | true     |                 | GMO apiのエンドポイント                       |
-| `GMO_SHOP_ID`                     | true     |                 | GMO サイトID                             |
-| `GMO_SHOP_ID`                     | true     |                 | GMO ショップID                            |
-| `GMO_SHOP_PASS`                   | true     |                 | GMO ショップパスワード                         |
 | `RESERVATIONS_PRINT_URL`          | true     |                 | 予約印刷URL                           |
-| `TTTS_TOKEN_SECRET`               | true     |                 | TTTSトークンシークレット                        |
 
 # tslint
 

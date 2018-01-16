@@ -138,8 +138,8 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
     reservationModel.transactionInProgress.seatReservationAuthorizeActionId = action.id;
     // この時点で購入番号が発行される
     reservationModel.transactionInProgress.paymentNo =
-        (<ttts.factory.action.authorize.seatReservation.IResult>action.result).tmpReservations[0].payment_no;
-    const tmpReservations = (<ttts.factory.action.authorize.seatReservation.IResult>action.result).tmpReservations;
+        (<tttsapi.factory.action.authorize.seatReservation.IResult>action.result).tmpReservations[0].payment_no;
+    const tmpReservations = (<tttsapi.factory.action.authorize.seatReservation.IResult>action.result).tmpReservations;
 
     // セッションに保管
     reservationModel.transactionInProgress.reservations = tmpReservations.filter(
@@ -209,7 +209,7 @@ async function checkFixSeatsAndTickets(reservationModel: ReserveSessionModel, re
 
     // 特殊チケット情報
     const extraSeatNum: {
-        [key: string]: number
+        [key: string]: number;
     } = {};
     reservationModel.transactionInProgress.ticketTypes.forEach((ticketTypeInArray) => {
         if (ticketTypeInArray.ttts_extension.category !== ttts.factory.ticketTypeCategory.Normal) {
@@ -333,12 +333,9 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
  * @memberof ReserveBaseController
  */
 export async function createEmailAttributes(
-    reservations: ttts.factory.reservation.event.IReservation[],
-    totalCharge: number,
+    reservations: tttsapi.factory.reservation.event.IReservation[],
     res: Response
 ): Promise<ttts.factory.creativeWork.message.email.IAttributes> {
-    // 特殊チケットは除外
-    reservations = reservations.filter((reservation) => reservation.status === ttts.factory.reservationStatusType.ReservationConfirmed);
     // チケットコード順にソート
     reservations.sort((a, b) => {
         if (a.ticket_type < b.ticket_type) {
@@ -393,9 +390,6 @@ export async function createEmailAttributes(
         `${reservations[0].purchaser_last_name} ${reservations[0].purchaser_first_name}` :
         `${reservations[0].purchaser_first_name} ${reservations[0].purchaser_last_name}`;
 
-    // staffでは金額なし
-    totalCharge = 0;
-
     debug('rendering template...');
 
     return new Promise<ttts.factory.creativeWork.message.email.IAttributes>((resolve, reject) => {
@@ -408,7 +402,7 @@ export async function createEmailAttributes(
                 numeral: numeral,
                 conf: conf,
                 ticketInfoStr: ticketInfoStr,
-                totalCharge: totalCharge,
+                totalCharge: 0,
                 dayTime: `${day} ${time}`,
                 purchaserName: purchaserName
             },

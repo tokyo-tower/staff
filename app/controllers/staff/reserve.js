@@ -24,15 +24,7 @@ const reserveBaseController = require("../reserveBase");
 const debug = createDebug('ttts-staff:controller:reserve');
 const PURCHASER_GROUP = ttts.factory.person.Group.Staff;
 const layout = 'layouts/staff/layout';
-const paymentMethodNames = { F: '無料招待券', I: '請求書支払い' };
 const reserveMaxDateInfo = conf.get('reserve_max_date');
-const redisClient = ttts.redis.createClient({
-    host: process.env.REDIS_HOST,
-    // tslint:disable-next-line:no-magic-numbers
-    port: parseInt(process.env.REDIS_PORT, 10),
-    password: process.env.REDIS_KEY,
-    tls: { servername: process.env.REDIS_HOST }
-});
 function start(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         // 期限指定
@@ -285,7 +277,7 @@ function confirm(req, res, next) {
                     req.session.transactionResult = transactionResult;
                     try {
                         // 完了メールキュー追加(あれば更新日時を更新するだけ)
-                        const emailAttributes = yield reserveBaseController.createEmailAttributes(transactionResult.eventReservations, reservationModel.getTotalCharge(), res);
+                        const emailAttributes = yield reserveBaseController.createEmailAttributes(transactionResult.eventReservations, res);
                         yield placeOrderTransactionService.sendEmailNotification({
                             transactionId: reservationModel.transactionInProgress.id,
                             emailMessageAttributes: emailAttributes
@@ -295,7 +287,7 @@ function confirm(req, res, next) {
                     catch (error) {
                         // 失敗してもスルー
                     }
-                    //　購入フローセッションは削除
+                    // 購入フローセッションは削除
                     session_1.default.REMOVE(req);
                     res.redirect('/staff/reserve/complete');
                     return;
@@ -319,7 +311,6 @@ function confirm(req, res, next) {
                 res.render('staff/reserve/confirm', {
                     reservationModel: reservationModel,
                     ticketInfos: ticketInfos,
-                    paymentMethodName: paymentMethodNames[reservationModel.transactionInProgress.paymentMethod],
                     layout: layout
                 });
             }
@@ -347,16 +338,9 @@ function complete(req, res, next) {
             reservations = reservations.filter((r) => r.status === ttts.factory.reservationStatusType.ReservationConfirmed);
             // チケットをticket_type(id)でソート
             sortReservationstByTicketType(reservations);
-            // 初めてのアクセスであれば印刷トークン発行
-            if (req.session.printToken === undefined) {
-                const tokenRepo = new ttts.repository.Token(redisClient);
-                const printToken = yield tokenRepo.createPrintToken(reservations.map((r) => r.id));
-                debug('printToken created.', printToken);
-                req.session.printToken = printToken;
-            }
             res.render('staff/reserve/complete', {
                 reservations: reservations,
-                printToken: req.session.printToken,
+                printToken: transactionResult.printToken,
                 layout: layout
             });
         }

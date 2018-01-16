@@ -92,12 +92,10 @@ exports.searchSuspendedPerformances = searchSuspendedPerformances;
 function getConditionsFromTo(value1, value2, convert = false) {
     const conditionsFromTo = {};
     if (value1 !== null) {
-        value1 = convert ? moment(value1, 'YYYY/MM/DD').format('YYYY/MM/DD HH:mm:ss') : value1;
-        conditionsFromTo.$gte = value1;
+        conditionsFromTo.$gte = convert ? moment(value1, 'YYYY/MM/DD').format('YYYY/MM/DD HH:mm:ss') : value1;
     }
     if (value2 !== null) {
-        value2 = convert ? moment(value2, 'YYYY/MM/DD').add(1, 'day').format('YYYY/MM/DD HH:mm:ss') : value2;
-        conditionsFromTo.$lt = value2;
+        conditionsFromTo.$lt = convert ? moment(value2, 'YYYY/MM/DD').add(1, 'day').format('YYYY/MM/DD HH:mm:ss') : value2;
     }
     return conditionsFromTo;
 }

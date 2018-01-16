@@ -89,12 +89,10 @@ export async function searchSuspendedPerformances(req: Request, res: Response): 
 function getConditionsFromTo(value1: string | null, value2: string | null, convert: boolean = false): any {
     const conditionsFromTo: any = {};
     if (value1 !== null) {
-        value1 = convert ? moment(value1, 'YYYY/MM/DD').format('YYYY/MM/DD HH:mm:ss') : value1;
-        conditionsFromTo.$gte = value1;
+        conditionsFromTo.$gte = convert ? moment(value1, 'YYYY/MM/DD').format('YYYY/MM/DD HH:mm:ss') : value1;
     }
     if (value2 !== null) {
-        value2 = convert ? moment(value2, 'YYYY/MM/DD').add(1, 'day').format('YYYY/MM/DD HH:mm:ss') : value2;
-        conditionsFromTo.$lt = value2;
+        conditionsFromTo.$lt = convert ? moment(value2, 'YYYY/MM/DD').add(1, 'day').format('YYYY/MM/DD HH:mm:ss') : value2;
     }
 
     return conditionsFromTo;
@@ -149,7 +147,7 @@ async function findSuspendedPerformances(conditions: any[], limit: number, page:
     debug('suspended performances found.', performances);
 
     return Promise.all(performances.map(async (performance) => {
-        const performanceId = <string>performance.id;
+        const performanceId = performance.id;
 
         // パフォーマンスに対する予約数
         const numberOfReservations = await reservationRepo.reservationModel.count(
