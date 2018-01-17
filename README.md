@@ -54,7 +54,6 @@ npm run css
 | `NPM_TOKEN`                       | true     |                 | NPM auth token                        |
 | `NODE_ENV`                        | true     |                 | 環境名(development,test,productionなど) |
 | `SENDGRID_API_KEY`                | true     |                 | GMOリンク決済からの戻り先エンドポイント             |
-| `FRONTEND_GMO_RESULT_ENDPOINT`    | true     |                 | frontと連携するttts apiのエンドポイント          |
 | `API_ENDPOINT`                    | true     |                 | frontと連携するttts apiのエンドポイント          |
 | `API_CLIENT_ID`                   | true     |                 | APIクライアントID                           |
 | `API_CLIENT_SECRET`               | true     |                 | APIクライアントシークレット                       |
@@ -65,6 +64,7 @@ npm run css
 | `REDIS_KEY`                       | true     |                 | redis key                             |
 | `MONGOLAB_URI`                    | true     |                 | mongodb接続URI                        |
 | `RESERVATIONS_PRINT_URL`          | true     |                 | 予約印刷URL                           |
+| `TTTS_TOKEN_SECRET`               | true     |                 | トークン検証シークレット                        |
 
 # tslint
 
