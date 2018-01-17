@@ -313,20 +313,21 @@ function cancelById(reservationId) {
                 }
                 return doc.toObject();
             });
-            // 同じseat_code_baseのチケット一式を予約キャンセル(車椅子予約の場合は、システムホールドのデータもキャンセルする必要があるので)
-            const cancelingReservations = yield reservationRepo.reservationModel.find({
-                performance_day: reservation.performance_day,
-                payment_no: reservation.payment_no,
-                'reservation_ttts_extension.seat_code_base': reservation.seat_code
-            }).exec();
-            debug('canceling...', cancelingReservations);
-            yield Promise.all(cancelingReservations.map((cancelingReservation) => __awaiter(this, void 0, void 0, function* () {
-                // 予約をキャンセル
-                yield reservationRepo.reservationModel.findByIdAndUpdate(cancelingReservation.id, { status: ttts.factory.reservationStatusType.ReservationCancelled }).exec();
-                // 在庫を空きに(在庫IDに対して、元の状態に戻す)
-                yield stockRepo.stockModel.findByIdAndUpdate(cancelingReservation.get('stock'), { availability: cancelingReservation.get('stock_availability_before') }).exec();
+            debug('canceling a reservation...', reservation.id);
+            // 予約をキャンセル
+            yield reservationRepo.reservationModel.findByIdAndUpdate(reservation.id, { status: ttts.factory.reservationStatusType.ReservationCancelled }).exec();
+            // 在庫を空きに(在庫IDに対して、元の状態に戻す)
+            yield Promise.all(reservation.stocks.map((stock) => __awaiter(this, void 0, void 0, function* () {
+                yield stockRepo.stockModel.findOneAndUpdate({
+                    _id: stock.id,
+                    availability: stock.availability_after,
+                    holder: stock.holder // 対象取引に保持されている
+                }, {
+                    $set: { availability: stock.availability_before },
+                    $unset: { holder: 1 }
+                }).exec();
             })));
-            debug(cancelingReservations.length, 'reservation(s) canceled.');
+            debug(reservation.stocks.length, 'stock(s) returned in stock.');
             // 券種による流入制限解放
             if (reservation.rate_limit_unit_in_seconds > 0) {
                 const rateLimitRepo = new ttts.repository.rateLimit.TicketTypeCategory(redisClient);

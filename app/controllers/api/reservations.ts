@@ -175,7 +175,7 @@ export async function search(req: Request, res: Response): Promise<void> {
             .then((docs) => docs.map((doc) => <ttts.factory.reservation.event.IReservation>doc.toObject()));
 
         // 0件メッセージセット
-        const message : string = (reservations.length === 0) ?
+        const message: string = (reservations.length === 0) ?
             '検索結果がありません。予約データが存在しないか、検索条件を見直してください' : '';
 
         const getPaymentMethodName = (method: string) => {
@@ -332,30 +332,28 @@ async function cancelById(reservationId: string): Promise<boolean> {
             return <ttts.factory.reservation.event.IReservation>doc.toObject();
         });
 
-        // 同じseat_code_baseのチケット一式を予約キャンセル(車椅子予約の場合は、システムホールドのデータもキャンセルする必要があるので)
-        const cancelingReservations = await reservationRepo.reservationModel.find(
-            {
-                performance_day: reservation.performance_day,
-                payment_no: reservation.payment_no,
-                'reservation_ttts_extension.seat_code_base': reservation.seat_code
-            }
+        debug('canceling a reservation...', reservation.id);
+        // 予約をキャンセル
+        await reservationRepo.reservationModel.findByIdAndUpdate(
+            reservation.id,
+            { status: ttts.factory.reservationStatusType.ReservationCancelled }
         ).exec();
 
-        debug('canceling...', cancelingReservations);
-        await Promise.all(cancelingReservations.map(async (cancelingReservation) => {
-            // 予約をキャンセル
-            await reservationRepo.reservationModel.findByIdAndUpdate(
-                <string>cancelingReservation.id,
-                { status: ttts.factory.reservationStatusType.ReservationCancelled }
-            ).exec();
-
-            // 在庫を空きに(在庫IDに対して、元の状態に戻す)
-            await stockRepo.stockModel.findByIdAndUpdate(
-                cancelingReservation.get('stock'),
-                { availability: cancelingReservation.get('stock_availability_before') }
+        // 在庫を空きに(在庫IDに対して、元の状態に戻す)
+        await Promise.all(reservation.stocks.map(async (stock) => {
+            await stockRepo.stockModel.findOneAndUpdate(
+                {
+                    _id: stock.id,
+                    availability: stock.availability_after,
+                    holder: stock.holder // 対象取引に保持されている
+                },
+                {
+                    $set: { availability: stock.availability_before },
+                    $unset: { holder: 1 }
+                }
             ).exec();
         }));
-        debug(cancelingReservations.length, 'reservation(s) canceled.');
+        debug(reservation.stocks.length, 'stock(s) returned in stock.');
 
         // 券種による流入制限解放
         if (reservation.rate_limit_unit_in_seconds > 0) {
