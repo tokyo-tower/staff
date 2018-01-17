@@ -8,6 +8,7 @@ import * as ttts from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
+import { CONFLICT, TOO_MANY_REQUESTS } from 'http-status';
 import * as moment from 'moment';
 import * as _ from 'underscore';
 
@@ -180,9 +181,8 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
                 // "予約可能な席がございません"などのメッセージ表示
                 res.locals.message = error.message;
 
-                // 車椅子レート制限を超過した場合
-                if (error instanceof ttts.factory.errors.RateLimitExceeded ||
-                    error instanceof ttts.factory.errors.AlreadyInUse) {
+                // 残席数不足、あるいは車椅子レート制限を超過の場合
+                if (error.code === CONFLICT || error.code === TOO_MANY_REQUESTS) {
                     res.locals.message = req.__('NoAvailableSeats');
                 }
 
