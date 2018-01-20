@@ -12,6 +12,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const ttts = require("@motionpicture/ttts-domain");
 const createDebug = require("debug");
 const querystring = require("querystring");
@@ -24,13 +25,29 @@ const redisClient = ttts.redis.createClient({
     password: process.env.REDIS_KEY,
     tls: { servername: process.env.REDIS_HOST }
 });
+const authClient = new tttsapi.auth.OAuth2({
+    domain: process.env.ADMIN_API_AUTHORIZE_SERVER_DOMAIN,
+    clientId: process.env.ADMIN_API_CLIENT_ID,
+    clientSecret: process.env.ADMIN_API_CLIENT_SECRET
+});
 /**
  * マイページ(予約一覧)
  */
-function index(__, res, next) {
+function index(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const owners = yield ttts.service.admin.findAllByGroup(process.env.AWS_ACCESS_KEY_ID, process.env.AWS_SECRET_ACCESS_KEY, process.env.COGNITO_USER_POOL_ID, 'Staff')();
+            const cognitoCredentials = req.session.cognitoCredentials;
+            authClient.setCredentials({
+                refresh_token: cognitoCredentials.refreshToken,
+                // expiry_date: number;
+                access_token: cognitoCredentials.accessToken,
+                token_type: cognitoCredentials.tokenType
+            });
+            const adminService = new tttsapi.service.Admin({
+                endpoint: process.env.API_ENDPOINT,
+                auth: authClient
+            });
+            const owners = yield adminService.search({ group: 'Staff' });
             res.render('staff/mypage/index', {
                 owners: owners,
                 layout: layout
