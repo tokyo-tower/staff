@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Security
 
 
+## v4.0.0 - 2018-01-20
+### Changed
+- ttts-domain@12.0.0でリリース。
+
 ## v3.0.2 - 2017-12-13
 ### Changed
 - APIの認証情報をCognitoから取得するように変更。

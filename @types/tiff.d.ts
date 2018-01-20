@@ -105,7 +105,13 @@ declare global {
             count: number;
         }
 
+        export interface IGroup {
+            name: string;
+            description: string;
+        }
+
         interface IStaffUser {
+            group: IGroup;
             familyName: string;
             givenName: string;
             email: string;
@@ -113,10 +119,18 @@ declare global {
             username: string;
         }
 
+        export interface ICredentials {
+            accessToken: string;
+            expiresIn: number;
+            idToken: string;
+            refreshToken: string;
+            tokenType: string;
+        }
+
         // tslint:disable-next-line:interface-name
         export interface Session {
-            staffUser?: ttts.service.admin.IAdmin;
-            cognitoCredentials?: ttts.service.admin.ICredentials;
+            staffUser?: IStaffUser;
+            cognitoCredentials?: ICredentials;
             /**
              * 購入者情報(一度入力するとセッションが保持)
              */
