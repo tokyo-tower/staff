@@ -65,9 +65,9 @@ function login(req, res, next) {
                     const cognitoCredentials = req.session.cognitoCredentials;
                     if (cognitoCredentials !== undefined) {
                         const authClient = new tttsapi.auth.OAuth2({
-                            domain: process.env.ADMIN_API_AUTHORIZE_SERVER_DOMAIN,
-                            clientId: process.env.ADMIN_API_CLIENT_ID,
-                            clientSecret: process.env.ADMIN_API_CLIENT_SECRET
+                            domain: process.env.API_AUTHORIZE_SERVER_DOMAIN,
+                            clientId: process.env.API_CLIENT_ID,
+                            clientSecret: process.env.API_CLIENT_SECRET
                         });
                         authClient.setCredentials({
                             refresh_token: cognitoCredentials.refreshToken,

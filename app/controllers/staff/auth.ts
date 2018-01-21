@@ -66,9 +66,9 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
                 const cognitoCredentials = (<Express.Session>req.session).cognitoCredentials;
                 if (cognitoCredentials !== undefined) {
                     const authClient = new tttsapi.auth.OAuth2({
-                        domain: <string>process.env.ADMIN_API_AUTHORIZE_SERVER_DOMAIN,
-                        clientId: <string>process.env.ADMIN_API_CLIENT_ID,
-                        clientSecret: <string>process.env.ADMIN_API_CLIENT_SECRET
+                        domain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
+                        clientId: <string>process.env.API_CLIENT_ID,
+                        clientSecret: <string>process.env.API_CLIENT_SECRET
                     });
                     authClient.setCredentials({
                         refresh_token: cognitoCredentials.refreshToken,

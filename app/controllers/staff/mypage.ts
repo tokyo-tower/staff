@@ -21,9 +21,9 @@ const redisClient = ttts.redis.createClient({
 });
 
 const authClient = new tttsapi.auth.OAuth2({
-    domain: <string>process.env.ADMIN_API_AUTHORIZE_SERVER_DOMAIN,
-    clientId: <string>process.env.ADMIN_API_CLIENT_ID,
-    clientSecret: <string>process.env.ADMIN_API_CLIENT_SECRET
+    domain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
+    clientId: <string>process.env.API_CLIENT_ID,
+    clientSecret: <string>process.env.API_CLIENT_SECRET
 });
 
 /**
