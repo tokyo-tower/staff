@@ -1,11 +1,8 @@
 iisnode.yml
-lock/
-logs/
 node_modules/
 npm-debug.log*
-typings/
 iisnode/
-docs
+doc
 .env*
 .vscode/
 .DS_Store

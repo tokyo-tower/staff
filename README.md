@@ -1,79 +1,42 @@
-# 元祖興行パッケージチケット予約ウェブアプリケーション
+<img src="https://motionpicture.jp/images/common/logo_01.svg" alt="motionpicture" title="motionpicture" align="right" height="56" width="98"/>
 
-# Features
+# 東京タワー予約システムスタッフアプリケーション
 
-# Getting Started
+[![CircleCI](https://circleci.com/gh/motionpicture/ttts-staff.svg?style=svg&circle-token=8f31624e75361d1fdf42392282297e393bc6c74d)](https://circleci.com/gh/motionpicture/ttts-staff)
 
-## インフラ
-基本的にnode.jsのウェブアプリケーションです。
-ウェブサーバーとしては、AzureのWebAppsあるいはGCPのAppEngineを想定しており、両方で動くように開発していくことが望ましい。
 
-## 言語
-実態としては、linuxあるいはwindows上でnode.jsは動くわけですが、プログラミング言語としては、alternative javascriptのひとつであるTypeScriptを採用しています。
+## Table of contents
 
-* TypeScript(https://www.typescriptlang.org/)
+* [Usage](#usage)
+* [Jsdoc](#jsdoc)
+* [License](#license)
 
-## 開発方法
-npmでパッケージをインストールします。npmはnode.jsでスタンダードなパッケージ管理ツールです。パッケージ管理にとどまらず、開発やサーバー起動においても活躍します。
-
-```shell
-npm install
-```
-* npm(https://www.npmjs.com/)
-
-typescriptをjavascriptにコンパイルします。wオプションでファイル変更監視できます。
-
-```shell
-npm run build -- -w
-```
-
-npmでローカルサーバーを立ち上げることができます。
-
-```shell
-npm start
-```
-(http://localhost:8080)にアクセスすると、ローカルでウェブアプリを確認できます。
-
-ビルドファイルクリーン
-
-```shell
-npm run clean
-```
-
-scssビルド
-
-```shell
-npm run css
-```
+## Usage
 
 ### Environment variables
 
-| Name                              | Required | Value           | Purpose                               |
-| --------------------------------- | -------- | --------------- | ------------------------------------- |
-| `DEBUG`                           | false    | ttts-frontend:* | Debug                                 |
-| `NPM_TOKEN`                       | true     |                 | NPM auth token                        |
-| `NODE_ENV`                        | true     |                 | 環境名(development,test,productionなど) |
-| `SENDGRID_API_KEY`                | true     |                 | GMOリンク決済からの戻り先エンドポイント             |
-| `API_ENDPOINT`                    | true     |                 | frontと連携するttts apiのエンドポイント          |
-| `API_CLIENT_ID`                   | true     |                 | APIクライアントID                           |
-| `API_CLIENT_SECRET`               | true     |                 | APIクライアントシークレット                       |
-| `API_AUTHORIZE_SERVER_DOMAIN`     | true     |                 | API認可サーバードメイン                       |
-| `API_RESOURECE_SERVER_IDENTIFIER` | true     |                 | APIリソースサーバー識別子                     |
-| `REDIS_HOST`                      | true     |                 | redis host                            |
-| `REDIS_PORT`                      | true     |                 | redis port                            |
-| `REDIS_KEY`                       | true     |                 | redis key                             |
-| `MONGOLAB_URI`                    | true     |                 | mongodb接続URI                        |
-| `RESERVATIONS_PRINT_URL`          | true     |                 | 予約印刷URL                           |
-| `TTTS_TOKEN_SECRET`               | true     |                 | トークン検証シークレット                        |
+| Name                              | Required | Value        | Purpose                               |
+| --------------------------------- | -------- | ------------ | ------------------------------------- |
+| `DEBUG`                           | false    | ttts-staff:* | Debug                                 |
+| `NPM_TOKEN`                       | true     |              | NPM auth token                        |
+| `NODE_ENV`                        | true     |              | 環境名(development,test,productionなど) |
+| `SENDGRID_API_KEY`                | true     |              | GMOリンク決済からの戻り先エンドポイント             |
+| `API_ENDPOINT`                    | true     |              | APIエンドポイント                            |
+| `API_CLIENT_ID`                   | true     |              | APIクライアントID                           |
+| `API_CLIENT_SECRET`               | true     |              | APIクライアントシークレット                       |
+| `API_AUTHORIZE_SERVER_DOMAIN`     | true     |              | API認可サーバードメイン                       |
+| `API_RESOURECE_SERVER_IDENTIFIER` | true     |              | APIリソースサーバー識別子                     |
+| `REDIS_HOST`                      | true     |              | redis host                            |
+| `REDIS_PORT`                      | true     |              | redis port                            |
+| `REDIS_KEY`                       | true     |              | redis key                             |
+| `MONGOLAB_URI`                    | true     |              | mongodb接続URI                        |
+| `RESERVATIONS_PRINT_URL`          | true     |              | 予約印刷URL                           |
+| `TTTS_TOKEN_SECRET`               | true     |              | トークン検証シークレット                        |
 
-# tslint
+## Jsdoc
 
-コード品質チェックをtslintで行っています。lintパッケージとして以下を仕様。
-* [tslint](https://github.com/palantir/tslint)
-* [tslint-microsoft-contrib](https://github.com/Microsoft/tslint-microsoft-contrib)
-`npm run check`でチェック実行。改修の際には、必ずチェックすること。
+`npm run doc` emits jsdoc to ./doc.
 
-# test
-mochaフレームワークでテスト実行。
-* [mocha](https://www.npmjs.com/package/mocha)
-`npm test`でテスト実行。だが、現状テストコードなし。テストコードを増やしていくことが望ましい。
+## License
+
+UNLICENSED
