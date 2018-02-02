@@ -7,7 +7,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 ### Changed
-- iisのクエリ文字列の長さ制限を調整。
 
 ### Deprecated
 
@@ -17,6 +16,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+
+## v4.0.2 - 2018-02-02
+### Changed
+- iisのクエリ文字列の長さ制限を調整。
 
 ## v4.0.1 - 2018-01-21
 ### Changed
