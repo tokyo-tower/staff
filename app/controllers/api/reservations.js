@@ -34,6 +34,7 @@ const paymentMethodsForStaff = conf.get('paymentMethodsForStaff');
 // tslint:disable-next-line:cyclomatic-complexity max-func-body-length
 function search(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
+        const POS_CLIENT_ID = process.env.POS_CLIENT_ID;
         // バリデーション
         const errors = {};
         // 片方入力エラーチェック
@@ -116,7 +117,12 @@ function search(req, res) {
         }
         // 予約方法
         if (purchaserGroup !== null) {
-            conditions.push({ purchaser_group: purchaserGroup });
+            if (purchaserGroup === 'POS' && POS_CLIENT_ID !== undefined) {
+                conditions.push({ 'transaction_agent.id': POS_CLIENT_ID });
+            }
+            else {
+                conditions.push({ purchaser_group: purchaserGroup });
+            }
         }
         // 決済手段
         if (paymentMethod !== null) {

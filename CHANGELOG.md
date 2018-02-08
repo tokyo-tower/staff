@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 ### Changed
+- 予約検索にてPOSでの注文を判別できるように対応。
 
 ### Deprecated
 
