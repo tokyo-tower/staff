@@ -134,12 +134,10 @@ export async function search(req: Request, res: Response): Promise<void> {
     }
     // 名前
     if (purchaserLastName !== null) {
-        conditions.push({ purchaser_last_name: { $regex: purchaserLastName } });
-        //conditions['name.ja'] = { $regex: managementTypeName };
+        conditions.push({ purchaser_last_name: new RegExp(purchaserLastName, 'i') }); // 大文字小文字区別しない
     }
     if (purchaserFirstName !== null) {
-        conditions.push({ purchaser_first_name: { $regex: purchaserFirstName } });
-        //conditions.push({ purchaser_first_name: purchaserFirstName });
+        conditions.push({ purchaser_first_name: new RegExp(purchaserFirstName, 'i') }); // 大文字小文字区別しない
     }
     // メアド
     if (purchaserEmail !== null) {
@@ -147,13 +145,11 @@ export async function search(req: Request, res: Response): Promise<void> {
     }
     // 電話番号
     if (purchaserTel !== null) {
-        conditions.push({
-            purchaser_tel: { $regex: new RegExp(`${purchaserTel}$`) }
-        });
+        conditions.push({ purchaser_tel: new RegExp(`${purchaserTel}$`) });
     }
     // メモ
     if (watcherName !== null) {
-        conditions.push({ watcher_name: watcherName });
+        conditions.push({ watcher_name: new RegExp(watcherName, 'i') }); // 大文字小文字区別しない
     }
 
     debug('searching reservations...', conditions);

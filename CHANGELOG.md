@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Removed
 
 ### Fixed
+- 予約のテキスト検索に関して、アルファベットの大文字小文字を区別しないように調整。
 
 ### Security
 
