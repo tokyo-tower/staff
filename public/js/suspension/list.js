@@ -177,7 +177,7 @@ $(function() {
     var busy_refund = false;
     var refund = function(performanceId) {
         var targetSuspension = suspensionsByPid[performanceId];
-        var infoText = 'ツアー年月日: ' + moment(targetSuspension.start_date).format('YYYY/MM/DD HH:mm') + '～' + moment(targetSuspension.end_date).format('HH:mm') + '\nツアーNo: ' + targetSuspension.tour_number + '\n運転状況: ' + targetSuspension.ev_service_status_name;
+        var infoText = 'ツアー年月日: ' + moment(targetSuspension.start_date).format('YYYY/MM/DD HH:mm') + '～' + moment(targetSuspension.end_date).format('HH:mm') + '\nツアーNo: ' + targetSuspension.tour_number + '\n販売状況: ' + targetSuspension.ev_service_status_name;
         if (busy_refund
         || !confirm('このツアーへの返金処理を実行してよろしいですか？\n\n' + infoText)
         || !confirm('この処理は取り消せませんが本当に返金を実行しますか？\n\n' + infoText)) {
