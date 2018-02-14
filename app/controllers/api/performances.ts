@@ -155,7 +155,7 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
     //トウキョウ タロウ 様
     const purchaserNameJp = `${reservation.purchaser_last_name} ${reservation.purchaser_first_name}`;
     const purchaserName: string = `${res.__('{{name}}様', { name: purchaserNameJp })}`;
-    const purchaserNameEn: string = `${res.__('Mr{{name}}', { name: reservation.purchaser_name })}`;
+    const purchaserNameEn: string = `${res.__('Mr./Ms.{{name}}', { name: reservation.purchaser_name })}`;
 
     // 購入チケット情報
     const paymentTicketInfos: string[] = [];
@@ -166,7 +166,7 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
     const day: string = moment(reservation.performance_day, 'YYYYMMDD').format('YYYY/MM/DD');
     // tslint:disable-next-line:no-magic-numbers
     const time: string = `${reservation.performance_start_time.substr(0, 2)}:${reservation.performance_start_time.substr(2, 2)}`;
-    paymentTicketInfos.push(`${res.__('Label.Day')} : ${day} ${time}`);
+    paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);
 
     // 券種 枚数
     paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`);
