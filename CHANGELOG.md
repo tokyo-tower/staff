@@ -7,20 +7,25 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 ### Changed
-- 予約検索にてPOSでの注文を判別できるように対応。
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+
+### Security
+
+
+## v4.1.0 - 2018-02-14
+### Changed
+- 予約検索にてPOSでの注文を判別できるように対応。
+
+### Fixed
 - 予約のテキスト検索に関して、アルファベットの大文字小文字を区別しないように調整。
 - staffログイン時のエラーメッセージを修正
 - staff販売中止の通知の文言修正
 - 販売停止一覧表示の文言修正
-
-### Security
-
 
 ## v4.0.2 - 2018-02-02
 ### Changed
