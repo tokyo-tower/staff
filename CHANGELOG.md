@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## Unreleased
 ### Added
+- 団体印刷(印字領域72mm) を追加
 
 ### Changed
 
