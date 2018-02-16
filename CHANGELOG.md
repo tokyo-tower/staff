@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 ### Changed
+- 枠の終了日時まで予約可能なように変更。
 
 ### Deprecated
 

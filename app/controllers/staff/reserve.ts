@@ -167,8 +167,8 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
             }
 
             try {
-                // 現在時刻が開始時刻を過ぎている時
-                if (moment(reservationModel.transactionInProgress.performance.start_date).toDate() < moment().toDate()) {
+                // 現在時刻がイベント終了時刻を過ぎている時
+                if (moment(reservationModel.transactionInProgress.performance.end_date).toDate() < moment().toDate()) {
                     //「ご希望の枚数が用意できないため予約できません。」
                     throw new Error(req.__('NoAvailableSeats'));
                 }
