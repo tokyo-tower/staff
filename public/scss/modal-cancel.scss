@@ -62,6 +62,9 @@
         width: 200px;
         height: 45px;
     }
+    .btn-widethermalprint {
+        margin: 2em auto;
+    }
     .btn-cancelrsrv {
         @include btn-red;
         margin: 2em auto;

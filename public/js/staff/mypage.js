@@ -9,8 +9,14 @@ $(function () {
 
     var dom_totalcount = document.getElementById('echo_totalcount');
 
-    // サーマル印刷実行ボタン
+    // サーマル印刷実行ボタン(58mm)
     $(document).on('click', '.btn-thermalprint', function (e) {
+        var id = e.currentTarget.getAttribute('data-targetid');
+        window.open('/staff/mypage/print?output=thermal_normal&ids[]=' + id);
+    });
+
+    // 厚紙印刷実行ボタン(72mm)
+    $(document).on('click', '.btn-widethermalprint', function (e) {
         var id = e.currentTarget.getAttribute('data-targetid');
         window.open('/staff/mypage/print?output=thermal&ids[]=' + id);
     });
@@ -93,7 +99,8 @@ $(function () {
                 html += ''
                     + '<p class="btn call-modal"><span>詳細</span></p>'
                     + '<p class="btn btn-print" data-targetid="' + reservation.id + '"><span>A4チケット印刷</span></p>'
-                    + '<p class="btn btn-thermalprint" data-targetid="' + reservation.id + '"><span>サーマル印刷</span></p>';
+                    + '<p class="btn btn-thermalprint" data-targetid="' + reservation.id + '"><span>サーマル印刷</span></p>'
+                    + '<p class="btn btn-widethermalprint" data-targetid="' + reservation.id + '"><span>団体印刷</span></p>';
             }
             html += ''
                 + '</td>'
@@ -297,6 +304,7 @@ $(function () {
         document.getElementById('echo_detailmodal__purchaseinfo').innerHTML = reservationNode.getAttribute('data-purchase-route');
         modal_detail.querySelector('.btn-print').setAttribute('data-targetid', id);
         modal_detail.querySelector('.btn-thermalprint').setAttribute('data-targetid', id);
+        modal_detail.querySelector('.btn-widethermalprint').setAttribute('data-targetid', id);
         modal_detail.querySelector('.btn-cancelrsrv').onclick = function () { cancel([id]); };
         $(modal_detail).modal();
     });
@@ -341,6 +349,8 @@ $(function () {
         } else if (action === 'print') {
             window.open('/staff/mypage/print?output=a4&' + ids.map(function (id) { return 'ids[]=' + id; }).join('&'));
         } else if (action === 'thermalprint') {
+            window.open('/staff/mypage/print?output=thermal_normal&' + ids.map(function (id) { return 'ids[]=' + id; }).join('&'));
+        } else if (action === 'widethermalprint') {
             window.open('/staff/mypage/print?output=thermal&' + ids.map(function (id) { return 'ids[]=' + id; }).join('&'));
         } else {
             alert('操作を選択してください');
