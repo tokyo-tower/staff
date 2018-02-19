@@ -5,10 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## Unreleased
 ### Added
-- 団体印刷(印字領域72mm) を追加
 
 ### Changed
-- 枠の終了日時まで予約可能なように変更。
 
 ### Deprecated
 
@@ -18,6 +16,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+
+## v4.2.0 - 2018-02-19
+### Added
+- 団体印刷(印字領域72mm) を追加
+
+### Changed
+- 枠の終了日時まで予約可能なように変更。
 
 ## v4.1.0 - 2018-02-14
 ### Changed
