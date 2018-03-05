@@ -5,7 +5,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## Unreleased
 ### Added
-- 販売停止一覧表示にページャーを追加。
 
 ### Changed
 
@@ -17,6 +16,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+
+## v4.2.1 - 2018-03-05
+### Added
+- 販売停止一覧表示にページャーを追加。
 
 ## v4.2.0 - 2018-02-19
 ### Added
