@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Security
 
 
+## v4.2.1 - 2018-03-05
+### Added
+- 販売停止一覧表示にページャーを追加。
+
 ## v4.2.0 - 2018-02-19
 ### Added
 - 団体印刷(印字領域72mm) を追加

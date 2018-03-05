@@ -1,6 +1,6 @@
 /* global moment */
 'use strict';
-$(function() {
+$(function () {
     if (!window.ttts.API_SUSPENDED_ENDPOINT) {
         return alert('window.ttts.API_SUSPENDED_ENDPOINT undefined');
     }
@@ -96,9 +96,9 @@ $(function() {
      */
     var dom_reservations = document.getElementById('reservations');
     var dom_suspensiontotal = document.getElementById('echo_suspensiontotal');
-    var renderSupensionsData = function() {
+    var renderSupensionsData = function (totalCount) {
         var html = '';
-        suspensionArray.forEach(function(suspension) {
+        suspensionArray.forEach(function (suspension) {
             suspensionsByPid[suspension.performance_id] = suspension;
             html += '<tr>' +
                 '<td class="td-performance_day">' + suspension.performance_day + '</td>' +
@@ -118,10 +118,10 @@ $(function() {
                 } else {
                     html += '<p class="btn btn-refund_process" data-pid="' + suspension.performance_id + '"><span>処理実行</span></p>';
                 }
-            // 指示済
+                // 指示済
             } else if (suspension.refund_status === window.ttts.RefundStatus.Instructed) {
                 html += '<p class="btn btn-disabled"><span>処理中</span></p>';
-            // 完了済
+                // 完了済
             } else if (suspension.refund_status === window.ttts.RefundStatus.Compeleted) {
                 html += '<p><span>処理完了</span></p>';
             } else {
@@ -131,15 +131,15 @@ $(function() {
         });
         dom_reservations.innerHTML = html;
 
-        dom_suspensiontotal.innerText = suspensionArray.length + '件';
+        dom_suspensiontotal.innerText = totalCount + '件';
 
-        showPager(parseInt(suspensionArray.length, 10));
+        showPager(totalCount);
     };
 
     /**
      * 販売停止一覧APIに conditions をPOSTして suspensionArray を更新する
      */
-    var search = function() {
+    var search = function () {
         var performancedate = $input_performancedate.data('daterangepicker');
         conditions.input_performancedate1 = performancedate.startDate.format('YYYYMMDD');
         conditions.input_performancedate2 = performancedate.endDate.format('YYYYMMDD');
@@ -151,22 +151,25 @@ $(function() {
         conditions.refund_status = document.getElementById('select_refund_status').value || '';
 
         conditions.searched_at = Date.now(); // ブラウザキャッシュ対策
+        var totalCount = 0;
+
         $.ajax({
             url: window.ttts.API_SUSPENDED_ENDPOINT,
             type: 'GET',
             data: conditions,
-            beforeSend: function() {
+            beforeSend: function () {
                 $modal_loading.modal();
             }
-        }).done(function(data) {
+        }).done(function (data, textStatus, xhr) {
             suspensionArray = data || [];
-        }).fail(function(jqxhr, textStatus, error) {
+            totalCount = xhr.getResponseHeader('X-Total-Count');
+        }).fail(function (jqxhr, textStatus, error) {
             suspensionArray = [];
             console.log(error);
             alert(error.message);
-        }).always(function() {
+        }).always(function () {
             $modal_loading.modal('hide');
-            renderSupensionsData();
+            renderSupensionsData(totalCount);
         });
     };
 
@@ -175,22 +178,22 @@ $(function() {
      * @param {string} performanceId
      */
     var busy_refund = false;
-    var refund = function(performanceId) {
+    var refund = function (performanceId) {
         var targetSuspension = suspensionsByPid[performanceId];
         var infoText = 'ツアー年月日: ' + moment(targetSuspension.start_date).format('YYYY/MM/DD HH:mm') + '～' + moment(targetSuspension.end_date).format('HH:mm') + '\nツアーNo: ' + targetSuspension.tour_number + '\n販売状況: ' + targetSuspension.ev_service_status_name;
         if (busy_refund
-        || !confirm('このツアーへの返金処理を実行してよろしいですか？\n\n' + infoText)
-        || !confirm('この処理は取り消せませんが本当に返金を実行しますか？\n\n' + infoText)) {
+            || !confirm('このツアーへの返金処理を実行してよろしいですか？\n\n' + infoText)
+            || !confirm('この処理は取り消せませんが本当に返金を実行しますか？\n\n' + infoText)) {
             return false;
         }
         busy_refund = true;
         $modal_loading.modal();
-        $.post(window.ttts.API_SUSPENDED_ENDPOINT + '/' + performanceId + '/tasks/returnOrders').done(function() {
+        $.post(window.ttts.API_SUSPENDED_ENDPOINT + '/' + performanceId + '/tasks/returnOrders').done(function () {
             // ステータス表示更新
             targetSuspension.refund_status_name = '指示済';
             targetSuspension.refund_status = window.ttts.RefundStatus.Instructed;
             renderSupensionsData();
-        }).fail(function(jqxhr, textStatus, error) {
+        }).fail(function (jqxhr, textStatus, error) {
             if (jqxhr.status === 500) {
                 var response = $.parseJSON(jqxhr.responseText);
                 console.error(jqxhr.res);
@@ -198,7 +201,7 @@ $(function() {
             } else {
                 alert(error);
             }
-        }).always(function() {
+        }).always(function () {
             $modal_loading.modal('hide');
             busy_refund = false;
         });
@@ -206,13 +209,13 @@ $(function() {
 
 
     // 検索ボタン
-    document.getElementById('btn_execsearch').onclick = function() {
+    document.getElementById('btn_execsearch').onclick = function () {
         conditions.page = '1';
         search();
     };
 
     // 検索条件リセットボタン
-    document.getElementById('btn_clearconditions').onclick = function() {
+    document.getElementById('btn_clearconditions').onclick = function () {
         $input_performancedate.data('daterangepicker').setStartDate(moments_default.input_performancedate1);
         $input_performancedate.data('daterangepicker').setEndDate(moments_default.input_performancedate2);
         $input_onlinedate.data('daterangepicker').setStartDate(moments_default.input_onlinedate1);
@@ -222,13 +225,13 @@ $(function() {
     };
 
     // ページ変更
-    $(document).on('click', '.change-page', function() {
+    $(document).on('click', '.change-page', function () {
         conditions.page = this.getAttribute('data-page');
         search();
     });
 
     // 返金処理実行ボタン
-    $(document).on('click', '.btn-refund_process', function(e) {
+    $(document).on('click', '.btn-refund_process', function (e) {
         var performanceId = e.currentTarget.getAttribute('data-pid');
         refund(performanceId);
     });
