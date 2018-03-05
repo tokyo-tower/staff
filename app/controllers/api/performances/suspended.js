@@ -69,8 +69,9 @@ function searchSuspendedPerformances(req, res) {
         }
         try {
             // 販売停止パフォーマンス情報を検索
-            const suspensionList = yield findSuspendedPerformances(conditions, limit, page);
-            res.json(suspensionList);
+            const { results, totalCount } = yield findSuspendedPerformances(conditions, limit, page);
+            res.header('X-Total-Count', totalCount.toString());
+            res.json(results);
         }
         catch (error) {
             res.status(http_status_1.INTERNAL_SERVER_ERROR).json({
@@ -116,7 +117,9 @@ function findSuspendedPerformances(conditions, limit, page) {
             .limit(limit)
             .exec().then((docs) => docs.map((doc) => doc.toObject()));
         debug('suspended performances found.', performances);
-        return Promise.all(performances.map((performance) => __awaiter(this, void 0, void 0, function* () {
+        const totalCount = yield performanceRepo.performanceModel.count({ $and: conditions }).exec();
+        debug(totalCount, 'total results.');
+        const results = yield Promise.all(performances.map((performance) => __awaiter(this, void 0, void 0, function* () {
             const performanceId = performance.id;
             // パフォーマンスに対する予約数
             const numberOfReservations = yield reservationRepo.reservationModel.count({
@@ -149,6 +152,7 @@ function findSuspendedPerformances(conditions, limit, page) {
                 refunded: extension.refunded_count
             };
         })));
+        return { results, totalCount };
     });
 }
 /**

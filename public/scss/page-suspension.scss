@@ -133,6 +133,19 @@
             @include btn-blue;
         }
     }
+    .wrapper-controls {
+        .navigation {
+            text-align: center;
+            span {
+                color: #666;
+                padding: 0 4px;
+                >a {
+                    color: #666;
+                    text-decoration: underline;
+                }
+            }
+        }
+    }
 }
 
 #modal_suspension {

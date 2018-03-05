@@ -68,8 +68,9 @@ export async function searchSuspendedPerformances(req: Request, res: Response): 
 
     try {
         // 販売停止パフォーマンス情報を検索
-        const suspensionList = await findSuspendedPerformances(conditions, limit, page);
-        res.json(suspensionList);
+        const { results, totalCount } = await findSuspendedPerformances(conditions, limit, page);
+        res.header('X-Total-Count', totalCount.toString());
+        res.json(results);
     } catch (error) {
         res.status(INTERNAL_SERVER_ERROR).json({
             errors: [{
@@ -131,7 +132,10 @@ export interface ISuspendedPerformances {
 /**
  * 表示一覧取得
  */
-async function findSuspendedPerformances(conditions: any[], limit: number, page: number): Promise<ISuspendedPerformances[]> {
+async function findSuspendedPerformances(conditions: any[], limit: number, page: number): Promise<{
+    totalCount: number;
+    results: ISuspendedPerformances[];
+}> {
     const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
     const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
 
@@ -146,7 +150,10 @@ async function findSuspendedPerformances(conditions: any[], limit: number, page:
         .exec().then((docs) => docs.map((doc) => <ttts.factory.performance.IPerformance>doc.toObject()));
     debug('suspended performances found.', performances);
 
-    return Promise.all(performances.map(async (performance) => {
+    const totalCount = await performanceRepo.performanceModel.count({ $and: conditions }).exec();
+    debug(totalCount, 'total results.');
+
+    const results = await Promise.all(performances.map(async (performance) => {
         const performanceId = performance.id;
 
         // パフォーマンスに対する予約数
@@ -186,6 +193,8 @@ async function findSuspendedPerformances(conditions: any[], limit: number, page:
             refunded: extension.refunded_count
         };
     }));
+
+    return { results, totalCount };
 }
 
 /**
