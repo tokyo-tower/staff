@@ -1,12 +1,16 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## Unreleased
+
 ### Added
 
 ### Changed
+
+- POSの決済方法を「---」表示に変更。
 
 ### Deprecated
 
@@ -14,8 +18,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Fixed
 
-### Security
+- 予約検索で予約方法で一般を選択した際にPOSでの購入を除外する対応。
 
+### Security
 
 ## v4.2.1 - 2018-03-05
 ### Added
