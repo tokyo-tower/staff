@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Fixed
 
+- オンライン販売中止時のスタッフ向けメール内容を調整。
+
 ### Security
 
 ## v4.2.2 - 2018-03-14
