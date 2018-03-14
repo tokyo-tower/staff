@@ -10,17 +10,23 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- POSの決済方法を「---」表示に変更。
-
 ### Deprecated
 
 ### Removed
 
 ### Fixed
 
-- 予約検索で予約方法で一般を選択した際にPOSでの購入を除外する対応。
-
 ### Security
+
+## v4.2.2 - 2018-03-14
+
+### Changed
+
+- POSの決済方法を「---」表示に変更。
+
+### Fixed
+
+- 予約検索で予約方法で一般を選択した際にPOSでの購入を除外する対応。
 
 ## v4.2.1 - 2018-03-05
 ### Added
