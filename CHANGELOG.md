@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 - 予約検索で予約方法で一般を選択した際にPOSでの購入を除外する対応。
+- オンライン販売中止時のスタッフ向けメール内容を調整。
 
 ### Security
 
