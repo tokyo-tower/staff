@@ -62,7 +62,8 @@ $(function () {
             // POS注文かどうか
             var orderedAtPOS = (reservation.transaction_agent !== undefined && reservation.transaction_agent.id === POS_CLIENT_ID);
             var transactionAgentName = (orderedAtPOS) ? 'POS' : purchaseRoute[reservation.purchaser_group];
-            var paymentMethodName = (orderedAtPOS) ? '' : reservation.payment_method_name;
+            // とりあえずPOSの決済方法は「---」とする仕様
+            var paymentMethodName = (orderedAtPOS) ? '---' : reservation.payment_method_name;
 
             var startDatetime = reservation.performance_day.substr(0, 4)
                 + '/' + reservation.performance_day.substr(4, 2)

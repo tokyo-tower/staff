@@ -117,11 +117,18 @@ function search(req, res) {
         }
         // 予約方法
         if (purchaserGroup !== null) {
-            if (purchaserGroup === 'POS' && POS_CLIENT_ID !== undefined) {
-                conditions.push({ 'transaction_agent.id': POS_CLIENT_ID });
-            }
-            else {
-                conditions.push({ purchaser_group: purchaserGroup });
+            switch (purchaserGroup) {
+                case 'POS':
+                    // 取引エージェントがPOS
+                    conditions.push({ 'transaction_agent.id': POS_CLIENT_ID });
+                    break;
+                case ttts.factory.person.Group.Customer:
+                    // 購入者区分が一般、かつ、POS購入でない
+                    conditions.push({ purchaser_group: purchaserGroup });
+                    conditions.push({ 'transaction_agent.id': { $ne: POS_CLIENT_ID } });
+                    break;
+                default:
+                    conditions.push({ purchaser_group: purchaserGroup });
             }
         }
         // 決済手段
