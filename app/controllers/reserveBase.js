@@ -66,7 +66,7 @@ function processStart(purchaserGroup, req) {
                 address: '',
                 gender: ''
             },
-            paymentMethod: ttts.factory.paymentMethodType.CreditCard,
+            paymentMethod: tttsapi.factory.paymentMethodType.CreditCard,
             purchaserGroup: purchaserGroup,
             transactionGMO: {
                 orderId: '',
