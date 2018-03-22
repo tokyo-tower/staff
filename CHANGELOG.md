@@ -18,6 +18,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.2.3 - 2018-03-22
+
+### Added
+
+- 決済方法に手売りを追加。
+
+### Fixed
+
+- オンライン販売中止時のスタッフ向けメール内容を調整。
+
 ## v4.2.2 - 2018-03-14
 
 ### Changed

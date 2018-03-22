@@ -131,6 +131,7 @@ function createEmails(res, transactions, notice) {
  * @param {string} notice
  * @return {Promise<void>}
  */
+// tslint:disable-next-line:max-func-body-length
 function createEmail(res, reservations, notice) {
     return __awaiter(this, void 0, void 0, function* () {
         const reservation = reservations[0];
@@ -145,18 +146,24 @@ function createEmail(res, reservations, notice) {
         const purchaserNameEn = `${res.__('Mr./Ms.{{name}}', { name: reservation.purchaser_name })}`;
         // 購入チケット情報
         const paymentTicketInfos = [];
-        // 購入番号 : 850000001
-        paymentTicketInfos.push(`${res.__('PaymentNo')} : ${reservation.payment_no}`);
         // ご来塔日時 : 2017/12/10 09:15
         const day = moment(reservation.performance_day, 'YYYYMMDD').format('YYYY/MM/DD');
         // tslint:disable-next-line:no-magic-numbers
         const time = `${reservation.performance_start_time.substr(0, 2)}:${reservation.performance_start_time.substr(2, 2)}`;
+        // 購入番号 : 850000001
+        paymentTicketInfos.push(`${res.__('PaymentNo')} : ${reservation.payment_no}`);
         paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);
-        // 券種 枚数
-        paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`);
-        // TOP DECKチケット(大人) 1枚
-        const infos = getTicketInfo(reservations, res.__, res.locale);
+        paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`); // 券種 枚数
+        const infos = getTicketInfo(reservations, res.__, res.locale); // TOP DECKチケット(大人) 1枚
         paymentTicketInfos.push(infos.join('\n'));
+        // 英語表記を追加
+        paymentTicketInfos.push(''); // 日英の間の改行
+        paymentTicketInfos.push(`${res.__({ phrase: 'PaymentNo', locale: 'en' })} : ${reservation.payment_no}`);
+        paymentTicketInfos.push(`${res.__({ phrase: 'EmailReserveDate', locale: 'en' })} : ${day} ${time}`);
+        paymentTicketInfos.push(`${res.__({ phrase: 'TicketType', locale: 'en' })} ${res.__({ phrase: 'TicketCount', locale: 'en' })}`);
+        // TOP DECKチケット(大人) 1枚
+        const infosEn = getTicketInfo(reservations, res.__, 'en');
+        paymentTicketInfos.push(infosEn.join('\n'));
         // foot
         const foot1 = conf.get('emailSus.EmailFoot1');
         const footEn1 = conf.get('emailSus.EmailFootEn1');
