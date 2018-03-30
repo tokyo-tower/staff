@@ -46,17 +46,36 @@ function updateOnlineStatus(req, res) {
             // パフォーマンス更新
             debug('updating performance online_sales_status...');
             const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
-            yield performanceRepo.performanceModel.update({ _id: { $in: performanceIds } }, {
-                'ttts_extension.online_sales_status': onlineStatus,
-                'ttts_extension.online_sales_update_user': req.staffUser.username,
-                'ttts_extension.online_sales_update_at': now,
-                'ttts_extension.ev_service_status': evStatus,
-                'ttts_extension.ev_service_update_user': req.staffUser.username,
-                'ttts_extension.ev_service_update_at': now,
-                'ttts_extension.refund_status': refundStatus,
-                'ttts_extension.refund_update_user': req.staffUser.username,
-                'ttts_extension.refund_update_at': now
-            }, { multi: true }).exec();
+            const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
+            // 指定のパフォーマンスに対する予約検索
+            const reservations = yield reservationRepo.reservationModel.find({ performance: { $in: performanceIds } }).exec().then((docs) => docs.map((doc) => doc.toObject()));
+            const updateUser = req.staffUser.username;
+            yield Promise.all(performanceIds.map((performanceId) => __awaiter(this, void 0, void 0, function* () {
+                // パフォーマンスに対する予約検索
+                const reservations4performance = reservations.filter((r) => r.performance === performanceId);
+                const reservationsAtLastUpdateDate = reservations4performance.map((r) => {
+                    return {
+                        id: r.id,
+                        status: r.status,
+                        purchaser_group: r.purchaser_group,
+                        transaction_agent: r.transaction_agent,
+                        payment_method: r.payment_method,
+                        order_number: r.order_number
+                    };
+                });
+                yield performanceRepo.performanceModel.findByIdAndUpdate(performanceId, {
+                    'ttts_extension.reservationsAtLastUpdateDate': reservationsAtLastUpdateDate,
+                    'ttts_extension.online_sales_status': onlineStatus,
+                    'ttts_extension.online_sales_update_user': updateUser,
+                    'ttts_extension.online_sales_update_at': now,
+                    'ttts_extension.ev_service_status': evStatus,
+                    'ttts_extension.ev_service_update_user': updateUser,
+                    'ttts_extension.ev_service_update_at': now,
+                    'ttts_extension.refund_status': refundStatus,
+                    'ttts_extension.refund_update_user': updateUser,
+                    'ttts_extension.refund_update_at': now
+                }).exec();
+            })));
             debug('performance online_sales_status updated.');
             // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
             if (evStatus === ttts.factory.performance.EvServiceStatus.Suspended) {
