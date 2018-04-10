@@ -31,6 +31,10 @@ REFUND_STATUS_NAMES[ttts.factory.performance.RefundStatus.Compeleted] = '返金�
 if (process.env.API_CLIENT_ID === undefined) {
     throw new Error('Please set an environment variable \'API_CLIENT_ID\'');
 }
+const FRONTEND_CLIENT_ID = process.env.FRONTEND_CLIENT_ID;
+if (FRONTEND_CLIENT_ID === undefined) {
+    throw new Error('Please set an environment variable \'FRONTEND_CLIENT_ID\'');
+}
 /**
  * 販売中止一覧検索(api)
  */
@@ -57,11 +61,25 @@ function searchSuspendedPerformances(req, res) {
         conditions.push({ 'ttts_extension.online_sales_status': ttts.factory.performance.OnlineSalesStatus.Suspended });
         // 販売停止処理日
         if (day1 !== null || day2 !== null) {
-            conditions.push({ 'ttts_extension.online_sales_update_at': getConditionsFromTo(day1, day2, true) });
+            const condition4onlineSalesUpdateAt = {};
+            if (day1 !== null) {
+                condition4onlineSalesUpdateAt.$gte = moment(`${day1}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').toDate();
+            }
+            if (day2 !== null) {
+                condition4onlineSalesUpdateAt.$lt = moment(`${day2}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').add(1, 'day').toDate();
+            }
+            conditions.push({ 'ttts_extension.online_sales_update_at': condition4onlineSalesUpdateAt });
         }
         // 対象ツアー年月日
         if (performanceDate1 !== null || performanceDate2 !== null) {
-            conditions.push({ day: getConditionsFromTo(performanceDate1, performanceDate2) });
+            const condition4performanceDay = {};
+            if (performanceDate1 !== null) {
+                condition4performanceDay.$gte = performanceDate1;
+            }
+            if (performanceDate2 !== null) {
+                condition4performanceDay.$lte = performanceDate2;
+            }
+            conditions.push({ day: condition4performanceDay });
         }
         // 返金ステータス
         if (refundStatus !== null) {
@@ -84,29 +102,13 @@ function searchSuspendedPerformances(req, res) {
 }
 exports.searchSuspendedPerformances = searchSuspendedPerformances;
 /**
- * FromTo条件セット
- * @param {string | null} value1
- * @param {string | null} value2
- * @param {boolean} convert
- * @return {any}
- */
-function getConditionsFromTo(value1, value2, convert = false) {
-    const conditionsFromTo = {};
-    if (value1 !== null) {
-        conditionsFromTo.$gte = convert ? moment(value1, 'YYYY/MM/DD').format('YYYY/MM/DD HH:mm:ss') : value1;
-    }
-    if (value2 !== null) {
-        conditionsFromTo.$lt = convert ? moment(value2, 'YYYY/MM/DD').add(1, 'day').format('YYYY/MM/DD HH:mm:ss') : value2;
-    }
-    return conditionsFromTo;
-}
-/**
  * 表示一覧取得
  */
 function findSuspendedPerformances(conditions, limit, page) {
     return __awaiter(this, void 0, void 0, function* () {
         const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
         const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
+        debug('finfing performances...', conditions);
         const performances = yield performanceRepo.performanceModel
             .find({ $and: conditions })
             .sort({
@@ -116,23 +118,37 @@ function findSuspendedPerformances(conditions, limit, page) {
             .skip(limit * (page - 1))
             .limit(limit)
             .exec().then((docs) => docs.map((doc) => doc.toObject()));
-        debug('suspended performances found.', performances);
+        debug(performances.length, 'suspended performances found.');
         const totalCount = yield performanceRepo.performanceModel.count({ $and: conditions }).exec();
         debug(totalCount, 'total results.');
         const results = yield Promise.all(performances.map((performance) => __awaiter(this, void 0, void 0, function* () {
             const performanceId = performance.id;
             // パフォーマンスに対する予約数
-            const numberOfReservations = yield reservationRepo.reservationModel.count({
+            let numberOfReservations = yield reservationRepo.reservationModel.count({
                 purchaser_group: ttts.factory.person.Group.Customer,
                 performance: performanceId
             }).exec();
             // 未入場の予約数
-            const nubmerOfUncheckedReservations = yield reservationRepo.reservationModel.count({
+            let nubmerOfUncheckedReservations = yield reservationRepo.reservationModel.count({
                 purchaser_group: ttts.factory.person.Group.Customer,
                 performance: performanceId,
                 checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
             }).exec();
             const extension = performance.ttts_extension;
+            // 時点での予約
+            let reservationsAtLastUpdateDate = performance.ttts_extension.reservationsAtLastUpdateDate;
+            if (reservationsAtLastUpdateDate !== undefined) {
+                reservationsAtLastUpdateDate = reservationsAtLastUpdateDate
+                    .filter((r) => r.status === ttts.factory.reservationStatusType.ReservationConfirmed) // 確定ステータス
+                    .filter((r) => r.purchaser_group === ttts.factory.person.Group.Customer) // 購入者一般
+                    .filter((r) => r.transaction_agent !== undefined && r.transaction_agent !== null && r.transaction_agent.id === FRONTEND_CLIENT_ID);
+                numberOfReservations = reservationsAtLastUpdateDate.length;
+                debug(reservationsAtLastUpdateDate.map((r) => r.id));
+                nubmerOfUncheckedReservations = yield reservationRepo.reservationModel.count({
+                    _id: { $in: reservationsAtLastUpdateDate.map((r) => r.id) },
+                    checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
+                }).exec();
+            }
             return {
                 performance_id: performanceId,
                 performance_day: moment(performance.day, 'YYYYMMDD').format('YYYY/MM/DD'),

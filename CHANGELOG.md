@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 販売停止ステータスのイベントに対する一般予約数の表示を、ステータス変更時点での数を反映するように調整。
+
 ### Deprecated
 
 ### Removed

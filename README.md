@@ -15,23 +15,25 @@
 
 ### Environment variables
 
-| Name                              | Required | Value        | Purpose                               |
-| --------------------------------- | -------- | ------------ | ------------------------------------- |
-| `DEBUG`                           | false    | ttts-staff:* | Debug                                 |
-| `NPM_TOKEN`                       | true     |              | NPM auth token                        |
+| Name                              | Required | Value        | Purpose                            |
+|-----------------------------------|----------|--------------|------------------------------------|
+| `DEBUG`                           | false    | ttts-staff:* | Debug                              |
+| `NPM_TOKEN`                       | true     |              | NPM auth token                     |
 | `NODE_ENV`                        | true     |              | 環境名(development,test,productionなど) |
-| `SENDGRID_API_KEY`                | true     |              | GMOリンク決済からの戻り先エンドポイント             |
-| `API_ENDPOINT`                    | true     |              | APIエンドポイント                            |
-| `API_CLIENT_ID`                   | true     |              | APIクライアントID                           |
-| `API_CLIENT_SECRET`               | true     |              | APIクライアントシークレット                       |
-| `API_AUTHORIZE_SERVER_DOMAIN`     | true     |              | API認可サーバードメイン                       |
+| `SENDGRID_API_KEY`                | true     |              | GMOリンク決済からの戻り先エンドポイント              |
+| `API_ENDPOINT`                    | true     |              | APIエンドポイント                         |
+| `API_CLIENT_ID`                   | true     |              | APIクライアントID                        |
+| `API_CLIENT_SECRET`               | true     |              | APIクライアントシークレット                    |
+| `API_AUTHORIZE_SERVER_DOMAIN`     | true     |              | API認可サーバードメイン                      |
 | `API_RESOURECE_SERVER_IDENTIFIER` | true     |              | APIリソースサーバー識別子                     |
-| `REDIS_HOST`                      | true     |              | redis host                            |
-| `REDIS_PORT`                      | true     |              | redis port                            |
-| `REDIS_KEY`                       | true     |              | redis key                             |
-| `MONGOLAB_URI`                    | true     |              | mongodb接続URI                        |
-| `RESERVATIONS_PRINT_URL`          | true     |              | 予約印刷URL                           |
-| `TTTS_TOKEN_SECRET`               | true     |              | トークン検証シークレット                        |
+| `REDIS_HOST`                      | true     |              | redis host                         |
+| `REDIS_PORT`                      | true     |              | redis port                         |
+| `REDIS_KEY`                       | true     |              | redis key                          |
+| `MONGOLAB_URI`                    | true     |              | mongodb接続URI                       |
+| `RESERVATIONS_PRINT_URL`          | true     |              | 予約印刷URL                            |
+| `TTTS_TOKEN_SECRET`               | true     |              | トークン検証シークレット                       |
+| `POS_CLIENT_ID`                   | true     |              | POSアプリケーションクライアントID                |
+| `FRONTEND_CLIENT_ID`              | true     |              | frontendアプリケーションクライアントID           |
 
 ## Jsdoc
 
