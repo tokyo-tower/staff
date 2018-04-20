@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.2.5 - 2018-04-20
+
+### Changed
+
+- 代理予約の際、上限枚数を超える予約を確保しようとするとエラーになるが、その際予約メモが消えてしまうのを消えないように調整。
+
 ## v4.2.4 - 2018-04-17
 
 ### Changed
