@@ -31,6 +31,7 @@ $(function () {
         defaultDate: 'today',
         disableMobile: true, // 端末自前の日付選択UIを使わない
         locale: 'ja',
+        dateFormat: "Ymd",
         // minDate: moment().add(-3, 'months').toDate(),
         // maxDate: moment().add(3, 'months').toDate(),
         onOpen: function () {
@@ -69,14 +70,20 @@ $(function () {
                 + '/' + reservation.performance_day.substr(4, 2)
                 + '/' + reservation.performance_day.substr(6)
                 + ' ' + reservation.performance_start_time.substr(0, 2) + ':' + reservation.performance_start_time.substr(2);
+
             html += ''
                 + '<tr data-seat-code="' + reservation.seat_code + '"'
                 + ' data-reservation-id="' + reservation.id + '"'
                 + ' data-payment-no="' + reservation.payment_no + '"'
+                + ' data-purchaser-name="' + reservation.purchaser_last_name + ' ' + reservation.purchaser_first_name + '"'
+                + ' data-purchaser-tel="' + reservation.purchaser_tel + '"'
                 + ' data-performance-start-datetime="' + startDatetime + '"'
+                + ' data-purchased-datetime="' + moment(reservation.purchased_at).format('YYYY/MM/DD HH:mm') + '"'
                 + ' data-watcher-name="' + reservation.watcher_name + '"'
                 + ' data-ticketname="' + reservation.ticket_type_name.ja + '"'
                 + ' data-purchase-route="' + transactionAgentName + '"'
+                + ' data-payment-method="' + reservation.payment_method + '"'
+                + ' data-checkined="' + ((reservation.checkins.length) ? '入場済み' : '未入場') + '"'
                 + '>'
                 + '<th class="td-checkbox">';
 
@@ -300,9 +307,10 @@ $(function () {
         var reservationNode = this.parentNode.parentNode;
         var id = reservationNode.getAttribute('data-reservation-id');
         document.getElementById('echo_detailmodal__payment_no').innerHTML = reservationNode.getAttribute('data-payment-no');
-        document.getElementById('echo_detailmodal__date').innerHTML = reservationNode.getAttribute('data-performance-start-datetime');
+        document.getElementById('echo_detailmodal__purchaserinfo').innerHTML = reservationNode.getAttribute('data-purchaser-name') + ' / ' + reservationNode.getAttribute('data-purchaser-tel');
+        document.getElementById('echo_detailmodal__date').innerHTML = reservationNode.getAttribute('data-purchased-datetime') + ' / ' + reservationNode.getAttribute('data-performance-start-datetime');
         document.getElementById('echo_detailmodal__info').innerHTML = reservationNode.getAttribute('data-seat-code') + ' / ' + reservationNode.getAttribute('data-ticketname') + ' / ' + reservationNode.getAttribute('data-watcher-name');
-        document.getElementById('echo_detailmodal__purchaseinfo').innerHTML = reservationNode.getAttribute('data-purchase-route');
+        document.getElementById('echo_detailmodal__purchaseinfo').innerHTML = reservationNode.getAttribute('data-purchase-route') + ' / ' + reservationNode.getAttribute('data-payment-method') + ' / ' + reservationNode.getAttribute('data-checkined');
         modal_detail.querySelector('.btn-print').setAttribute('data-targetid', id);
         modal_detail.querySelector('.btn-thermalprint').setAttribute('data-targetid', id);
         modal_detail.querySelector('.btn-widethermalprint').setAttribute('data-targetid', id);
