@@ -287,6 +287,31 @@ $(function () {
         search();
     });
 
+    // 検索条件リセットボタン
+    document.getElementById('btn_clearconditions').onclick = function () {
+        calendar.setDate(new Date())
+
+        $('select[name="start_hour1"]').val('').prop('selected', true)
+        $('select[name="start_minute1"]').val('').prop('selected', true)
+        $('select[name="start_hour2"]').val('').prop('selected', true)
+        $('select[name="start_minute2"]').val('').prop('selected', true)
+
+        $('input[name="payment_no"]').val('')
+        $('select[name="purchaser_group"]').val('')
+        $('select[name="owner"]').val('')
+        $('select[name="payment_method"]').val('')
+
+        $('input[name="purchaser_last_name"]').val('')
+        $('input[name="purchaser_first_name"]').val('')
+        $('input[name="purchaser_email"]').val('')
+        $('input[name="purchaser_tel"]').val('')
+        $('input[name="watcher_name"]').val('')
+
+        conditions.page = '1';
+        setConditions();
+        search();
+    };
+
     // ページ変更
     $(document).on('click', '.change-page', function () {
         conditions.page = $(this).attr('data-page');
