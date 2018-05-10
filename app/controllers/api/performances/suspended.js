@@ -141,6 +141,8 @@ function findSuspendedPerformances(conditions, limit, page) {
                 reservationsAtLastUpdateDate = reservationsAtLastUpdateDate
                     .filter((r) => r.status === ttts.factory.reservationStatusType.ReservationConfirmed) // 確定ステータス
                     .filter((r) => r.purchaser_group === ttts.factory.person.Group.Customer) // 購入者一般
+                    // frontendアプリケーションでの購入
+                    // tslint:disable-next-line:max-line-length
                     .filter((r) => r.transaction_agent !== undefined && r.transaction_agent !== null && r.transaction_agent.id === FRONTEND_CLIENT_ID);
                 numberOfReservations = reservationsAtLastUpdateDate.length;
                 debug(reservationsAtLastUpdateDate.map((r) => r.id));

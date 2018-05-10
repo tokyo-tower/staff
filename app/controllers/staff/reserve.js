@@ -176,13 +176,13 @@ function tickets(req, res, next) {
                         res.locals.message = req.__('NoAvailableSeats');
                     }
                     // reservation初期化後のエラーだとcommentが消えちゃうのでセット
-                    let watcher_name = "";
+                    let reserveMemo = '';
                     if (Array.isArray(JSON.parse(req.body.choices))) {
-                        watcher_name = JSON.parse(req.body.choices)[0].watcher_name;
+                        reserveMemo = JSON.parse(req.body.choices)[0].watcher_name;
                     }
                     res.render('staff/reserve/tickets', {
                         reservationModel: reservationModel,
-                        watcher_name: watcher_name,
+                        watcher_name: reserveMemo,
                         layout: layout
                     });
                 }
@@ -192,7 +192,7 @@ function tickets(req, res, next) {
                 res.locals.message = '';
                 res.render('staff/reserve/tickets', {
                     reservationModel: reservationModel,
-                    watcher_name: "",
+                    watcher_name: '',
                     layout: layout
                 });
             }
