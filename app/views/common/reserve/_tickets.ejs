@@ -4,6 +4,9 @@
     const isWheelchair = (tempReservationModel.category === 'wheelchair');
     const tempReservationModel_reservations = tempReservationModel.reservations;
     let watcherName = '';
+    if(watcher_name){
+        watcherName = watcher_name
+    }
     if (isStaff && tempReservationModel_reservations.length > 0){
         watcherName = tempReservationModel_reservations[0].watcher_name;
     }

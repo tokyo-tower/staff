@@ -268,7 +268,7 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
         // パフォーマンス取得
         const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
         const performance = yield performanceRepo.findById(perfomanceId);
-        if (performance.canceled) {
+        if (performance.canceled) { // 万が一上映中止だった場合
             throw new Error(req.__('Message.OutOfTerm'));
         }
         // 券種セット
