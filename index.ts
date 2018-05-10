@@ -87,7 +87,7 @@ function onError(error: any) {
 function onListening() {
     const addr = server.address();
     const bind = typeof addr === 'string'
-        ? `pipe ${<string>addr}`
+        ? `pipe ${addr}`
         : `port ${addr.port.toString()}`;
     debug(`Listening on ${bind}`);
 
