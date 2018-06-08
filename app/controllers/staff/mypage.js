@@ -48,7 +48,9 @@ function index(req, res, next) {
                 auth: authClient
             });
             const owners = yield adminService.search({ group: 'Staff' });
+            const token = authClient.credentials;
             res.render('staff/mypage/index', {
+                token: token,
                 owners: owners,
                 layout: layout
             });

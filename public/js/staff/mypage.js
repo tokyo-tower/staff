@@ -1,6 +1,10 @@
 /* global moment */
 'use strict';
 $(function () {
+    //APIを呼ぶ
+    if (!window.ttts.API_ENDPOINT) { return alert('API_ENDPOINT undefined'); }
+    if (!window.ttts.API_TOKEN.VALUE) { return alert('API_TOKEN undefined'); }
+
     // POSクライアントID
     var POS_CLIENT_ID = $('input[name="POS_CLIENT_ID"]').val();
 
@@ -197,7 +201,8 @@ $(function () {
             url: $('.search-form').attr('action'),
             type: 'GET',
             data: conditions,
-            beforeSend: function () {
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + window.ttts.API_TOKEN.VALUE);
                 $('.loading').modal();
                 $('.wrapper-reservations input[type="checkbox"]').prop('checked', false);
             }

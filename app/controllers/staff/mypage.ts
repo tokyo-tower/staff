@@ -43,8 +43,10 @@ export async function index(req: Request, res: Response, next: NextFunction): Pr
             auth: authClient
         });
         const owners = await adminService.search({ group: 'Staff' });
+        const token = authClient.credentials;
 
         res.render('staff/mypage/index', {
+            token: token,
             owners: owners,
             layout: layout
         });
