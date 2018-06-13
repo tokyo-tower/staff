@@ -3,6 +3,10 @@
         VALUE: '<%= token.access_token %>',
         EXPIRY_DATE: '<%= token.expiry_date %>'
     };
+    window.ttts.conf = {
+        paymentMethodsForCustomer: '<%- JSON.stringify(conf.get("paymentMethodsForCustomer")) %>',
+        paymentMethodsForStaff: '<%- JSON.stringify(conf.get("paymentMethodsForStaff")) %>',
+    }
 </script>
 <div class="wrapper-searchform">
 

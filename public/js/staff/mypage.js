@@ -4,6 +4,8 @@ $(function () {
     //APIを呼ぶ
     if (!window.ttts.API_ENDPOINT) { return alert('API_ENDPOINT undefined'); }
     if (!window.ttts.API_TOKEN.VALUE) { return alert('API_TOKEN undefined'); }
+    if (!window.ttts.conf.paymentMethodsForCustomer) { return alert('paymentMethodsForCustomer undefined'); }
+    if (!window.ttts.conf.paymentMethodsForStaff) { return alert('paymentMethodsForStaff undefined'); }
 
     // POSクライアントID
     var POS_CLIENT_ID = $('input[name="POS_CLIENT_ID"]').val();
@@ -68,7 +70,7 @@ $(function () {
             var orderedAtPOS = (reservation.transaction_agent !== undefined && reservation.transaction_agent.id === POS_CLIENT_ID);
             var transactionAgentName = (orderedAtPOS) ? 'POS' : purchaseRoute[reservation.purchaser_group];
             // とりあえずPOSの決済方法は「---」とする仕様
-            var paymentMethodName = (orderedAtPOS) ? '---' : reservation.payment_method_name;
+            var paymentMethodName = (orderedAtPOS) ? '---' : getPaymentMethod(reservation.payment_method);
 
             var startDatetime = reservation.performance_day.substr(0, 4)
                 + '/' + reservation.performance_day.substr(4, 2)
@@ -178,6 +180,23 @@ $(function () {
             document.querySelector('[name=start_hour2]').value = '00';
         }
     }
+
+    //入力チェックはフロント側でやる
+    function checkConditions() {
+        // バリデーション
+        const errors = {};
+
+        // 片方入力エラーチェック
+        if (!isInputEven(conditions.start_hour1, conditions.start_minute1)) {
+            errors.start_hour1 = { msg: '時分Fromが片方しか指定されていません' };
+        }
+        if (!isInputEven(conditions.start_hour2, conditions.start_minute2)) {
+            errors.start_hour2 = { msg: '時分Toが片方しか指定されていません' };
+        }
+
+        return errors;
+    }
+
     function showConditions() {
         var formDatas = $('.search-form').serializeArray();
         formDatas.forEach(function (formData) {
@@ -195,6 +214,11 @@ $(function () {
         conditions.day = conditions.day.replace(/\-/g, '');
         conditions.searched_at = Date.now(); // ブラウザキャッシュ対策
         $('.error-message').hide();
+        
+        var errors = checkConditions(conditions);
+        if (Object.keys(errors).length > 0) {
+            return false;
+        }
 
         $.ajax({
             dataType: 'json',
@@ -212,6 +236,10 @@ $(function () {
             if (!Array.isArray(data.results)) {
                 message = '検索APIが異常なレスポンスを返しました (data.resultsが配列でない)';
             }
+            if (Array.isArray(data.results) && data.results.length == 0) {
+                message = '検索結果がありません。予約データが存在しないか、検索条件を見直してください';
+            }
+
             dom_searchmsg.innerText = message;
             dom_searchmsg.style.display = (message) ? 'block' : 'none';
             dom_totalcount.innerHTML = data.count + '件';
@@ -408,3 +436,40 @@ $(function () {
     // 予約リスト表示
     search();
 });
+
+/**
+ * 決済方法取得
+ * @param {*} method string
+ */
+function getPaymentMethod (method) {
+    var paymentMethodName = '';
+    var paymentMethodCustomer = JSON.parse(ttts.conf.paymentMethodsForCustomer);
+    if (paymentMethodCustomer.hasOwnProperty(method)) {
+        return paymentMethodCustomer[method];
+    }
+
+    var paymentMethodStaff = JSON.parse(ttts.conf.paymentMethodsForStaff);
+    if (paymentMethodStaff.hasOwnProperty(method)) {
+        return paymentMethodStaff[method];
+    }
+
+    return paymentMethodName;
+}
+
+/**
+ * 両方入力チェック(両方入力、または両方未入力の時true)
+ *
+ * @param {string} value1
+ * @param {string} value2
+ * @return {boolean}
+ */
+function isInputEven(value1, value2) {
+    if (value1 == '' && value2 == '') {
+        return true;
+    }
+    if (value1 != '' && value2 != '') {
+        return true;
+    }
+
+    return false;
+}
