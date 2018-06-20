@@ -170,6 +170,9 @@
                 予約を検索
             </span>
         </a>
+        <a id="btn_clearconditions" class="btn btn-big" href="javascript:void(0)">
+            <span>検索条件リセット</span>
+        </a>
 
     </form>
 </div>
@@ -241,6 +244,33 @@
     </div>
 </div>
 
+<div id="modal_show_list" class="modal modal-show-list fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="btn-close" data-dismiss="modal">
+                    <span>×</span>
+                </p>
+                <h2 class="modal-title">指定した予約のキャンセル処理を実行してよろしいですか？</h2>
+                <p id="error_cancel"></p>
+            </div>
+            <div class="modal-body">
+                <div id="echo_showlist"></div>
+            </div>
+            <div class="modal-footer">
+                <div class="btns2clm">
+                    <p class="btn btn-modal-show-list">
+                        <span>OK</span>
+                    </p>
+                    <p class="btn" data-dismiss="modal">
+                        <span>キャンセル</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="modal_detail" class="modal modal-detail modal-cancel fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -259,7 +289,11 @@
                         <p class="echo" id="echo_detailmodal__payment_no"></p>
                         <hr>
 
-                        <h4>ご来塔ご予約日時</h4>
+                        <h4>氏名 / 電話番号</h4>
+                        <p class="echo" id="echo_detailmodal__purchaserinfo"></p>
+                        <hr>
+
+                        <h4>ご購入日時 / ご来塔ご予約日時</h4>
                         <p class="echo" id="echo_detailmodal__date"></p>
                         <hr>
 
@@ -267,7 +301,7 @@
                         <p class="echo" id="echo_detailmodal__info"></p>
                         <hr>
 
-                        <h4>購入場所</h4>
+                        <h4>購入場所 / 決済方法 / 入場状況</h4>
                         <p class="echo" id="echo_detailmodal__purchaseinfo"></p>
                         <hr>
                     </div>

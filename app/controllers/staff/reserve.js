@@ -175,8 +175,14 @@ function tickets(req, res, next) {
                     if (error.code === http_status_1.CONFLICT || error.code === http_status_1.TOO_MANY_REQUESTS) {
                         res.locals.message = req.__('NoAvailableSeats');
                     }
+                    // reservation初期化後のエラーだとcommentが消えちゃうのでセット
+                    let reserveMemo = '';
+                    if (Array.isArray(JSON.parse(req.body.choices))) {
+                        reserveMemo = JSON.parse(req.body.choices)[0].watcher_name;
+                    }
                     res.render('staff/reserve/tickets', {
                         reservationModel: reservationModel,
+                        watcher_name: reserveMemo,
                         layout: layout
                     });
                 }
@@ -186,6 +192,7 @@ function tickets(req, res, next) {
                 res.locals.message = '';
                 res.render('staff/reserve/tickets', {
                     reservationModel: reservationModel,
+                    watcher_name: '',
                     layout: layout
                 });
             }

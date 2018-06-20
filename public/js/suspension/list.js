@@ -60,7 +60,7 @@ $(function () {
     daterangepickerSettings.endDate = moments_default.input_onlinedate2;
     var $input_onlinedate = $('#input_onlinedate').daterangepicker(daterangepickerSettings);
 
-
+    var $select_refund_status = $('#select_refund_status');
     /**
      * ページャーを表示する
      * @param {number} count 全件数
@@ -220,6 +220,7 @@ $(function () {
         $input_performancedate.data('daterangepicker').setEndDate(moments_default.input_performancedate2);
         $input_onlinedate.data('daterangepicker').setStartDate(moments_default.input_onlinedate1);
         $input_onlinedate.data('daterangepicker').setEndDate(moments_default.input_onlinedate2);
+        $select_refund_status.val('').prop('selected',true);
         conditions.page = '1';
         search();
     };

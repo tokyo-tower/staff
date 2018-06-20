@@ -31,6 +31,7 @@ $(function () {
         defaultDate: 'today',
         disableMobile: true, // 端末自前の日付選択UIを使わない
         locale: 'ja',
+        dateFormat: "Ymd",
         // minDate: moment().add(-3, 'months').toDate(),
         // maxDate: moment().add(3, 'months').toDate(),
         onOpen: function () {
@@ -55,6 +56,8 @@ $(function () {
         page: '1'
     };
 
+    var reservationsIds4cancel = null;
+
     function showReservations(reservations) {
         var html = '';
 
@@ -69,14 +72,20 @@ $(function () {
                 + '/' + reservation.performance_day.substr(4, 2)
                 + '/' + reservation.performance_day.substr(6)
                 + ' ' + reservation.performance_start_time.substr(0, 2) + ':' + reservation.performance_start_time.substr(2);
+
             html += ''
                 + '<tr data-seat-code="' + reservation.seat_code + '"'
                 + ' data-reservation-id="' + reservation.id + '"'
                 + ' data-payment-no="' + reservation.payment_no + '"'
+                + ' data-purchaser-name="' + reservation.purchaser_last_name + ' ' + reservation.purchaser_first_name + '"'
+                + ' data-purchaser-tel="' + reservation.purchaser_tel + '"'
                 + ' data-performance-start-datetime="' + startDatetime + '"'
+                + ' data-purchased-datetime="' + moment(reservation.purchased_at).format('YYYY/MM/DD HH:mm') + '"'
                 + ' data-watcher-name="' + reservation.watcher_name + '"'
                 + ' data-ticketname="' + reservation.ticket_type_name.ja + '"'
                 + ' data-purchase-route="' + transactionAgentName + '"'
+                + ' data-payment-method="' + reservation.payment_method + '"'
+                + ' data-checkined="' + ((reservation.checkins.length) ? '入場済み' : '未入場') + '"'
                 + '>'
                 + '<th class="td-checkbox">';
 
@@ -235,37 +244,50 @@ $(function () {
         });
     }
 
-    function cancel(reservationsIds4cancel) {
-        if (!confirm('指定した予約のキャンセル処理を実行してよろしいですか？\n\n'
-            + reservationsIds4cancel.map(function (id) {
-                return reservationsById[id].payment_no + ' ' + reservationsById[id].seat_code + ' ' + reservationsById[id].ticket_type_name.ja;
-            }).join('\n'))
-            || !confirm('キャンセルをした予約は復元できませんが本当に実行しますか？')) {
-            return false;
-        }
-        $.ajax({
-            dataType: 'json',
-            url: $('input[name="urlCancel"]').val(),
-            type: 'POST',
-            data: {
-                reservationIds: reservationsIds4cancel
-            },
-            beforeSend: function () {
-                $('#modal_detail').modal('hide');
-            }
-        }).done(function (data) {
-            console.log('[succeeded] cancelReservation', data);
-            var tempHTML = '';
-            reservationsIds4cancel.forEach(function (id) {
-                tempHTML += '<h3><span>購入番号:</span>' + reservationsById[id].payment_no + '<span>座席 / 券種:</span>' + reservationsById[id].seat_code + '/' + reservationsById[id].ticket_type_name.ja + '</h3>';
-            });
-            document.getElementById('echo_canceledreservations').innerHTML = tempHTML;
-            $('#modal_cancelcompleted').modal();
-        }).fail(function (jqxhr, textStatus, error) {
-            alert(error);
-        }).always(function () {
-        });
+    //ポップアップを表示
+    function cancel() {
+        var modal_show_list = document.getElementById('modal_show_list');
+        var tempHTML = reservationsIds4cancel.map(function (id) {
+            return '<h3>' + reservationsById[id].payment_no + ' ' + reservationsById[id].seat_code + ' ' + reservationsById[id].ticket_type_name.ja + '</h3>';
+        }).join('\n');
+        document.getElementById('echo_showlist').innerHTML = tempHTML;
+        $(modal_show_list).modal();
     }
+
+    // 指定した予約のキャンセル処理
+    $(document).on('click', '.btn-modal-show-list', function (e) {
+        var modal_show_list = document.getElementById('modal_show_list');
+        $(modal_show_list).modal('hide');
+
+        setTimeout(function() {
+            if (!confirm('キャンセルをした予約は復元できませんが本当に実行しますか？')) {
+                return false;
+            }
+    
+            $.ajax({
+                dataType: 'json',
+                url: $('input[name="urlCancel"]').val(),
+                type: 'POST',
+                data: {
+                    reservationIds: reservationsIds4cancel
+                },
+                beforeSend: function () {
+                    $('#modal_detail').modal('hide');
+                }
+            }).done(function (data) {
+                console.log('[succeeded] cancelReservation', data);
+                var tempHTML = '';
+                reservationsIds4cancel.forEach(function (id) {
+                    tempHTML += '<h3><span>購入番号:</span>' + reservationsById[id].payment_no + '<span>座席 / 券種:</span>' + reservationsById[id].seat_code + '/' + reservationsById[id].ticket_type_name.ja + '</h3>';
+                });
+                document.getElementById('echo_canceledreservations').innerHTML = tempHTML;
+                $('#modal_cancelcompleted').modal();
+            }).fail(function (jqxhr, textStatus, error) {
+                alert(error);
+            }).always(function () {});
+        }, 500);
+    });
+
     // キャンセル完了モーダルの閉じるボタンで再検索 (※キャンセル完了のモーダルが出たままsearchするとモーダルが衝突してしまう)
     document.getElementById('btn_cancelcompleted').onclick = function () {
         search();
@@ -279,6 +301,31 @@ $(function () {
         setConditions();
         search();
     });
+
+    // 検索条件リセットボタン
+    document.getElementById('btn_clearconditions').onclick = function () {
+        calendar.setDate(new Date())
+
+        $('select[name="start_hour1"]').val('').prop('selected', true)
+        $('select[name="start_minute1"]').val('').prop('selected', true)
+        $('select[name="start_hour2"]').val('').prop('selected', true)
+        $('select[name="start_minute2"]').val('').prop('selected', true)
+
+        $('input[name="payment_no"]').val('')
+        $('select[name="purchaser_group"]').val('')
+        $('select[name="owner"]').val('')
+        $('select[name="payment_method"]').val('')
+
+        $('input[name="purchaser_last_name"]').val('')
+        $('input[name="purchaser_first_name"]').val('')
+        $('input[name="purchaser_email"]').val('')
+        $('input[name="purchaser_tel"]').val('')
+        $('input[name="watcher_name"]').val('')
+
+        conditions.page = '1';
+        setConditions();
+        search();
+    };
 
     // ページ変更
     $(document).on('click', '.change-page', function () {
@@ -300,9 +347,10 @@ $(function () {
         var reservationNode = this.parentNode.parentNode;
         var id = reservationNode.getAttribute('data-reservation-id');
         document.getElementById('echo_detailmodal__payment_no').innerHTML = reservationNode.getAttribute('data-payment-no');
-        document.getElementById('echo_detailmodal__date').innerHTML = reservationNode.getAttribute('data-performance-start-datetime');
+        document.getElementById('echo_detailmodal__purchaserinfo').innerHTML = reservationNode.getAttribute('data-purchaser-name') + ' / ' + reservationNode.getAttribute('data-purchaser-tel');
+        document.getElementById('echo_detailmodal__date').innerHTML = reservationNode.getAttribute('data-purchased-datetime') + ' / ' + reservationNode.getAttribute('data-performance-start-datetime');
         document.getElementById('echo_detailmodal__info').innerHTML = reservationNode.getAttribute('data-seat-code') + ' / ' + reservationNode.getAttribute('data-ticketname') + ' / ' + reservationNode.getAttribute('data-watcher-name');
-        document.getElementById('echo_detailmodal__purchaseinfo').innerHTML = reservationNode.getAttribute('data-purchase-route');
+        document.getElementById('echo_detailmodal__purchaseinfo').innerHTML = reservationNode.getAttribute('data-purchase-route') + ' / ' + reservationNode.getAttribute('data-payment-method') + ' / ' + reservationNode.getAttribute('data-checkined');
         modal_detail.querySelector('.btn-print').setAttribute('data-targetid', id);
         modal_detail.querySelector('.btn-thermalprint').setAttribute('data-targetid', id);
         modal_detail.querySelector('.btn-widethermalprint').setAttribute('data-targetid', id);
@@ -346,7 +394,8 @@ $(function () {
 
         var action = document.getElementById('select_action').value;
         if (action === 'cancel') {
-            cancel(ids);
+            reservationsIds4cancel = ids;
+            cancel();
         } else if (action === 'print') {
             window.open('/staff/mypage/print?output=a4&' + ids.map(function (id) { return 'ids[]=' + id; }).join('&'));
         } else if (action === 'thermalprint') {

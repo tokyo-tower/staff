@@ -46,6 +46,18 @@
                 width: 400px;
             }
         }
+        #btn_clearconditions {
+            box-shadow: none;
+            background-color: transparent !important;
+            color: #898989;
+            border: 2px solid #898989;
+            border-radius: 10px;
+            height: 40px;
+            width: 180px;
+            &:hover {
+                color: #bbb;
+            }
+        }
     }
     #echo_totalcount {
         margin-top: 1em;
