@@ -124,6 +124,9 @@ $(function() {
             }
         }).fail(function(jqxhr, textStatus, error) {
             console.log('API Error: /performance/search', error);
+            if (error == 'Unauthorized') {
+                location.href = '/auth/logout';
+            }
         }).always(function() {
             $loading.modal('hide');
         });
