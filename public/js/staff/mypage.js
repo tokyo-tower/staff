@@ -245,12 +245,14 @@ $(function () {
     }
 
     //ポップアップを表示
-    function cancel() {
+    function cancel(reservationsIds) {
         var modal_show_list = document.getElementById('modal_show_list');
-        var tempHTML = reservationsIds4cancel.map(function (id) {
+        var tempHTML = reservationsIds.map(function (id) {
             return '<h3>' + reservationsById[id].payment_no + ' ' + reservationsById[id].seat_code + ' ' + reservationsById[id].ticket_type_name.ja + '</h3>';
         }).join('\n');
+        reservationsIds4cancel = reservationsIds;
         document.getElementById('echo_showlist').innerHTML = tempHTML;
+        $(modal_detail).modal('hide');
         $(modal_show_list).modal();
     }
 
@@ -394,8 +396,7 @@ $(function () {
 
         var action = document.getElementById('select_action').value;
         if (action === 'cancel') {
-            reservationsIds4cancel = ids;
-            cancel();
+            cancel(ids);
         } else if (action === 'print') {
             window.open('/staff/mypage/print?output=a4&' + ids.map(function (id) { return 'ids[]=' + id; }).join('&'));
         } else if (action === 'thermalprint') {
