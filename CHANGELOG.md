@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.2.6 - 2018-06-25
+
+### Changed
+
+- 一括キャンセル時の POPUPを新規作成（briswell）
+
 ## v4.2.5 - 2018-05-09
 
 ### Changed

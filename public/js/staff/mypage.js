@@ -56,6 +56,8 @@ $(function () {
         page: '1'
     };
 
+    var reservationsIds4cancel = null;
+
     function showReservations(reservations) {
         var html = '';
 
@@ -242,37 +244,52 @@ $(function () {
         });
     }
 
-    function cancel(reservationsIds4cancel) {
-        if (!confirm('指定した予約のキャンセル処理を実行してよろしいですか？\n\n'
-            + reservationsIds4cancel.map(function (id) {
-                return reservationsById[id].payment_no + ' ' + reservationsById[id].seat_code + ' ' + reservationsById[id].ticket_type_name.ja;
-            }).join('\n'))
-            || !confirm('キャンセルをした予約は復元できませんが本当に実行しますか？')) {
-            return false;
-        }
-        $.ajax({
-            dataType: 'json',
-            url: $('input[name="urlCancel"]').val(),
-            type: 'POST',
-            data: {
-                reservationIds: reservationsIds4cancel
-            },
-            beforeSend: function () {
-                $('#modal_detail').modal('hide');
-            }
-        }).done(function (data) {
-            console.log('[succeeded] cancelReservation', data);
-            var tempHTML = '';
-            reservationsIds4cancel.forEach(function (id) {
-                tempHTML += '<h3><span>購入番号:</span>' + reservationsById[id].payment_no + '<span>座席 / 券種:</span>' + reservationsById[id].seat_code + '/' + reservationsById[id].ticket_type_name.ja + '</h3>';
-            });
-            document.getElementById('echo_canceledreservations').innerHTML = tempHTML;
-            $('#modal_cancelcompleted').modal();
-        }).fail(function (jqxhr, textStatus, error) {
-            alert(error);
-        }).always(function () {
-        });
+    //ポップアップを表示
+    function cancel(reservationsIds) {
+        var modal_show_list = document.getElementById('modal_show_list');
+        var tempHTML = reservationsIds.map(function (id) {
+            return '<h3>' + reservationsById[id].payment_no + ' ' + reservationsById[id].seat_code + ' ' + reservationsById[id].ticket_type_name.ja + '</h3>';
+        }).join('\n');
+        reservationsIds4cancel = reservationsIds;
+        document.getElementById('echo_showlist').innerHTML = tempHTML;
+        $(modal_detail).modal('hide');
+        $(modal_show_list).modal();
     }
+
+    // 指定した予約のキャンセル処理
+    $(document).on('click', '.btn-modal-show-list', function (e) {
+        var modal_show_list = document.getElementById('modal_show_list');
+        $(modal_show_list).modal('hide');
+
+        setTimeout(function() {
+            if (!confirm('キャンセルをした予約は復元できませんが本当に実行しますか？')) {
+                return false;
+            }
+    
+            $.ajax({
+                dataType: 'json',
+                url: $('input[name="urlCancel"]').val(),
+                type: 'POST',
+                data: {
+                    reservationIds: reservationsIds4cancel
+                },
+                beforeSend: function () {
+                    $('#modal_detail').modal('hide');
+                }
+            }).done(function (data) {
+                console.log('[succeeded] cancelReservation', data);
+                var tempHTML = '';
+                reservationsIds4cancel.forEach(function (id) {
+                    tempHTML += '<h3><span>購入番号:</span>' + reservationsById[id].payment_no + '<span>座席 / 券種:</span>' + reservationsById[id].seat_code + '/' + reservationsById[id].ticket_type_name.ja + '</h3>';
+                });
+                document.getElementById('echo_canceledreservations').innerHTML = tempHTML;
+                $('#modal_cancelcompleted').modal();
+            }).fail(function (jqxhr, textStatus, error) {
+                alert(error);
+            }).always(function () {});
+        }, 500);
+    });
+
     // キャンセル完了モーダルの閉じるボタンで再検索 (※キャンセル完了のモーダルが出たままsearchするとモーダルが衝突してしまう)
     document.getElementById('btn_cancelcompleted').onclick = function () {
         search();
