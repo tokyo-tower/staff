@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.2.7 - 2018-08-01
+
+### Changed
+
+- staff予約一覧の検索条件の日付ハイフンが消えないように修正
+
 ## v4.2.6 - 2018-06-25
 
 ### Changed
