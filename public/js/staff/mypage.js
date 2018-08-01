@@ -31,7 +31,7 @@ $(function () {
         defaultDate: 'today',
         disableMobile: true, // 端末自前の日付選択UIを使わない
         locale: 'ja',
-        dateFormat: "Ymd",
+        //dateFormat: "Ymd",
         // minDate: moment().add(-3, 'months').toDate(),
         // maxDate: moment().add(3, 'months').toDate(),
         onOpen: function () {
@@ -178,6 +178,7 @@ $(function () {
     }
     function showConditions() {
         var formDatas = $('.search-form').serializeArray();
+        conditions.day = conditions.day ? moment(conditions.day).format('YYYY-MM-DD') : '';
         formDatas.forEach(function (formData) {
             var name = formData.name;
             if (conditions.hasOwnProperty(name)) {
