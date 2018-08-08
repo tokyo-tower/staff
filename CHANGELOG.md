@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.2.8 - 2018-08-08
+
+### Changed
+
+- nodejsのversion固定
+
 ## v4.2.7 - 2018-08-01
 
 ### Changed
