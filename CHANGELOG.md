@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.2.9 - 2018-09-12
+
+### Changed
+
+- staff予約管理一覧の詳細画面での決済方法の表示
+
 ## v4.2.8 - 2018-08-08
 
 ### Changed
