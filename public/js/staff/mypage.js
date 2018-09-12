@@ -84,7 +84,7 @@ $(function () {
                 + ' data-watcher-name="' + reservation.watcher_name + '"'
                 + ' data-ticketname="' + reservation.ticket_type_name.ja + '"'
                 + ' data-purchase-route="' + transactionAgentName + '"'
-                + ' data-payment-method="' + reservation.payment_method + '"'
+                + ' data-payment-method="' + paymentMethodName + '"'
                 + ' data-checkined="' + ((reservation.checkins.length) ? '入場済み' : '未入場') + '"'
                 + '>'
                 + '<th class="td-checkbox">';
