@@ -242,7 +242,6 @@ $(function() {
 
     // 販売再開ボタン
     document.getElementById('btn_callmodal_resume').onclick = function() {
-        textarea_announcemail.value = '';
         bool_forResume = true;
         if (!valideteSelection()) { return false; }
         document.getElementById('radio_ev_restart').checked = true;
