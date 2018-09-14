@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.3.0 - 2018-09-14
+
+### Changed
+
+- staff中止文言メール
+
 ## v4.2.9 - 2018-09-12
 
 ### Changed
