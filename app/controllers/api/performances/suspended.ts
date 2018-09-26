@@ -32,6 +32,14 @@ if (FRONTEND_CLIENT_ID === undefined) {
     throw new Error('Please set an environment variable \'FRONTEND_CLIENT_ID\'');
 }
 
+const redisClient = ttts.redis.createClient({
+    host: <string>process.env.REDIS_HOST,
+    // tslint:disable-next-line:no-magic-numbers
+    port: parseInt(<string>process.env.REDIS_PORT, 10),
+    password: <string>process.env.REDIS_KEY,
+    tls: { servername: <string>process.env.REDIS_HOST }
+});
+
 /**
  * 販売中止一覧検索(api)
  */
@@ -232,6 +240,15 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
             <string>process.env.API_CLIENT_ID, req.params.performanceId
         )(performanceRepo, taskRepo);
         debug('returnAllByPerformance task created.', task);
+
+        if (task !== undefined) {
+            // パフォーマンス情報取得
+            const ttl: number = Number.parseInt(process.env.SUSPENDED_TIMEOUT !== undefined ? process.env.SUSPENDED_TIMEOUT : '2678400');
+            const performance = await performanceRepo.findById(req.params.performanceId);
+            const suspensionRepo = new ttts.repository.itemAvailability.Suspension(redisClient);
+            await suspensionRepo.save(performance.day, performance.id, ttl);
+            debug('performance day created.');
+        }
 
         res.status(CREATED).json(task);
     } catch (error) {
