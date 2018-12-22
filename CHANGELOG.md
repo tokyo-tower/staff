@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.3.1 - 2018-12-22
+
+### Changed
+
+- 社名変更に伴うロゴの修正
+
 ## v4.3.0 - 2018-09-14
 
 ### Changed
