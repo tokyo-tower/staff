@@ -39,8 +39,8 @@
                 <div class="wrapper-qrcodes">
                     <div>
                         <p>
-                            <img class="codeimg-barcode" src="//chart.apis.google.com/chart?chs=150x150&cht=qr&chl=<%= reservation.qr_str %>" alt="">
-                        </p>
+                            <!-- <img class="codeimg-barcode" src="//chart.apis.google.com/chart?chs=150x150&cht=qr&chl=<%= reservation.qr_str %>" alt=""> -->
+                            <img class="codeimg-barcode" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&cht=qr&data=<%= reservation.qr_str %>" alt="">
                         <p>
                             <%- reservation.ticket_type_name[locale] || reservation.ticket_type_name.en %> <%- __('{{price}} yen', { price: reservation.ticket_type_charge } ) %><br>
                             <%- `${__('EmailReserveDate')}: ${moment(`${reservations[0].performance_day}${reservations[0].performance_start_time}`, 'YYYYMMDDHHmm').format('LLL')}` %><br>

@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.3.2 - 2019-03-19
+
+### Changed
+
+- QRサービスの変更
+
 ## v4.3.1 - 2018-12-22
 
 ### Changed
