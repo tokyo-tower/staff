@@ -13,11 +13,7 @@
                 <th>予約日時</th>
                 <td>
                     <p>
-                        <%
-                        const startDate = moment(reservationModel.transactionInProgress.performance.start_date);
-                        const endTime = moment(reservationModel.transactionInProgress.performance.end_date);
-                        %>
-                        <%- `${startDate.format('YYYY/MM/DD')} ${startDate.format('HH:mm')} - ${endTime.format('HH:mm')}` %>
+                        <%- `${moment(reservationModel.transactionInProgress.performance.day, 'YYYYMMDD').format('LL')}&nbsp;&nbsp;${moment(reservationModel.transactionInProgress.performance.start_time, 'hmm').format('HH:mm')} - ${moment(reservationModel.transactionInProgress.performance.end_time, 'hmm').format('HH:mm')} <span class="is-not-ja">(JST)</span>` %>
                     </p>
                 </td>
             </tr>

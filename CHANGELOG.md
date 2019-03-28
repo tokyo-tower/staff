@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.3.3 - 2019-03-28
+
+### Changed
+
+- TTTS-492 staffの内容確認画面の予約日時を日本時間に修正
+
 ## v4.3.2 - 2019-03-19
 
 ### Changed
