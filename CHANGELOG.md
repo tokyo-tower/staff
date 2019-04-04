@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.3.4 - 2019-04-05
+
+### Changed
+
+- TTTS-494  QRをjsで生成
+
 ## v4.3.3 - 2019-03-28
 
 ### Changed
