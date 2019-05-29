@@ -10,9 +10,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- パフォーマンス検索条件から作品関係を削除
+- パフォーマンスコレクションからリレーションを削除
+- jsdoc削除
+
 ### Deprecated
 
 ### Removed
+
+- 劇場、スクリーン、作品コレクションを削除(一時的に動的データ管理を不可能に変更)
 
 ### Fixed
 

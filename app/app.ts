@@ -113,6 +113,9 @@ app.use(notFoundHandler);
 // error handlers
 app.use(errorHandler);
 
-ttts.mongoose.connect(<string>process.env.MONGOLAB_URI, mongooseConnectionOptions);
+ttts.mongoose.connect(<string>process.env.MONGOLAB_URI, mongooseConnectionOptions)
+    .then()
+    // tslint:disable-next-line:no-console
+    .catch(console.error);
 
 export = app;

@@ -89,5 +89,8 @@ app.use('/', router_1.default);
 app.use(notFoundHandler_1.default);
 // error handlers
 app.use(errorHandler_1.default);
-ttts.mongoose.connect(process.env.MONGOLAB_URI, mongooseConnectionOptions_1.default);
+ttts.mongoose.connect(process.env.MONGOLAB_URI, mongooseConnectionOptions_1.default)
+    .then()
+    // tslint:disable-next-line:no-console
+    .catch(console.error);
 module.exports = app;

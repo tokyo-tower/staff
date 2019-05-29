@@ -28,14 +28,17 @@ export async function processStart(purchaserGroup: string, req: Request): Promis
     // 言語も指定
     (<Express.Session>req.session).locale = (!_.isEmpty(req.query.locale)) ? req.query.locale : 'ja';
 
-    const sellerIdentifier = 'TokyoTower';
-    const organizationRepo = new ttts.repository.Organization(ttts.mongoose.connection);
-    const seller = await organizationRepo.findCorporationByIdentifier(sellerIdentifier);
-
     const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
         endpoint: <string>process.env.API_ENDPOINT,
         auth: req.tttsAuthClient
     });
+    const oragnizationService = new tttsapi.service.Organization({
+        endpoint: <string>process.env.API_ENDPOINT,
+        auth: req.tttsAuthClient
+    });
+
+    const sellerIdentifier = 'TokyoTower';
+    const seller = await oragnizationService.findCorporationByIdentifier({ identifier: sellerIdentifier });
 
     const expires = moment().add(conf.get<number>('temporary_reservation_valid_period_seconds'), 'seconds').toDate();
     const transaction = await placeOrderTransactionService.start({
@@ -307,8 +310,11 @@ export async function processFixProfile(reservationModel: ReserveSessionModel, r
 export async function processFixPerformance(reservationModel: ReserveSessionModel, perfomanceId: string, req: Request): Promise<void> {
     debug('fixing performance...', perfomanceId);
     // パフォーマンス取得
-    const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
-    const performance = await performanceRepo.findById(perfomanceId);
+    const eventService = new tttsapi.service.Event({
+        endpoint: <string>process.env.API_ENDPOINT,
+        auth: req.tttsAuthClient
+    });
+    const performance = await eventService.findPerofrmanceById({ id: perfomanceId });
 
     if (performance.canceled) { // 万が一上映中止だった場合
         throw new Error(req.__('Message.OutOfTerm'));
