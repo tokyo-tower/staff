@@ -321,9 +321,7 @@ export async function cancel(req: Request, res: Response, next: NextFunction): P
 }
 
 /**
- * キャンセル処理(idから)
- * @param {string} reservationId
- * @return {Promise<boolean>}
+ * 予約キャンセル処理(
  */
 async function cancelById(reservationId: string): Promise<boolean> {
     try {

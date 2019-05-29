@@ -95,10 +95,7 @@ export async function processStart(purchaserGroup: string, req: Request): Promis
 }
 
 /**
- * 座席・券種FIXプロセス
- *
- * @param {ReserveSessionModel} reservationModel
- * @returns {Promise<void>}
+ * 座席・券種確定プロセス
  */
 export async function processFixSeatsAndTickets(reservationModel: ReserveSessionModel, req: Request): Promise<void> {
     // パフォーマンスは指定済みのはず
@@ -178,11 +175,7 @@ export interface IChoiceInfo {
 }
 
 /**
- * 座席・券種FIXプロセス/検証処理
- *
- * @param {ReservationModel} reservationModel
- * @param {Request} req
- * @returns {Promise<void>}
+ * 座席・券種確定プロセス/検証処理
  */
 async function checkFixSeatsAndTickets(reservationModel: ReserveSessionModel, req: Request): Promise<ICheckInfo> {
     const checkInfo: ICheckInfo = {
@@ -254,9 +247,7 @@ async function checkFixSeatsAndTickets(reservationModel: ReserveSessionModel, re
 }
 
 /**
- * 購入者情報FIXプロセス
- * @param {ReservationModel} reservationModel
- * @returns {Promise<void>}
+ * 購入者情報確定プロセス
  */
 export async function processFixProfile(reservationModel: ReserveSessionModel, req: Request, res: Response): Promise<void> {
     reserveProfileForm(req);

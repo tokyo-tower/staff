@@ -52,10 +52,12 @@ function onError(error) {
     // handle specific listen errors with friendly messages
     switch (error.code) {
         case 'EACCES':
+            // tslint:disable-next-line:no-console
             console.error(`${bind} requires elevated privileges`);
             process.exit(1);
             break;
         case 'EADDRINUSE':
+            // tslint:disable-next-line:no-console
             console.error(`${bind} is already in use`);
             process.exit(1);
             break;
