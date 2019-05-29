@@ -84,7 +84,7 @@ function updateOnlineStatus(req, res) {
                 }
                 catch (error) {
                     // no op
-                    console.error(error);
+                    debug('createEmails failed', error);
                 }
             }
             res.status(http_status_1.NO_CONTENT).end();

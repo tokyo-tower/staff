@@ -49,7 +49,6 @@ function start(req, res, next) {
             }
         }
         catch (error) {
-            console.error(error);
             next(new Error(req.__('UnexpectedError')));
         }
     });

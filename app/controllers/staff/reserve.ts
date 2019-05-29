@@ -46,7 +46,6 @@ export async function start(req: Request, res: Response, next: NextFunction): Pr
             res.redirect(`/staff/reserve/terms?cb=${encodeURIComponent(cb)}`);
         }
     } catch (error) {
-        console.error(error);
         next(new Error(req.__('UnexpectedError')));
     }
 }

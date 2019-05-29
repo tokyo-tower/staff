@@ -93,10 +93,7 @@ function processStart(purchaserGroup, req) {
 }
 exports.processStart = processStart;
 /**
- * 座席・券種FIXプロセス
- *
- * @param {ReserveSessionModel} reservationModel
- * @returns {Promise<void>}
+ * 座席・券種確定プロセス
  */
 function processFixSeatsAndTickets(reservationModel, req) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -144,11 +141,7 @@ function processFixSeatsAndTickets(reservationModel, req) {
 }
 exports.processFixSeatsAndTickets = processFixSeatsAndTickets;
 /**
- * 座席・券種FIXプロセス/検証処理
- *
- * @param {ReservationModel} reservationModel
- * @param {Request} req
- * @returns {Promise<void>}
+ * 座席・券種確定プロセス/検証処理
  */
 function checkFixSeatsAndTickets(reservationModel, req) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -214,9 +207,7 @@ function checkFixSeatsAndTickets(reservationModel, req) {
     });
 }
 /**
- * 購入者情報FIXプロセス
- * @param {ReservationModel} reservationModel
- * @returns {Promise<void>}
+ * 購入者情報確定プロセス
  */
 function processFixProfile(reservationModel, req, res) {
     return __awaiter(this, void 0, void 0, function* () {

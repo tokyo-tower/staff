@@ -94,7 +94,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
                 await createEmails(res, targetPlaceOrderTransactions, notice);
             } catch (error) {
                 // no op
-                console.error(error);
+                debug('createEmails failed', error);
             }
         }
 

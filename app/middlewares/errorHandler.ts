@@ -6,6 +6,7 @@ import { NextFunction, Request, Response } from 'express';
 import { INTERNAL_SERVER_ERROR } from 'http-status';
 
 export default (err: any, req: Request, res: Response, __: NextFunction) => {
+    // tslint:disable-next-line:no-console
     console.error(err.message, err.stack);
 
     if (req.xhr) {

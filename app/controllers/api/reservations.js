@@ -303,9 +303,7 @@ function cancel(req, res, next) {
 }
 exports.cancel = cancel;
 /**
- * キャンセル処理(idから)
- * @param {string} reservationId
- * @return {Promise<boolean>}
+ * 予約キャンセル処理(
  */
 function cancelById(reservationId) {
     return __awaiter(this, void 0, void 0, function* () {
