@@ -55,40 +55,38 @@ export async function searchSuspendedPerformances(req: Request, res: Response): 
     const refundStatus: string | null = getValue(req.query.refund_status);
 
     // 検索条件を作成
-    const conditions: any[] = [];
-    conditions.push({ 'ttts_extension.online_sales_status': ttts.factory.performance.OnlineSalesStatus.Suspended });
-    // 販売停止処理日
-    if (day1 !== null || day2 !== null) {
-        const condition4onlineSalesUpdateAt: any = {};
-        if (day1 !== null) {
-            condition4onlineSalesUpdateAt.$gte = moment(`${day1}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').toDate();
-        }
-        if (day2 !== null) {
-            condition4onlineSalesUpdateAt.$lt = moment(`${day2}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').add(1, 'day').toDate();
-        }
-        conditions.push({ 'ttts_extension.online_sales_update_at': condition4onlineSalesUpdateAt });
-    }
-
-    // 対象ツアー年月日
-    if (performanceDate1 !== null || performanceDate2 !== null) {
-        const condition4performanceDay: any = {};
-        if (performanceDate1 !== null) {
-            condition4performanceDay.$gte = performanceDate1;
-        }
-        if (performanceDate2 !== null) {
-            condition4performanceDay.$lte = performanceDate2;
-        }
-        conditions.push({ day: condition4performanceDay });
-    }
-
-    // 返金ステータス
-    if (refundStatus !== null) {
-        conditions.push({ 'ttts_extension.refund_status': refundStatus });
-    }
+    const searchConditions = {
+        limit: limit,
+        page: page,
+        sort: {
+            day: -1,
+            start_time: 1
+        },
+        ttts_extension: {
+            online_sales_status: ttts.factory.performance.OnlineSalesStatus.Suspended,
+            online_sales_update_at: (day1 !== null || day2 !== null)
+                ? {
+                    ...(day1 !== null)
+                        ? { $gte: moment(`${day1}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').toDate() }
+                        : undefined,
+                    ...(day2 !== null)
+                        ? { $lt: moment(`${day2}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').add(1, 'day').toDate() }
+                        : undefined
+                }
+                : undefined,
+            refund_status: (refundStatus !== null) ? refundStatus : undefined
+        },
+        day: (performanceDate1 !== null || performanceDate2 !== null)
+            ? {
+                ...(performanceDate1 !== null) ? { $gte: performanceDate1 } : undefined,
+                ...(performanceDate2 !== null) ? { $lte: performanceDate2 } : undefined
+            }
+            : undefined
+    };
 
     try {
         // 販売停止パフォーマンス情報を検索
-        const { results, totalCount } = await findSuspendedPerformances(conditions, limit, page);
+        const { results, totalCount } = await findSuspendedPerformances(searchConditions);
         res.header('X-Total-Count', totalCount.toString());
         res.json(results);
     } catch (error) {
@@ -133,7 +131,7 @@ export interface ISuspendedPerformances {
 /**
  * 表示一覧取得
  */
-async function findSuspendedPerformances(conditions: any[], limit: number, page: number): Promise<{
+async function findSuspendedPerformances(conditions: any): Promise<{
     totalCount: number;
     results: ISuspendedPerformances[];
 }> {
@@ -141,39 +139,27 @@ async function findSuspendedPerformances(conditions: any[], limit: number, page:
     const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
 
     debug('finfing performances...', conditions);
-    const performances = await performanceRepo.performanceModel
-        .find({ $and: conditions })
-        .sort({
-            day: -1,
-            start_time: 1
-        })
-        .skip(limit * (page - 1))
-        .limit(limit)
-        .exec().then((docs) => docs.map((doc) => <ttts.factory.performance.IPerformance>doc.toObject()));
+    const performances = await performanceRepo.search(conditions);
     debug(performances.length, 'suspended performances found.');
 
-    const totalCount = await performanceRepo.performanceModel.count({ $and: conditions }).exec();
+    const totalCount = await performanceRepo.count(conditions);
     debug(totalCount, 'total results.');
 
     const results = await Promise.all(performances.map(async (performance) => {
         const performanceId = performance.id;
 
         // パフォーマンスに対する予約数
-        let numberOfReservations = await reservationRepo.reservationModel.count(
-            {
-                purchaser_group: ttts.factory.person.Group.Customer,
-                performance: performanceId
-            }
-        ).exec();
+        let numberOfReservations = await reservationRepo.count({
+            purchaser_group: ttts.factory.person.Group.Customer,
+            performance: performanceId
+        });
 
         // 未入場の予約数
-        let nubmerOfUncheckedReservations = await reservationRepo.reservationModel.count(
-            {
-                purchaser_group: ttts.factory.person.Group.Customer,
-                performance: performanceId,
-                checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
-            }
-        ).exec();
+        let nubmerOfUncheckedReservations = await reservationRepo.count({
+            purchaser_group: ttts.factory.person.Group.Customer,
+            performance: performanceId,
+            checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
+        });
 
         const extension = performance.ttts_extension;
 
@@ -189,12 +175,10 @@ async function findSuspendedPerformances(conditions: any[], limit: number, page:
 
             numberOfReservations = reservationsAtLastUpdateDate.length;
             debug(reservationsAtLastUpdateDate.map((r) => r.id));
-            nubmerOfUncheckedReservations = await reservationRepo.reservationModel.count(
-                {
-                    _id: { $in: reservationsAtLastUpdateDate.map((r) => r.id) },
-                    checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
-                }
-            ).exec();
+            nubmerOfUncheckedReservations = await reservationRepo.count({
+                ids: reservationsAtLastUpdateDate.map((r) => r.id),
+                checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
+            });
         }
 
         return {

@@ -49,9 +49,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
         const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
 
         // 指定のパフォーマンスに対する予約検索
-        const reservations = await reservationRepo.reservationModel.find(
-            { performance: { $in: performanceIds } }
-        ).exec().then((docs) => docs.map((doc) => <ttts.factory.reservation.event.IReservation>doc.toObject()));
+        const reservations = await reservationRepo.search({ performances: performanceIds });
 
         const updateUser = (<StaffUser>req.staffUser).username;
 
@@ -70,8 +68,8 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
                     };
                 });
 
-            await performanceRepo.performanceModel.findByIdAndUpdate(
-                performanceId,
+            await performanceRepo.updateOne(
+                { _id: performanceId },
                 {
                     'ttts_extension.reservationsAtLastUpdateDate': reservationsAtLastUpdateDate,
                     'ttts_extension.online_sales_status': onlineStatus,
@@ -84,7 +82,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
                     'ttts_extension.refund_update_user': updateUser,
                     'ttts_extension.refund_update_at': now
                 }
-            ).exec();
+            );
         }));
         debug('performance online_sales_status updated.');
 
@@ -121,15 +119,15 @@ export async function getTargetReservationsForRefund(performanceIds: string[]): 
     const transactionRepo = new ttts.repository.Transaction(ttts.mongoose.connection);
 
     // 返品されていない、かつ、入場履歴なし、の予約から、取引IDリストを取得
-    const targetTransactionIds = await reservationRepo.reservationModel.distinct(
+    const targetTransactionIds = await reservationRepo.distinct(
         'transaction',
         {
             status: ttts.factory.reservationStatusType.ReservationConfirmed,
             purchaser_group: ttts.factory.person.Group.Customer,
-            performance: { $in: performanceIds },
+            performances: performanceIds,
             checkins: { $size: 0 }
         }
-    ).exec();
+    );
 
     return transactionRepo.transactionModel.find(
         {

@@ -48,7 +48,7 @@ function updateOnlineStatus(req, res) {
             const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
             const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
             // 指定のパフォーマンスに対する予約検索
-            const reservations = yield reservationRepo.reservationModel.find({ performance: { $in: performanceIds } }).exec().then((docs) => docs.map((doc) => doc.toObject()));
+            const reservations = yield reservationRepo.search({ performances: performanceIds });
             const updateUser = req.staffUser.username;
             yield Promise.all(performanceIds.map((performanceId) => __awaiter(this, void 0, void 0, function* () {
                 // パフォーマンスに対する予約検索
@@ -63,7 +63,7 @@ function updateOnlineStatus(req, res) {
                         order_number: r.order_number
                     };
                 });
-                yield performanceRepo.performanceModel.findByIdAndUpdate(performanceId, {
+                yield performanceRepo.updateOne({ _id: performanceId }, {
                     'ttts_extension.reservationsAtLastUpdateDate': reservationsAtLastUpdateDate,
                     'ttts_extension.online_sales_status': onlineStatus,
                     'ttts_extension.online_sales_update_user': updateUser,
@@ -74,7 +74,7 @@ function updateOnlineStatus(req, res) {
                     'ttts_extension.refund_status': refundStatus,
                     'ttts_extension.refund_update_user': updateUser,
                     'ttts_extension.refund_update_at': now
-                }).exec();
+                });
             })));
             debug('performance online_sales_status updated.');
             // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
@@ -110,12 +110,12 @@ function getTargetReservationsForRefund(performanceIds) {
         const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
         const transactionRepo = new ttts.repository.Transaction(ttts.mongoose.connection);
         // 返品されていない、かつ、入場履歴なし、の予約から、取引IDリストを取得
-        const targetTransactionIds = yield reservationRepo.reservationModel.distinct('transaction', {
+        const targetTransactionIds = yield reservationRepo.distinct('transaction', {
             status: ttts.factory.reservationStatusType.ReservationConfirmed,
             purchaser_group: ttts.factory.person.Group.Customer,
-            performance: { $in: performanceIds },
+            performances: performanceIds,
             checkins: { $size: 0 }
-        }).exec();
+        });
         return transactionRepo.transactionModel.find({
             _id: { $in: targetTransactionIds }
         }).exec().then((docs) => docs.map((doc) => doc.toObject()));

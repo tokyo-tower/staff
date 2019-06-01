@@ -64,7 +64,7 @@ function search(req, res) {
         const startHour2 = (!_.isEmpty(req.query.start_hour2)) ? req.query.start_hour2 : null;
         const startMinute2 = (!_.isEmpty(req.query.start_minute2)) ? req.query.start_minute2 : null;
         // 購入番号
-        let paymentNo = (!_.isEmpty(req.query.payment_no)) ? req.query.payment_no : null;
+        const paymentNo = (!_.isEmpty(req.query.payment_no)) ? req.query.payment_no : null;
         // アカウント
         const owner = (!_.isEmpty(req.query.owner)) ? req.query.owner : null;
         // 予約方法
@@ -81,99 +81,64 @@ function search(req, res) {
         // メモ
         const watcherName = (!_.isEmpty(req.query.watcher_name)) ? req.query.watcher_name : null;
         // 検索条件を作成
-        const conditions = [];
-        // 管理者の場合、内部関係者の予約全て&確保中
-        conditions.push({
-            status: ttts.factory.reservationStatusType.ReservationConfirmed
-        });
-        // 来塔日
-        if (day !== null) {
-            conditions.push({ performance_day: day });
-        }
-        // 開始時間
         const startTimeFrom = (startHour1 !== null && startMinute1 !== null) ? startHour1 + startMinute1 : null;
         const startTimeTo = (startHour2 !== null && startMinute2 !== null) ? startHour2 + startMinute2 : null;
-        if (startTimeFrom !== null || startTimeTo !== null) {
-            const conditionsTime = {};
-            // 開始時間From
-            if (startTimeFrom !== null) {
-                conditionsTime.$gte = startTimeFrom;
-            }
-            // 開始時間To
-            if (startTimeTo !== null) {
-                conditionsTime.$lte = startTimeTo;
-            }
-            conditions.push({ performance_start_time: conditionsTime });
-        }
-        // 購入番号
-        if (paymentNo !== null) {
-            // remove space characters
-            paymentNo = ttts.CommonUtil.toHalfWidth(paymentNo.replace(/\s/g, ''));
-            conditions.push({ payment_no: { $regex: `${paymentNo}` } });
-        }
-        // アカウント
-        if (owner !== null) {
-            conditions.push({ owner_username: owner });
-        }
-        // 予約方法
-        if (purchaserGroup !== null) {
-            switch (purchaserGroup) {
-                case 'POS':
-                    // 取引エージェントがPOS
-                    conditions.push({ 'transaction_agent.id': POS_CLIENT_ID });
-                    break;
-                case ttts.factory.person.Group.Customer:
-                    // 購入者区分が一般、かつ、POS購入でない
-                    conditions.push({ purchaser_group: purchaserGroup });
-                    conditions.push({ 'transaction_agent.id': { $ne: POS_CLIENT_ID } });
-                    break;
-                default:
-                    conditions.push({ purchaser_group: purchaserGroup });
-            }
-        }
-        // 決済手段
-        if (paymentMethod !== null) {
-            conditions.push({ payment_method: paymentMethod });
-        }
-        // 名前
-        if (purchaserLastName !== null) {
-            conditions.push({ purchaser_last_name: new RegExp(purchaserLastName, 'i') }); // 大文字小文字区別しない
-        }
-        if (purchaserFirstName !== null) {
-            conditions.push({ purchaser_first_name: new RegExp(purchaserFirstName, 'i') }); // 大文字小文字区別しない
-        }
-        // メアド
-        if (purchaserEmail !== null) {
-            conditions.push({ purchaser_email: purchaserEmail });
-        }
-        // 電話番号
-        if (purchaserTel !== null) {
-            conditions.push({ purchaser_tel: new RegExp(`${purchaserTel}$`) });
-        }
-        // メモ
-        if (watcherName !== null) {
-            conditions.push({ watcher_name: new RegExp(watcherName, 'i') }); // 大文字小文字区別しない
-        }
-        debug('searching reservations...', conditions);
-        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
-        try {
-            // 総数検索
-            const count = yield reservationRepo.reservationModel.count({
-                $and: conditions
-            }).exec();
-            debug('reservation count:', count);
-            // データ検索(検索→ソート→指定ページ分切取り)
-            const reservations = yield reservationRepo.reservationModel.find({ $and: conditions })
-                .sort({
+        const searchConditions = {
+            limit: limit,
+            page: page,
+            sort: {
                 performance_day: 1,
                 performance_start_time: 1,
                 payment_no: 1,
                 ticket_type: 1
-            })
-                .skip(limit * (page - 1))
-                .limit(limit)
-                .exec()
-                .then((docs) => docs.map((doc) => doc.toObject()));
+            },
+            // 管理者の場合、内部関係者の予約全て&確保中
+            status: ttts.factory.reservationStatusType.ReservationConfirmed,
+            performance_day: (day !== null) ? day : undefined,
+            performanceStartTimeFrom: (startTimeFrom !== null) ? startTimeFrom : undefined,
+            performanceStartTimeTo: (startTimeTo !== null) ? startTimeTo : undefined,
+            payment_no: (paymentNo !== null) ? ttts.CommonUtil.toHalfWidth(paymentNo.replace(/\s/g, '')) : undefined,
+            owner_username: (owner !== null) ? owner : undefined,
+            purchaser_group: (purchaserGroup !== null)
+                ? (purchaserGroup !== 'POS') ? purchaserGroup : undefined
+                : undefined,
+            transactionAgentId: (purchaserGroup !== null)
+                ? (purchaserGroup === 'POS')
+                    ? POS_CLIENT_ID
+                    : (purchaserGroup === ttts.factory.person.Group.Customer) ? { $ne: POS_CLIENT_ID } : undefined
+                : undefined,
+            paymentMethod: (paymentMethod !== null) ? paymentMethod : undefined,
+            purchaserLastName: (purchaserLastName !== null) ? purchaserLastName : undefined,
+            purchaserFirstName: (purchaserFirstName !== null) ? purchaserFirstName : undefined,
+            purchaserEmail: (purchaserEmail !== null) ? purchaserEmail : undefined,
+            purchaserTel: (purchaserTel !== null) ? purchaserTel : undefined,
+            watcherName: (watcherName !== null) ? watcherName : undefined
+        };
+        const conditions = [];
+        // 予約方法
+        // if (purchaserGroup !== null) {
+        //     switch (purchaserGroup) {
+        //         case 'POS':
+        //             // 取引エージェントがPOS
+        //             conditions.push({ 'transaction_agent.id': POS_CLIENT_ID });
+        //             break;
+        //         case ttts.factory.person.Group.Customer:
+        //             // 購入者区分が一般、かつ、POS購入でない
+        //             conditions.push({ purchaser_group: purchaserGroup });
+        //             conditions.push({ 'transaction_agent.id': { $ne: POS_CLIENT_ID } });
+        //             break;
+        //         default:
+        //             conditions.push({ purchaser_group: purchaserGroup });
+        //     }
+        // }
+        debug('searching reservations...', conditions);
+        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
+        try {
+            // 総数検索
+            const count = yield reservationRepo.count(searchConditions);
+            debug('reservation count:', count);
+            // データ検索(検索→ソート→指定ページ分切取り)
+            const reservations = yield reservationRepo.search(searchConditions);
             // 0件メッセージセット
             const message = (reservations.length === 0) ?
                 '検索結果がありません。予約データが存在しないか、検索条件を見直してください' : '';
@@ -240,10 +205,10 @@ function updateWatcherName(req, res, next) {
         };
         const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
         try {
-            const reservation = yield reservationRepo.reservationModel.findOneAndUpdate(condition, {
+            const reservation = yield reservationRepo.updateWatcher(condition, {
                 watcher_name: watcherName,
-                watcher_name_updated_at: Date.now()
-            }, { new: true }).exec();
+                watcher_name_updated_at: new Date()
+            });
             if (reservation === null) {
                 res.status(http_status_1.NOT_FOUND).json(null);
             }
@@ -309,30 +274,24 @@ function cancelById(reservationId) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
-            const stockRepo = new ttts.repository.Stock(ttts.mongoose.connection);
+            const stockRepo = new ttts.repository.Stock(redisClient);
             // idから予約データ取得
-            const reservation = yield reservationRepo.reservationModel.findOne({
-                _id: reservationId,
-                status: ttts.factory.reservationStatusType.ReservationConfirmed
-            }).exec().then((doc) => {
-                if (doc === null) {
-                    throw new Error('Reservation not found.');
-                }
-                return doc.toObject();
-            });
+            const reservation = yield reservationRepo.findById({ id: reservationId });
+            if (reservation.reservationStatus !== ttts.factory.reservationStatusType.ReservationConfirmed) {
+                throw new ttts.factory.errors.Argument('reservationId', 'status not confirmed');
+            }
             debug('canceling a reservation...', reservation.id);
             // 予約をキャンセル
-            yield reservationRepo.reservationModel.findByIdAndUpdate(reservation.id, { status: ttts.factory.reservationStatusType.ReservationCancelled }).exec();
+            yield reservationRepo.cancel({ id: reservation.id });
             // 在庫を空きに(在庫IDに対して、元の状態に戻す)
             yield Promise.all(reservation.stocks.map((stock) => __awaiter(this, void 0, void 0, function* () {
-                yield stockRepo.stockModel.findOneAndUpdate({
-                    _id: stock.id,
-                    availability: stock.availability_after,
-                    holder: stock.holder // 対象取引に保持されている
-                }, {
-                    $set: { availability: stock.availability_before },
-                    $unset: { holder: 1 }
-                }).exec();
+                yield stockRepo.unlock({
+                    eventId: reservation.performance,
+                    offer: {
+                        seatSection: '',
+                        seatNumber: stock.seat_code
+                    }
+                });
             })));
             debug(reservation.stocks.length, 'stock(s) returned in stock.');
             // 券種による流入制限解放
