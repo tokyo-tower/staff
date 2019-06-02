@@ -16,7 +16,6 @@ const ttts = require("@motionpicture/ttts-domain");
 const conf = require("config");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
-const moment = require("moment");
 const _ = require("underscore");
 const debug = createDebug('ttts-staff:controllers:api:reservations');
 const redisClient = ttts.redis.createClient({
@@ -246,11 +245,15 @@ function cancel(req, res, next) {
             }
             const promises = reservationIds.map((id) => __awaiter(this, void 0, void 0, function* () {
                 // 予約データの解放
-                const result = yield cancelById(id);
-                if (result) {
+                try {
+                    yield ttts.service.reserve.cancelReservation({ id: id })({
+                        reservation: new ttts.repository.Reservation(ttts.mongoose.connection),
+                        stock: new ttts.repository.Stock(redisClient),
+                        ticketTypeCategoryRateLimit: new ttts.repository.rateLimit.TicketTypeCategory(redisClient)
+                    });
                     successIds.push(id);
                 }
-                else {
+                catch (error) {
                     errorIds.push(id);
                 }
             }));
@@ -267,47 +270,3 @@ function cancel(req, res, next) {
     });
 }
 exports.cancel = cancel;
-/**
- * 予約キャンセル処理(
- */
-function cancelById(reservationId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
-            const stockRepo = new ttts.repository.Stock(redisClient);
-            // idから予約データ取得
-            const reservation = yield reservationRepo.findById({ id: reservationId });
-            if (reservation.reservationStatus !== ttts.factory.reservationStatusType.ReservationConfirmed) {
-                throw new ttts.factory.errors.Argument('reservationId', 'status not confirmed');
-            }
-            debug('canceling a reservation...', reservation.id);
-            // 予約をキャンセル
-            yield reservationRepo.cancel({ id: reservation.id });
-            // 在庫を空きに(在庫IDに対して、元の状態に戻す)
-            yield Promise.all(reservation.stocks.map((stock) => __awaiter(this, void 0, void 0, function* () {
-                yield stockRepo.unlock({
-                    eventId: reservation.performance,
-                    offer: {
-                        seatSection: '',
-                        seatNumber: stock.seat_code
-                    }
-                });
-            })));
-            debug(reservation.stocks.length, 'stock(s) returned in stock.');
-            // 券種による流入制限解放
-            if (reservation.rate_limit_unit_in_seconds > 0) {
-                const rateLimitRepo = new ttts.repository.rateLimit.TicketTypeCategory(redisClient);
-                yield rateLimitRepo.unlock({
-                    ticketTypeCategory: reservation.ticket_ttts_extension.category,
-                    performanceStartDate: moment(reservation.performance_start_date).toDate(),
-                    unitInSeconds: reservation.rate_limit_unit_in_seconds
-                });
-                debug('rate limit reset.');
-            }
-        }
-        catch (error) {
-            return false;
-        }
-        return true;
-    });
-}

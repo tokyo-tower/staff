@@ -8,7 +8,6 @@ import * as conf from 'config';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 import { INTERNAL_SERVER_ERROR, NO_CONTENT, NOT_FOUND } from 'http-status';
-import * as moment from 'moment';
 import * as _ from 'underscore';
 
 const debug = createDebug('ttts-staff:controllers:api:reservations');
@@ -263,10 +262,15 @@ export async function cancel(req: Request, res: Response, next: NextFunction): P
 
         const promises = reservationIds.map(async (id) => {
             // 予約データの解放
-            const result: boolean = await cancelById(id);
-            if (result) {
+            try {
+                await ttts.service.reserve.cancelReservation({ id: id })({
+                    reservation: new ttts.repository.Reservation(ttts.mongoose.connection),
+                    stock: new ttts.repository.Stock(redisClient),
+                    ticketTypeCategoryRateLimit: new ttts.repository.rateLimit.TicketTypeCategory(redisClient)
+                });
+
                 successIds.push(id);
-            } else {
+            } catch (error) {
                 errorIds.push(id);
             }
         });
@@ -279,51 +283,4 @@ export async function cancel(req: Request, res: Response, next: NextFunction): P
             errorIds: errorIds
         });
     }
-}
-
-/**
- * 予約キャンセル処理(
- */
-async function cancelById(reservationId: string): Promise<boolean> {
-    try {
-        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
-        const stockRepo = new ttts.repository.Stock(redisClient);
-
-        // idから予約データ取得
-        const reservation = await reservationRepo.findById({ id: reservationId });
-        if (reservation.reservationStatus !== ttts.factory.reservationStatusType.ReservationConfirmed) {
-            throw new ttts.factory.errors.Argument('reservationId', 'status not confirmed');
-        }
-
-        debug('canceling a reservation...', reservation.id);
-        // 予約をキャンセル
-        await reservationRepo.cancel({ id: reservation.id });
-
-        // 在庫を空きに(在庫IDに対して、元の状態に戻す)
-        await Promise.all(reservation.stocks.map(async (stock) => {
-            await stockRepo.unlock({
-                eventId: reservation.performance,
-                offer: {
-                    seatSection: '',
-                    seatNumber: stock.seat_code
-                }
-            });
-        }));
-        debug(reservation.stocks.length, 'stock(s) returned in stock.');
-
-        // 券種による流入制限解放
-        if (reservation.rate_limit_unit_in_seconds > 0) {
-            const rateLimitRepo = new ttts.repository.rateLimit.TicketTypeCategory(redisClient);
-            await rateLimitRepo.unlock({
-                ticketTypeCategory: reservation.ticket_ttts_extension.category,
-                performanceStartDate: moment(reservation.performance_start_date).toDate(),
-                unitInSeconds: reservation.rate_limit_unit_in_seconds
-            });
-            debug('rate limit reset.');
-        }
-    } catch (error) {
-        return false;
-    }
-
-    return true;
 }
