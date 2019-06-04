@@ -1,8 +1,4 @@
 "use strict";
-/**
- * 販売停止パフォーマンスAPIコントローラー
- * @namespace controllers.api.performances.suspended
- */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -12,22 +8,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ttts = require("@motionpicture/ttts-domain");
+/**
+ * 販売停止パフォーマンスAPIコントローラー
+ */
+const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
-const moment = require("moment");
+const moment = require("moment-timezone");
 const _ = require("underscore");
-const debug = createDebug('ttts-staff:controllers:api:performances');
+const debug = createDebug('ttts-staff:controllers');
 const EMPTY_STRING = '-';
 const EV_SERVICE_STATUS_NAMES = {};
-EV_SERVICE_STATUS_NAMES[ttts.factory.performance.EvServiceStatus.Normal] = EMPTY_STRING;
-EV_SERVICE_STATUS_NAMES[ttts.factory.performance.EvServiceStatus.Slowdown] = '一時休止';
-EV_SERVICE_STATUS_NAMES[ttts.factory.performance.EvServiceStatus.Suspended] = '完全中止';
+EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Normal] = EMPTY_STRING;
+EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Slowdown] = '一時休止';
+EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Suspended] = '完全中止';
 const REFUND_STATUS_NAMES = {};
-REFUND_STATUS_NAMES[ttts.factory.performance.RefundStatus.None] = EMPTY_STRING;
-REFUND_STATUS_NAMES[ttts.factory.performance.RefundStatus.NotInstructed] = '未指示';
-REFUND_STATUS_NAMES[ttts.factory.performance.RefundStatus.Instructed] = '指示済';
-REFUND_STATUS_NAMES[ttts.factory.performance.RefundStatus.Compeleted] = '返金済';
+REFUND_STATUS_NAMES[tttsapi.factory.performance.RefundStatus.None] = EMPTY_STRING;
+REFUND_STATUS_NAMES[tttsapi.factory.performance.RefundStatus.NotInstructed] = '未指示';
+REFUND_STATUS_NAMES[tttsapi.factory.performance.RefundStatus.Instructed] = '指示済';
+REFUND_STATUS_NAMES[tttsapi.factory.performance.RefundStatus.Compeleted] = '返金済';
 if (process.env.API_CLIENT_ID === undefined) {
     throw new Error('Please set an environment variable \'API_CLIENT_ID\'');
 }
@@ -65,7 +64,7 @@ function searchSuspendedPerformances(req, res) {
                 start_time: 1
             },
             ttts_extension: {
-                online_sales_status: ttts.factory.performance.OnlineSalesStatus.Suspended,
+                online_sales_status: tttsapi.factory.performance.OnlineSalesStatus.Suspended,
                 online_sales_update_at: (day1 !== null || day2 !== null)
                     ? Object.assign({}, (day1 !== null)
                         ? { $gte: moment(`${day1}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').toDate() }
@@ -79,7 +78,7 @@ function searchSuspendedPerformances(req, res) {
         };
         try {
             // 販売停止パフォーマンス情報を検索
-            const { results, totalCount } = yield findSuspendedPerformances(searchConditions);
+            const { results, totalCount } = yield findSuspendedPerformances(req, searchConditions);
             res.header('X-Total-Count', totalCount.toString());
             res.json(results);
         }
@@ -96,53 +95,68 @@ exports.searchSuspendedPerformances = searchSuspendedPerformances;
 /**
  * 表示一覧取得
  */
-function findSuspendedPerformances(conditions) {
+function findSuspendedPerformances(req, conditions) {
     return __awaiter(this, void 0, void 0, function* () {
-        const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
-        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
+        const eventService = new tttsapi.service.Event({
+            endpoint: process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+        const reservationService = new tttsapi.service.Reservation({
+            endpoint: process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
         debug('finfing performances...', conditions);
-        const performances = yield performanceRepo.search(conditions);
-        debug(performances.length, 'suspended performances found.');
-        const totalCount = yield performanceRepo.count(conditions);
+        const searchResults = yield eventService.searchPerformances(conditions);
+        debug('suspended performances found.', searchResults);
+        const performances = searchResults.data.data;
+        const totalCount = searchResults.totalCount;
         debug(totalCount, 'total results.');
         const results = yield Promise.all(performances.map((performance) => __awaiter(this, void 0, void 0, function* () {
-            const performanceId = performance.id;
             // パフォーマンスに対する予約数
-            let numberOfReservations = yield reservationRepo.count({
-                purchaser_group: ttts.factory.person.Group.Customer,
-                performance: performanceId
+            let searchReservationsResult = yield reservationService.search({
+                limit: 1,
+                purchaser_group: tttsapi.factory.person.Group.Customer,
+                performance: performance.id
             });
+            let numberOfReservations = searchReservationsResult.totalCount;
             // 未入場の予約数
-            let nubmerOfUncheckedReservations = yield reservationRepo.count({
-                purchaser_group: ttts.factory.person.Group.Customer,
-                performance: performanceId,
+            searchReservationsResult = yield reservationService.search({
+                limit: 1,
+                purchaser_group: tttsapi.factory.person.Group.Customer,
+                performance: performance.id,
                 checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
             });
-            const extension = performance.ttts_extension;
+            let nubmerOfUncheckedReservations = searchReservationsResult.totalCount;
+            const extension = performance.extension;
             // 時点での予約
-            let reservationsAtLastUpdateDate = performance.ttts_extension.reservationsAtLastUpdateDate;
+            let reservationsAtLastUpdateDate = extension.reservationsAtLastUpdateDate;
             if (reservationsAtLastUpdateDate !== undefined) {
                 reservationsAtLastUpdateDate = reservationsAtLastUpdateDate
-                    .filter((r) => r.status === ttts.factory.reservationStatusType.ReservationConfirmed) // 確定ステータス
-                    .filter((r) => r.purchaser_group === ttts.factory.person.Group.Customer) // 購入者一般
+                    .filter((r) => r.status === tttsapi.factory.reservationStatusType.ReservationConfirmed) // 確定ステータス
+                    .filter((r) => r.purchaser_group === tttsapi.factory.person.Group.Customer) // 購入者一般
                     // frontendアプリケーションでの購入
-                    // tslint:disable-next-line:max-line-length
-                    .filter((r) => r.transaction_agent !== undefined && r.transaction_agent !== null && r.transaction_agent.id === FRONTEND_CLIENT_ID);
+                    .filter((r) => r.transaction_agent !== undefined
+                    && r.transaction_agent !== null
+                    && r.transaction_agent.id === FRONTEND_CLIENT_ID);
                 numberOfReservations = reservationsAtLastUpdateDate.length;
-                debug(reservationsAtLastUpdateDate.map((r) => r.id));
-                nubmerOfUncheckedReservations = yield reservationRepo.count({
-                    ids: reservationsAtLastUpdateDate.map((r) => r.id),
-                    checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
-                });
+                // 時点での予約が存在していれば、そのうちの未入場数を検索
+                if (numberOfReservations > 0) {
+                    searchReservationsResult = yield reservationService.search({
+                        limit: 1,
+                        ids: reservationsAtLastUpdateDate.map((r) => r.id),
+                        checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
+                    });
+                    nubmerOfUncheckedReservations = searchReservationsResult.totalCount;
+                }
             }
             return {
-                performance_id: performanceId,
-                performance_day: moment(performance.day, 'YYYYMMDD').format('YYYY/MM/DD'),
-                start_time: performance.start_time,
-                end_time: performance.end_time,
-                start_date: performance.start_date,
-                end_date: performance.end_date,
-                tour_number: performance.tour_number,
+                performance_id: performance.id,
+                performance_day: moment(performance.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD'),
+                start_time: moment(performance.startDate).tz('Asia/Tokyo').format('HHmm'),
+                end_time: moment(performance.endDate).tz('Asia/Tokyo').format('HHmm'),
+                start_date: performance.startDate,
+                end_date: performance.endDate,
+                tour_number: performance.tourNumber,
                 ev_service_status: extension.ev_service_status,
                 ev_service_status_name: EV_SERVICE_STATUS_NAMES[extension.ev_service_status],
                 online_sales_update_at: extension.online_sales_update_at,
@@ -163,12 +177,40 @@ function findSuspendedPerformances(conditions) {
 function returnOrders(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            // パフォーマンスと予約情報の返金ステータス更新(指示済に)
-            const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
-            const taskRepo = new ttts.repository.Task(ttts.mongoose.connection);
-            const task = yield ttts.service.order.returnAllByPerformance(process.env.API_CLIENT_ID, req.params.performanceId)(performanceRepo, taskRepo);
+            const eventService = new tttsapi.service.Event({
+                endpoint: process.env.API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
+            const taskService = new tttsapi.service.Task({
+                endpoint: process.env.API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
+            const performanceId = req.params.performanceId;
+            // パフォーマンス終了済かどうか確認
+            const performance = yield eventService.findPerofrmanceById({ id: performanceId });
+            debug('starting returnOrders by performance...', performance.id);
+            const now = moment();
+            const endDate = moment(performance.end_date);
+            debug(now, endDate);
+            if (endDate >= now) {
+                throw new Error('上映が終了していないので返品処理を実行できません。');
+            }
+            const task = yield taskService.create({
+                name: tttsapi.factory.taskName.ReturnOrdersByPerformance,
+                status: tttsapi.factory.taskStatus.Ready,
+                runsAt: new Date(),
+                remainingNumberOfTries: 10,
+                lastTriedAt: null,
+                numberOfTried: 0,
+                executionResults: [],
+                data: {
+                    agentId: process.env.API_CLIENT_ID,
+                    performanceId: performanceId
+                }
+            });
             debug('returnAllByPerformance task created.', task);
-            res.status(http_status_1.CREATED).json(task);
+            res.status(http_status_1.CREATED)
+                .json(task);
         }
         catch (error) {
             res.status(http_status_1.INTERNAL_SERVER_ERROR).json({

@@ -1,9 +1,8 @@
 /**
  * パフォーマンスAPIコントローラー
- * @namespace controllers.api.performances
  */
+import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
-import * as ttts from '@motionpicture/ttts-domain';
 import * as conf from 'config';
 import * as createDebug from 'debug';
 import { Request, Response } from 'express';
@@ -13,7 +12,7 @@ import * as numeral from 'numeral';
 
 import StaffUser from '../../models/user/staff';
 
-const debug = createDebug('ttts-staff:controllers:api:performances');
+const debug = createDebug('ttts-staff:controllers');
 
 /**
  * 運行・オンライン販売ステータス変更
@@ -27,36 +26,46 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
         }
 
         // パフォーマンス・予約(入塔記録のないもの)のステータス更新
-        const onlineStatus: string = req.body.onlineStatus;
-        const evStatus: string = req.body.evStatus;
+        const onlineStatus: tttsapi.factory.performance.OnlineSalesStatus = req.body.onlineStatus;
+        const evStatus: tttsapi.factory.performance.EvServiceStatus = req.body.evStatus;
         const notice: string = req.body.notice;
         debug('updating performances...', performanceIds, onlineStatus, evStatus, notice);
 
         const now = new Date();
 
         // 返金対象予約情報取得(入塔記録のないもの)
-        const targetPlaceOrderTransactions = await getTargetReservationsForRefund(performanceIds);
+        const targetPlaceOrderTransactions = await getTargetReservationsForRefund(req, performanceIds);
         debug('email target placeOrderTransactions:', targetPlaceOrderTransactions);
 
         // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
-        const refundStatus: string = evStatus === ttts.factory.performance.EvServiceStatus.Suspended ?
-            ttts.factory.performance.RefundStatus.NotInstructed :
-            ttts.factory.performance.RefundStatus.None;
+        const refundStatus: tttsapi.factory.performance.RefundStatus =
+            evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended ?
+                tttsapi.factory.performance.RefundStatus.NotInstructed :
+                tttsapi.factory.performance.RefundStatus.None;
 
         // パフォーマンス更新
         debug('updating performance online_sales_status...');
-        const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
-        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
 
-        // 指定のパフォーマンスに対する予約検索
-        const reservations = await reservationRepo.search({ performances: performanceIds });
+        const eventService = new tttsapi.service.Event({
+            endpoint: <string>process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+        const reservationService = new tttsapi.service.Reservation({
+            endpoint: <string>process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
 
         const updateUser = (<StaffUser>req.staffUser).username;
 
         await Promise.all(performanceIds.map(async (performanceId) => {
-            // パフォーマンスに対する予約検索
-            const reservations4performance = reservations.filter((r) => r.performance === performanceId);
-            const reservationsAtLastUpdateDate: ttts.factory.performance.IReservationAtLastupdateDate[] =
+            // パフォーマンスに対する予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
+            const searchReservationsResult = await reservationService.search({
+                limit: 100,
+                performance: performanceId
+            });
+            const reservations4performance = searchReservationsResult.data;
+
+            const reservationsAtLastUpdateDate: tttsapi.factory.performance.IReservationAtLastupdateDate[] =
                 reservations4performance.map((r) => {
                     return {
                         id: r.id,
@@ -68,28 +77,26 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
                     };
                 });
 
-            await performanceRepo.updateOne(
-                { _id: performanceId },
-                {
-                    'ttts_extension.reservationsAtLastUpdateDate': reservationsAtLastUpdateDate,
-                    'ttts_extension.online_sales_status': onlineStatus,
-                    'ttts_extension.online_sales_update_user': updateUser,
-                    'ttts_extension.online_sales_update_at': now,
-                    'ttts_extension.ev_service_status': evStatus,
-                    'ttts_extension.ev_service_update_user': updateUser,
-                    'ttts_extension.ev_service_update_at': now,
-                    'ttts_extension.refund_status': refundStatus,
-                    'ttts_extension.refund_update_user': updateUser,
-                    'ttts_extension.refund_update_at': now
-                }
-            );
+            await eventService.updateExtension({
+                id: performanceId,
+                reservationsAtLastUpdateDate: reservationsAtLastUpdateDate,
+                onlineSalesStatus: onlineStatus,
+                onlineSalesStatusUpdateUser: updateUser,
+                onlineSalesStatusUpdateAt: now,
+                evServiceStatus: evStatus,
+                evServiceStatusUpdateUser: updateUser,
+                evServiceStatusUpdateAt: now,
+                refundStatus: refundStatus,
+                refundStatusUpdateUser: updateUser,
+                refundStatusUpdateAt: now
+            });
         }));
         debug('performance online_sales_status updated.');
 
         // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
-        if (evStatus === ttts.factory.performance.EvServiceStatus.Suspended) {
+        if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
             try {
-                await createEmails(res, targetPlaceOrderTransactions, notice);
+                await createEmails(req, res, targetPlaceOrderTransactions, notice);
             } catch (error) {
                 // no op
                 debug('createEmails failed', error);
@@ -104,48 +111,67 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
     }
 }
 
-export type IPlaceOrderTransaction = ttts.factory.transaction.placeOrder.ITransaction;
+export type IPlaceOrderTransaction = tttsapi.factory.transaction.placeOrder.ITransaction;
 
 /**
  * 返金対象予約情報取得
  *  [一般予約]かつ
  *  [予約データ]かつ
  *  [同一購入単位に入塔記録のない]予約のid配列
- * @param {string} performanceIds
- * @return {Promise<IPlaceOrderTransaction[]>}
  */
-export async function getTargetReservationsForRefund(performanceIds: string[]): Promise<IPlaceOrderTransaction[]> {
-    const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
-    const transactionRepo = new ttts.repository.Transaction(ttts.mongoose.connection);
+export async function getTargetReservationsForRefund(req: Request, performanceIds: string[]): Promise<IPlaceOrderTransaction[]> {
+    const placeOrderService = new tttsapi.service.transaction.PlaceOrder({
+        endpoint: <string>process.env.API_ENDPOINT,
+        auth: req.tttsAuthClient
+    });
 
     // 返品されていない、かつ、入場履歴なし、の予約から、取引IDリストを取得
-    const targetTransactionIds = await reservationRepo.distinct(
+    const reservationService = new tttsapi.service.Reservation({
+        endpoint: <string>process.env.API_ENDPOINT,
+        auth: req.tttsAuthClient
+    });
+    const targetTransactionIds = await reservationService.distinct(
         'transaction',
         {
-            status: ttts.factory.reservationStatusType.ReservationConfirmed,
-            purchaser_group: ttts.factory.person.Group.Customer,
+            status: tttsapi.factory.reservationStatusType.ReservationConfirmed,
+            purchaser_group: tttsapi.factory.person.Group.Customer,
             performances: performanceIds,
             checkins: { $size: 0 }
         }
     );
 
-    return transactionRepo.transactionModel.find(
-        {
-            _id: { $in: targetTransactionIds }
-        }
-    ).exec().then((docs) => docs.map((doc) => <IPlaceOrderTransaction>doc.toObject()));
+    // 全取引検索
+    const limit = 100;
+    let page = 0;
+    let numData: number = limit;
+    const transactions: IPlaceOrderTransaction[] = [];
+    while (numData === limit) {
+        page += 1;
+        const searchTransactionsResult = await placeOrderService.search({
+            limit: limit,
+            page: page,
+            typeOf: tttsapi.factory.transactionType.PlaceOrder,
+            ids: targetTransactionIds
+        });
+        numData = searchTransactionsResult.data.length;
+        debug('numData:', numData);
+        transactions.push(...searchTransactionsResult.data);
+    }
+
+    return transactions;
 }
 
 /**
  * 運行・オンライン販売停止メール作成
  * @param {Response} res
- * @param {ttts.factory.transaction.placeOrder.ITransaction[]} transactions
+ * @param {tttsapi.factory.transaction.placeOrder.ITransaction[]} transactions
  * @param {string} notice
  * @return {Promise<void>}
  */
 async function createEmails(
+    req: Request,
     res: Response,
-    transactions: ttts.factory.transaction.placeOrder.ITransaction[],
+    transactions: tttsapi.factory.transaction.placeOrder.ITransaction[],
     notice: string
 ): Promise<void> {
     if (transactions.length === 0) {
@@ -154,22 +180,24 @@ async function createEmails(
 
     // 購入単位ごとにメール作成
     await Promise.all(transactions.map(async (transaction) => {
-        const result = <ttts.factory.transaction.placeOrder.IResult>transaction.result;
+        const result = <tttsapi.factory.transaction.placeOrder.IResult>transaction.result;
         const confirmedReservations = result.eventReservations
-            .filter((r) => r.status === ttts.factory.reservationStatusType.ReservationConfirmed);
-        await createEmail(res, confirmedReservations, notice);
+            .filter((r) => r.status === tttsapi.factory.reservationStatusType.ReservationConfirmed);
+        await createEmail(req, res, confirmedReservations, notice);
     }));
 }
 
 /**
  * 運行・オンライン販売停止メール作成(1通)
  * @param {Response} res
- * @param {ttts.factory.reservation.event.IReservation[]} reservation
+ * @param {tttsapi.factory.reservation.event.IReservation[]} reservation
  * @param {string} notice
  * @return {Promise<void>}
  */
 // tslint:disable-next-line:max-func-body-length
-async function createEmail(res: Response, reservations: ttts.factory.reservation.event.IReservation[], notice: string): Promise<void> {
+async function createEmail(
+    req: Request, res: Response, reservations: tttsapi.factory.reservation.event.IReservation[], notice: string
+): Promise<void> {
     const reservation = reservations[0];
     // タイトル編集
     // 東京タワー TOP DECK Ticket
@@ -222,7 +250,7 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
     const content: string = `${title}\n${titleEn}\n\n${purchaserName}\n${purchaserNameEn}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}\n\n\n${foot1}\n${foot2}\n${foot3}\n\n${footEn1}\n${footEn2}\n${footEn3}\n\n${access1}\n${access2}\n\n${accessEn1}\n${accessEn2}`;
 
     // メール編集
-    const emailAttributes: ttts.factory.creativeWork.message.email.IAttributes = {
+    const emailAttributes: tttsapi.factory.creativeWork.message.email.IAttributes = {
         sender: {
             name: conf.get<string>('email.fromname'),
             email: conf.get<string>('email.from')
@@ -237,9 +265,12 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
     };
 
     // メール作成
-    const taskRepo = new ttts.repository.Task(ttts.mongoose.connection);
+    const taskService = new tttsapi.service.Task({
+        endpoint: <string>process.env.API_ENDPOINT,
+        auth: req.tttsAuthClient
+    });
 
-    const emailMessage = ttts.factory.creativeWork.message.email.create({
+    const emailMessage = tttsapi.factory.creativeWork.message.email.create({
         identifier: `updateOnlineStatus-${reservation.id}`,
         sender: {
             typeOf: 'Corporation',
@@ -247,7 +278,7 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
             email: emailAttributes.sender.email
         },
         toRecipient: {
-            typeOf: ttts.factory.personType.Person,
+            typeOf: tttsapi.factory.personType.Person,
             name: emailAttributes.toRecipient.name,
             email: emailAttributes.toRecipient.email
         },
@@ -256,8 +287,8 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
     });
 
     // その場で送信ではなく、DBにタスクを登録
-    const taskAttributes = ttts.factory.task.sendEmailNotification.createAttributes({
-        status: ttts.factory.taskStatus.Ready,
+    const taskAttributes = tttsapi.factory.task.sendEmailNotification.createAttributes({
+        status: tttsapi.factory.taskStatus.Ready,
         runsAt: new Date(), // なるはやで実行
         remainingNumberOfTries: 10,
         lastTriedAt: null,
@@ -267,8 +298,7 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
             emailMessage: emailMessage
         }
     });
-
-    await taskRepo.save(taskAttributes);
+    await taskService.create(taskAttributes);
     debug('sendEmail task created.');
 }
 
@@ -276,7 +306,7 @@ async function createEmail(res: Response, reservations: ttts.factory.reservation
  * チケット情報取得
  *
  */
-export function getTicketInfo(reservations: ttts.factory.reservation.event.IReservation[], __: Function, locale: string): string[] {
+export function getTicketInfo(reservations: tttsapi.factory.reservation.event.IReservation[], __: Function, locale: string): string[] {
     // 券種ごとに合計枚数算出
     const ticketInfos: {
         [ticketTypeId: string]: {

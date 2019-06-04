@@ -1,10 +1,8 @@
 /**
  * 内部関係者座席予約コントローラー
- * @namespace controllers.staff.reserve
  */
-
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
-import * as ttts from '@motionpicture/ttts-domain';
+
 import * as conf from 'config';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
@@ -16,8 +14,9 @@ import reservePerformanceForm from '../../forms/reserve/reservePerformanceForm';
 import ReserveSessionModel from '../../models/reserve/session';
 import * as reserveBaseController from '../reserveBase';
 
-const debug = createDebug('ttts-staff:controller:reserve');
-const PURCHASER_GROUP: string = ttts.factory.person.Group.Staff;
+const debug = createDebug('ttts-staff:controller');
+
+const PURCHASER_GROUP: string = tttsapi.factory.person.Group.Staff;
 const layout: string = 'layouts/staff/layout';
 
 const reserveMaxDateInfo = conf.get<{ [period: string]: number }>('reserve_max_date');
@@ -354,7 +353,7 @@ export async function complete(req: Request, res: Response, next: NextFunction):
 
         let reservations = transactionResult.eventReservations;
         debug(reservations.length, 'reservation(s) found.');
-        reservations = reservations.filter((r) => r.status === ttts.factory.reservationStatusType.ReservationConfirmed);
+        reservations = reservations.filter((r) => r.status === tttsapi.factory.reservationStatusType.ReservationConfirmed);
         // チケットをticket_type(id)でソート
         sortReservationstByTicketType(reservations);
 

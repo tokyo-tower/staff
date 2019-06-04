@@ -1,11 +1,7 @@
 /**
  * expressアプリケーション
- * @module app
- * @global
  */
-
 import * as middlewares from '@motionpicture/express-middleware';
-import * as ttts from '@motionpicture/ttts-domain';
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
@@ -27,8 +23,6 @@ import apiRouter from './routes/api';
 import authRouter from './routes/auth';
 import router from './routes/router';
 import staffRouter from './routes/staff';
-
-import mongooseConnectionOptions from '../mongooseConnectionOptions';
 
 const app = express();
 
@@ -112,10 +106,5 @@ app.use(notFoundHandler);
 
 // error handlers
 app.use(errorHandler);
-
-ttts.mongoose.connect(<string>process.env.MONGOLAB_URI, mongooseConnectionOptions)
-    .then()
-    // tslint:disable-next-line:no-console
-    .catch(console.error);
 
 export = app;

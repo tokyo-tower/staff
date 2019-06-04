@@ -1,8 +1,4 @@
 "use strict";
-/**
- * 内部関係者座席予約コントローラー
- * @namespace controllers.staff.reserve
- */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -12,8 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * 内部関係者座席予約コントローラー
+ */
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
-const ttts = require("@motionpicture/ttts-domain");
 const conf = require("config");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
@@ -22,8 +20,8 @@ const _ = require("underscore");
 const reservePerformanceForm_1 = require("../../forms/reserve/reservePerformanceForm");
 const session_1 = require("../../models/reserve/session");
 const reserveBaseController = require("../reserveBase");
-const debug = createDebug('ttts-staff:controller:reserve');
-const PURCHASER_GROUP = ttts.factory.person.Group.Staff;
+const debug = createDebug('ttts-staff:controller');
+const PURCHASER_GROUP = tttsapi.factory.person.Group.Staff;
 const layout = 'layouts/staff/layout';
 const reserveMaxDateInfo = conf.get('reserve_max_date');
 function start(req, res, next) {
@@ -339,7 +337,7 @@ function complete(req, res, next) {
             }
             let reservations = transactionResult.eventReservations;
             debug(reservations.length, 'reservation(s) found.');
-            reservations = reservations.filter((r) => r.status === ttts.factory.reservationStatusType.ReservationConfirmed);
+            reservations = reservations.filter((r) => r.status === tttsapi.factory.reservationStatusType.ReservationConfirmed);
             // チケットをticket_type(id)でソート
             sortReservationstByTicketType(reservations);
             res.render('staff/reserve/complete', {

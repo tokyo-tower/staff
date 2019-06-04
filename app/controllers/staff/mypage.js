@@ -1,8 +1,4 @@
 "use strict";
-/**
- * 内部関係者マイページコントローラー
- * @namespace controllers.staff.mypage
- */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -12,19 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * 内部関係者マイページコントローラー
+ */
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
-const ttts = require("@motionpicture/ttts-domain");
 const createDebug = require("debug");
 const querystring = require("querystring");
 const debug = createDebug('ttts-staff:controllers:staff:mypage');
 const layout = 'layouts/staff/layout';
-const redisClient = ttts.redis.createClient({
-    host: process.env.REDIS_HOST,
-    // tslint:disable-next-line:no-magic-numbers
-    port: parseInt(process.env.REDIS_PORT, 10),
-    password: process.env.REDIS_KEY,
-    tls: { servername: process.env.REDIS_HOST }
-});
 const authClient = new tttsapi.auth.OAuth2({
     domain: process.env.API_AUTHORIZE_SERVER_DOMAIN,
     clientId: process.env.API_CLIENT_ID,
@@ -68,13 +59,16 @@ function print(req, res, next) {
             const ids = req.query.ids;
             debug('printing reservations...ids:', ids);
             // 印刷トークン発行
-            const tokenRepo = new ttts.repository.Token(redisClient);
-            const printToken = yield tokenRepo.createPrintToken(ids);
-            debug('printToken created.', printToken);
+            const reservationService = new tttsapi.service.Reservation({
+                endpoint: process.env.API_ENDPOINT,
+                auth: authClient
+            });
+            const { token } = yield reservationService.publishPrintToken({ ids });
+            debug('printToken created.', token);
             const query = querystring.stringify({
                 locale: 'ja',
                 output: req.query.output,
-                token: printToken
+                token: token
             });
             const printUrl = `${process.env.RESERVATIONS_PRINT_URL}?${query}`;
             debug('printUrl:', printUrl);

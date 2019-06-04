@@ -1,8 +1,4 @@
 "use strict";
-/**
- * 予約APIコントローラー
- * @namespace controllers.api.reservations
- */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -12,21 +8,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ttts = require("@motionpicture/ttts-domain");
+/**
+ * 予約APIコントローラー
+ */
+const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const conf = require("config");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
 const _ = require("underscore");
-const debug = createDebug('ttts-staff:controllers:api:reservations');
-const redisClient = ttts.redis.createClient({
-    host: process.env.REDIS_HOST,
-    // tslint:disable-next-line:no-magic-numbers
-    port: parseInt(process.env.REDIS_PORT, 10),
-    password: process.env.REDIS_KEY,
-    tls: { servername: process.env.REDIS_HOST }
-});
+const debug = createDebug('ttts-staff:controllers');
 const paymentMethodsForCustomer = conf.get('paymentMethodsForCustomer');
 const paymentMethodsForStaff = conf.get('paymentMethodsForStaff');
+/**
+ * 全角→半角変換
+ */
+function toHalfWidth(str) {
+    return str.split('').map((value) => {
+        // 全角であれば変換
+        // tslint:disable-next-line:no-magic-numbers no-irregular-whitespace
+        return value.replace(/[！-～]/g, String.fromCharCode(value.charCodeAt(0) - 0xFEE0)).replace('　', ' ');
+    }).join('');
+}
+exports.toHalfWidth = toHalfWidth;
 /**
  * 予約検索
  */
@@ -92,11 +95,11 @@ function search(req, res) {
                 ticket_type: 1
             },
             // 管理者の場合、内部関係者の予約全て&確保中
-            status: ttts.factory.reservationStatusType.ReservationConfirmed,
+            status: tttsapi.factory.reservationStatusType.ReservationConfirmed,
             performance_day: (day !== null) ? day : undefined,
             performanceStartTimeFrom: (startTimeFrom !== null) ? startTimeFrom : undefined,
             performanceStartTimeTo: (startTimeTo !== null) ? startTimeTo : undefined,
-            payment_no: (paymentNo !== null) ? ttts.CommonUtil.toHalfWidth(paymentNo.replace(/\s/g, '')) : undefined,
+            payment_no: (paymentNo !== null) ? toHalfWidth(paymentNo.replace(/\s/g, '')) : undefined,
             owner_username: (owner !== null) ? owner : undefined,
             purchaser_group: (purchaserGroup !== null)
                 ? (purchaserGroup !== 'POS') ? purchaserGroup : undefined
@@ -104,7 +107,7 @@ function search(req, res) {
             transactionAgentId: (purchaserGroup !== null)
                 ? (purchaserGroup === 'POS')
                     ? POS_CLIENT_ID
-                    : (purchaserGroup === ttts.factory.person.Group.Customer) ? { $ne: POS_CLIENT_ID } : undefined
+                    : (purchaserGroup === tttsapi.factory.person.Group.Customer) ? { $ne: POS_CLIENT_ID } : undefined
                 : undefined,
             paymentMethod: (paymentMethod !== null) ? paymentMethod : undefined,
             purchaserLastName: (purchaserLastName !== null) ? purchaserLastName : undefined,
@@ -121,7 +124,7 @@ function search(req, res) {
         //             // 取引エージェントがPOS
         //             conditions.push({ 'transaction_agent.id': POS_CLIENT_ID });
         //             break;
-        //         case ttts.factory.person.Group.Customer:
+        //         case tttsapi.factory.person.Group.Customer:
         //             // 購入者区分が一般、かつ、POS購入でない
         //             conditions.push({ purchaser_group: purchaserGroup });
         //             conditions.push({ 'transaction_agent.id': { $ne: POS_CLIENT_ID } });
@@ -131,13 +134,17 @@ function search(req, res) {
         //     }
         // }
         debug('searching reservations...', conditions);
-        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
+        const reservationService = new tttsapi.service.Reservation({
+            endpoint: process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
         try {
             // 総数検索
-            const count = yield reservationRepo.count(searchConditions);
-            debug('reservation count:', count);
             // データ検索(検索→ソート→指定ページ分切取り)
-            const reservations = yield reservationRepo.search(searchConditions);
+            const searchReservationsResult = yield reservationService.search(searchConditions);
+            const count = searchReservationsResult.totalCount;
+            debug('reservation count:', count);
+            const reservations = searchReservationsResult.data;
             // 0件メッセージセット
             const message = (reservations.length === 0) ?
                 '検索結果がありません。予約データが存在しないか、検索条件を見直してください' : '';
@@ -188,44 +195,6 @@ function isInputEven(value1, value2) {
     return false;
 }
 /**
- * 配布先を更新する
- */
-function updateWatcherName(req, res, next) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (req.staffUser === undefined) {
-            next(new Error(req.__('UnexpectedError')));
-            return;
-        }
-        const reservationId = req.body.reservationId;
-        const watcherName = req.body.watcherName;
-        const condition = {
-            _id: reservationId,
-            status: ttts.factory.reservationStatusType.ReservationConfirmed
-        };
-        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
-        try {
-            const reservation = yield reservationRepo.updateWatcher(condition, {
-                watcher_name: watcherName,
-                watcher_name_updated_at: new Date()
-            });
-            if (reservation === null) {
-                res.status(http_status_1.NOT_FOUND).json(null);
-            }
-            else {
-                res.status(http_status_1.NO_CONTENT).end();
-            }
-        }
-        catch (error) {
-            res.status(http_status_1.INTERNAL_SERVER_ERROR).json({
-                errors: [{
-                        message: req.__('UnexpectedError')
-                    }]
-            });
-        }
-    });
-}
-exports.updateWatcherName = updateWatcherName;
-/**
  * キャンセル実行api
  * @param {string} reservationId
  * @return {Promise<boolean>}
@@ -243,14 +212,14 @@ function cancel(req, res, next) {
             if (!Array.isArray(reservationIds)) {
                 throw new Error(req.__('UnexpectedError'));
             }
+            const reservationService = new tttsapi.service.Reservation({
+                endpoint: process.env.API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
             const promises = reservationIds.map((id) => __awaiter(this, void 0, void 0, function* () {
                 // 予約データの解放
                 try {
-                    yield ttts.service.reserve.cancelReservation({ id: id })({
-                        reservation: new ttts.repository.Reservation(ttts.mongoose.connection),
-                        stock: new ttts.repository.Stock(redisClient),
-                        ticketTypeCategoryRateLimit: new ttts.repository.rateLimit.TicketTypeCategory(redisClient)
-                    });
+                    yield reservationService.cancel({ id: id });
                     successIds.push(id);
                 }
                 catch (error) {

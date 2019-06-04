@@ -1,5 +1,5 @@
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
-import * as ttts from '@motionpicture/ttts-domain';
+
 import * as express from 'express';
 import StaffUser from '../app/models/user/staff';
 
@@ -56,7 +56,7 @@ declare global {
             /**
              * スクリーン内の座席グレードリスト
              */
-            seatGradeCodesInScreen: string[];
+            // seatGradeCodesInScreen: string[];
             /**
              * 予約座席コードリスト
              */
@@ -82,7 +82,7 @@ declare global {
         /**
          * チケット情報インターフェース
          */
-        type ITicketType = ttts.factory.offer.seatReservation.ITicketType & {
+        type ITicketType = tttsapi.factory.offer.seatReservation.ITicketType & {
             count: number;
         };
 

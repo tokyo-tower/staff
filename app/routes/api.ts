@@ -13,7 +13,6 @@ import authentication from '../middlewares/authentication';
 const apiRouter = express.Router();
 
 apiRouter.get('/reservations', authentication, ReservationsController.search);
-apiRouter.post('/reservations/updateWatcherName', authentication, ReservationsController.updateWatcherName);
 apiRouter.post('/reservations/cancel', authentication, ReservationsController.cancel);
 
 // 運行・オンライン販売停止設定コントローラー

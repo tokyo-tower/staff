@@ -262,11 +262,11 @@ $(function () {
         var modal_show_list = document.getElementById('modal_show_list');
         $(modal_show_list).modal('hide');
 
-        setTimeout(function() {
+        setTimeout(function () {
             if (!confirm('キャンセルをした予約は復元できませんが本当に実行しますか？')) {
                 return false;
             }
-    
+
             $.ajax({
                 dataType: 'json',
                 url: $('input[name="urlCancel"]').val(),
@@ -287,7 +287,7 @@ $(function () {
                 $('#modal_cancelcompleted').modal();
             }).fail(function (jqxhr, textStatus, error) {
                 alert(error);
-            }).always(function () {});
+            }).always(function () { });
         }, 500);
     });
 
@@ -359,31 +359,6 @@ $(function () {
         modal_detail.querySelector('.btn-widethermalprint').setAttribute('data-targetid', id);
         modal_detail.querySelector('.btn-cancelrsrv').onclick = function () { cancel([id]); };
         $(modal_detail).modal();
-    });
-
-    // 配布先更新
-    $(document).on('click', '.update-watcher-name', function () {
-        var reservationId = $(this).parent().parent().parent().attr('data-reservation-id');
-        var watcherName = $('input', $(this).parent().parent()).val();
-
-        $.ajax({
-            dataType: 'json',
-            url: $('input[name="urlUpdateWatcherName"]').val(),
-            type: 'POST',
-            data: {
-                reservationId: reservationId,
-                watcherName: watcherName
-            },
-            beforeSend: function () {
-            }
-        }).done(function (data) {
-            console.log('[succeeded] updateWatcherName', data);
-            search();
-        }).fail(function (jqxhr, textStatus, error) {
-            alert('Failed Updating.');
-            console.log(error);
-        }).always(function () {
-        });
     });
 
     // まとめて操作

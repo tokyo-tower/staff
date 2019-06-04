@@ -1,17 +1,13 @@
 /**
  * 運行・オンライン販売停止設定コントローラー
- * @namespace controller/staff/suspensionSetting
  */
-
-import * as ttts from '@motionpicture/ttts-domain';
+import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 import { NextFunction, Request, Response } from 'express';
 
 const layout: string = 'layouts/staff/layout';
 
 /**
  * スケジュール選択
- * @method performances
- * @returns {Promise<void>}
  */
 export async function performances(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -19,9 +15,9 @@ export async function performances(req: Request, res: Response, next: NextFuncti
         res.render('staff/suspension/performances', {
             token: req.tttsAuthClient.credentials,
             layout: layout,
-            EvServiceStatus: ttts.factory.performance.EvServiceStatus,
-            OnlineSalesStatus: ttts.factory.performance.OnlineSalesStatus,
-            RefundStatus: ttts.factory.performance.RefundStatus
+            EvServiceStatus: tttsapi.factory.performance.EvServiceStatus,
+            OnlineSalesStatus: tttsapi.factory.performance.OnlineSalesStatus,
+            RefundStatus: tttsapi.factory.performance.RefundStatus
         });
     } catch (error) {
         next(new Error(req.__('UnexpectedError')));

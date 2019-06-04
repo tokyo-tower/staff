@@ -1,24 +1,14 @@
 /**
  * 内部関係者マイページコントローラー
- * @namespace controllers.staff.mypage
  */
-
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
-import * as ttts from '@motionpicture/ttts-domain';
+
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 import * as querystring from 'querystring';
 
 const debug = createDebug('ttts-staff:controllers:staff:mypage');
 const layout: string = 'layouts/staff/layout';
-
-const redisClient = ttts.redis.createClient({
-    host: <string>process.env.REDIS_HOST,
-    // tslint:disable-next-line:no-magic-numbers
-    port: parseInt(<string>process.env.REDIS_PORT, 10),
-    password: <string>process.env.REDIS_KEY,
-    tls: { servername: <string>process.env.REDIS_HOST }
-});
 
 const authClient = new tttsapi.auth.OAuth2({
     domain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
@@ -58,18 +48,21 @@ export async function index(req: Request, res: Response, next: NextFunction): Pr
  */
 export async function print(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const ids = req.query.ids;
+        const ids = <string[]>req.query.ids;
         debug('printing reservations...ids:', ids);
 
         // 印刷トークン発行
-        const tokenRepo = new ttts.repository.Token(redisClient);
-        const printToken = await tokenRepo.createPrintToken(ids);
-        debug('printToken created.', printToken);
+        const reservationService = new tttsapi.service.Reservation({
+            endpoint: <string>process.env.API_ENDPOINT,
+            auth: authClient
+        });
+        const { token } = await reservationService.publishPrintToken({ ids });
+        debug('printToken created.', token);
 
         const query = querystring.stringify({
             locale: 'ja',
             output: req.query.output,
-            token: printToken
+            token: token
         });
         const printUrl = `${process.env.RESERVATIONS_PRINT_URL}?${query}`;
         debug('printUrl:', printUrl);
