@@ -1,8 +1,4 @@
 "use strict";
-/**
- * 座席予約ベースコントローラー
- * @namespace controller.reserveBase
- */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -12,8 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * 座席予約ベースコントローラー
+ */
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
-const ttts = require("@motionpicture/ttts-domain");
 const conf = require("config");
 const createDebug = require("debug");
 const moment = require("moment");
@@ -22,7 +20,7 @@ const _ = require("underscore");
 const reserveProfileForm_1 = require("../forms/reserve/reserveProfileForm");
 const reserveTicketForm_1 = require("../forms/reserve/reserveTicketForm");
 const session_1 = require("../models/reserve/session");
-const debug = createDebug('ttts-staff:controller:reserveBase');
+const debug = createDebug('ttts-staff:controller');
 /**
  * 購入開始プロセス
  * @param {string} purchaserGroup 購入者区分
@@ -32,13 +30,16 @@ function processStart(purchaserGroup, req) {
     return __awaiter(this, void 0, void 0, function* () {
         // 言語も指定
         req.session.locale = (!_.isEmpty(req.query.locale)) ? req.query.locale : 'ja';
-        const sellerIdentifier = 'TokyoTower';
-        const organizationRepo = new ttts.repository.Organization(ttts.mongoose.connection);
-        const seller = yield organizationRepo.findCorporationByIdentifier(sellerIdentifier);
         const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
             endpoint: process.env.API_ENDPOINT,
             auth: req.tttsAuthClient
         });
+        const oragnizationService = new tttsapi.service.Organization({
+            endpoint: process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+        const sellerIdentifier = 'TokyoTower';
+        const seller = yield oragnizationService.findCorporationByIdentifier({ identifier: sellerIdentifier });
         const expires = moment().add(conf.get('temporary_reservation_valid_period_seconds'), 'seconds').toDate();
         const transaction = yield placeOrderTransactionService.start({
             expires: expires,
@@ -56,7 +57,7 @@ function processStart(purchaserGroup, req) {
             expires: expires.toISOString(),
             paymentMethodChoices: [],
             ticketTypes: [],
-            seatGradeCodesInScreen: [],
+            // seatGradeCodesInScreen: [],
             purchaser: {
                 lastName: '',
                 firstName: '',
@@ -90,10 +91,7 @@ function processStart(purchaserGroup, req) {
 }
 exports.processStart = processStart;
 /**
- * 座席・券種FIXプロセス
- *
- * @param {ReserveSessionModel} reservationModel
- * @returns {Promise<void>}
+ * 座席・券種確定プロセス
  */
 function processFixSeatsAndTickets(reservationModel, req) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -136,16 +134,12 @@ function processFixSeatsAndTickets(reservationModel, req) {
             action.result.tmpReservations[0].payment_no;
         const tmpReservations = action.result.tmpReservations;
         // セッションに保管
-        reservationModel.transactionInProgress.reservations = tmpReservations.filter((r) => r.status_after === ttts.factory.reservationStatusType.ReservationConfirmed);
+        reservationModel.transactionInProgress.reservations = tmpReservations.filter((r) => r.status_after === tttsapi.factory.reservationStatusType.ReservationConfirmed);
     });
 }
 exports.processFixSeatsAndTickets = processFixSeatsAndTickets;
 /**
- * 座席・券種FIXプロセス/検証処理
- *
- * @param {ReservationModel} reservationModel
- * @param {Request} req
- * @returns {Promise<void>}
+ * 座席・券種確定プロセス/検証処理
  */
 function checkFixSeatsAndTickets(reservationModel, req) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -174,7 +168,7 @@ function checkFixSeatsAndTickets(reservationModel, req) {
         // 特殊チケット情報
         const extraSeatNum = {};
         reservationModel.transactionInProgress.ticketTypes.forEach((ticketTypeInArray) => {
-            if (ticketTypeInArray.ttts_extension.category !== ttts.factory.ticketTypeCategory.Normal) {
+            if (ticketTypeInArray.ttts_extension.category !== tttsapi.factory.ticketTypeCategory.Normal) {
                 extraSeatNum[ticketTypeInArray.id] = ticketTypeInArray.ttts_extension.required_seat_num;
             }
         });
@@ -211,9 +205,7 @@ function checkFixSeatsAndTickets(reservationModel, req) {
     });
 }
 /**
- * 購入者情報FIXプロセス
- * @param {ReservationModel} reservationModel
- * @returns {Promise<void>}
+ * 購入者情報確定プロセス
  */
 function processFixProfile(reservationModel, req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -266,11 +258,11 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
     return __awaiter(this, void 0, void 0, function* () {
         debug('fixing performance...', perfomanceId);
         // パフォーマンス取得
-        const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
-        const performance = yield performanceRepo.findById(perfomanceId);
-        if (performance.canceled) { // 万が一上映中止だった場合
-            throw new Error(req.__('Message.OutOfTerm'));
-        }
+        const eventService = new tttsapi.service.Event({
+            endpoint: process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+        const performance = yield eventService.findPerofrmanceById({ id: perfomanceId });
         // 券種セット
         reservationModel.transactionInProgress.ticketTypes = performance.ticket_type_group.ticket_types.map((t) => {
             return Object.assign({}, t, { count: 0, watcher_name: '' });
@@ -278,9 +270,9 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
         // パフォーマンス情報を保管
         reservationModel.transactionInProgress.performance = performance;
         // 座席グレードリスト抽出
-        reservationModel.transactionInProgress.seatGradeCodesInScreen = performance.screen.sections[0].seats
-            .map((seat) => seat.grade.code)
-            .filter((seatCode, index, seatCodes) => seatCodes.indexOf(seatCode) === index);
+        // reservationModel.transactionInProgress.seatGradeCodesInScreen = performance.screen.sections[0].seats
+        //     .map((seat) => seat.grade.code)
+        //     .filter((seatCode, index, seatCodes) => seatCodes.indexOf(seatCode) === index);
     });
 }
 exports.processFixPerformance = processFixPerformance;

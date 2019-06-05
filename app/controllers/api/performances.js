@@ -1,8 +1,4 @@
 "use strict";
-/**
- * パフォーマンスAPIコントローラー
- * @namespace controllers.api.performances
- */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -12,13 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ttts = require("@motionpicture/ttts-domain");
+/**
+ * パフォーマンスAPIコントローラー
+ */
+const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const conf = require("config");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
 const moment = require("moment");
 const numeral = require("numeral");
-const debug = createDebug('ttts-staff:controllers:api:performances');
+const debug = createDebug('ttts-staff:controllers');
 /**
  * 運行・オンライン販売ステータス変更
  */
@@ -37,22 +36,30 @@ function updateOnlineStatus(req, res) {
             debug('updating performances...', performanceIds, onlineStatus, evStatus, notice);
             const now = new Date();
             // 返金対象予約情報取得(入塔記録のないもの)
-            const targetPlaceOrderTransactions = yield getTargetReservationsForRefund(performanceIds);
+            const targetPlaceOrderTransactions = yield getTargetReservationsForRefund(req, performanceIds);
             debug('email target placeOrderTransactions:', targetPlaceOrderTransactions);
             // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
-            const refundStatus = evStatus === ttts.factory.performance.EvServiceStatus.Suspended ?
-                ttts.factory.performance.RefundStatus.NotInstructed :
-                ttts.factory.performance.RefundStatus.None;
+            const refundStatus = evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended ?
+                tttsapi.factory.performance.RefundStatus.NotInstructed :
+                tttsapi.factory.performance.RefundStatus.None;
             // パフォーマンス更新
             debug('updating performance online_sales_status...');
-            const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
-            const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
-            // 指定のパフォーマンスに対する予約検索
-            const reservations = yield reservationRepo.reservationModel.find({ performance: { $in: performanceIds } }).exec().then((docs) => docs.map((doc) => doc.toObject()));
+            const eventService = new tttsapi.service.Event({
+                endpoint: process.env.API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
+            const reservationService = new tttsapi.service.Reservation({
+                endpoint: process.env.API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
             const updateUser = req.staffUser.username;
             yield Promise.all(performanceIds.map((performanceId) => __awaiter(this, void 0, void 0, function* () {
-                // パフォーマンスに対する予約検索
-                const reservations4performance = reservations.filter((r) => r.performance === performanceId);
+                // パフォーマンスに対する予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
+                const searchReservationsResult = yield reservationService.search({
+                    limit: 100,
+                    performance: performanceId
+                });
+                const reservations4performance = searchReservationsResult.data;
                 const reservationsAtLastUpdateDate = reservations4performance.map((r) => {
                     return {
                         id: r.id,
@@ -63,28 +70,29 @@ function updateOnlineStatus(req, res) {
                         order_number: r.order_number
                     };
                 });
-                yield performanceRepo.performanceModel.findByIdAndUpdate(performanceId, {
-                    'ttts_extension.reservationsAtLastUpdateDate': reservationsAtLastUpdateDate,
-                    'ttts_extension.online_sales_status': onlineStatus,
-                    'ttts_extension.online_sales_update_user': updateUser,
-                    'ttts_extension.online_sales_update_at': now,
-                    'ttts_extension.ev_service_status': evStatus,
-                    'ttts_extension.ev_service_update_user': updateUser,
-                    'ttts_extension.ev_service_update_at': now,
-                    'ttts_extension.refund_status': refundStatus,
-                    'ttts_extension.refund_update_user': updateUser,
-                    'ttts_extension.refund_update_at': now
-                }).exec();
+                yield eventService.updateExtension({
+                    id: performanceId,
+                    reservationsAtLastUpdateDate: reservationsAtLastUpdateDate,
+                    onlineSalesStatus: onlineStatus,
+                    onlineSalesStatusUpdateUser: updateUser,
+                    onlineSalesStatusUpdateAt: now,
+                    evServiceStatus: evStatus,
+                    evServiceStatusUpdateUser: updateUser,
+                    evServiceStatusUpdateAt: now,
+                    refundStatus: refundStatus,
+                    refundStatusUpdateUser: updateUser,
+                    refundStatusUpdateAt: now
+                });
             })));
             debug('performance online_sales_status updated.');
             // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
-            if (evStatus === ttts.factory.performance.EvServiceStatus.Suspended) {
+            if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
                 try {
-                    yield createEmails(res, targetPlaceOrderTransactions, notice);
+                    yield createEmails(req, res, targetPlaceOrderTransactions, notice);
                 }
                 catch (error) {
                     // no op
-                    console.error(error);
+                    debug('createEmails failed', error);
                 }
             }
             res.status(http_status_1.NO_CONTENT).end();
@@ -102,34 +110,53 @@ exports.updateOnlineStatus = updateOnlineStatus;
  *  [一般予約]かつ
  *  [予約データ]かつ
  *  [同一購入単位に入塔記録のない]予約のid配列
- * @param {string} performanceIds
- * @return {Promise<IPlaceOrderTransaction[]>}
  */
-function getTargetReservationsForRefund(performanceIds) {
+function getTargetReservationsForRefund(req, performanceIds) {
     return __awaiter(this, void 0, void 0, function* () {
-        const reservationRepo = new ttts.repository.Reservation(ttts.mongoose.connection);
-        const transactionRepo = new ttts.repository.Transaction(ttts.mongoose.connection);
+        const placeOrderService = new tttsapi.service.transaction.PlaceOrder({
+            endpoint: process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
         // 返品されていない、かつ、入場履歴なし、の予約から、取引IDリストを取得
-        const targetTransactionIds = yield reservationRepo.reservationModel.distinct('transaction', {
-            status: ttts.factory.reservationStatusType.ReservationConfirmed,
-            purchaser_group: ttts.factory.person.Group.Customer,
-            performance: { $in: performanceIds },
+        const reservationService = new tttsapi.service.Reservation({
+            endpoint: process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+        const targetTransactionIds = yield reservationService.distinct('transaction', {
+            status: tttsapi.factory.reservationStatusType.ReservationConfirmed,
+            purchaser_group: tttsapi.factory.person.Group.Customer,
+            performances: performanceIds,
             checkins: { $size: 0 }
-        }).exec();
-        return transactionRepo.transactionModel.find({
-            _id: { $in: targetTransactionIds }
-        }).exec().then((docs) => docs.map((doc) => doc.toObject()));
+        });
+        // 全取引検索
+        const limit = 100;
+        let page = 0;
+        let numData = limit;
+        const transactions = [];
+        while (numData === limit) {
+            page += 1;
+            const searchTransactionsResult = yield placeOrderService.search({
+                limit: limit,
+                page: page,
+                typeOf: tttsapi.factory.transactionType.PlaceOrder,
+                ids: targetTransactionIds
+            });
+            numData = searchTransactionsResult.data.length;
+            debug('numData:', numData);
+            transactions.push(...searchTransactionsResult.data);
+        }
+        return transactions;
     });
 }
 exports.getTargetReservationsForRefund = getTargetReservationsForRefund;
 /**
  * 運行・オンライン販売停止メール作成
  * @param {Response} res
- * @param {ttts.factory.transaction.placeOrder.ITransaction[]} transactions
+ * @param {tttsapi.factory.transaction.placeOrder.ITransaction[]} transactions
  * @param {string} notice
  * @return {Promise<void>}
  */
-function createEmails(res, transactions, notice) {
+function createEmails(req, res, transactions, notice) {
     return __awaiter(this, void 0, void 0, function* () {
         if (transactions.length === 0) {
             return;
@@ -138,20 +165,20 @@ function createEmails(res, transactions, notice) {
         yield Promise.all(transactions.map((transaction) => __awaiter(this, void 0, void 0, function* () {
             const result = transaction.result;
             const confirmedReservations = result.eventReservations
-                .filter((r) => r.status === ttts.factory.reservationStatusType.ReservationConfirmed);
-            yield createEmail(res, confirmedReservations, notice);
+                .filter((r) => r.status === tttsapi.factory.reservationStatusType.ReservationConfirmed);
+            yield createEmail(req, res, confirmedReservations, notice);
         })));
     });
 }
 /**
  * 運行・オンライン販売停止メール作成(1通)
  * @param {Response} res
- * @param {ttts.factory.reservation.event.IReservation[]} reservation
+ * @param {tttsapi.factory.reservation.event.IReservation[]} reservation
  * @param {string} notice
  * @return {Promise<void>}
  */
 // tslint:disable-next-line:max-func-body-length
-function createEmail(res, reservations, notice) {
+function createEmail(req, res, reservations, notice) {
     return __awaiter(this, void 0, void 0, function* () {
         const reservation = reservations[0];
         // タイトル編集
@@ -212,8 +239,11 @@ function createEmail(res, reservations, notice) {
             text: content
         };
         // メール作成
-        const taskRepo = new ttts.repository.Task(ttts.mongoose.connection);
-        const emailMessage = ttts.factory.creativeWork.message.email.create({
+        const taskService = new tttsapi.service.Task({
+            endpoint: process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+        const emailMessage = tttsapi.factory.creativeWork.message.email.create({
             identifier: `updateOnlineStatus-${reservation.id}`,
             sender: {
                 typeOf: 'Corporation',
@@ -221,7 +251,7 @@ function createEmail(res, reservations, notice) {
                 email: emailAttributes.sender.email
             },
             toRecipient: {
-                typeOf: ttts.factory.personType.Person,
+                typeOf: tttsapi.factory.personType.Person,
                 name: emailAttributes.toRecipient.name,
                 email: emailAttributes.toRecipient.email
             },
@@ -229,8 +259,8 @@ function createEmail(res, reservations, notice) {
             text: emailAttributes.text
         });
         // その場で送信ではなく、DBにタスクを登録
-        const taskAttributes = ttts.factory.task.sendEmailNotification.createAttributes({
-            status: ttts.factory.taskStatus.Ready,
+        const taskAttributes = tttsapi.factory.task.sendEmailNotification.createAttributes({
+            status: tttsapi.factory.taskStatus.Ready,
             runsAt: new Date(),
             remainingNumberOfTries: 10,
             lastTriedAt: null,
@@ -240,7 +270,7 @@ function createEmail(res, reservations, notice) {
                 emailMessage: emailMessage
             }
         });
-        yield taskRepo.save(taskAttributes);
+        yield taskService.create(taskAttributes);
         debug('sendEmail task created.');
     });
 }

@@ -1,11 +1,8 @@
 "use strict";
 /**
  * expressアプリケーション
- * @module app
- * @global
  */
 const middlewares = require("@motionpicture/express-middleware");
-const ttts = require("@motionpicture/ttts-domain");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const express = require("express");
@@ -25,7 +22,6 @@ const api_1 = require("./routes/api");
 const auth_1 = require("./routes/auth");
 const router_1 = require("./routes/router");
 const staff_1 = require("./routes/staff");
-const mongooseConnectionOptions_1 = require("../mongooseConnectionOptions");
 const app = express();
 app.use(middlewares.basicAuth({
     name: process.env.BASIC_AUTH_NAME,
@@ -89,5 +85,4 @@ app.use('/', router_1.default);
 app.use(notFoundHandler_1.default);
 // error handlers
 app.use(errorHandler_1.default);
-ttts.mongoose.connect(process.env.MONGOLAB_URI, mongooseConnectionOptions_1.default);
 module.exports = app;

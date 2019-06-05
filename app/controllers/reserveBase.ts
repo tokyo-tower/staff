@@ -1,10 +1,8 @@
 /**
  * 座席予約ベースコントローラー
- * @namespace controller.reserveBase
  */
-
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
-import * as ttts from '@motionpicture/ttts-domain';
+
 import * as conf from 'config';
 import * as createDebug from 'debug';
 import { Request, Response } from 'express';
@@ -17,7 +15,7 @@ import reserveTicketForm from '../forms/reserve/reserveTicketForm';
 import ReserveSessionModel from '../models/reserve/session';
 import StaffUser from '../models/user/staff';
 
-const debug = createDebug('ttts-staff:controller:reserveBase');
+const debug = createDebug('ttts-staff:controller');
 
 /**
  * 購入開始プロセス
@@ -28,14 +26,17 @@ export async function processStart(purchaserGroup: string, req: Request): Promis
     // 言語も指定
     (<Express.Session>req.session).locale = (!_.isEmpty(req.query.locale)) ? req.query.locale : 'ja';
 
-    const sellerIdentifier = 'TokyoTower';
-    const organizationRepo = new ttts.repository.Organization(ttts.mongoose.connection);
-    const seller = await organizationRepo.findCorporationByIdentifier(sellerIdentifier);
-
     const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
         endpoint: <string>process.env.API_ENDPOINT,
         auth: req.tttsAuthClient
     });
+    const oragnizationService = new tttsapi.service.Organization({
+        endpoint: <string>process.env.API_ENDPOINT,
+        auth: req.tttsAuthClient
+    });
+
+    const sellerIdentifier = 'TokyoTower';
+    const seller = await oragnizationService.findCorporationByIdentifier({ identifier: sellerIdentifier });
 
     const expires = moment().add(conf.get<number>('temporary_reservation_valid_period_seconds'), 'seconds').toDate();
     const transaction = await placeOrderTransactionService.start({
@@ -55,7 +56,7 @@ export async function processStart(purchaserGroup: string, req: Request): Promis
         expires: expires.toISOString(),
         paymentMethodChoices: [],
         ticketTypes: [],
-        seatGradeCodesInScreen: [],
+        // seatGradeCodesInScreen: [],
         purchaser: {
             lastName: '',
             firstName: '',
@@ -92,10 +93,7 @@ export async function processStart(purchaserGroup: string, req: Request): Promis
 }
 
 /**
- * 座席・券種FIXプロセス
- *
- * @param {ReserveSessionModel} reservationModel
- * @returns {Promise<void>}
+ * 座席・券種確定プロセス
  */
 export async function processFixSeatsAndTickets(reservationModel: ReserveSessionModel, req: Request): Promise<void> {
     // パフォーマンスは指定済みのはず
@@ -143,7 +141,7 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
 
     // セッションに保管
     reservationModel.transactionInProgress.reservations = tmpReservations.filter(
-        (r) => r.status_after === ttts.factory.reservationStatusType.ReservationConfirmed
+        (r) => r.status_after === tttsapi.factory.reservationStatusType.ReservationConfirmed
     );
 }
 
@@ -175,11 +173,7 @@ export interface IChoiceInfo {
 }
 
 /**
- * 座席・券種FIXプロセス/検証処理
- *
- * @param {ReservationModel} reservationModel
- * @param {Request} req
- * @returns {Promise<void>}
+ * 座席・券種確定プロセス/検証処理
  */
 async function checkFixSeatsAndTickets(reservationModel: ReserveSessionModel, req: Request): Promise<ICheckInfo> {
     const checkInfo: ICheckInfo = {
@@ -212,7 +206,7 @@ async function checkFixSeatsAndTickets(reservationModel: ReserveSessionModel, re
         [key: string]: number;
     } = {};
     reservationModel.transactionInProgress.ticketTypes.forEach((ticketTypeInArray) => {
-        if (ticketTypeInArray.ttts_extension.category !== ttts.factory.ticketTypeCategory.Normal) {
+        if (ticketTypeInArray.ttts_extension.category !== tttsapi.factory.ticketTypeCategory.Normal) {
             extraSeatNum[ticketTypeInArray.id] = ticketTypeInArray.ttts_extension.required_seat_num;
         }
     });
@@ -251,9 +245,7 @@ async function checkFixSeatsAndTickets(reservationModel: ReserveSessionModel, re
 }
 
 /**
- * 購入者情報FIXプロセス
- * @param {ReservationModel} reservationModel
- * @returns {Promise<void>}
+ * 購入者情報確定プロセス
  */
 export async function processFixProfile(reservationModel: ReserveSessionModel, req: Request, res: Response): Promise<void> {
     reserveProfileForm(req);
@@ -307,12 +299,11 @@ export async function processFixProfile(reservationModel: ReserveSessionModel, r
 export async function processFixPerformance(reservationModel: ReserveSessionModel, perfomanceId: string, req: Request): Promise<void> {
     debug('fixing performance...', perfomanceId);
     // パフォーマンス取得
-    const performanceRepo = new ttts.repository.Performance(ttts.mongoose.connection);
-    const performance = await performanceRepo.findById(perfomanceId);
-
-    if (performance.canceled) { // 万が一上映中止だった場合
-        throw new Error(req.__('Message.OutOfTerm'));
-    }
+    const eventService = new tttsapi.service.Event({
+        endpoint: <string>process.env.API_ENDPOINT,
+        auth: req.tttsAuthClient
+    });
+    const performance = await eventService.findPerofrmanceById({ id: perfomanceId });
 
     // 券種セット
     reservationModel.transactionInProgress.ticketTypes = performance.ticket_type_group.ticket_types.map((t) => {
@@ -323,9 +314,9 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
     reservationModel.transactionInProgress.performance = performance;
 
     // 座席グレードリスト抽出
-    reservationModel.transactionInProgress.seatGradeCodesInScreen = performance.screen.sections[0].seats
-        .map((seat) => seat.grade.code)
-        .filter((seatCode, index, seatCodes) => seatCodes.indexOf(seatCode) === index);
+    // reservationModel.transactionInProgress.seatGradeCodesInScreen = performance.screen.sections[0].seats
+    //     .map((seat) => seat.grade.code)
+    //     .filter((seatCode, index, seatCodes) => seatCodes.indexOf(seatCode) === index);
 }
 
 /**
@@ -335,7 +326,7 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
 export async function createEmailAttributes(
     reservations: tttsapi.factory.reservation.event.IReservation[],
     res: Response
-): Promise<ttts.factory.creativeWork.message.email.IAttributes> {
+): Promise<tttsapi.factory.creativeWork.message.email.IAttributes> {
     // チケットコード順にソート
     reservations.sort((a, b) => {
         if (a.ticket_type < b.ticket_type) {
@@ -392,7 +383,7 @@ export async function createEmailAttributes(
 
     debug('rendering template...');
 
-    return new Promise<ttts.factory.creativeWork.message.email.IAttributes>((resolve, reject) => {
+    return new Promise<tttsapi.factory.creativeWork.message.email.IAttributes>((resolve, reject) => {
         res.render(
             'email/reserve/complete',
             {

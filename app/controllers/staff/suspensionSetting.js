@@ -1,8 +1,4 @@
 "use strict";
-/**
- * 運行・オンライン販売停止設定コントローラー
- * @namespace controller/staff/suspensionSetting
- */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -12,12 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ttts = require("@motionpicture/ttts-domain");
+/**
+ * 運行・オンライン販売停止設定コントローラー
+ */
+const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const layout = 'layouts/staff/layout';
 /**
  * スケジュール選択
- * @method performances
- * @returns {Promise<void>}
  */
 function performances(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -26,9 +23,9 @@ function performances(req, res, next) {
             res.render('staff/suspension/performances', {
                 token: req.tttsAuthClient.credentials,
                 layout: layout,
-                EvServiceStatus: ttts.factory.performance.EvServiceStatus,
-                OnlineSalesStatus: ttts.factory.performance.OnlineSalesStatus,
-                RefundStatus: ttts.factory.performance.RefundStatus
+                EvServiceStatus: tttsapi.factory.performance.EvServiceStatus,
+                OnlineSalesStatus: tttsapi.factory.performance.OnlineSalesStatus,
+                RefundStatus: tttsapi.factory.performance.RefundStatus
             });
         }
         catch (error) {

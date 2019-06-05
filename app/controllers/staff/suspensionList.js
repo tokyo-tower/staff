@@ -1,8 +1,4 @@
 "use strict";
-/**
- * 運行・オンライン販売停止一覧コントローラー
- * @namespace controller/staff/suspensionList
- */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -12,7 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ttts = require("@motionpicture/ttts-domain");
+/**
+ * 運行・オンライン販売停止一覧コントローラー
+ */
+const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const layout = 'layouts/staff/layout';
 /**
  * 運行・オンライン販売停止一覧
@@ -22,9 +21,9 @@ function index(__, res, next) {
         try {
             res.render('staff/suspension/list', {
                 layout: layout,
-                EvServiceStatus: ttts.factory.performance.EvServiceStatus,
-                OnlineSalesStatus: ttts.factory.performance.OnlineSalesStatus,
-                RefundStatus: ttts.factory.performance.RefundStatus
+                EvServiceStatus: tttsapi.factory.performance.EvServiceStatus,
+                OnlineSalesStatus: tttsapi.factory.performance.OnlineSalesStatus,
+                RefundStatus: tttsapi.factory.performance.RefundStatus
             });
         }
         catch (error) {

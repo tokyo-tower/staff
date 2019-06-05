@@ -11,7 +11,6 @@ const ReservationsController = require("../controllers/api/reservations");
 const authentication_1 = require("../middlewares/authentication");
 const apiRouter = express.Router();
 apiRouter.get('/reservations', authentication_1.default, ReservationsController.search);
-apiRouter.post('/reservations/updateWatcherName', authentication_1.default, ReservationsController.updateWatcherName);
 apiRouter.post('/reservations/cancel', authentication_1.default, ReservationsController.cancel);
 // 運行・オンライン販売停止設定コントローラー
 apiRouter.post('/performances/updateOnlineStatus', authentication_1.default, PerformancesController.updateOnlineStatus);

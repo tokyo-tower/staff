@@ -18,6 +18,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.4.0 - 2019-06-05
+
+### Changed
+
+- パフォーマンス検索条件から作品関係を削除
+- パフォーマンスコレクションからリレーションを削除
+- jsdoc削除
+- 予約リポジトリのmongooseモデルをprivate化
+- パフォーマンスリポジトリのmongooseモデルをprivate化
+- 新しいRedis在庫リポジトリで再構築
+
+### Removed
+
+- 劇場、スクリーン、作品コレクションを削除(一時的に動的データ管理を不可能に変更)
+
 ## v4.3.4 - 2019-04-05
 
 ### Changed
