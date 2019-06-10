@@ -129,21 +129,23 @@ function getTargetReservationsForRefund(req, performanceIds) {
             checkins: { $size: 0 }
         });
         // 全取引検索
-        const limit = 100;
-        let page = 0;
-        let numData = limit;
         const transactions = [];
-        while (numData === limit) {
-            page += 1;
-            const searchTransactionsResult = yield placeOrderService.search({
-                limit: limit,
-                page: page,
-                typeOf: tttsapi.factory.transactionType.PlaceOrder,
-                ids: targetTransactionIds
-            });
-            numData = searchTransactionsResult.data.length;
-            debug('numData:', numData);
-            transactions.push(...searchTransactionsResult.data);
+        if (targetTransactionIds.length > 0) {
+            const limit = 100;
+            let page = 0;
+            let numData = limit;
+            while (numData === limit) {
+                page += 1;
+                const searchTransactionsResult = yield placeOrderService.search({
+                    limit: limit,
+                    page: page,
+                    typeOf: tttsapi.factory.transactionType.PlaceOrder,
+                    ids: targetTransactionIds
+                });
+                numData = searchTransactionsResult.data.length;
+                debug('numData:', numData);
+                transactions.push(...searchTransactionsResult.data);
+            }
         }
         return transactions;
     });

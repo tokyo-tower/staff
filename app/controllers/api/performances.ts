@@ -141,21 +141,23 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
     );
 
     // 全取引検索
-    const limit = 100;
-    let page = 0;
-    let numData: number = limit;
     const transactions: IPlaceOrderTransaction[] = [];
-    while (numData === limit) {
-        page += 1;
-        const searchTransactionsResult = await placeOrderService.search({
-            limit: limit,
-            page: page,
-            typeOf: tttsapi.factory.transactionType.PlaceOrder,
-            ids: targetTransactionIds
-        });
-        numData = searchTransactionsResult.data.length;
-        debug('numData:', numData);
-        transactions.push(...searchTransactionsResult.data);
+    if (targetTransactionIds.length > 0) {
+        const limit = 100;
+        let page = 0;
+        let numData: number = limit;
+        while (numData === limit) {
+            page += 1;
+            const searchTransactionsResult = await placeOrderService.search({
+                limit: limit,
+                page: page,
+                typeOf: tttsapi.factory.transactionType.PlaceOrder,
+                ids: targetTransactionIds
+            });
+            numData = searchTransactionsResult.data.length;
+            debug('numData:', numData);
+            transactions.push(...searchTransactionsResult.data);
+        }
     }
 
     return transactions;
