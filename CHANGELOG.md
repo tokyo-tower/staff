@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Fixed
 
+- パフォーマンスのオンライン販売ステータス変更時、注文取引数が0の場合に注文取引を検索しないように調整
+
 ### Security
 
 ## v4.4.0 - 2019-06-05
