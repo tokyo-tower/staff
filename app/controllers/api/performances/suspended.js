@@ -115,6 +115,7 @@ function findSuspendedPerformances(req, conditions) {
             // パフォーマンスに対する予約数
             let searchReservationsResult = yield reservationService.search({
                 limit: 1,
+                typeOf: tttsapi.factory.reservationType.EventReservation,
                 purchaser_group: tttsapi.factory.person.Group.Customer,
                 performance: performance.id
             });
@@ -122,6 +123,7 @@ function findSuspendedPerformances(req, conditions) {
             // 未入場の予約数
             searchReservationsResult = yield reservationService.search({
                 limit: 1,
+                typeOf: tttsapi.factory.reservationType.EventReservation,
                 purchaser_group: tttsapi.factory.person.Group.Customer,
                 performance: performance.id,
                 checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
@@ -143,6 +145,7 @@ function findSuspendedPerformances(req, conditions) {
                 if (numberOfReservations > 0) {
                     searchReservationsResult = yield reservationService.search({
                         limit: 1,
+                        typeOf: tttsapi.factory.reservationType.EventReservation,
                         ids: reservationsAtLastUpdateDate.map((r) => r.id),
                         checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
                     });

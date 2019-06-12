@@ -141,7 +141,7 @@ exports.processFixSeatsAndTickets = processFixSeatsAndTickets;
 /**
  * 座席・券種確定プロセス/検証処理
  */
-function checkFixSeatsAndTickets(reservationModel, req) {
+function checkFixSeatsAndTickets(__, req) {
     return __awaiter(this, void 0, void 0, function* () {
         const checkInfo = {
             status: false,
@@ -165,13 +165,6 @@ function checkFixSeatsAndTickets(reservationModel, req) {
             return checkInfo;
         }
         checkInfo.choices = choices;
-        // 特殊チケット情報
-        const extraSeatNum = {};
-        reservationModel.transactionInProgress.ticketTypes.forEach((ticketTypeInArray) => {
-            if (ticketTypeInArray.ttts_extension.category !== tttsapi.factory.ticketTypeCategory.Normal) {
-                extraSeatNum[ticketTypeInArray.id] = ticketTypeInArray.ttts_extension.required_seat_num;
-            }
-        });
         // チケット枚数合計計算
         choices.forEach((choice) => {
             // チケットセット(選択枚数分)
@@ -184,18 +177,6 @@ function checkFixSeatsAndTickets(reservationModel, req) {
                     choicesExtra: [],
                     updated: false
                 };
-                // 特殊の時、必要枚数分セット
-                if (extraSeatNum.hasOwnProperty(choice.ticket_type) === true) {
-                    const extraCount = Number(extraSeatNum[choice.ticket_type]) - 1;
-                    for (let indexExtra = 0; indexExtra < extraCount; indexExtra += 1) {
-                        choiceInfo.choicesExtra.push({
-                            ticket_type: choice.ticket_type,
-                            ticketCount: 1,
-                            updated: false
-                        });
-                        checkInfo.extraCount += 1;
-                    }
-                }
                 // 選択チケット本体分セット(選択枚数分)
                 checkInfo.choicesAll.push(choiceInfo);
             }

@@ -7,6 +7,7 @@ import * as conf from 'config';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 import { INTERNAL_SERVER_ERROR, NO_CONTENT } from 'http-status';
+import * as moment from 'moment';
 import * as _ from 'underscore';
 
 const debug = createDebug('ttts-staff:controllers');
@@ -83,23 +84,50 @@ export async function search(req: Request, res: Response): Promise<void> {
     const watcherName: string | null = (!_.isEmpty(req.query.watcher_name)) ? req.query.watcher_name : null;
 
     // 検索条件を作成
-    const startTimeFrom: any = (startHour1 !== null && startMinute1 !== null) ? startHour1 + startMinute1 : null;
-    const startTimeTo: any = (startHour2 !== null && startMinute2 !== null) ? startHour2 + startMinute2 : null;
+    const startTimeFrom: string | null = (startHour1 !== null && startMinute1 !== null) ? startHour1 + startMinute1 : null;
+    const startTimeTo: string | null = (startHour2 !== null && startMinute2 !== null) ? startHour2 + startMinute2 : null;
+
+    let eventStartFrom: Date | undefined;
+    let eventStartThrough: Date | undefined;
+    if (day !== null) {
+        // tslint:disable-next-line:no-magic-numbers
+        const date = `${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6, 8)}`;
+        eventStartFrom = moment(`${date}T00:00:00+09:00`).toDate();
+        eventStartThrough = moment(eventStartFrom).add(1, 'day').toDate();
+
+        if (startTimeFrom !== null) {
+            // tslint:disable-next-line:no-magic-numbers
+            eventStartFrom = moment(`${date}T${startTimeFrom.slice(0, 2)}:${startTimeFrom.slice(2, 4)}:00+09:00`)
+                .add(1, 'second')
+                .toDate();
+        }
+
+        if (startTimeTo !== null) {
+            // tslint:disable-next-line:no-magic-numbers
+            eventStartThrough = moment(`${date}T${startTimeTo.slice(0, 2)}:${startTimeTo.slice(2, 4)}:00+09:00`)
+                .add(1, 'second')
+                .toDate();
+        }
+    }
 
     const searchConditions = {
         limit: limit,
         page: page,
         sort: {
-            performance_day: 1,
-            performance_start_time: 1,
-            payment_no: 1,
-            ticket_type: 1
+            'reservationFor.startDate': 1,
+            reservationNumber: 1,
+            'reservedTicket.ticketType.id': 1,
+            'reservedTicket.ticketedSeat.seatNumber': 1
         },
-        // 管理者の場合、内部関係者の予約全て&確保中
-        status: tttsapi.factory.reservationStatusType.ReservationConfirmed,
-        performance_day: (day !== null) ? day : undefined,
-        performanceStartTimeFrom: (startTimeFrom !== null) ? startTimeFrom : undefined,
-        performanceStartTimeTo: (startTimeTo !== null) ? startTimeTo : undefined,
+        typeOf: tttsapi.factory.reservationType.EventReservation,
+        reservationStatuses: [tttsapi.factory.reservationStatusType.ReservationConfirmed],
+        reservationFor: {
+            startFrom: eventStartFrom,
+            startThrough: eventStartThrough
+        },
+        // performance_day: (day !== null) ? day : undefined,
+        // performanceStartTimeFrom: (startTimeFrom !== null) ? startTimeFrom : undefined,
+        // performanceStartTimeTo: (startTimeTo !== null) ? startTimeTo : undefined,
         payment_no: (paymentNo !== null) ? toHalfWidth(paymentNo.replace(/\s/g, '')) : undefined,
         owner_username: (owner !== null) ? owner : undefined,
         purchaser_group: (purchaserGroup !== null)
@@ -117,8 +145,6 @@ export async function search(req: Request, res: Response): Promise<void> {
         purchaserTel: (purchaserTel !== null) ? purchaserTel : undefined,
         watcherName: (watcherName !== null) ? watcherName : undefined
     };
-
-    const conditions: any[] = [];
 
     // 予約方法
     // if (purchaserGroup !== null) {
@@ -139,7 +165,7 @@ export async function search(req: Request, res: Response): Promise<void> {
     //     }
     // }
 
-    debug('searching reservations...', conditions);
+    debug('searching reservations...', searchConditions);
     const reservationService = new tttsapi.service.Reservation({
         endpoint: <string>process.env.API_ENDPOINT,
         auth: req.tttsAuthClient

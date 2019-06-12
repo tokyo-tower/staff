@@ -61,6 +61,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             // パフォーマンスに対する予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
             const searchReservationsResult = await reservationService.search({
                 limit: 100,
+                typeOf: tttsapi.factory.reservationType.EventReservation,
                 performance: performanceId
             });
             const reservations4performance = searchReservationsResult.data;
@@ -133,6 +134,7 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
     const targetTransactionIds = await reservationService.distinct(
         'transaction',
         {
+            typeOf: tttsapi.factory.reservationType.EventReservation,
             status: tttsapi.factory.reservationStatusType.ReservationConfirmed,
             purchaser_group: tttsapi.factory.person.Group.Customer,
             performances: performanceIds,

@@ -57,6 +57,7 @@ function updateOnlineStatus(req, res) {
                 // パフォーマンスに対する予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
                 const searchReservationsResult = yield reservationService.search({
                     limit: 100,
+                    typeOf: tttsapi.factory.reservationType.EventReservation,
                     performance: performanceId
                 });
                 const reservations4performance = searchReservationsResult.data;
@@ -123,6 +124,7 @@ function getTargetReservationsForRefund(req, performanceIds) {
             auth: req.tttsAuthClient
         });
         const targetTransactionIds = yield reservationService.distinct('transaction', {
+            typeOf: tttsapi.factory.reservationType.EventReservation,
             status: tttsapi.factory.reservationStatusType.ReservationConfirmed,
             purchaser_group: tttsapi.factory.person.Group.Customer,
             performances: performanceIds,

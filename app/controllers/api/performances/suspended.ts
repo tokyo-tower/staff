@@ -156,6 +156,7 @@ async function findSuspendedPerformances(req: Request, conditions: any): Promise
         // パフォーマンスに対する予約数
         let searchReservationsResult = await reservationService.search({
             limit: 1,
+            typeOf: tttsapi.factory.reservationType.EventReservation,
             purchaser_group: tttsapi.factory.person.Group.Customer,
             performance: performance.id
         });
@@ -164,6 +165,7 @@ async function findSuspendedPerformances(req: Request, conditions: any): Promise
         // 未入場の予約数
         searchReservationsResult = await reservationService.search({
             limit: 1,
+            typeOf: tttsapi.factory.reservationType.EventReservation,
             purchaser_group: tttsapi.factory.person.Group.Customer,
             performance: performance.id,
             checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
@@ -188,6 +190,7 @@ async function findSuspendedPerformances(req: Request, conditions: any): Promise
             if (numberOfReservations > 0) {
                 searchReservationsResult = await reservationService.search({
                     limit: 1,
+                    typeOf: tttsapi.factory.reservationType.EventReservation,
                     ids: reservationsAtLastUpdateDate.map((r) => r.id),
                     checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
                 });
