@@ -15,23 +15,15 @@ const debug = createDebug('ttts-staff:controllers');
 const paymentMethodsForCustomer = conf.get<any>('paymentMethodsForCustomer');
 const paymentMethodsForStaff = conf.get<any>('paymentMethodsForStaff');
 
-/**
- * 全角→半角変換
- */
-export function toHalfWidth(str: string): string {
-    return str.split('').map((value) => {
-        // 全角であれば変換
-        // tslint:disable-next-line:no-magic-numbers no-irregular-whitespace
-        return value.replace(/[！-～]/g, String.fromCharCode(value.charCodeAt(0) - 0xFEE0)).replace('　', ' ');
-    }).join('');
-}
+const POS_CLIENT_ID = <string>process.env.POS_CLIENT_ID;
+const FRONTEND_CLIENT_ID = <string>process.env.FRONTEND_CLIENT_ID;
+const STAFF_CLIENT_ID = <string>process.env.API_CLIENT_ID;
 
 /**
  * 予約検索
  */
 // tslint:disable-next-line:cyclomatic-complexity max-func-body-length
 export async function search(req: Request, res: Response): Promise<void> {
-    const POS_CLIENT_ID = <string>process.env.POS_CLIENT_ID;
 
     // バリデーション
     const errors: any = {};
@@ -110,7 +102,21 @@ export async function search(req: Request, res: Response): Promise<void> {
         }
     }
 
-    const searchConditions = {
+    const clientIds: string[] = [];
+    switch (purchaserGroup) {
+        case tttsapi.factory.person.Group.Customer:
+            clientIds.push(FRONTEND_CLIENT_ID);
+            break;
+        case tttsapi.factory.person.Group.Staff:
+            clientIds.push(STAFF_CLIENT_ID);
+            break;
+        case 'POS':
+            clientIds.push(POS_CLIENT_ID);
+            break;
+        default:
+    }
+
+    const searchConditions: tttsapi.factory.reservation.event.ISearchConditions = {
         limit: limit,
         page: page,
         sort: {
@@ -130,41 +136,39 @@ export async function search(req: Request, res: Response): Promise<void> {
         // performanceStartTimeFrom: (startTimeFrom !== null) ? startTimeFrom : undefined,
         // performanceStartTimeTo: (startTimeTo !== null) ? startTimeTo : undefined,
         // payment_no: (paymentNo !== null) ? toHalfWidth(paymentNo.replace(/\s/g, '')) : undefined,
-        owner_username: (owner !== null) ? owner : undefined,
-        purchaser_group: (purchaserGroup !== null)
-            ? (purchaserGroup !== 'POS') ? purchaserGroup : undefined
-            : undefined,
-        transactionAgentId: (purchaserGroup !== null)
-            ? (purchaserGroup === 'POS')
-                ? POS_CLIENT_ID
-                : (purchaserGroup === tttsapi.factory.person.Group.Customer) ? { $ne: POS_CLIENT_ID } : undefined
-            : undefined,
-        paymentMethod: (paymentMethod !== null) ? paymentMethod : undefined,
-        purchaserLastName: (purchaserLastName !== null) ? purchaserLastName : undefined,
-        purchaserFirstName: (purchaserFirstName !== null) ? purchaserFirstName : undefined,
-        purchaserEmail: (purchaserEmail !== null) ? purchaserEmail : undefined,
-        purchaserTel: (purchaserTel !== null) ? purchaserTel : undefined,
-        watcherName: (watcherName !== null) ? watcherName : undefined
+        // owner_username: (owner !== null) ? owner : undefined,
+        // purchaser_group: (purchaserGroup !== null)
+        //     ? (purchaserGroup !== 'POS') ? purchaserGroup : undefined
+        //     : undefined,
+        // transactionAgentId: (purchaserGroup !== null)
+        //     ? (purchaserGroup === 'POS')
+        //         ? POS_CLIENT_ID
+        //         : (purchaserGroup === tttsapi.factory.person.Group.Customer) ? { $ne: POS_CLIENT_ID } : undefined
+        //     : undefined,
+        // paymentMethod: (paymentMethod !== null) ? paymentMethod : undefined,
+        underName: {
+            familyName: (purchaserLastName !== null) ? purchaserLastName : undefined,
+            givenName: (purchaserFirstName !== null) ? purchaserFirstName : undefined,
+            email: (purchaserEmail !== null) ? purchaserEmail : undefined,
+            telephone: (purchaserTel !== null) ? `${purchaserTel}$` : undefined,
+            identifiers: [
+                ...(owner !== null) ? [{ name: 'username', value: owner }] : [],
+                // 予約方法=Customerの場合、クライアントIDがfrontend or pos
+                // 予約方法=Staffの場合、クライアントIDがstaff
+                // 予約方法=POSの場合、クライアントIDがpos
+                ...clientIds.map((id) => {
+                    return { name: 'clientId', value: id };
+                }),
+                ...(paymentMethod !== null) ? [{ name: 'paymentMethod', value: paymentMethod }] : []
+            ]
+        },
+        additionalTicketText: (watcherName !== null) ? watcherName : undefined
+        // purchaserLastName: (purchaserLastName !== null) ? purchaserLastName : undefined,
+        // purchaserFirstName: (purchaserFirstName !== null) ? purchaserFirstName : undefined,
+        // purchaserEmail: (purchaserEmail !== null) ? purchaserEmail : undefined,
+        // purchaserTel: (purchaserTel !== null) ? purchaserTel : undefined,
+        // watcherName: (watcherName !== null) ? watcherName : undefined
     };
-
-    // 予約方法
-    // if (purchaserGroup !== null) {
-    //     switch (purchaserGroup) {
-    //         case 'POS':
-    //             // 取引エージェントがPOS
-    //             conditions.push({ 'transaction_agent.id': POS_CLIENT_ID });
-    //             break;
-
-    //         case tttsapi.factory.person.Group.Customer:
-    //             // 購入者区分が一般、かつ、POS購入でない
-    //             conditions.push({ purchaser_group: purchaserGroup });
-    //             conditions.push({ 'transaction_agent.id': { $ne: POS_CLIENT_ID } });
-    //             break;
-
-    //         default:
-    //             conditions.push({ purchaser_group: purchaserGroup });
-    //     }
-    // }
 
     debug('searching reservations...', searchConditions);
     const reservationService = new tttsapi.service.Reservation({
@@ -184,16 +188,6 @@ export async function search(req: Request, res: Response): Promise<void> {
         const message: string = (reservations.length === 0) ?
             '検索結果がありません。予約データが存在しないか、検索条件を見直してください' : '';
 
-        const getPaymentMethodName = (method: string) => {
-            if (paymentMethodsForCustomer.hasOwnProperty(method)) {
-                return paymentMethodsForCustomer[method];
-            }
-            if (paymentMethodsForStaff.hasOwnProperty(method)) {
-                return paymentMethodsForStaff[method];
-            }
-
-            return method;
-        };
         // 決済手段名称追加
         for (const reservation of reservations) {
             let paymentMethod4reservation = '';
@@ -203,7 +197,7 @@ export async function search(req: Request, res: Response): Promise<void> {
                     paymentMethod4reservation = paymentMethodProperty.value;
                 }
             }
-            (<any>reservation).payment_method_name = getPaymentMethodName(paymentMethod4reservation);
+            (<any>reservation).payment_method_name = paymentMethod2name(paymentMethod4reservation);
         }
 
         res.json({
@@ -222,11 +216,29 @@ export async function search(req: Request, res: Response): Promise<void> {
 }
 
 /**
+ * 全角→半角変換
+ */
+function toHalfWidth(str: string): string {
+    return str.split('').map((value) => {
+        // 全角であれば変換
+        // tslint:disable-next-line:no-magic-numbers no-irregular-whitespace
+        return value.replace(/[！-～]/g, String.fromCharCode(value.charCodeAt(0) - 0xFEE0)).replace('　', ' ');
+    }).join('');
+}
+
+function paymentMethod2name(method: string) {
+    if (paymentMethodsForCustomer.hasOwnProperty(method)) {
+        return paymentMethodsForCustomer[method];
+    }
+    if (paymentMethodsForStaff.hasOwnProperty(method)) {
+        return paymentMethodsForStaff[method];
+    }
+
+    return method;
+}
+
+/**
  * 両方入力チェック(両方入力、または両方未入力の時true)
- *
- * @param {string} value1
- * @param {string} value2
- * @return {boolean}
  */
 function isInputEven(value1: string, value2: string): boolean {
     if (_.isEmpty(value1) && _.isEmpty(value2)) {
@@ -241,8 +253,6 @@ function isInputEven(value1: string, value2: string): boolean {
 
 /**
  * キャンセル実行api
- * @param {string} reservationId
- * @return {Promise<boolean>}
  */
 export async function cancel(req: Request, res: Response, next: NextFunction): Promise<void> {
     if (req.staffUser === undefined) {

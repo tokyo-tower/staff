@@ -20,24 +20,15 @@ const _ = require("underscore");
 const debug = createDebug('ttts-staff:controllers');
 const paymentMethodsForCustomer = conf.get('paymentMethodsForCustomer');
 const paymentMethodsForStaff = conf.get('paymentMethodsForStaff');
-/**
- * 全角→半角変換
- */
-function toHalfWidth(str) {
-    return str.split('').map((value) => {
-        // 全角であれば変換
-        // tslint:disable-next-line:no-magic-numbers no-irregular-whitespace
-        return value.replace(/[！-～]/g, String.fromCharCode(value.charCodeAt(0) - 0xFEE0)).replace('　', ' ');
-    }).join('');
-}
-exports.toHalfWidth = toHalfWidth;
+const POS_CLIENT_ID = process.env.POS_CLIENT_ID;
+const FRONTEND_CLIENT_ID = process.env.FRONTEND_CLIENT_ID;
+const STAFF_CLIENT_ID = process.env.API_CLIENT_ID;
 /**
  * 予約検索
  */
 // tslint:disable-next-line:cyclomatic-complexity max-func-body-length
 function search(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        const POS_CLIENT_ID = process.env.POS_CLIENT_ID;
         // バリデーション
         const errors = {};
         // 片方入力エラーチェック
@@ -106,6 +97,19 @@ function search(req, res) {
                     .toDate();
             }
         }
+        const clientIds = [];
+        switch (purchaserGroup) {
+            case tttsapi.factory.person.Group.Customer:
+                clientIds.push(FRONTEND_CLIENT_ID);
+                break;
+            case tttsapi.factory.person.Group.Staff:
+                clientIds.push(STAFF_CLIENT_ID);
+                break;
+            case 'POS':
+                clientIds.push(POS_CLIENT_ID);
+                break;
+            default:
+        }
         const searchConditions = {
             limit: limit,
             page: page,
@@ -126,38 +130,39 @@ function search(req, res) {
             // performanceStartTimeFrom: (startTimeFrom !== null) ? startTimeFrom : undefined,
             // performanceStartTimeTo: (startTimeTo !== null) ? startTimeTo : undefined,
             // payment_no: (paymentNo !== null) ? toHalfWidth(paymentNo.replace(/\s/g, '')) : undefined,
-            owner_username: (owner !== null) ? owner : undefined,
-            purchaser_group: (purchaserGroup !== null)
-                ? (purchaserGroup !== 'POS') ? purchaserGroup : undefined
-                : undefined,
-            transactionAgentId: (purchaserGroup !== null)
-                ? (purchaserGroup === 'POS')
-                    ? POS_CLIENT_ID
-                    : (purchaserGroup === tttsapi.factory.person.Group.Customer) ? { $ne: POS_CLIENT_ID } : undefined
-                : undefined,
-            paymentMethod: (paymentMethod !== null) ? paymentMethod : undefined,
-            purchaserLastName: (purchaserLastName !== null) ? purchaserLastName : undefined,
-            purchaserFirstName: (purchaserFirstName !== null) ? purchaserFirstName : undefined,
-            purchaserEmail: (purchaserEmail !== null) ? purchaserEmail : undefined,
-            purchaserTel: (purchaserTel !== null) ? purchaserTel : undefined,
-            watcherName: (watcherName !== null) ? watcherName : undefined
+            // owner_username: (owner !== null) ? owner : undefined,
+            // purchaser_group: (purchaserGroup !== null)
+            //     ? (purchaserGroup !== 'POS') ? purchaserGroup : undefined
+            //     : undefined,
+            // transactionAgentId: (purchaserGroup !== null)
+            //     ? (purchaserGroup === 'POS')
+            //         ? POS_CLIENT_ID
+            //         : (purchaserGroup === tttsapi.factory.person.Group.Customer) ? { $ne: POS_CLIENT_ID } : undefined
+            //     : undefined,
+            // paymentMethod: (paymentMethod !== null) ? paymentMethod : undefined,
+            underName: {
+                familyName: (purchaserLastName !== null) ? purchaserLastName : undefined,
+                givenName: (purchaserFirstName !== null) ? purchaserFirstName : undefined,
+                email: (purchaserEmail !== null) ? purchaserEmail : undefined,
+                telephone: (purchaserTel !== null) ? `${purchaserTel}$` : undefined,
+                identifiers: [
+                    ...(owner !== null) ? [{ name: 'username', value: owner }] : [],
+                    // 予約方法=Customerの場合、クライアントIDがfrontend or pos
+                    // 予約方法=Staffの場合、クライアントIDがstaff
+                    // 予約方法=POSの場合、クライアントIDがpos
+                    ...clientIds.map((id) => {
+                        return { name: 'clientId', value: id };
+                    }),
+                    ...(paymentMethod !== null) ? [{ name: 'paymentMethod', value: paymentMethod }] : []
+                ]
+            },
+            additionalTicketText: (watcherName !== null) ? watcherName : undefined
+            // purchaserLastName: (purchaserLastName !== null) ? purchaserLastName : undefined,
+            // purchaserFirstName: (purchaserFirstName !== null) ? purchaserFirstName : undefined,
+            // purchaserEmail: (purchaserEmail !== null) ? purchaserEmail : undefined,
+            // purchaserTel: (purchaserTel !== null) ? purchaserTel : undefined,
+            // watcherName: (watcherName !== null) ? watcherName : undefined
         };
-        // 予約方法
-        // if (purchaserGroup !== null) {
-        //     switch (purchaserGroup) {
-        //         case 'POS':
-        //             // 取引エージェントがPOS
-        //             conditions.push({ 'transaction_agent.id': POS_CLIENT_ID });
-        //             break;
-        //         case tttsapi.factory.person.Group.Customer:
-        //             // 購入者区分が一般、かつ、POS購入でない
-        //             conditions.push({ purchaser_group: purchaserGroup });
-        //             conditions.push({ 'transaction_agent.id': { $ne: POS_CLIENT_ID } });
-        //             break;
-        //         default:
-        //             conditions.push({ purchaser_group: purchaserGroup });
-        //     }
-        // }
         debug('searching reservations...', searchConditions);
         const reservationService = new tttsapi.service.Reservation({
             endpoint: process.env.API_ENDPOINT,
@@ -173,15 +178,6 @@ function search(req, res) {
             // 0件メッセージセット
             const message = (reservations.length === 0) ?
                 '検索結果がありません。予約データが存在しないか、検索条件を見直してください' : '';
-            const getPaymentMethodName = (method) => {
-                if (paymentMethodsForCustomer.hasOwnProperty(method)) {
-                    return paymentMethodsForCustomer[method];
-                }
-                if (paymentMethodsForStaff.hasOwnProperty(method)) {
-                    return paymentMethodsForStaff[method];
-                }
-                return method;
-            };
             // 決済手段名称追加
             for (const reservation of reservations) {
                 let paymentMethod4reservation = '';
@@ -191,7 +187,7 @@ function search(req, res) {
                         paymentMethod4reservation = paymentMethodProperty.value;
                     }
                 }
-                reservation.payment_method_name = getPaymentMethodName(paymentMethod4reservation);
+                reservation.payment_method_name = paymentMethod2name(paymentMethod4reservation);
             }
             res.json({
                 results: reservations,
@@ -211,11 +207,26 @@ function search(req, res) {
 }
 exports.search = search;
 /**
+ * 全角→半角変換
+ */
+function toHalfWidth(str) {
+    return str.split('').map((value) => {
+        // 全角であれば変換
+        // tslint:disable-next-line:no-magic-numbers no-irregular-whitespace
+        return value.replace(/[！-～]/g, String.fromCharCode(value.charCodeAt(0) - 0xFEE0)).replace('　', ' ');
+    }).join('');
+}
+function paymentMethod2name(method) {
+    if (paymentMethodsForCustomer.hasOwnProperty(method)) {
+        return paymentMethodsForCustomer[method];
+    }
+    if (paymentMethodsForStaff.hasOwnProperty(method)) {
+        return paymentMethodsForStaff[method];
+    }
+    return method;
+}
+/**
  * 両方入力チェック(両方入力、または両方未入力の時true)
- *
- * @param {string} value1
- * @param {string} value2
- * @return {boolean}
  */
 function isInputEven(value1, value2) {
     if (_.isEmpty(value1) && _.isEmpty(value2)) {
@@ -228,8 +239,6 @@ function isInputEven(value1, value2) {
 }
 /**
  * キャンセル実行api
- * @param {string} reservationId
- * @return {Promise<boolean>}
  */
 function cancel(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
