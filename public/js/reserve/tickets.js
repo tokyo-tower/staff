@@ -1,12 +1,9 @@
-$(function() {
+$(function () {
     'use strict';
     var isSubmitting = false;
 
-    var isAgreed = function() {
-        if (window.ttts.isStaff) {
-            return true;
-        }
-        return document.getElementById('checkbox_agreed').checked;
+    var isAgreed = function () {
+        return true;
     };
 
     // 合計金額の更新
@@ -17,12 +14,12 @@ $(function() {
     var dom_btnnext = document.querySelector('.btn-next');
     var $alertTicketOvermax = $('.alert-ticket-overmax');
     var $alertsTicket = $('.alert-ticket');
-    var reloadTotalCharge = function() {
+    var reloadTotalCharge = function () {
         dom_tfoot.classList.add('hidden');
         $alertsTicket.hide();
         var total = 0;
         var count = 0;
-        [].forEach.call(dom_tickets_tr, function(tr) {
+        [].forEach.call(dom_tickets_tr, function (tr) {
             var dom_select = tr.querySelector('select');
             if (!dom_select) { return true; }
             var q = parseInt(dom_select.value, 10);
@@ -51,12 +48,12 @@ $(function() {
     reloadTotalCharge();
 
     // 券種変更イベント
-    $(document).on('change', 'select', function() {
+    $(document).on('change', 'select', function () {
         reloadTotalCharge();
     });
 
     // 規約同意
-    $('#checkbox_agreed').on('change', function() {
+    $('#checkbox_agreed').on('change', function () {
         if (isSubmitting) { return false; }
         this.parentNode.className = (this.checked) ? 'agreed' : '';
         if (this.checked && isValidTicketsSelected) {
@@ -67,19 +64,19 @@ $(function() {
     }).trigger('change');
 
     // 次へ
-    $(document).on('click', '.btn-next', function(e) {
+    $(document).on('click', '.btn-next', function (e) {
         if (!isAgreed() || isSubmitting) {
             return false;
         }
-        var watcherName = (window.ttts.isStaff) ? document.getElementById('input_watcherName').value : '';
-        if (window.ttts.isStaff && !watcherName) {
+        var watcherName = document.getElementById('input_watcherName').value;
+        if (!watcherName) {
             alert('予約メモは必ず入力してください');
             return false;
         }
         $('form input[name="choices"]').val('');
         // 座席コードリストを取得
         var choices = [];
-        $('.table-tickets tbody tr').each(function() {
+        $('.table-tickets tbody tr').each(function () {
             var ticketCount = $('option:selected', this).val();
             if (ticketCount > 0) {
                 choices.push({

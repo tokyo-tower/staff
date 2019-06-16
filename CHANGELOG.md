@@ -11,10 +11,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 - 予約検索条件を調整
+- 新しい予約インターフェース(Chevre)で再構築
 
 ### Deprecated
 
 ### Removed
+
+- 一般購入向けの不要なソースを削除
 
 ### Fixed
 

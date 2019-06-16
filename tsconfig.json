@@ -26,6 +26,7 @@
         "noResolve": false,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
+        "outDir": "./dst",
         "preserveConstEnums": false,
         "pretty": false,
         "removeComments": false,

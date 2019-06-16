@@ -1,0 +1,98 @@
+<script src="/js/reserve/complete.js"></script>
+<script src="/js/common/VanillaQR.js"></script>
+<script src="/js/qr/qr.js"></script>
+
+<%- include('./_step', {currentStepName: 'complete'}) %>
+
+<h1 class="pagetitle"><%- __('ReservationCompleted') %></h1>
+<p class="guidetext guidetext-customer"><%- __('CompleteReservationGuideText') %></p>
+<p class="rednotice qrnotice"><%- __('CompleteReservationNoticeText') %></p>
+<% if (reservations[0].purchaser_group === 'Staff') { %>
+<p class="guidetext">代理予約が完了いたしました。<br>「印刷」ボタンを押してチケットを発券してください。</p>
+<% } %>
+
+<table class="table table-complete">
+    <tbody>
+        <tr class="tr-number">
+            <th><%- __('PaymentNo') %></th>
+            <td>
+                <span class="rsrvno"><%- reservations[0].reservationNumber %></span>
+                <p class="numbernotice"><%- __('TransactionNumberNotice') %></p>
+            </td>
+        </tr>
+        <tr class="tr-date">
+            <th><%- __('PurchaseContentDate') %></th>
+            <td>
+                <%- `${moment(reservations[0].performance_day, 'YYYYMMDD').format('LL')}&nbsp;&nbsp;${moment(reservations[0].performance_start_time, 'hmm').format('HH:mm')} - ${moment(reservations[0].performance_end_time, 'hmm').format('HH:mm')} <span class="is-not-ja">(JST)</span>` %>
+            </td>
+        </tr>
+        <tr class="tr-tourno">
+            <th><%- __('TourNumber') %></th>
+            <td>
+                <p>
+                    <%- reservations[0].performance_ttts_extension.tour_number %>
+                </p>
+            </td>
+        </tr>
+        <tr class="tr-qr">
+            <th><%- __('QRCode') %></th>
+            <td>
+                <% reservations.forEach((reservation, index) => { %>
+                <div class="wrapper-qrcodes">
+                    <div>
+                        <p>
+                            <!-- <img class="codeimg-barcode" src="//chart.apis.google.com/chart?chs=150x150&cht=qr&chl=<%= reservation.qr_str %>" alt=""> -->
+                            <!-- <img class="codeimg-barcode" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&cht=qr&data=<%= reservation.qr_str %>" alt=""> -->
+                            <span class="codeimg-barcode" data-qrcode=<%= reservation.qr_str %>></span>
+                            <p>
+                                <%- reservation.reservedTicket.ticketType.name[locale] || reservation.reservedTicket.ticketType.name.en %>
+                                <%- __('{{price}} yen', { price: reservation.reservedTicket.ticketType.priceSpecification.price } ) %><br>
+                                <%- `${__('EmailReserveDate')}: ${moment(`${reservations[0].performance_day}${reservations[0].performance_start_time}`, 'YYYYMMDDHHmm').format('LLL')}` %><br>
+                                <%- `${__('TourNumber')}: ${reservation.performance_ttts_extension.tour_number}` %><br>
+                                <%- reservation.reservedTicket.ticketedSeat.seatNumber %><br>
+                            </p>
+                    </div>
+                </div>
+                <% }) %>
+            </td>
+        </tr>
+        <tr class="tr-email">
+            <th><%= __('Email') %></th>
+            <td>
+                <%= reservations[0].purchaser_email %>
+            </td>
+        </tr>
+        <tr class="tr-price">
+            <th><%- __('TotalPrice') %></th>
+            <td>
+                <% var totalAmount = reservations.reduce((a,b)=>a+b.reservedTicket.ticketType.priceSpecification.price,0); %>
+                <span class="price"><%- __('{{price}} yen', { price: totalAmount } ) %></span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+<a class="btn btn-blue visible-pc" id="btn_print_a4" target="_blank"
+    href='<%- process.env.RESERVATIONS_PRINT_URL %>?output=a4&locale=<%- locale %>&token=<%= printToken %>'><span><%- __('PrintTicket') %></span></a>
+
+<% if (reservations[0].purchaser_group === 'Staff') { %>
+<div class="thermalprint">
+    <a class="btn btn-big btn-thermalprint" id="btn_thermalprint" target="_blank"
+        href='<%- process.env.RESERVATIONS_PRINT_URL %>?output=thermal_normal&locale=<%- locale %>&token=<%= printToken %>'><span>サーマル印刷</span></a>
+</div>
+<div class="thermalprint">
+    <a class="btn btn-big btn-widethermalprint" id="btn_widethermalprint" target="_blank"
+        href='<%- process.env.RESERVATIONS_PRINT_URL %>?output=thermal&locale=<%- locale %>&token=<%= printToken %>'><span>団体印刷</span></a>
+</div>
+<% } %>
+
+
+<p class="mailnotice"><%- __('CompleteNotesText') %></p>
+
+<div class="enteringguide">
+    <h3><%- __('HowToEnter') %></h3>
+    <p><%- __('AboutEntryDescription') %></p>
+    <a class="btn btn-blue btn-entering" href="/aboutenter"
+        target="_blank"><span><%- __('AboutHowToEnter') %></span></a>
+</div>

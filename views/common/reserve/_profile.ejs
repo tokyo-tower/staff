@@ -1,0 +1,40 @@
+<%- include('./_step', {currentStepName: 'profile'}) %>
+
+<h1 class="pagetitle"><%- __('EditProfile') %></h1>
+<p class="guidetext">ご購入者情報を入力し「次へ」ボタンを押してください。</p>
+
+<form id="form_profile" method="post">
+
+    <table class="table table-profile table-profile-staff">
+        <tbody>
+            <tr class="tr-price">
+                <th><label><%- __('TotalPrice') %></label></th>
+                <td>
+                    <p><span class="price">&yen;<%- numeral(reservationModel.getTotalCharge()).format('0,0') %></span>
+                    </p>
+                </td>
+            </tr>
+            <tr class="tr-payment">
+                <th>購入者情報<span class="requiredmark"></span></th>
+                <td>
+                    <div class="wrapper-payment form-inline">
+                        <%
+                            const paymentMethods = conf.get('paymentMethodsForStaff');
+                            Object.keys(paymentMethods).forEach((methodCode) => { %>
+                        <label for="radio_payment_method<%- methodCode %>" class="form-group payment">
+                            <input type="radio" id="radio_payment_method<%- methodCode %>" name="paymentMethod"
+                                class="form-control" value="<%- methodCode %>"
+                                <% if (paymentMethod === methodCode ) { %> checked="checked" <% } %>>
+                            <%- paymentMethods[methodCode] %>
+                            <div class="checkedbg"></div>
+                        </label>
+                        <% }) %>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</form>
+
+<script src="/js/profile.js"></script>
