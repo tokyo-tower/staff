@@ -18,7 +18,7 @@
   ],
   "dependencies": {
     "@motionpicture/express-middleware": "0.0.0",
-    "@motionpicture/ttts-api-nodejs-client": "1.0.0-alpha.1",
+    "@motionpicture/ttts-api-nodejs-client": "1.0.0-alpha.3",
     "body-parser": "^1.18.2",
     "config": "^1.29.2",
     "connect-redis": "^3.3.3",
@@ -85,23 +85,23 @@
   },
   "keywords": [],
   "license": "UNLICENSED",
-  "main": "index.js",
+  "main": "dst/index.js",
   "name": "ttts-staff",
   "private": true,
   "repository": {},
   "scripts": {
     "build": "tsc",
     "check": "npm run tslint",
-    "tslint": "tslint --project tsconfig.json -c tslint.json index.ts app/**/*.ts",
-    "clean": "rimraf app/**/*.js index.js npm-debug.log* doc/*",
+    "tslint": "tslint --project tsconfig.json -c tslint.json --exclude \"**/*.spec.ts\" \"src/**/*.ts\"",
+    "clean": "rimraf ./dst \"npm-debug.log*\" ./doc ./coverage ./.nyc_output",
     "css": "gulp",
     "doc": "echo \"implementing...\" && exit 0",
-    "start": "node ./index.js",
+    "start": "node ./dst/index.js",
     "test": "npm run check && mocha",
     "precommit": "npm test",
     "preversion": "npm run clean && npm run build && npm test",
     "version": "git add -A",
     "postversion": "git push origin --tags"
   },
-  "version": "4.4.1"
+  "version": "4.4.2"
 }
