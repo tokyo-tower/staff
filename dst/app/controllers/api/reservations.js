@@ -87,7 +87,6 @@ function search(req, res) {
             if (startTimeFrom !== null) {
                 // tslint:disable-next-line:no-magic-numbers
                 eventStartFrom = moment(`${date}T${startTimeFrom.slice(0, 2)}:${startTimeFrom.slice(2, 4)}:00+09:00`)
-                    .add(1, 'second')
                     .toDate();
             }
             if (startTimeTo !== null) {
