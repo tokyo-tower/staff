@@ -144,16 +144,17 @@ function search(req, res) {
                 givenName: (purchaserFirstName !== null) ? purchaserFirstName : undefined,
                 email: (purchaserEmail !== null) ? purchaserEmail : undefined,
                 telephone: (purchaserTel !== null) ? `${purchaserTel}$` : undefined,
-                identifiers: [
-                    ...(owner !== null) ? [{ name: 'username', value: owner }] : [],
-                    // 予約方法=Customerの場合、クライアントIDがfrontend or pos
-                    // 予約方法=Staffの場合、クライアントIDがstaff
-                    // 予約方法=POSの場合、クライアントIDがpos
-                    ...clientIds.map((id) => {
-                        return { name: 'clientId', value: id };
-                    }),
-                    ...(paymentMethod !== null) ? [{ name: 'paymentMethod', value: paymentMethod }] : []
-                ]
+                identifier: {
+                    $all: [
+                        ...(owner !== null) ? [{ name: 'username', value: owner }] : [],
+                        ...(paymentMethod !== null) ? [{ name: 'paymentMethod', value: paymentMethod }] : []
+                    ],
+                    $in: [
+                        ...clientIds.map((id) => {
+                            return { name: 'clientId', value: id };
+                        })
+                    ]
+                }
             },
             additionalTicketText: (watcherName !== null) ? watcherName : undefined
             // purchaserLastName: (purchaserLastName !== null) ? purchaserLastName : undefined,
