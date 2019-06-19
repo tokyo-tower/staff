@@ -11,6 +11,17 @@
 <p class="guidetext">代理予約が完了いたしました。<br>「印刷」ボタンを押してチケットを発券してください。</p>
 <% } %>
 
+<%
+var tourNumber = '';
+const performance = reservations[0].reservationFor;
+if (Array.isArray(performance.additionalProperty)) {
+    const tourNumberProperty = performance.additionalProperty.find((p) => p.name === 'tourNumber');
+    if (tourNumberProperty !== undefined) {
+        tourNumber = tourNumberProperty.value;
+    }
+}
+%>
+
 <table class="table table-complete">
     <tbody>
         <tr class="tr-number">
@@ -30,7 +41,7 @@
             <th><%- __('TourNumber') %></th>
             <td>
                 <p>
-                    <%- reservations[0].performance_ttts_extension.tour_number %>
+                    <%- tourNumber %>
                 </p>
             </td>
         </tr>
@@ -48,7 +59,7 @@
                                 <%- reservation.reservedTicket.ticketType.name[locale] || reservation.reservedTicket.ticketType.name.en %>
                                 <%- __('{{price}} yen', { price: reservation.reservedTicket.ticketType.priceSpecification.price } ) %><br>
                                 <%- `${__('EmailReserveDate')}: ${moment(`${reservations[0].performance_day}${reservations[0].performance_start_time}`, 'YYYYMMDDHHmm').format('LLL')}` %><br>
-                                <%- `${__('TourNumber')}: ${reservation.performance_ttts_extension.tour_number}` %><br>
+                                <%- `${__('TourNumber')}: ${tourNumber}` %><br>
                                 <%- reservation.reservedTicket.ticketedSeat.seatNumber %><br>
                             </p>
                     </div>

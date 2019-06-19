@@ -1,14 +1,26 @@
+<%
+var tourNumber = '';
+const performance = tempReservationModel.performance;
+if (Array.isArray(performance.additionalProperty)) {
+    const tourNumberProperty = performance.additionalProperty.find((p) => p.name === 'tourNumber');
+    if (tourNumberProperty !== undefined) {
+        tourNumber = tourNumberProperty.value;
+    }
+}
+%>
+
 <div class="reservationstatus row">
     <h2 class="accordion_mobile_toggle"><%- __('PurchaseContent') %></h2>
     <div class="reservationstatus-inner accordion_mobile_inner">
         <p class="reservationstatus-title"><%- __('PurchaseContentDate') %></p>
         <div class="reservationstatus-info">
             <%= moment(tempReservationModel.performance.day).format('LL') %><br>
-            <%= `${moment(tempReservationModel.performance.start_time, 'hmm').format('HH:mm')} - ${moment(tempReservationModel.performance.end_time, 'hmm').format('HH:mm')}` %> <span class="is-not-ja">(JST)</span>
+            <%= `${moment(tempReservationModel.performance.start_time, 'hmm').format('HH:mm')} - ${moment(tempReservationModel.performance.end_time, 'hmm').format('HH:mm')}` %>
+            <span class="is-not-ja">(JST)</span>
         </div>
         <p class="reservationstatus-title"><%- __('TourNumber') %></p>
         <div class="reservationstatus-info">
-            <%- tempReservationModel.performance.ttts_extension.tour_number %>
+            <%- tourNumber %>
         </div>
     </div>
 </div>
