@@ -188,20 +188,8 @@ export async function search(req: Request, res: Response): Promise<void> {
         const message: string = (reservations.length === 0) ?
             '検索結果がありません。予約データが存在しないか、検索条件を見直してください' : '';
 
-        // 決済手段名称追加
-        for (const reservation of reservations) {
-            let paymentMethod4reservation = '';
-            if (reservation.underName !== undefined && Array.isArray(reservation.underName.identifier)) {
-                const paymentMethodProperty = reservation.underName.identifier.find((p) => p.name === 'paymentMethod');
-                if (paymentMethodProperty !== undefined) {
-                    paymentMethod4reservation = paymentMethodProperty.value;
-                }
-            }
-            (<any>reservation).payment_method_name = paymentMethod2name(paymentMethod4reservation);
-        }
-
         res.json({
-            results: reservations,
+            results: addCustomAttributes(reservations),
             count: count,
             errors: null,
             message: message
@@ -213,6 +201,31 @@ export async function search(req: Request, res: Response): Promise<void> {
             }]
         });
     }
+}
+
+function addCustomAttributes(
+    reservations: tttsapi.factory.reservation.event.IReservation[]
+): tttsapi.factory.reservation.event.IReservation[] {
+    return reservations.map((reservation) => {
+        // 決済手段名称追加
+        let paymentMethod4reservation = '';
+        if (reservation.underName !== undefined && Array.isArray(reservation.underName.identifier)) {
+            const paymentMethodProperty = reservation.underName.identifier.find((p) => p.name === 'paymentMethod');
+            if (paymentMethodProperty !== undefined) {
+                paymentMethod4reservation = paymentMethodProperty.value;
+            }
+        }
+
+        return {
+            ...reservation,
+            payment_method_name: paymentMethod2name(paymentMethod4reservation),
+            performance: reservation.reservationFor.id,
+            performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'),
+            performance_start_time: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HHmm'),
+            performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'),
+            performance_canceled: false
+        };
+    });
 }
 
 /**
