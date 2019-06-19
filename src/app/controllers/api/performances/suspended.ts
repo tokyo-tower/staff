@@ -198,6 +198,14 @@ async function findSuspendedPerformances(req: Request, conditions: any): Promise
             }
         }
 
+        let tourNumber: string = performance.tourNumber; // 古いデーターに対する互換性対応
+        if (performance.additionalProperty !== undefined) {
+            const tourNumberProperty = performance.additionalProperty.find((p) => p.name === 'tourNumber');
+            if (tourNumberProperty !== undefined) {
+                tourNumber = tourNumberProperty.value;
+            }
+        }
+
         return {
             performance_id: performance.id,
             performance_day: moment(performance.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD'),
@@ -205,7 +213,7 @@ async function findSuspendedPerformances(req: Request, conditions: any): Promise
             end_time: moment(performance.endDate).tz('Asia/Tokyo').format('HHmm'),
             start_date: performance.startDate,
             end_date: performance.endDate,
-            tour_number: performance.tourNumber,
+            tour_number: tourNumber,
             ev_service_status: extension.ev_service_status,
             ev_service_status_name: EV_SERVICE_STATUS_NAMES[extension.ev_service_status],
             online_sales_update_at: extension.online_sales_update_at,

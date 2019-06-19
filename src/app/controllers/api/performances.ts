@@ -14,9 +14,12 @@ import StaffUser from '../../models/user/staff';
 
 const debug = createDebug('ttts-staff:controllers');
 
+const STAFF_CLIENT_ID = <string>process.env.API_CLIENT_ID;
+
 /**
  * 運行・オンライン販売ステータス変更
  */
+// tslint:disable-next-line:max-func-body-length
 export async function updateOnlineStatus(req: Request, res: Response): Promise<void> {
     try {
         // パフォーマンスIDリストをjson形式で受け取る
@@ -62,19 +65,49 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             const searchReservationsResult = await reservationService.search({
                 limit: 100,
                 typeOf: tttsapi.factory.reservationType.EventReservation,
+                status: tttsapi.factory.reservationStatusType.ReservationConfirmed,
                 performance: performanceId
             });
             const reservations4performance = searchReservationsResult.data;
 
             const reservationsAtLastUpdateDate: tttsapi.factory.performance.IReservationAtLastupdateDate[] =
                 reservations4performance.map((r) => {
+                    let clientId: string = '';
+                    let purchaserGroup: tttsapi.factory.person.Group = tttsapi.factory.person.Group.Customer;
+                    let paymentMethod: string = '';
+                    let orderNumber: string = '';
+                    if (r.underName !== undefined && r.underName.identifier !== undefined) {
+                        const paymentMethodProperty = r.underName.identifier.find((p) => p.name === 'paymentMethod');
+                        if (paymentMethodProperty !== undefined) {
+                            paymentMethod = paymentMethodProperty.value;
+                        }
+
+                        const orderNumberProperty = r.underName.identifier.find((p) => p.name === 'orderNumber');
+                        if (orderNumberProperty !== undefined) {
+                            orderNumber = orderNumberProperty.value;
+                        }
+
+                        const clientIdProperty = r.underName.identifier.find((p) => p.name === 'clientId');
+                        if (clientIdProperty !== undefined) {
+                            clientId = clientIdProperty.value;
+                        }
+
+                        // クライアントIDがstaffであればStaffグループ(その他はCustomer)
+                        if (clientId === STAFF_CLIENT_ID) {
+                            purchaserGroup = tttsapi.factory.person.Group.Staff;
+                        }
+                    }
+
                     return {
                         id: r.id,
-                        status: r.status,
-                        purchaser_group: r.purchaser_group,
-                        transaction_agent: r.transaction_agent,
-                        payment_method: r.payment_method,
-                        order_number: r.order_number
+                        status: <tttsapi.factory.chevre.reservationStatusType>r.reservationStatus,
+                        purchaser_group: purchaserGroup,
+                        transaction_agent: {
+                            typeOf: tttsapi.factory.personType.Person,
+                            id: clientId
+                        },
+                        payment_method: <tttsapi.factory.paymentMethodType>paymentMethod,
+                        order_number: orderNumber
                     };
                 });
 
