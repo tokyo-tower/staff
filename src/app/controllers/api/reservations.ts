@@ -223,7 +223,9 @@ function addCustomAttributes(
             performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'),
             performance_start_time: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HHmm'),
             performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'),
-            performance_canceled: false
+            performance_canceled: false,
+            ticket_type: reservation.reservedTicket.ticketType.identifier,
+            ticket_type_name: <any>reservation.reservedTicket.ticketType.name
         };
     });
 }

@@ -205,7 +205,7 @@ function addCustomAttributes(reservations) {
                 paymentMethod4reservation = paymentMethodProperty.value;
             }
         }
-        return Object.assign({}, reservation, { payment_method_name: paymentMethod2name(paymentMethod4reservation), performance: reservation.reservationFor.id, performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'), performance_start_time: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HHmm'), performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'), performance_canceled: false });
+        return Object.assign({}, reservation, { payment_method_name: paymentMethod2name(paymentMethod4reservation), performance: reservation.reservationFor.id, performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'), performance_start_time: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HHmm'), performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'), performance_canceled: false, ticket_type: reservation.reservedTicket.ticketType.identifier, ticket_type_name: reservation.reservedTicket.ticketType.name });
     });
 }
 /**
