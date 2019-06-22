@@ -18,6 +18,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.4.4 - 2019-06-22
+
+### Changed
+
+- 予約検索以外のChevreインターフェース対応
+- ツアーナンバーのChevreインターフェース対応
+
 ## v4.4.3 - 2019-06-18
 
 ### Changed

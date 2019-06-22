@@ -11,6 +11,17 @@
 <p class="guidetext">代理予約が完了いたしました。<br>「印刷」ボタンを押してチケットを発券してください。</p>
 <% } %>
 
+<%
+var tourNumber = '';
+const performance = reservations[0].reservationFor;
+if (Array.isArray(performance.additionalProperty)) {
+    const tourNumberProperty = performance.additionalProperty.find((p) => p.name === 'tourNumber');
+    if (tourNumberProperty !== undefined) {
+        tourNumber = tourNumberProperty.value;
+    }
+}
+%>
+
 <table class="table table-complete">
     <tbody>
         <tr class="tr-number">
@@ -23,14 +34,14 @@
         <tr class="tr-date">
             <th><%- __('PurchaseContentDate') %></th>
             <td>
-                <%- `${moment(reservations[0].performance_day, 'YYYYMMDD').format('LL')}&nbsp;&nbsp;${moment(reservations[0].performance_start_time, 'hmm').format('HH:mm')} - ${moment(reservations[0].performance_end_time, 'hmm').format('HH:mm')} <span class="is-not-ja">(JST)</span>` %>
+                <%- `${moment(reservations[0].reservationFor.startDate).tz('Asia/Tokyo').format('LL')}&nbsp;&nbsp;${moment(reservations[0].reservationFor.startDate).tz('Asia/Tokyo').format('HH:mm')} - ${moment(reservations[0].reservationFor.endDate).tz('Asia/Tokyo').format('HH:mm')} <span class="is-not-ja">(JST)</span>` %>
             </td>
         </tr>
         <tr class="tr-tourno">
             <th><%- __('TourNumber') %></th>
             <td>
                 <p>
-                    <%- reservations[0].performance_ttts_extension.tour_number %>
+                    <%- tourNumber %>
                 </p>
             </td>
         </tr>
@@ -47,8 +58,8 @@
                             <p>
                                 <%- reservation.reservedTicket.ticketType.name[locale] || reservation.reservedTicket.ticketType.name.en %>
                                 <%- __('{{price}} yen', { price: reservation.reservedTicket.ticketType.priceSpecification.price } ) %><br>
-                                <%- `${__('EmailReserveDate')}: ${moment(`${reservations[0].performance_day}${reservations[0].performance_start_time}`, 'YYYYMMDDHHmm').format('LLL')}` %><br>
-                                <%- `${__('TourNumber')}: ${reservation.performance_ttts_extension.tour_number}` %><br>
+                                <%- `${__('EmailReserveDate')}: ${moment(reservations[0].reservationFor.startDate).tz('Asia/Tokyo').format('LLL')}` %><br>
+                                <%- `${__('TourNumber')}: ${tourNumber}` %><br>
                                 <%- reservation.reservedTicket.ticketedSeat.seatNumber %><br>
                             </p>
                     </div>

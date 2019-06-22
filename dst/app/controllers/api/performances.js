@@ -18,9 +18,11 @@ const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const numeral = require("numeral");
 const debug = createDebug('ttts-staff:controllers');
+const STAFF_CLIENT_ID = process.env.API_CLIENT_ID;
 /**
  * 運行・オンライン販売ステータス変更
  */
+// tslint:disable-next-line:max-func-body-length
 function updateOnlineStatus(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -58,17 +60,43 @@ function updateOnlineStatus(req, res) {
                 const searchReservationsResult = yield reservationService.search({
                     limit: 100,
                     typeOf: tttsapi.factory.reservationType.EventReservation,
+                    status: tttsapi.factory.reservationStatusType.ReservationConfirmed,
                     performance: performanceId
                 });
                 const reservations4performance = searchReservationsResult.data;
                 const reservationsAtLastUpdateDate = reservations4performance.map((r) => {
+                    let clientId = '';
+                    let purchaserGroup = tttsapi.factory.person.Group.Customer;
+                    let paymentMethod = '';
+                    let orderNumber = '';
+                    if (r.underName !== undefined && r.underName.identifier !== undefined) {
+                        const paymentMethodProperty = r.underName.identifier.find((p) => p.name === 'paymentMethod');
+                        if (paymentMethodProperty !== undefined) {
+                            paymentMethod = paymentMethodProperty.value;
+                        }
+                        const orderNumberProperty = r.underName.identifier.find((p) => p.name === 'orderNumber');
+                        if (orderNumberProperty !== undefined) {
+                            orderNumber = orderNumberProperty.value;
+                        }
+                        const clientIdProperty = r.underName.identifier.find((p) => p.name === 'clientId');
+                        if (clientIdProperty !== undefined) {
+                            clientId = clientIdProperty.value;
+                        }
+                        // クライアントIDがstaffであればStaffグループ(その他はCustomer)
+                        if (clientId === STAFF_CLIENT_ID) {
+                            purchaserGroup = tttsapi.factory.person.Group.Staff;
+                        }
+                    }
                     return {
                         id: r.id,
-                        status: r.status,
-                        purchaser_group: r.purchaser_group,
-                        transaction_agent: r.transaction_agent,
-                        payment_method: r.payment_method,
-                        order_number: r.order_number
+                        status: r.reservationStatus,
+                        purchaser_group: purchaserGroup,
+                        transaction_agent: {
+                            typeOf: tttsapi.factory.personType.Person,
+                            id: clientId
+                        },
+                        payment_method: paymentMethod,
+                        order_number: orderNumber
                     };
                 });
                 yield eventService.updateExtension({
