@@ -158,7 +158,9 @@ async function findSuspendedPerformances(req: Request, conditions: any): Promise
             limit: 1,
             typeOf: tttsapi.factory.reservationType.EventReservation,
             purchaser_group: tttsapi.factory.person.Group.Customer,
-            performance: performance.id
+            reservationFor: {
+                id: performance.id
+            }
         });
         let numberOfReservations = searchReservationsResult.totalCount;
 
@@ -167,7 +169,9 @@ async function findSuspendedPerformances(req: Request, conditions: any): Promise
             limit: 1,
             typeOf: tttsapi.factory.reservationType.EventReservation,
             purchaser_group: tttsapi.factory.person.Group.Customer,
-            performance: performance.id,
+            reservationFor: {
+                id: performance.id
+            },
             checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
         });
         let nubmerOfUncheckedReservations = searchReservationsResult.totalCount;

@@ -60,8 +60,8 @@ function updateOnlineStatus(req, res) {
                 const searchReservationsResult = yield reservationService.search({
                     limit: 100,
                     typeOf: tttsapi.factory.reservationType.EventReservation,
-                    status: tttsapi.factory.reservationStatusType.ReservationConfirmed,
-                    performance: performanceId
+                    reservationStatuses: [tttsapi.factory.reservationStatusType.ReservationConfirmed],
+                    reservationFor: { id: performanceId }
                 });
                 const reservations4performance = searchReservationsResult.data;
                 const reservationsAtLastUpdateDate = reservations4performance.map((r) => {
@@ -153,9 +153,11 @@ function getTargetReservationsForRefund(req, performanceIds) {
         });
         const targetTransactionIds = yield reservationService.distinct('transaction', {
             typeOf: tttsapi.factory.reservationType.EventReservation,
-            status: tttsapi.factory.reservationStatusType.ReservationConfirmed,
+            reservationStatuses: [tttsapi.factory.reservationStatusType.ReservationConfirmed],
             purchaser_group: tttsapi.factory.person.Group.Customer,
-            performances: performanceIds,
+            reservationFor: {
+                ids: performanceIds
+            },
             checkins: { $size: 0 }
         });
         // 全取引検索
