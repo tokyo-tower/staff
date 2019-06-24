@@ -65,8 +65,8 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             const searchReservationsResult = await reservationService.search({
                 limit: 100,
                 typeOf: tttsapi.factory.reservationType.EventReservation,
-                status: tttsapi.factory.reservationStatusType.ReservationConfirmed,
-                performance: performanceId
+                reservationStatuses: [tttsapi.factory.reservationStatusType.ReservationConfirmed],
+                reservationFor: { id: performanceId }
             });
             const reservations4performance = searchReservationsResult.data;
 
@@ -168,9 +168,11 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
         'transaction',
         {
             typeOf: tttsapi.factory.reservationType.EventReservation,
-            status: tttsapi.factory.reservationStatusType.ReservationConfirmed,
+            reservationStatuses: [tttsapi.factory.reservationStatusType.ReservationConfirmed],
             purchaser_group: tttsapi.factory.person.Group.Customer,
-            performances: performanceIds,
+            reservationFor: {
+                ids: performanceIds
+            },
             checkins: { $size: 0 }
         }
     );
