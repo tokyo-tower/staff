@@ -216,6 +216,16 @@ function addCustomAttributes(
             }
         }
 
+        const underName = reservation.underName;
+
+        let age = '';
+        if (reservation.underName !== undefined && Array.isArray(reservation.underName.identifier)) {
+            const ageProperty = reservation.underName.identifier.find((p) => p.name === 'age');
+            if (ageProperty !== undefined) {
+                age = ageProperty.value;
+            }
+        }
+
         return {
             ...reservation,
             payment_method_name: paymentMethod2name(paymentMethod4reservation),
@@ -225,7 +235,18 @@ function addCustomAttributes(
             performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'),
             performance_canceled: false,
             ticket_type: reservation.reservedTicket.ticketType.identifier,
-            ticket_type_name: <any>reservation.reservedTicket.ticketType.name
+            ticket_type_name: <any>reservation.reservedTicket.ticketType.name,
+            purchased_at: (reservation.bookingTime !== undefined) ? reservation.bookingTime : (<any>reservation).purchased_at,
+            purchaser_name: (underName !== undefined) ? underName.name : '',
+            purchaser_last_name: (underName !== undefined) ? underName.familyName : '',
+            purchaser_first_name: (underName !== undefined) ? underName.givenName : '',
+            purchaser_email: (underName !== undefined) ? underName.email : '',
+            purchaser_tel: (underName !== undefined) ? underName.telephone : '',
+            purchaser_international_tel: '',
+            purchaser_age: age,
+            purchaser_address: (underName !== undefined) ? (<any>underName).address : '',
+            purchaser_gender: (underName !== undefined) ? underName.gender : '',
+            watcher_name: reservation.additionalTicketText
         };
     });
 }

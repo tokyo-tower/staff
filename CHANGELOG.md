@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Removed
 
+- 予約インターフェースから不要な属性を削除
+
 ### Fixed
 
 ### Security
