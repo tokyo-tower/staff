@@ -103,5 +103,5 @@
     "version": "git add -A",
     "postversion": "git push origin --tags"
   },
-  "version": "4.4.5"
+  "version": "4.4.6-alpha.0"
 }
