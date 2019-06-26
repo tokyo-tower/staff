@@ -14,11 +14,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Removed
 
-- 予約インターフェースから不要な属性を削除
-
 ### Fixed
 
 ### Security
+
+## v4.4.6 - 2019-06-26
+
+### Removed
+
+- 予約インターフェースから不要な属性を削除
 
 ## v4.4.5 - 2019-06-24
 
