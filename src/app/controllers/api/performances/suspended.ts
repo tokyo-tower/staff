@@ -285,7 +285,9 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
             executionResults: [],
             data: {
                 agentId: <string>process.env.API_CLIENT_ID,
-                performanceId: performanceId
+                performanceId: performanceId,
+                // 返品対象の注文クライアントID
+                clientIds: [FRONTEND_CLIENT_ID, POS_CLIENT_ID]
             }
         });
         debug('returnAllByPerformance task created.', task);
