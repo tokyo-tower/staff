@@ -62,8 +62,18 @@ $(function () {
         var html = '';
 
         reservations.forEach(function (reservation) {
+            var clientId = '';
+            if (reservation.underName !== undefined && Array.isArray(reservation.underName.identifier)) {
+                var clientIdProperty = reservation.underName.identifier.find(function (p) {
+                    return p.name === 'clientId';
+                });
+
+                if (clientIdProperty !== undefined) {
+                    clientId = clientIdProperty.value;
+                }
+            }
             // POS注文かどうか
-            var orderedAtPOS = (reservation.transaction_agent !== undefined && reservation.transaction_agent.id === POS_CLIENT_ID);
+            var orderedAtPOS = (clientId === POS_CLIENT_ID);
             var transactionAgentName = (orderedAtPOS) ? 'POS' : purchaseRoute[reservation.purchaser_group];
             // とりあえずPOSの決済方法は「---」とする仕様
             var paymentMethodName = (orderedAtPOS) ? '---' : reservation.payment_method_name;

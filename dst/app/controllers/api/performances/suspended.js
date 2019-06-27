@@ -30,6 +30,7 @@ REFUND_STATUS_NAMES[tttsapi.factory.performance.RefundStatus.Compeleted] = '返�
 if (process.env.API_CLIENT_ID === undefined) {
     throw new Error('Please set an environment variable \'API_CLIENT_ID\'');
 }
+const POS_CLIENT_ID = process.env.POS_CLIENT_ID;
 const FRONTEND_CLIENT_ID = process.env.FRONTEND_CLIENT_ID;
 if (FRONTEND_CLIENT_ID === undefined) {
     throw new Error('Please set an environment variable \'FRONTEND_CLIENT_ID\'');
@@ -95,6 +96,7 @@ exports.searchSuspendedPerformances = searchSuspendedPerformances;
 /**
  * 表示一覧取得
  */
+// tslint:disable-next-line:max-func-body-length
 function findSuspendedPerformances(req, conditions) {
     return __awaiter(this, void 0, void 0, function* () {
         const eventService = new tttsapi.service.Event({
@@ -116,7 +118,14 @@ function findSuspendedPerformances(req, conditions) {
             let searchReservationsResult = yield reservationService.search({
                 limit: 1,
                 typeOf: tttsapi.factory.reservationType.EventReservation,
-                purchaser_group: tttsapi.factory.person.Group.Customer,
+                // クライアントがfrontend or pos
+                underName: {
+                    identifiers: [
+                        { name: 'clientId', value: POS_CLIENT_ID },
+                        { name: 'clientId', value: FRONTEND_CLIENT_ID }
+                    ]
+                },
+                // purchaser_group: tttsapi.factory.person.Group.Customer,
                 reservationFor: {
                     id: performance.id
                 }
@@ -126,7 +135,14 @@ function findSuspendedPerformances(req, conditions) {
             searchReservationsResult = yield reservationService.search({
                 limit: 1,
                 typeOf: tttsapi.factory.reservationType.EventReservation,
-                purchaser_group: tttsapi.factory.person.Group.Customer,
+                // クライアントがfrontend or pos
+                underName: {
+                    identifiers: [
+                        { name: 'clientId', value: POS_CLIENT_ID },
+                        { name: 'clientId', value: FRONTEND_CLIENT_ID }
+                    ]
+                },
+                // purchaser_group: tttsapi.factory.person.Group.Customer,
                 reservationFor: {
                     id: performance.id
                 },

@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 予約の入場以外の全属性をChevre化
+
 ### Deprecated
 
 ### Removed

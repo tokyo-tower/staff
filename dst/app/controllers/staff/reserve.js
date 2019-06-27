@@ -327,9 +327,8 @@ function complete(req, res, next) {
                 next(new Error(req.__('NotFound')));
                 return;
             }
-            let reservations = transactionResult.eventReservations;
+            const reservations = transactionResult.eventReservations;
             debug(reservations.length, 'reservation(s) found.');
-            reservations = reservations.filter((r) => r.status === tttsapi.factory.reservationStatusType.ReservationConfirmed);
             // チケットを券種コードでソート
             sortReservationstByTicketType(reservations);
             res.render('staff/reserve/complete', {
