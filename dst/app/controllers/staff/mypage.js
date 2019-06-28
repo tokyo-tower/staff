@@ -16,27 +16,15 @@ const createDebug = require("debug");
 const querystring = require("querystring");
 const debug = createDebug('ttts-staff:controllers:staff:mypage');
 const layout = 'layouts/staff/layout';
-const authClient = new tttsapi.auth.OAuth2({
-    domain: process.env.API_AUTHORIZE_SERVER_DOMAIN,
-    clientId: process.env.API_CLIENT_ID,
-    clientSecret: process.env.API_CLIENT_SECRET
-});
 /**
  * マイページ(予約一覧)
  */
 function index(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const cognitoCredentials = req.session.cognitoCredentials;
-            authClient.setCredentials({
-                refresh_token: cognitoCredentials.refreshToken,
-                // expiry_date: number;
-                access_token: cognitoCredentials.accessToken,
-                token_type: cognitoCredentials.tokenType
-            });
             const adminService = new tttsapi.service.Admin({
                 endpoint: process.env.API_ENDPOINT,
-                auth: authClient
+                auth: req.tttsAuthClient
             });
             const owners = yield adminService.search({ group: 'Staff' });
             res.render('staff/mypage/index', {
@@ -61,7 +49,7 @@ function print(req, res, next) {
             // 印刷トークン発行
             const reservationService = new tttsapi.service.Reservation({
                 endpoint: process.env.API_ENDPOINT,
-                auth: authClient
+                auth: req.tttsAuthClient
             });
             const { token } = yield reservationService.publishPrintToken({ ids });
             debug('printToken created.', token);
