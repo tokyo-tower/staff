@@ -15,6 +15,8 @@ import StaffUser from '../../models/user/staff';
 const debug = createDebug('ttts-staff:controllers');
 
 const STAFF_CLIENT_ID = <string>process.env.API_CLIENT_ID;
+const POS_CLIENT_ID = <string>process.env.POS_CLIENT_ID;
+const FRONTEND_CLIENT_ID = <string>process.env.FRONTEND_CLIENT_ID;
 
 /**
  * 運行・オンライン販売ステータス変更
@@ -169,7 +171,14 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
         {
             typeOf: tttsapi.factory.reservationType.EventReservation,
             reservationStatuses: [tttsapi.factory.reservationStatusType.ReservationConfirmed],
-            purchaser_group: tttsapi.factory.person.Group.Customer,
+            // クライアントがfrontend or pos
+            underName: {
+                identifiers: [
+                    { name: 'clientId', value: POS_CLIENT_ID },
+                    { name: 'clientId', value: FRONTEND_CLIENT_ID }
+                ]
+            },
+            // purchaser_group: tttsapi.factory.person.Group.Customer,
             reservationFor: {
                 ids: performanceIds
             },
@@ -221,7 +230,16 @@ async function createEmails(
     await Promise.all(transactions.map(async (transaction) => {
         const result = <tttsapi.factory.transaction.placeOrder.IResult>transaction.result;
         const confirmedReservations = result.eventReservations
-            .filter((r) => r.status === tttsapi.factory.reservationStatusType.ReservationConfirmed);
+            .filter((r) => {
+                let extraProperty: tttsapi.factory.propertyValue.IPropertyValue<string> | undefined;
+                if (r.additionalProperty !== undefined) {
+                    extraProperty = r.additionalProperty.find((p) => p.name === 'extra');
+                }
+
+                return r.additionalProperty === undefined
+                    || extraProperty === undefined
+                    || extraProperty.value !== '1';
+            });
         await createEmail(req, res, confirmedReservations, notice);
     }));
 }

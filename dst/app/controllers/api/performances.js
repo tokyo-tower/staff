@@ -19,6 +19,8 @@ const moment = require("moment-timezone");
 const numeral = require("numeral");
 const debug = createDebug('ttts-staff:controllers');
 const STAFF_CLIENT_ID = process.env.API_CLIENT_ID;
+const POS_CLIENT_ID = process.env.POS_CLIENT_ID;
+const FRONTEND_CLIENT_ID = process.env.FRONTEND_CLIENT_ID;
 /**
  * 運行・オンライン販売ステータス変更
  */
@@ -154,7 +156,14 @@ function getTargetReservationsForRefund(req, performanceIds) {
         const targetTransactionIds = yield reservationService.distinct('transaction', {
             typeOf: tttsapi.factory.reservationType.EventReservation,
             reservationStatuses: [tttsapi.factory.reservationStatusType.ReservationConfirmed],
-            purchaser_group: tttsapi.factory.person.Group.Customer,
+            // クライアントがfrontend or pos
+            underName: {
+                identifiers: [
+                    { name: 'clientId', value: POS_CLIENT_ID },
+                    { name: 'clientId', value: FRONTEND_CLIENT_ID }
+                ]
+            },
+            // purchaser_group: tttsapi.factory.person.Group.Customer,
             reservationFor: {
                 ids: performanceIds
             },
@@ -199,7 +208,15 @@ function createEmails(req, res, transactions, notice) {
         yield Promise.all(transactions.map((transaction) => __awaiter(this, void 0, void 0, function* () {
             const result = transaction.result;
             const confirmedReservations = result.eventReservations
-                .filter((r) => r.status === tttsapi.factory.reservationStatusType.ReservationConfirmed);
+                .filter((r) => {
+                let extraProperty;
+                if (r.additionalProperty !== undefined) {
+                    extraProperty = r.additionalProperty.find((p) => p.name === 'extra');
+                }
+                return r.additionalProperty === undefined
+                    || extraProperty === undefined
+                    || extraProperty.value !== '1';
+            });
             yield createEmail(req, res, confirmedReservations, notice);
         })));
     });

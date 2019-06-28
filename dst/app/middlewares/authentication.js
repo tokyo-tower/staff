@@ -26,12 +26,7 @@ exports.default = (req, res, next) => __awaiter(this, void 0, void 0, function* 
         const oauth2Client = new tttsapi.auth.OAuth2({
             domain: process.env.API_AUTHORIZE_SERVER_DOMAIN,
             clientId: process.env.API_CLIENT_ID,
-            clientSecret: process.env.API_CLIENT_SECRET,
-            scopes: [
-                `${process.env.API_RESOURECE_SERVER_IDENTIFIER}/performances.read-only`,
-                `${process.env.API_RESOURECE_SERVER_IDENTIFIER}/transactions`
-            ],
-            state: ''
+            clientSecret: process.env.API_CLIENT_SECRET
         });
         oauth2Client.setCredentials({
             refresh_token: cognitoCredentials.refreshToken,

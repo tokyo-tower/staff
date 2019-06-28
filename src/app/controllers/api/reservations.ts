@@ -226,6 +226,14 @@ function addCustomAttributes(
             }
         }
 
+        let clientId = '';
+        if (reservation.underName !== undefined && Array.isArray(reservation.underName.identifier)) {
+            const clientIdProperty = reservation.underName.identifier.find((p) => p.name === 'clientId');
+            if (clientIdProperty !== undefined) {
+                clientId = clientIdProperty.value;
+            }
+        }
+
         return {
             ...reservation,
             payment_method_name: paymentMethod2name(paymentMethod4reservation),
@@ -236,6 +244,7 @@ function addCustomAttributes(
             performance_canceled: false,
             ticket_type: reservation.reservedTicket.ticketType.identifier,
             ticket_type_name: <any>reservation.reservedTicket.ticketType.name,
+            purchaser_group: (clientId === STAFF_CLIENT_ID) ? tttsapi.factory.person.Group.Staff : tttsapi.factory.person.Group.Customer,
             purchased_at: (reservation.bookingTime !== undefined) ? reservation.bookingTime : (<any>reservation).purchased_at,
             purchaser_name: (underName !== undefined) ? underName.name : '',
             purchaser_last_name: (underName !== undefined) ? underName.familyName : '',

@@ -18,6 +18,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.5.0 - 2019-06-28
+
+### Changed
+
+- 予約の入場以外の全属性をChevre化
+- 券種インターフェースをChevre化
+
 ## v4.4.6 - 2019-06-26
 
 ### Removed

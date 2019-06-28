@@ -341,9 +341,8 @@ export async function complete(req: Request, res: Response, next: NextFunction):
             return;
         }
 
-        let reservations = transactionResult.eventReservations;
+        const reservations = transactionResult.eventReservations;
         debug(reservations.length, 'reservation(s) found.');
-        reservations = reservations.filter((r) => r.status === tttsapi.factory.reservationStatusType.ReservationConfirmed);
         // チケットを券種コードでソート
         sortReservationstByTicketType(reservations);
 
