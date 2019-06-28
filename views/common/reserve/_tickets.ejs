@@ -39,30 +39,58 @@
                     // 車椅子予約なので車椅子の券を上位に持ってくる
                     if (isWheelchair) {
                         tempReservationModel.ticketTypes.sort((a, b) => {
-                            if (b.ttts_extension.category === 'Wheelchair') {
-                                if (a.ttts_extension.category === b.ttts_extension.category) {
+                            let ticketTypeCategory4a = '';
+                            let ticketTypeCategory4b = '';
+                            if (Array.isArray(a.additionalProperty)) {
+                                const categoryProperty4a = a.additionalProperty.find((p) => p.name === 'category');
+                                if (categoryProperty4a !== undefined) {
+                                    ticketTypeCategory4a = categoryProperty4a.value;
+                                }
+                            }
+                            if (Array.isArray(a.additionalProperty)) {
+                                const categoryProperty4b = b.additionalProperty.find((p) => p.name === 'category');
+                                if (categoryProperty4b !== undefined) {
+                                    ticketTypeCategory4b = categoryProperty4b.value;
+                                }
+                            }
+
+                            if (ticketTypeCategory4b === 'Wheelchair') {
+                                if (ticketTypeCategory4a === ticketTypeCategory4b) {
                                     return 0;
                                 }
                                 return 1;
-                            } else if (a._id > b._id) {
+                            } else if (a.id > b.id) {
                                 return -1;
                             }
                             return 0;
                         });
                     }
                     tempReservationModel.ticketTypes.forEach(function(ticketType) {
+                        let ticketTypeCategory = '';
+                        if (Array.isArray(ticketType.additionalProperty)) {
+                            const categoryProperty = ticketType.additionalProperty.find((p) => p.name === 'category');
+                            if (categoryProperty !== undefined) {
+                                ticketTypeCategory = categoryProperty.value;
+                            }
+                        }
+
                         // 一般予約(general)だったら一般券種以外を弾く
-                        if (tempReservationModel.category === 'general' && ticketType.ttts_extension.category !== 'Normal') {
+                        if (tempReservationModel.category === 'general' && ticketTypeCategory !== 'Normal') {
                             return true;
                         }
+
+                        let unitPrice = 0;
+                        if (ticketType.priceSpecification !== undefined) {
+                            unitPrice = ticketType.priceSpecification.price;
+                        }
                 %>
-                <tr data-ticket-code="<%- ticketType._id %>" data-ticket-charge="<%= ticketType.charge %>">
+                <tr data-ticket-code="<%- ticketType.id %>" data-ticket-charge="<%= unitPrice %>">
                     <th>
                         <span><%- ticketType.name[locale] %>
-                            <%- __('{{price}} yen', { price: ticketType.charge } ) %></span>
+                            <%- __('{{price}} yen', { price: unitPrice } ) %></span>
                     </th>
                     <td>
-                        <select id="select_ticketq_<%- ticketType._id %>" class="form-control">
+                        <select id="select_ticketq_<%- ticketType.id %>" class="form-control">
                             <% for (let ticketCount = 0; ticketCount <= ticketCountMax; ticketCount++) { %>
                             <option value="<%- ticketCount.toString() %>" <% if (ticketCount === ticketType.count) { %>
                                 selected="selected" <% } %>><%- ticketCount.toString() %></option>
