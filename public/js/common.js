@@ -1,7 +1,7 @@
 /* global Url */
 'use strict';
 window.ttts = {};
-window.ttts.mode = (location.href.indexOf('staff') === -1) ? 'customer' : 'staff';
+window.ttts.mode = 'staff';
 window.ttts.currentLocale = 'ja';
 window.ttts.str_thousandsSeparator = ',';
 

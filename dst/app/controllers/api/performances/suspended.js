@@ -220,7 +220,7 @@ function returnOrders(req, res) {
             const performance = yield eventService.findPerofrmanceById({ id: performanceId });
             debug('starting returnOrders by performance...', performance.id);
             const now = moment();
-            const endDate = moment(performance.end_date);
+            const endDate = moment(performance.endDate);
             debug(now, endDate);
             if (endDate >= now) {
                 throw new Error('上映が終了していないので返品処理を実行できません。');

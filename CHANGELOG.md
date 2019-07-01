@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Removed
 
+- 注文取引結果からeventReservationsを削除(order.acceptedOffersへ移行)
+- 仮予約インターフェースからrate_limit_unit_in_secondsを削除
+- パフォーマンスインターフェースから非推奨属性を削除
+
 ### Fixed
 
 ### Security

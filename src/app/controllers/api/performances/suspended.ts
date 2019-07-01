@@ -218,7 +218,7 @@ async function findSuspendedPerformances(req: Request, conditions: any): Promise
             }
         }
 
-        let tourNumber: string = performance.tourNumber; // 古いデーターに対する互換性対応
+        let tourNumber: string = (<any>performance).tourNumber; // 古いデーターに対する互換性対応
         if (performance.additionalProperty !== undefined) {
             const tourNumberProperty = performance.additionalProperty.find((p) => p.name === 'tourNumber');
             if (tourNumberProperty !== undefined) {
@@ -269,7 +269,7 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
         const performance = await eventService.findPerofrmanceById({ id: performanceId });
         debug('starting returnOrders by performance...', performance.id);
         const now = moment();
-        const endDate = moment(performance.end_date);
+        const endDate = moment(performance.endDate);
         debug(now, endDate);
         if (endDate >= now) {
             throw new Error('上映が終了していないので返品処理を実行できません。');

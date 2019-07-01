@@ -155,7 +155,7 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
 
             try {
                 // 現在時刻がイベント終了時刻を過ぎている時
-                if (moment(reservationModel.transactionInProgress.performance.end_date).toDate() < moment().toDate()) {
+                if (moment(reservationModel.transactionInProgress.performance.endDate).toDate() < moment().toDate()) {
                     //「ご希望の枚数が用意できないため予約できません。」
                     throw new Error(req.__('NoAvailableSeats'));
                 }
@@ -279,9 +279,10 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                 (<Express.Session>req.session).transactionResult = transactionResult;
 
                 try {
+                    const reservations = transactionResult.order.acceptedOffers.map((o) => o.itemOffered);
                     // 完了メールキュー追加(あれば更新日時を更新するだけ)
                     const emailAttributes = await reserveBaseController.createEmailAttributes(
-                        transactionResult.eventReservations, res
+                        reservations, res
                     );
 
                     await placeOrderTransactionService.sendEmailNotification({
@@ -341,7 +342,7 @@ export async function complete(req: Request, res: Response, next: NextFunction):
             return;
         }
 
-        const reservations = transactionResult.eventReservations;
+        const reservations = transactionResult.order.acceptedOffers.map((o) => o.itemOffered);
         debug(reservations.length, 'reservation(s) found.');
         // チケットを券種コードでソート
         sortReservationstByTicketType(reservations);
