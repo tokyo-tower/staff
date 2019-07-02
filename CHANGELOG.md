@@ -14,6 +14,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Removed
 
+### Fixed
+
+### Security
+
+## v4.6.0 - 2019-07-02
+
+### Removed
+
 - 注文取引結果からeventReservationsを削除(order.acceptedOffersへ移行)
 - 仮予約インターフェースからrate_limit_unit_in_secondsを削除
 - パフォーマンスインターフェースから非推奨属性を削除
@@ -21,8 +29,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 - IE11でのArray.prototype.find対応
-
-### Security
 
 ## v4.5.0 - 2019-06-28
 
