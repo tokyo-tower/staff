@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Fixed
 
+- IE11でのArray.prototype.find対応
+
 ### Security
 
 ## v4.5.0 - 2019-06-28
