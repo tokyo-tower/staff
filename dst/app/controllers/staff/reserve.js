@@ -148,7 +148,7 @@ function tickets(req, res, next) {
                 }
                 try {
                     // 現在時刻がイベント終了時刻を過ぎている時
-                    if (moment(reservationModel.transactionInProgress.performance.end_date).toDate() < moment().toDate()) {
+                    if (moment(reservationModel.transactionInProgress.performance.endDate).toDate() < moment().toDate()) {
                         //「ご希望の枚数が用意できないため予約できません。」
                         throw new Error(req.__('NoAvailableSeats'));
                     }
@@ -270,8 +270,9 @@ function confirm(req, res, next) {
                     // 購入結果セッション作成
                     req.session.transactionResult = transactionResult;
                     try {
+                        const reservations = transactionResult.order.acceptedOffers.map((o) => o.itemOffered);
                         // 完了メールキュー追加(あれば更新日時を更新するだけ)
-                        const emailAttributes = yield reserveBaseController.createEmailAttributes(transactionResult.eventReservations, res);
+                        const emailAttributes = yield reserveBaseController.createEmailAttributes(reservations, res);
                         yield placeOrderTransactionService.sendEmailNotification({
                             transactionId: reservationModel.transactionInProgress.id,
                             emailMessageAttributes: emailAttributes
@@ -327,7 +328,7 @@ function complete(req, res, next) {
                 next(new Error(req.__('NotFound')));
                 return;
             }
-            const reservations = transactionResult.eventReservations;
+            const reservations = transactionResult.order.acceptedOffers.map((o) => o.itemOffered);
             debug(reservations.length, 'reservation(s) found.');
             // チケットを券種コードでソート
             sortReservationstByTicketType(reservations);

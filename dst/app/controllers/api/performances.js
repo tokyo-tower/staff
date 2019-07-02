@@ -207,7 +207,8 @@ function createEmails(req, res, transactions, notice) {
         // 購入単位ごとにメール作成
         yield Promise.all(transactions.map((transaction) => __awaiter(this, void 0, void 0, function* () {
             const result = transaction.result;
-            const confirmedReservations = result.eventReservations
+            const reservations = result.order.acceptedOffers.map((o) => o.itemOffered);
+            const confirmedReservations = reservations
                 .filter((r) => {
                 let extraProperty;
                 if (r.additionalProperty !== undefined) {

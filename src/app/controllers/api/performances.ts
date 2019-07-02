@@ -229,7 +229,8 @@ async function createEmails(
     // 購入単位ごとにメール作成
     await Promise.all(transactions.map(async (transaction) => {
         const result = <tttsapi.factory.transaction.placeOrder.IResult>transaction.result;
-        const confirmedReservations = result.eventReservations
+        const reservations = result.order.acceptedOffers.map((o) => o.itemOffered);
+        const confirmedReservations = reservations
             .filter((r) => {
                 let extraProperty: tttsapi.factory.propertyValue.IPropertyValue<string> | undefined;
                 if (r.additionalProperty !== undefined) {

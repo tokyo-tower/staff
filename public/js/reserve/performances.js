@@ -5,7 +5,7 @@ $(function() {
     if (!window.ttts.API_TOKEN.VALUE) { return alert('API_TOKEN undefined'); }
 
     // カレンダーを何月何日から表示するか
-    var CALENDER_MINDATE = (window.ttts.mode !== 'staff') ? window.ttts.reserveStartDate : 'today';
+    var CALENDER_MINDATE = 'today';
 
     // カレンダーを何日先まで表示するか
     var CALENDER_MAXDATE = window.ttts.reservableMaxDate || '';
@@ -47,7 +47,7 @@ $(function() {
             try {
                 var hour = performance.attributes.start_time.slice(0, 2);
                 // 時刻を見て無視 (一般: → 開始時刻 ／ 代理: 終了時刻)
-                if (moment_now.isAfter(moment(performance.attributes.day + '' + ((window.ttts.mode === 'staff') ? performance.attributes.end_time : performance.attributes.start_time), 'YYYYMMDDHHmm'))) {
+                if (moment_now.isAfter(moment(performance.attributes.day + '' +  performance.attributes.end_time, 'YYYYMMDDHHmm'))) {
                     return true;
                 }
                 if (hourArray.indexOf(hour) === -1) {
