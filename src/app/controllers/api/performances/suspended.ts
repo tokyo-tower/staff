@@ -56,12 +56,13 @@ export async function searchSuspendedPerformances(req: Request, res: Response): 
     const refundStatus: string | null = getValue(req.query.refund_status);
 
     // 検索条件を作成
-    const searchConditions = {
+    const searchConditions: tttsapi.factory.performance.ISearchConditions = {
         limit: limit,
         page: page,
         sort: {
-            day: -1,
-            start_time: 1
+            startDate: -1
+            // day: -1,
+            // start_time: 1
         },
         ttts_extension: {
             online_sales_status: tttsapi.factory.performance.OnlineSalesStatus.Suspended,
@@ -77,11 +78,14 @@ export async function searchSuspendedPerformances(req: Request, res: Response): 
                 : undefined,
             refund_status: (refundStatus !== null) ? refundStatus : undefined
         },
-        day: (performanceDate1 !== null || performanceDate2 !== null)
-            ? {
-                ...(performanceDate1 !== null) ? { $gte: performanceDate1 } : undefined,
-                ...(performanceDate2 !== null) ? { $lte: performanceDate2 } : undefined
-            }
+        startFrom: (performanceDate1 !== null)
+            ? moment(`${performanceDate1}T00:00:00+09:00`, 'YYYYMMDDTHH:mm:ssZ')
+                .toDate()
+            : undefined,
+        startThrough: (performanceDate2 !== null)
+            ? moment(`${performanceDate2}T00:00:00+09:00`, 'YYYYMMDDTHH:mm:ssZ')
+                .add(1, 'day')
+                .toDate()
             : undefined
     };
 
@@ -133,7 +137,7 @@ export interface ISuspendedPerformances {
  * 表示一覧取得
  */
 // tslint:disable-next-line:max-func-body-length
-async function findSuspendedPerformances(req: Request, conditions: any): Promise<{
+async function findSuspendedPerformances(req: Request, conditions: tttsapi.factory.performance.ISearchConditions): Promise<{
     totalCount: number;
     results: ISuspendedPerformances[];
 }> {
@@ -184,7 +188,6 @@ async function findSuspendedPerformances(req: Request, conditions: any): Promise
                     { name: 'clientId', value: FRONTEND_CLIENT_ID }
                 ]
             },
-            // purchaser_group: tttsapi.factory.person.Group.Customer,
             reservationFor: {
                 id: performance.id
             },

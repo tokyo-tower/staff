@@ -61,8 +61,9 @@ function searchSuspendedPerformances(req, res) {
             limit: limit,
             page: page,
             sort: {
-                day: -1,
-                start_time: 1
+                startDate: -1
+                // day: -1,
+                // start_time: 1
             },
             ttts_extension: {
                 online_sales_status: tttsapi.factory.performance.OnlineSalesStatus.Suspended,
@@ -74,8 +75,15 @@ function searchSuspendedPerformances(req, res) {
                         : undefined) : undefined,
                 refund_status: (refundStatus !== null) ? refundStatus : undefined
             },
-            day: (performanceDate1 !== null || performanceDate2 !== null)
-                ? Object.assign({}, (performanceDate1 !== null) ? { $gte: performanceDate1 } : undefined, (performanceDate2 !== null) ? { $lte: performanceDate2 } : undefined) : undefined
+            startFrom: (performanceDate1 !== null)
+                ? moment(`${performanceDate1}T00:00:00+09:00`, 'YYYYMMDDTHH:mm:ssZ')
+                    .toDate()
+                : undefined,
+            startThrough: (performanceDate2 !== null)
+                ? moment(`${performanceDate2}T00:00:00+09:00`, 'YYYYMMDDTHH:mm:ssZ')
+                    .add(1, 'day')
+                    .toDate()
+                : undefined
         };
         try {
             // 販売停止パフォーマンス情報を検索
@@ -142,7 +150,6 @@ function findSuspendedPerformances(req, conditions) {
                         { name: 'clientId', value: FRONTEND_CLIENT_ID }
                     ]
                 },
-                // purchaser_group: tttsapi.factory.person.Group.Customer,
                 reservationFor: {
                     id: performance.id
                 },
