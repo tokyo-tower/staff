@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- パフォーマンス検索条件のChevre化に対応
+
 ### Deprecated
 
 ### Removed
