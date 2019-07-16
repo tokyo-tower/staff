@@ -280,8 +280,16 @@ async function createEmail(
     const day: string = moment(event.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD');
     const time: string = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
 
-    // 購入番号 : 850000001
-    paymentTicketInfos.push(`${res.__('PaymentNo')} : ${reservation.reservationNumber}`);
+    // 購入番号
+    let paymentNo: string = reservation.reservationNumber;
+    if (Array.isArray(underName.identifier)) {
+        const paymentNoProperty = underName.identifier.find((p) => p.name === 'paymentNo');
+        if (paymentNoProperty !== undefined) {
+            paymentNo = paymentNoProperty.value;
+        }
+    }
+
+    paymentTicketInfos.push(`${res.__('PaymentNo')} : ${paymentNo}`);
     paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);
     paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`); // 券種 枚数
     const infos = getTicketInfo(reservations, res.__, res.locale); // TOP DECKチケット(大人) 1枚
@@ -289,7 +297,7 @@ async function createEmail(
 
     // 英語表記を追加
     paymentTicketInfos.push(''); // 日英の間の改行
-    paymentTicketInfos.push(`${res.__({ phrase: 'PaymentNo', locale: 'en' })} : ${reservation.reservationNumber}`);
+    paymentTicketInfos.push(`${res.__({ phrase: 'PaymentNo', locale: 'en' })} : ${paymentNo}`);
     paymentTicketInfos.push(`${res.__({ phrase: 'EmailReserveDate', locale: 'en' })} : ${day} ${time}`);
     paymentTicketInfos.push(`${res.__({ phrase: 'TicketType', locale: 'en' })} ${res.__({ phrase: 'TicketCount', locale: 'en' })}`);
     // TOP DECKチケット(大人) 1枚

@@ -272,7 +272,7 @@ function confirm(req, res, next) {
                     try {
                         const reservations = transactionResult.order.acceptedOffers.map((o) => o.itemOffered);
                         // 完了メールキュー追加(あれば更新日時を更新するだけ)
-                        const emailAttributes = yield reserveBaseController.createEmailAttributes(reservations, res);
+                        const emailAttributes = yield reserveBaseController.createEmailAttributes(transactionResult.order, reservations, res);
                         yield placeOrderTransactionService.sendEmailNotification({
                             transactionId: reservationModel.transactionInProgress.id,
                             emailMessageAttributes: emailAttributes
@@ -333,6 +333,7 @@ function complete(req, res, next) {
             // チケットを券種コードでソート
             sortReservationstByTicketType(reservations);
             res.render('staff/reserve/complete', {
+                order: transactionResult.order,
                 reservations: reservations,
                 printToken: transactionResult.printToken,
                 layout: layout

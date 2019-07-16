@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 予約番号参照を購入番号へ移行
+
 ### Deprecated
 
 ### Removed
