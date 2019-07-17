@@ -5,7 +5,7 @@
 <%- __('EmailHead1').replace('$theater_name$', reservations[0].reservationFor.superEvent.location.name[locale]) %>
 <%- __('EmailHead2') %>
 
-<% /* 購入番号 */ %><%- __('PaymentNo') %> : <%- reservations[0].reservationNumber %>
+<% /* 購入番号 */ %><%- __('PaymentNo') %> : <%- order.confirmationNumber.slice(-6) %>
 <% /* ご来塔日時 */ %><%- __('EmailReserveDate') %> : <%- dayTime %>
 <% /* 券種、枚数 */ %><%- __('TicketType') %> <%- __('TicketCount') %>
 <%- ticketInfoStr %>

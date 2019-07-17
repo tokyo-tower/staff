@@ -132,9 +132,6 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
         offers: offers
     });
     reservationModel.transactionInProgress.seatReservationAuthorizeActionId = action.id;
-    // この時点で購入番号が発行される
-    reservationModel.transactionInProgress.paymentNo =
-        (<tttsapi.factory.action.authorize.seatReservation.IResult>action.result).tmpReservations[0].reservationNumber;
     const tmpReservations = (<tttsapi.factory.action.authorize.seatReservation.IResult>action.result).tmpReservations;
 
     // セッションに保管
@@ -294,6 +291,7 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
  */
 // tslint:disable-next-line:max-func-body-length
 export async function createEmailAttributes(
+    order: tttsapi.factory.order.IOrder,
     reservations: tttsapi.factory.reservation.event.IReservation[],
     res: Response
 ): Promise<tttsapi.factory.creativeWork.message.email.IAttributes> {
@@ -369,6 +367,7 @@ export async function createEmailAttributes(
             'email/reserve/complete',
             {
                 layout: false,
+                order: order,
                 reservations: reservations,
                 moment: moment,
                 numeral: numeral,

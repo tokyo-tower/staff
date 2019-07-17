@@ -127,9 +127,6 @@ function processFixSeatsAndTickets(reservationModel, req) {
             offers: offers
         });
         reservationModel.transactionInProgress.seatReservationAuthorizeActionId = action.id;
-        // この時点で購入番号が発行される
-        reservationModel.transactionInProgress.paymentNo =
-            action.result.tmpReservations[0].reservationNumber;
         const tmpReservations = action.result.tmpReservations;
         // セッションに保管
         reservationModel.transactionInProgress.reservations = tmpReservations;
@@ -255,7 +252,7 @@ exports.processFixPerformance = processFixPerformance;
  * 予約完了メールを作成する
  */
 // tslint:disable-next-line:max-func-body-length
-function createEmailAttributes(reservations, res) {
+function createEmailAttributes(order, reservations, res) {
     return __awaiter(this, void 0, void 0, function* () {
         // チケットコード順にソート
         reservations.sort((a, b) => {
@@ -319,6 +316,7 @@ function createEmailAttributes(reservations, res) {
         return new Promise((resolve, reject) => {
             res.render('email/reserve/complete', {
                 layout: false,
+                order: order,
                 reservations: reservations,
                 moment: moment,
                 numeral: numeral,

@@ -110,7 +110,7 @@ $(function () {
             html += ''
                 + '<tr data-seat-code="' + reservation.reservedTicket.ticketedSeat.seatNumber + '"'
                 + ' data-reservation-id="' + reservation.id + '"'
-                + ' data-payment-no="' + reservation.reservationNumber + '"'
+                + ' data-payment-no="' + reservation.paymentNo + '"'
                 + ' data-purchaser-name="' + reservation.purchaser_last_name + ' ' + reservation.purchaser_first_name + '"'
                 + ' data-purchaser-tel="' + reservation.purchaser_tel + '"'
                 + ' data-performance-start-datetime="' + startDatetime + '"'
@@ -123,14 +123,14 @@ $(function () {
                 + '>'
                 + '<th class="td-checkbox">';
 
-            if (reservation.reservationNumber && !reservation.performance_canceled) {
+            if (reservation.paymentNo && !reservation.performance_canceled) {
                 html += ''
                     + '<input type="checkbox" value="">';
             }
             html += ''
                 + '</th>'
                 + '<td class="td-number">'
-                + '<span class="paymentno">' + reservation.reservationNumber + '</span><span class="starttime">' + moment(reservation.performance_day + ' ' + reservation.performance_start_time, 'YYYYMMDD HHmm').format('YYYY/MM/DD HH:mm') + '</span></td>'
+                + '<span class="paymentno">' + reservation.paymentNo + '</span><span class="starttime">' + moment(reservation.performance_day + ' ' + reservation.performance_start_time, 'YYYYMMDD HHmm').format('YYYY/MM/DD HH:mm') + '</span></td>'
                 + '<td class="td-name">' + reservation.purchaser_last_name + ' ' + reservation.purchaser_first_name + '</td>'
                 + '<td class="td-amemo">' + reservation.watcher_name + '</td>'
                 + '<td class="td-seat">' + reservation.reservedTicket.ticketedSeat.seatNumber + '</td>'
@@ -139,7 +139,7 @@ $(function () {
                 + '<td class="td-route">' + paymentMethodName + '</td>'
                 + '<td class="td-checkin">' + ((reservation.checkins.length) ? '<span class="entered">入場済み</span>' : '<span class="unentered">未入場</span>') + '</td>'
                 + '<td class="td-actions">';
-            if (reservation.reservationNumber && !reservation.performance_canceled) {
+            if (reservation.paymentNo && !reservation.performance_canceled) {
                 html += ''
                     + '<p class="btn call-modal"><span>詳細</span></p>'
                     + '<p class="btn btn-print" data-targetid="' + reservation.id + '"><span>A4チケット印刷</span></p>'
@@ -283,7 +283,7 @@ $(function () {
     function cancel(reservationsIds) {
         var modal_show_list = document.getElementById('modal_show_list');
         var tempHTML = reservationsIds.map(function (id) {
-            return '<h3>' + reservationsById[id].reservationNumber + ' ' + reservationsById[id].reservedTicket.ticketedSeat.seatNumber + ' ' + reservationsById[id].ticket_type_name.ja + '</h3>';
+            return '<h3>' + reservationsById[id].paymentNo + ' ' + reservationsById[id].reservedTicket.ticketedSeat.seatNumber + ' ' + reservationsById[id].ticket_type_name.ja + '</h3>';
         }).join('\n');
         reservationsIds4cancel = reservationsIds;
         document.getElementById('echo_showlist').innerHTML = tempHTML;
@@ -315,7 +315,7 @@ $(function () {
                 console.log('[succeeded] cancelReservation', data);
                 var tempHTML = '';
                 reservationsIds4cancel.forEach(function (id) {
-                    tempHTML += '<h3><span>購入番号:</span>' + reservationsById[id].reservationNumber + '<span>座席 / 券種:</span>' + reservationsById[id].reservedTicket.ticketedSeat.seatNumber + '/' + reservationsById[id].ticket_type_name.ja + '</h3>';
+                    tempHTML += '<h3><span>購入番号:</span>' + reservationsById[id].paymentNo + '<span>座席 / 券種:</span>' + reservationsById[id].reservedTicket.ticketedSeat.seatNumber + '/' + reservationsById[id].ticket_type_name.ja + '</h3>';
                 });
                 document.getElementById('echo_canceledreservations').innerHTML = tempHTML;
                 $('#modal_cancelcompleted').modal();

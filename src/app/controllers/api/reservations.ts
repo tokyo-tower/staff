@@ -130,21 +130,6 @@ export async function search(req: Request, res: Response): Promise<void> {
             startFrom: eventStartFrom,
             startThrough: eventStartThrough
         },
-        reservationNumber: (paymentNo !== null) ? toHalfWidth(paymentNo.replace(/\s/g, '')) : undefined,
-        // performance_day: (day !== null) ? day : undefined,
-        // performanceStartTimeFrom: (startTimeFrom !== null) ? startTimeFrom : undefined,
-        // performanceStartTimeTo: (startTimeTo !== null) ? startTimeTo : undefined,
-        // payment_no: (paymentNo !== null) ? toHalfWidth(paymentNo.replace(/\s/g, '')) : undefined,
-        // owner_username: (owner !== null) ? owner : undefined,
-        // purchaser_group: (purchaserGroup !== null)
-        //     ? (purchaserGroup !== 'POS') ? purchaserGroup : undefined
-        //     : undefined,
-        // transactionAgentId: (purchaserGroup !== null)
-        //     ? (purchaserGroup === 'POS')
-        //         ? POS_CLIENT_ID
-        //         : (purchaserGroup === tttsapi.factory.person.Group.Customer) ? { $ne: POS_CLIENT_ID } : undefined
-        //     : undefined,
-        // paymentMethod: (paymentMethod !== null) ? paymentMethod : undefined,
         underName: {
             familyName: (purchaserLastName !== null) ? purchaserLastName : undefined,
             givenName: (purchaserFirstName !== null) ? purchaserFirstName : undefined,
@@ -159,15 +144,15 @@ export async function search(req: Request, res: Response): Promise<void> {
                     ...clientIds.map((id) => {
                         return { name: 'clientId', value: id };
                     })
-                ]
+                ],
+                ...{
+                    $elemMatch: (paymentNo !== null)
+                        ? { name: 'paymentNo', value: { $regex: toHalfWidth(paymentNo.replace(/\s/g, '')) } }
+                        : undefined
+                }
             }
         },
         additionalTicketText: (watcherName !== null) ? watcherName : undefined
-        // purchaserLastName: (purchaserLastName !== null) ? purchaserLastName : undefined,
-        // purchaserFirstName: (purchaserFirstName !== null) ? purchaserFirstName : undefined,
-        // purchaserEmail: (purchaserEmail !== null) ? purchaserEmail : undefined,
-        // purchaserTel: (purchaserTel !== null) ? purchaserTel : undefined,
-        // watcherName: (watcherName !== null) ? watcherName : undefined
     };
 
     debug('searching reservations...', searchConditions);
@@ -206,6 +191,7 @@ export async function search(req: Request, res: Response): Promise<void> {
 function addCustomAttributes(
     reservations: tttsapi.factory.reservation.event.IReservation[]
 ): tttsapi.factory.reservation.event.IReservation[] {
+    // tslint:disable-next-line:cyclomatic-complexity
     return reservations.map((reservation) => {
         // 決済手段名称追加
         let paymentMethod4reservation = '';
@@ -234,8 +220,18 @@ function addCustomAttributes(
             }
         }
 
+        // 購入番号
+        let paymentNo = reservation.reservationNumber;
+        if (reservation.underName !== undefined && Array.isArray(reservation.underName.identifier)) {
+            const paymentNoProperty = reservation.underName.identifier.find((p) => p.name === 'paymentNo');
+            if (paymentNoProperty !== undefined) {
+                paymentNo = paymentNoProperty.value;
+            }
+        }
+
         return {
             ...reservation,
+            paymentNo: paymentNo,
             payment_method_name: paymentMethod2name(paymentMethod4reservation),
             performance: reservation.reservationFor.id,
             performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'),

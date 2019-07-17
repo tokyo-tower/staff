@@ -282,7 +282,7 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                     const reservations = transactionResult.order.acceptedOffers.map((o) => o.itemOffered);
                     // 完了メールキュー追加(あれば更新日時を更新するだけ)
                     const emailAttributes = await reserveBaseController.createEmailAttributes(
-                        reservations, res
+                        transactionResult.order, reservations, res
                     );
 
                     await placeOrderTransactionService.sendEmailNotification({
@@ -348,6 +348,7 @@ export async function complete(req: Request, res: Response, next: NextFunction):
         sortReservationstByTicketType(reservations);
 
         res.render('staff/reserve/complete', {
+            order: transactionResult.order,
             reservations: reservations,
             printToken: transactionResult.printToken,
             layout: layout
