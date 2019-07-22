@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 券種IDと券種コードの分離対応
+
 ### Deprecated
 
 ### Removed

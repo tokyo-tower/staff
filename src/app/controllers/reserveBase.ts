@@ -279,7 +279,7 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
 
     // 券種セット
     reservationModel.transactionInProgress.ticketTypes = performance.ticket_type_group.ticket_types.map((t) => {
-        return { ...t, ...{ count: 0, watcher_name: '' } };
+        return { ...t, ...{ count: 0, watcher_name: '' }, id: t.identifier };
     });
 
     // パフォーマンス情報を保管
