@@ -18,7 +18,7 @@
   ],
   "dependencies": {
     "@motionpicture/express-middleware": "0.0.0",
-    "@motionpicture/ttts-api-nodejs-client": "^1.0.0",
+    "@motionpicture/ttts-api-nodejs-client": "^1.0.1",
     "body-parser": "^1.18.2",
     "config": "^1.29.2",
     "connect-redis": "^3.3.3",
@@ -103,5 +103,5 @@
     "version": "git add -A",
     "postversion": "git push origin --tags"
   },
-  "version": "4.7.1"
+  "version": "4.7.2"
 }
