@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 券種IDと券種コードの分離対応
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v4.7.2 - 2019-07-23
+
+### Changed
+
+- 券種IDと券種コードの分離対応
 
 ## v4.7.1 - 2019-07-17
 
