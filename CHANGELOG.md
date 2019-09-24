@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 注文のacceptedOffersに含まれる予約情報に依存しないように調整
+
 ### Deprecated
 
 ### Removed

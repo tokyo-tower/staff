@@ -241,7 +241,7 @@ async function createEmails(
                     || extraProperty === undefined
                     || extraProperty.value !== '1';
             });
-        await createEmail(req, res, confirmedReservations, notice);
+        await createEmail(req, res, result.order, confirmedReservations, notice);
     }));
 }
 
@@ -254,7 +254,11 @@ async function createEmails(
  */
 // tslint:disable-next-line:max-func-body-length
 async function createEmail(
-    req: Request, res: Response, reservations: tttsapi.factory.reservation.event.IReservation[], notice: string
+    req: Request,
+    res: Response,
+    order: tttsapi.factory.order.IOrder,
+    reservations: tttsapi.factory.reservation.event.IReservation[],
+    notice: string
 ): Promise<void> {
     const reservation = reservations[0];
     // タイトル編集
@@ -264,13 +268,9 @@ async function createEmail(
     const titleEn = conf.get<string>('emailSus.titleEn');
 
     //トウキョウ タロウ 様
-    const underName = reservation.underName;
-    if (underName === undefined) {
-        throw new Error('Reservation UnderName undefined');
-    }
-    const purchaserNameJp = `${underName.familyName} ${underName.givenName}`;
+    const purchaserNameJp = `${order.customer.familyName} ${order.customer.givenName}`;
     const purchaserName: string = `${res.__('{{name}}様', { name: purchaserNameJp })}`;
-    const purchaserNameEn: string = `${res.__('Mr./Ms.{{name}}', { name: underName.name })}`;
+    const purchaserNameEn: string = `${res.__('Mr./Ms.{{name}}', { name: order.customer.name })}`;
 
     // 購入チケット情報
     const paymentTicketInfos: string[] = [];
@@ -281,13 +281,8 @@ async function createEmail(
     const time: string = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
 
     // 購入番号
-    let paymentNo: string = reservation.reservationNumber;
-    if (Array.isArray(underName.identifier)) {
-        const paymentNoProperty = underName.identifier.find((p) => p.name === 'paymentNo');
-        if (paymentNoProperty !== undefined) {
-            paymentNo = paymentNoProperty.value;
-        }
-    }
+    // tslint:disable-next-line:no-magic-numbers
+    const paymentNo: string = order.confirmationNumber.slice(-6);
 
     paymentTicketInfos.push(`${res.__('PaymentNo')} : ${paymentNo}`);
     paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);
@@ -327,8 +322,8 @@ async function createEmail(
             email: conf.get<string>('email.from')
         },
         toRecipient: {
-            name: underName.name,
-            email: <string>underName.email
+            name: order.customer.name,
+            email: <string>order.customer.email
         },
         about: `${title} ${titleEn}`,
         text: content

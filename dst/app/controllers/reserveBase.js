@@ -264,9 +264,8 @@ function createEmailAttributes(order, reservations, res) {
             }
             return 0;
         });
-        const underName = reservations[0].underName;
-        const to = (underName !== undefined && underName.email !== undefined)
-            ? underName.email
+        const to = (order.customer.email !== undefined)
+            ? order.customer.email
             : '';
         debug('to is', to);
         if (to.length === 0) {
@@ -307,10 +306,10 @@ function createEmailAttributes(order, reservations, res) {
         const day = moment(event.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD');
         const time = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
         // 日本語の時は"姓名"他は"名姓"
-        const purchaserName = (underName !== undefined)
+        const purchaserName = (order.customer !== undefined)
             ? (res.locale === 'ja') ?
-                `${underName.familyName} ${underName.givenName}` :
-                `${underName.givenName} ${underName.familyName}`
+                `${order.customer.familyName} ${order.customer.givenName}` :
+                `${order.customer.givenName} ${order.customer.familyName}`
             : '';
         debug('rendering template...');
         return new Promise((resolve, reject) => {

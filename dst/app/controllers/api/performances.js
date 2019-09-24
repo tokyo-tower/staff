@@ -218,7 +218,7 @@ function createEmails(req, res, transactions, notice) {
                     || extraProperty === undefined
                     || extraProperty.value !== '1';
             });
-            yield createEmail(req, res, confirmedReservations, notice);
+            yield createEmail(req, res, result.order, confirmedReservations, notice);
         })));
     });
 }
@@ -230,7 +230,7 @@ function createEmails(req, res, transactions, notice) {
  * @return {Promise<void>}
  */
 // tslint:disable-next-line:max-func-body-length
-function createEmail(req, res, reservations, notice) {
+function createEmail(req, res, order, reservations, notice) {
     return __awaiter(this, void 0, void 0, function* () {
         const reservation = reservations[0];
         // タイトル編集
@@ -239,13 +239,9 @@ function createEmail(req, res, reservations, notice) {
         const title = conf.get('emailSus.title');
         const titleEn = conf.get('emailSus.titleEn');
         //トウキョウ タロウ 様
-        const underName = reservation.underName;
-        if (underName === undefined) {
-            throw new Error('Reservation UnderName undefined');
-        }
-        const purchaserNameJp = `${underName.familyName} ${underName.givenName}`;
+        const purchaserNameJp = `${order.customer.familyName} ${order.customer.givenName}`;
         const purchaserName = `${res.__('{{name}}様', { name: purchaserNameJp })}`;
-        const purchaserNameEn = `${res.__('Mr./Ms.{{name}}', { name: underName.name })}`;
+        const purchaserNameEn = `${res.__('Mr./Ms.{{name}}', { name: order.customer.name })}`;
         // 購入チケット情報
         const paymentTicketInfos = [];
         // ご来塔日時 : 2017/12/10 09:15
@@ -253,13 +249,8 @@ function createEmail(req, res, reservations, notice) {
         const day = moment(event.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD');
         const time = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
         // 購入番号
-        let paymentNo = reservation.reservationNumber;
-        if (Array.isArray(underName.identifier)) {
-            const paymentNoProperty = underName.identifier.find((p) => p.name === 'paymentNo');
-            if (paymentNoProperty !== undefined) {
-                paymentNo = paymentNoProperty.value;
-            }
-        }
+        // tslint:disable-next-line:no-magic-numbers
+        const paymentNo = order.confirmationNumber.slice(-6);
         paymentTicketInfos.push(`${res.__('PaymentNo')} : ${paymentNo}`);
         paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);
         paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`); // 券種 枚数
@@ -294,8 +285,8 @@ function createEmail(req, res, reservations, notice) {
                 email: conf.get('email.from')
             },
             toRecipient: {
-                name: underName.name,
-                email: underName.email
+                name: order.customer.name,
+                email: order.customer.email
             },
             about: `${title} ${titleEn}`,
             text: content
