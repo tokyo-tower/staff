@@ -323,7 +323,7 @@ async function createEmail(
         },
         toRecipient: {
             name: order.customer.name,
-            email: <string>order.customer.email
+            email: order.customer.email
         },
         about: `${title} ${titleEn}`,
         text: content
