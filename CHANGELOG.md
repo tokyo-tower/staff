@@ -10,9 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 注文のacceptedOffersに含まれる予約情報に依存しないように調整
-- 販売停止時の注文返品取引に確定後アクションを指定するように調整
-
 ### Deprecated
 
 ### Removed
@@ -20,6 +17,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v4.8.0 - 2019-09-25
+
+### Changed
+
+- 注文のacceptedOffersに含まれる予約情報に依存しないように調整
+- 販売停止時の注文返品取引に確定後アクションを指定するように調整
 
 ## v4.7.2 - 2019-07-23
 
