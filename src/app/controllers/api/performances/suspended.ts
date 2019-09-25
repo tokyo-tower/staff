@@ -162,7 +162,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
         // パフォーマンスに対する予約数
         let searchReservationsResult = await reservationService.search({
             limit: 1,
-            typeOf: tttsapi.factory.reservationType.EventReservation,
+            typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
             // クライアントがfrontend or pos
             underName: {
                 identifiers: [
@@ -180,7 +180,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
         // 未入場の予約数
         searchReservationsResult = await reservationService.search({
             limit: 1,
-            typeOf: tttsapi.factory.reservationType.EventReservation,
+            typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
             // クライアントがfrontend or pos
             underName: {
                 identifiers: [
@@ -201,7 +201,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
         let reservationsAtLastUpdateDate = extension.reservationsAtLastUpdateDate;
         if (reservationsAtLastUpdateDate !== undefined) {
             reservationsAtLastUpdateDate = reservationsAtLastUpdateDate
-                .filter((r) => r.status === tttsapi.factory.reservationStatusType.ReservationConfirmed) // 確定ステータス
+                .filter((r) => r.status === tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed) // 確定ステータス
                 // .filter((r) => r.purchaser_group === tttsapi.factory.person.Group.Customer) // 購入者一般
                 // frontendアプリケーションでの購入
                 .filter((r) => r.transaction_agent !== undefined
@@ -213,7 +213,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             if (numberOfReservations > 0) {
                 searchReservationsResult = await reservationService.search({
                     limit: 1,
-                    typeOf: tttsapi.factory.reservationType.EventReservation,
+                    typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
                     ids: reservationsAtLastUpdateDate.map((r) => r.id),
                     checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
                 });
@@ -279,18 +279,27 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
         }
 
         const task = await taskService.create({
-            name: tttsapi.factory.taskName.ReturnOrdersByPerformance,
+            project: { typeOf: 'Project', id: <string>process.env.PROJECT_ID },
+            name: <any>tttsapi.factory.taskName.ReturnOrdersByPerformance,
             status: tttsapi.factory.taskStatus.Ready,
             runsAt: new Date(), // なるはやで実行
             remainingNumberOfTries: 10,
-            lastTriedAt: null,
             numberOfTried: 0,
             executionResults: [],
             data: {
                 agentId: <string>process.env.API_CLIENT_ID,
                 performanceId: performanceId,
                 // 返品対象の注文クライアントID
-                clientIds: [FRONTEND_CLIENT_ID, POS_CLIENT_ID]
+                clientIds: [FRONTEND_CLIENT_ID, POS_CLIENT_ID],
+                potentialActions: {
+                    returnOrder: {
+                        potentialActions: {
+                            informOrder: [
+                                { recipient: { url: `${<string>process.env.API_ENDPOINT}/webhooks/onReturnOrder` } }
+                            ]
+                        }
+                    }
+                }
             }
         });
         debug('returnAllByPerformance task created.', task);

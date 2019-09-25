@@ -41,7 +41,7 @@ function updateOnlineStatus(req, res) {
             const now = new Date();
             // 返金対象予約情報取得(入塔記録のないもの)
             const targetPlaceOrderTransactions = yield getTargetReservationsForRefund(req, performanceIds);
-            debug('email target placeOrderTransactions:', targetPlaceOrderTransactions);
+            debug('email target placeOrderTransactions:', targetPlaceOrderTransactions.map((t) => t.id));
             // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
             const refundStatus = evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended ?
                 tttsapi.factory.performance.RefundStatus.NotInstructed :
@@ -61,14 +61,14 @@ function updateOnlineStatus(req, res) {
                 // パフォーマンスに対する予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
                 const searchReservationsResult = yield reservationService.search({
                     limit: 100,
-                    typeOf: tttsapi.factory.reservationType.EventReservation,
-                    reservationStatuses: [tttsapi.factory.reservationStatusType.ReservationConfirmed],
+                    typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+                    reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
                     reservationFor: { id: performanceId }
                 });
                 const reservations4performance = searchReservationsResult.data;
                 const reservationsAtLastUpdateDate = reservations4performance.map((r) => {
                     let clientId = '';
-                    let purchaserGroup = tttsapi.factory.person.Group.Customer;
+                    let purchaserGroup = 'Customer';
                     let paymentMethod = '';
                     let orderNumber = '';
                     if (r.underName !== undefined && r.underName.identifier !== undefined) {
@@ -86,7 +86,7 @@ function updateOnlineStatus(req, res) {
                         }
                         // クライアントIDがstaffであればStaffグループ(その他はCustomer)
                         if (clientId === STAFF_CLIENT_ID) {
-                            purchaserGroup = tttsapi.factory.person.Group.Staff;
+                            purchaserGroup = 'Staff';
                         }
                     }
                     return {
@@ -153,9 +153,11 @@ function getTargetReservationsForRefund(req, performanceIds) {
             endpoint: process.env.API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        const targetTransactionIds = yield reservationService.distinct('transaction', {
-            typeOf: tttsapi.factory.reservationType.EventReservation,
-            reservationStatuses: [tttsapi.factory.reservationStatusType.ReservationConfirmed],
+        const targetReservations = yield reservationService.distinct('underName', 
+        // 'transaction',
+        {
+            typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+            reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
             // クライアントがfrontend or pos
             underName: {
                 identifiers: [
@@ -163,12 +165,20 @@ function getTargetReservationsForRefund(req, performanceIds) {
                     { name: 'clientId', value: FRONTEND_CLIENT_ID }
                 ]
             },
-            // purchaser_group: tttsapi.factory.person.Group.Customer,
             reservationFor: {
                 ids: performanceIds
             },
             checkins: { $size: 0 }
         });
+        const targetTransactionIds = targetReservations.reduce((a, b) => {
+            if (Array.isArray(b.identifier)) {
+                const transactionProperty = b.identifier.find((p) => p.name === 'transaction');
+                if (transactionProperty !== undefined) {
+                    a.push(transactionProperty.value);
+                }
+            }
+            return a;
+        }, []);
         // 全取引検索
         const transactions = [];
         if (targetTransactionIds.length > 0) {
@@ -280,6 +290,7 @@ function createEmail(req, res, order, reservations, notice) {
         const content = `${title}\n${titleEn}\n\n${purchaserName}\n${purchaserNameEn}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}\n\n\n${foot1}\n${foot2}\n${foot3}\n\n${footEn1}\n${footEn2}\n${footEn3}\n\n${access1}\n${access2}\n\n${accessEn1}\n${accessEn2}`;
         // メール編集
         const emailAttributes = {
+            typeOf: tttsapi.factory.creativeWorkType.EmailMessage,
             sender: {
                 name: conf.get('email.fromname'),
                 email: conf.get('email.from')
@@ -296,8 +307,10 @@ function createEmail(req, res, order, reservations, notice) {
             endpoint: process.env.API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        const emailMessage = tttsapi.factory.creativeWork.message.email.create({
+        const emailMessage = {
+            typeOf: tttsapi.factory.creativeWorkType.EmailMessage,
             identifier: `updateOnlineStatus-${reservation.id}`,
+            name: `updateOnlineStatus-${reservation.id}`,
             sender: {
                 typeOf: 'Corporation',
                 name: emailAttributes.sender.name,
@@ -310,26 +323,38 @@ function createEmail(req, res, order, reservations, notice) {
             },
             about: emailAttributes.about,
             text: emailAttributes.text
-        });
+        };
         // その場で送信ではなく、DBにタスクを登録
-        const taskAttributes = tttsapi.factory.task.sendEmailNotification.createAttributes({
+        const taskAttributes = {
+            name: tttsapi.factory.cinerino.taskName.SendEmailMessage,
+            project: order.project,
             status: tttsapi.factory.taskStatus.Ready,
             runsAt: new Date(),
             remainingNumberOfTries: 10,
-            lastTriedAt: null,
             numberOfTried: 0,
             executionResults: [],
             data: {
-                emailMessage: emailMessage
+                actionAttributes: {
+                    typeOf: tttsapi.factory.actionType.SendAction,
+                    agent: req.staffUser,
+                    object: emailMessage,
+                    project: order.project,
+                    purpose: order,
+                    recipient: {
+                        id: order.customer.id,
+                        name: emailAttributes.toRecipient.name,
+                        typeOf: tttsapi.factory.personType.Person
+                    }
+                }
+                // emailMessage: emailMessage
             }
-        });
+        };
         yield taskService.create(taskAttributes);
         debug('sendEmail task created.');
     });
 }
 /**
  * チケット情報取得
- *
  */
 function getTicketInfo(reservations, __, locale) {
     // 券種ごとに合計枚数算出

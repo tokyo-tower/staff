@@ -98,10 +98,10 @@ function search(req, res) {
         }
         const clientIds = [];
         switch (purchaserGroup) {
-            case tttsapi.factory.person.Group.Customer:
+            case 'Customer':
                 clientIds.push(FRONTEND_CLIENT_ID);
                 break;
-            case tttsapi.factory.person.Group.Staff:
+            case 'Staff':
                 clientIds.push(STAFF_CLIENT_ID);
                 break;
             case 'POS':
@@ -118,8 +118,8 @@ function search(req, res) {
                 'reservedTicket.ticketType.id': 1,
                 'reservedTicket.ticketedSeat.seatNumber': 1
             },
-            typeOf: tttsapi.factory.reservationType.EventReservation,
-            reservationStatuses: [tttsapi.factory.reservationStatusType.ReservationConfirmed],
+            typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+            reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
             reservationFor: {
                 startFrom: eventStartFrom,
                 startThrough: eventStartThrough
@@ -210,7 +210,7 @@ function addCustomAttributes(reservations) {
                 paymentNo = paymentNoProperty.value;
             }
         }
-        return Object.assign({}, reservation, { paymentNo: paymentNo, payment_method_name: paymentMethod2name(paymentMethod4reservation), performance: reservation.reservationFor.id, performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'), performance_start_time: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HHmm'), performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'), performance_canceled: false, ticket_type: reservation.reservedTicket.ticketType.identifier, ticket_type_name: reservation.reservedTicket.ticketType.name, purchaser_group: (clientId === STAFF_CLIENT_ID) ? tttsapi.factory.person.Group.Staff : tttsapi.factory.person.Group.Customer, purchased_at: (reservation.bookingTime !== undefined) ? reservation.bookingTime : reservation.purchased_at, purchaser_name: (underName !== undefined) ? underName.name : '', purchaser_last_name: (underName !== undefined) ? underName.familyName : '', purchaser_first_name: (underName !== undefined) ? underName.givenName : '', purchaser_email: (underName !== undefined) ? underName.email : '', purchaser_tel: (underName !== undefined) ? underName.telephone : '', purchaser_international_tel: '', purchaser_age: age, purchaser_address: (underName !== undefined) ? underName.address : '', purchaser_gender: (underName !== undefined) ? underName.gender : '', watcher_name: reservation.additionalTicketText });
+        return Object.assign({}, reservation, { paymentNo: paymentNo, payment_method_name: paymentMethod2name(paymentMethod4reservation), performance: reservation.reservationFor.id, performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'), performance_start_time: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HHmm'), performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'), performance_canceled: false, ticket_type: reservation.reservedTicket.ticketType.identifier, ticket_type_name: reservation.reservedTicket.ticketType.name, purchaser_group: (clientId === STAFF_CLIENT_ID) ? 'Staff' : 'Customer', purchased_at: (reservation.bookingTime !== undefined) ? reservation.bookingTime : reservation.purchased_at, purchaser_name: (underName !== undefined) ? underName.name : '', purchaser_last_name: (underName !== undefined) ? underName.familyName : '', purchaser_first_name: (underName !== undefined) ? underName.givenName : '', purchaser_email: (underName !== undefined) ? underName.email : '', purchaser_tel: (underName !== undefined) ? underName.telephone : '', purchaser_international_tel: '', purchaser_age: age, purchaser_address: (underName !== undefined) ? underName.address : '', purchaser_gender: (underName !== undefined) ? underName.gender : '', watcher_name: reservation.additionalTicketText });
     });
 }
 /**

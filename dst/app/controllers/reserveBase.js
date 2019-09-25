@@ -42,8 +42,8 @@ function processStart(req) {
         const expires = moment().add(conf.get('temporary_reservation_valid_period_seconds'), 'seconds').toDate();
         const transaction = yield placeOrderTransactionService.start({
             expires: expires,
-            sellerIdentifier: sellerIdentifier,
-            purchaserGroup: tttsapi.factory.person.Group.Staff
+            sellerIdentifier: sellerIdentifier // 電波塔さんの組織識別子(現時点で固定)
+            // purchaserGroup: tttsapi.factory.person.Group.Staff
         });
         debug('transaction started.', transaction.id);
         // 取引セッションを初期化
@@ -66,7 +66,7 @@ function processStart(req) {
                 gender: ''
             },
             paymentMethod: tttsapi.factory.paymentMethodType.CreditCard,
-            purchaserGroup: transaction.object.purchaser_group,
+            purchaserGroup: 'Staff',
             transactionGMO: {
                 orderId: '',
                 amount: 0,
@@ -240,9 +240,11 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
         });
         const performance = yield eventService.findPerofrmanceById({ id: perfomanceId });
         // 券種セット
-        reservationModel.transactionInProgress.ticketTypes = performance.ticket_type_group.ticket_types.map((t) => {
-            return Object.assign({}, t, { count: 0, watcher_name: '' }, { id: t.identifier });
-        });
+        if (performance.ticket_type_group !== undefined) {
+            reservationModel.transactionInProgress.ticketTypes = performance.ticket_type_group.ticket_types.map((t) => {
+                return Object.assign({}, t, { count: 0, watcher_name: '' }, { id: t.identifier });
+            });
+        }
         // パフォーマンス情報を保管
         reservationModel.transactionInProgress.performance = performance;
     });
@@ -331,6 +333,7 @@ function createEmailAttributes(order, reservations, res) {
                     return;
                 }
                 resolve({
+                    typeOf: tttsapi.factory.creativeWorkType.EmailMessage,
                     sender: {
                         name: conf.get('email.fromname'),
                         email: conf.get('email.from')

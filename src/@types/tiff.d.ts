@@ -11,9 +11,13 @@ declare global {
             tttsAuthClient: tttsapi.auth.OAuth2;
         }
 
+        export interface IPlaceOrderTransactionResult extends tttsapi.factory.transaction.placeOrder.IResult {
+            printToken: string;
+        }
+
         interface ITransactionInProgress {
             /**
-             * 取引ID(MongoDBで発行される)
+             * 取引ID
              */
             id: string;
             /**
@@ -23,7 +27,7 @@ declare global {
             /**
              * 販売者ID
              */
-            seller: tttsapi.factory.organization.corporation.IOrganization;
+            seller: tttsapi.factory.seller.IOrganization<any>;
             /**
              * 販売者ID
              */
@@ -79,7 +83,7 @@ declare global {
         /**
          * チケット情報インターフェース
          */
-        type ITicketType = tttsapi.factory.offer.seatReservation.ITicketType & {
+        type ITicketType = tttsapi.factory.chevre.ticketType.ITicketType & {
             count: number;
         };
 
@@ -139,7 +143,7 @@ declare global {
             /**
              * 成立した取引結果
              */
-            transactionResult?: tttsapi.factory.transaction.placeOrder.IResult;
+            transactionResult?: IPlaceOrderTransactionResult;
         }
     }
 }
