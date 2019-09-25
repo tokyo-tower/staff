@@ -40,8 +40,8 @@ export async function processStart(req: Request): Promise<ReserveSessionModel> {
     const expires = moment().add(conf.get<number>('temporary_reservation_valid_period_seconds'), 'seconds').toDate();
     const transaction = await placeOrderTransactionService.start({
         expires: expires,
-        sellerIdentifier: sellerIdentifier, // 電波塔さんの組織識別子(現時点で固定)
-        purchaserGroup: tttsapi.factory.person.Group.Staff
+        sellerIdentifier: sellerIdentifier // 電波塔さんの組織識別子(現時点で固定)
+        // purchaserGroup: tttsapi.factory.person.Group.Staff
     });
     debug('transaction started.', transaction.id);
 
@@ -65,7 +65,7 @@ export async function processStart(req: Request): Promise<ReserveSessionModel> {
             gender: ''
         },
         paymentMethod: tttsapi.factory.paymentMethodType.CreditCard,
-        purchaserGroup: transaction.object.purchaser_group,
+        purchaserGroup: 'Staff',
         transactionGMO: {
             orderId: '',
             amount: 0,
@@ -248,7 +248,7 @@ export async function processFixProfile(reservationModel: ReserveSessionModel, r
     });
     const customerContact = await placeOrderTransactionService.setCustomerContact({
         transactionId: reservationModel.transactionInProgress.id,
-        contact: {
+        contact: <any>{
             last_name: contact.lastName,
             first_name: contact.firstName,
             email: contact.email,
@@ -278,9 +278,11 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
     const performance = await eventService.findPerofrmanceById({ id: perfomanceId });
 
     // 券種セット
-    reservationModel.transactionInProgress.ticketTypes = performance.ticket_type_group.ticket_types.map((t) => {
-        return { ...t, ...{ count: 0, watcher_name: '' }, id: t.identifier };
-    });
+    if (performance.ticket_type_group !== undefined) {
+        reservationModel.transactionInProgress.ticketTypes = performance.ticket_type_group.ticket_types.map((t) => {
+            return { ...t, ...{ count: 0, watcher_name: '' }, id: t.identifier };
+        });
+    }
 
     // パフォーマンス情報を保管
     reservationModel.transactionInProgress.performance = performance;
@@ -292,7 +294,7 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
 // tslint:disable-next-line:max-func-body-length
 export async function createEmailAttributes(
     order: tttsapi.factory.order.IOrder,
-    reservations: tttsapi.factory.reservation.event.IReservation[],
+    reservations: tttsapi.factory.order.IReservation[],
     res: Response
 ): Promise<tttsapi.factory.creativeWork.message.email.IAttributes> {
     // チケットコード順にソート
@@ -307,9 +309,8 @@ export async function createEmailAttributes(
         return 0;
     });
 
-    const underName = reservations[0].underName;
-    const to = (underName !== undefined && underName.email !== undefined)
-        ? underName.email
+    const to = (order.customer.email !== undefined)
+        ? order.customer.email
         : '';
     debug('to is', to);
     if (to.length === 0) {
@@ -354,10 +355,10 @@ export async function createEmailAttributes(
     const time: string = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
 
     // 日本語の時は"姓名"他は"名姓"
-    const purchaserName = (underName !== undefined)
+    const purchaserName = (order.customer !== undefined)
         ? (res.locale === 'ja') ?
-            `${underName.familyName} ${underName.givenName}` :
-            `${underName.givenName} ${underName.familyName}`
+            `${order.customer.familyName} ${order.customer.givenName}` :
+            `${order.customer.givenName} ${order.customer.familyName}`
         : '';
 
     debug('rendering template...');
@@ -386,6 +387,7 @@ export async function createEmailAttributes(
                 }
 
                 resolve({
+                    typeOf: tttsapi.factory.creativeWorkType.EmailMessage,
                     sender: {
                         name: conf.get<string>('email.fromname'),
                         email: conf.get<string>('email.from')

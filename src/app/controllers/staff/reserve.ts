@@ -279,7 +279,8 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                 (<Express.Session>req.session).transactionResult = transactionResult;
 
                 try {
-                    const reservations = transactionResult.order.acceptedOffers.map((o) => o.itemOffered);
+                    const reservations = <tttsapi.factory.order.IReservation[]>
+                        transactionResult.order.acceptedOffers.map((o) => o.itemOffered);
                     // 完了メールキュー追加(あれば更新日時を更新するだけ)
                     const emailAttributes = await reserveBaseController.createEmailAttributes(
                         transactionResult.order, reservations, res
@@ -342,7 +343,7 @@ export async function complete(req: Request, res: Response, next: NextFunction):
             return;
         }
 
-        const reservations = transactionResult.order.acceptedOffers.map((o) => o.itemOffered);
+        const reservations = <tttsapi.factory.order.IReservation[]>transactionResult.order.acceptedOffers.map((o) => o.itemOffered);
         debug(reservations.length, 'reservation(s) found.');
         // チケットを券種コードでソート
         sortReservationstByTicketType(reservations);
@@ -359,7 +360,7 @@ export async function complete(req: Request, res: Response, next: NextFunction):
 }
 
 type IReservation = tttsapi.factory.action.authorize.seatReservation.ITmpReservation |
-    tttsapi.factory.reservation.event.IReservation;
+    tttsapi.factory.order.IReservation;
 
 /**
  * チケットを券種コードでソートする

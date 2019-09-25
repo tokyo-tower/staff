@@ -103,10 +103,10 @@ export async function search(req: Request, res: Response): Promise<void> {
 
     const clientIds: string[] = [];
     switch (purchaserGroup) {
-        case tttsapi.factory.person.Group.Customer:
+        case 'Customer':
             clientIds.push(FRONTEND_CLIENT_ID);
             break;
-        case tttsapi.factory.person.Group.Staff:
+        case 'Staff':
             clientIds.push(STAFF_CLIENT_ID);
             break;
         case 'POS':
@@ -124,8 +124,8 @@ export async function search(req: Request, res: Response): Promise<void> {
             'reservedTicket.ticketType.id': 1,
             'reservedTicket.ticketedSeat.seatNumber': 1
         },
-        typeOf: tttsapi.factory.reservationType.EventReservation,
-        reservationStatuses: [tttsapi.factory.reservationStatusType.ReservationConfirmed],
+        typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+        reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
         reservationFor: {
             startFrom: eventStartFrom,
             startThrough: eventStartThrough
@@ -240,7 +240,7 @@ function addCustomAttributes(
             performance_canceled: false,
             ticket_type: reservation.reservedTicket.ticketType.identifier,
             ticket_type_name: <any>reservation.reservedTicket.ticketType.name,
-            purchaser_group: (clientId === STAFF_CLIENT_ID) ? tttsapi.factory.person.Group.Staff : tttsapi.factory.person.Group.Customer,
+            purchaser_group: (clientId === STAFF_CLIENT_ID) ? 'Staff' : 'Customer',
             purchased_at: (reservation.bookingTime !== undefined) ? reservation.bookingTime : (<any>reservation).purchased_at,
             purchaser_name: (underName !== undefined) ? underName.name : '',
             purchaser_last_name: (underName !== undefined) ? underName.familyName : '',

@@ -40,7 +40,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
 
         // 返金対象予約情報取得(入塔記録のないもの)
         const targetPlaceOrderTransactions = await getTargetReservationsForRefund(req, performanceIds);
-        debug('email target placeOrderTransactions:', targetPlaceOrderTransactions);
+        debug('email target placeOrderTransactions:', targetPlaceOrderTransactions.map((t) => t.id));
 
         // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
         const refundStatus: tttsapi.factory.performance.RefundStatus =
@@ -66,8 +66,8 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             // パフォーマンスに対する予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
             const searchReservationsResult = await reservationService.search({
                 limit: 100,
-                typeOf: tttsapi.factory.reservationType.EventReservation,
-                reservationStatuses: [tttsapi.factory.reservationStatusType.ReservationConfirmed],
+                typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+                reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
                 reservationFor: { id: performanceId }
             });
             const reservations4performance = searchReservationsResult.data;
@@ -75,7 +75,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             const reservationsAtLastUpdateDate: tttsapi.factory.performance.IReservationAtLastupdateDate[] =
                 reservations4performance.map((r) => {
                     let clientId: string = '';
-                    let purchaserGroup: tttsapi.factory.person.Group = tttsapi.factory.person.Group.Customer;
+                    let purchaserGroup: string = 'Customer';
                     let paymentMethod: string = '';
                     let orderNumber: string = '';
                     if (r.underName !== undefined && r.underName.identifier !== undefined) {
@@ -96,7 +96,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
 
                         // クライアントIDがstaffであればStaffグループ(その他はCustomer)
                         if (clientId === STAFF_CLIENT_ID) {
-                            purchaserGroup = tttsapi.factory.person.Group.Staff;
+                            purchaserGroup = 'Staff';
                         }
                     }
 
@@ -166,11 +166,12 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
         endpoint: <string>process.env.API_ENDPOINT,
         auth: req.tttsAuthClient
     });
-    const targetTransactionIds = await reservationService.distinct(
-        'transaction',
+    const targetReservations = await reservationService.distinct(
+        'underName',
+        // 'transaction',
         {
-            typeOf: tttsapi.factory.reservationType.EventReservation,
-            reservationStatuses: [tttsapi.factory.reservationStatusType.ReservationConfirmed],
+            typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+            reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
             // クライアントがfrontend or pos
             underName: {
                 identifiers: [
@@ -178,12 +179,24 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
                     { name: 'clientId', value: FRONTEND_CLIENT_ID }
                 ]
             },
-            // purchaser_group: tttsapi.factory.person.Group.Customer,
             reservationFor: {
                 ids: performanceIds
             },
             checkins: { $size: 0 }
         }
+    );
+    const targetTransactionIds = targetReservations.reduce<string[]>(
+        (a, b) => {
+            if (Array.isArray(b.identifier)) {
+                const transactionProperty = b.identifier.find((p: any) => p.name === 'transaction');
+                if (transactionProperty !== undefined) {
+                    a.push(transactionProperty.value);
+                }
+            }
+
+            return a;
+        },
+        []
     );
 
     // 全取引検索
@@ -229,7 +242,7 @@ async function createEmails(
     // 購入単位ごとにメール作成
     await Promise.all(transactions.map(async (transaction) => {
         const result = <tttsapi.factory.transaction.placeOrder.IResult>transaction.result;
-        const reservations = result.order.acceptedOffers.map((o) => o.itemOffered);
+        const reservations = result.order.acceptedOffers.map((o) => <tttsapi.factory.order.IReservation>o.itemOffered);
         const confirmedReservations = reservations
             .filter((r) => {
                 let extraProperty: tttsapi.factory.propertyValue.IPropertyValue<string> | undefined;
@@ -241,7 +254,7 @@ async function createEmails(
                     || extraProperty === undefined
                     || extraProperty.value !== '1';
             });
-        await createEmail(req, res, confirmedReservations, notice);
+        await createEmail(req, res, result.order, confirmedReservations, notice);
     }));
 }
 
@@ -254,7 +267,11 @@ async function createEmails(
  */
 // tslint:disable-next-line:max-func-body-length
 async function createEmail(
-    req: Request, res: Response, reservations: tttsapi.factory.reservation.event.IReservation[], notice: string
+    req: Request,
+    res: Response,
+    order: tttsapi.factory.order.IOrder,
+    reservations: tttsapi.factory.order.IReservation[],
+    notice: string
 ): Promise<void> {
     const reservation = reservations[0];
     // タイトル編集
@@ -264,13 +281,9 @@ async function createEmail(
     const titleEn = conf.get<string>('emailSus.titleEn');
 
     //トウキョウ タロウ 様
-    const underName = reservation.underName;
-    if (underName === undefined) {
-        throw new Error('Reservation UnderName undefined');
-    }
-    const purchaserNameJp = `${underName.familyName} ${underName.givenName}`;
+    const purchaserNameJp = `${order.customer.familyName} ${order.customer.givenName}`;
     const purchaserName: string = `${res.__('{{name}}様', { name: purchaserNameJp })}`;
-    const purchaserNameEn: string = `${res.__('Mr./Ms.{{name}}', { name: underName.name })}`;
+    const purchaserNameEn: string = `${res.__('Mr./Ms.{{name}}', { name: <string>order.customer.name })}`;
 
     // 購入チケット情報
     const paymentTicketInfos: string[] = [];
@@ -281,13 +294,8 @@ async function createEmail(
     const time: string = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
 
     // 購入番号
-    let paymentNo: string = reservation.reservationNumber;
-    if (Array.isArray(underName.identifier)) {
-        const paymentNoProperty = underName.identifier.find((p) => p.name === 'paymentNo');
-        if (paymentNoProperty !== undefined) {
-            paymentNo = paymentNoProperty.value;
-        }
-    }
+    // tslint:disable-next-line:no-magic-numbers
+    const paymentNo: string = order.confirmationNumber.slice(-6);
 
     paymentTicketInfos.push(`${res.__('PaymentNo')} : ${paymentNo}`);
     paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);
@@ -322,13 +330,14 @@ async function createEmail(
 
     // メール編集
     const emailAttributes: tttsapi.factory.creativeWork.message.email.IAttributes = {
+        typeOf: tttsapi.factory.creativeWorkType.EmailMessage,
         sender: {
             name: conf.get<string>('email.fromname'),
             email: conf.get<string>('email.from')
         },
         toRecipient: {
-            name: underName.name,
-            email: <string>underName.email
+            name: <string>order.customer.name,
+            email: <string>order.customer.email
         },
         about: `${title} ${titleEn}`,
         text: content
@@ -340,8 +349,10 @@ async function createEmail(
         auth: req.tttsAuthClient
     });
 
-    const emailMessage = tttsapi.factory.creativeWork.message.email.create({
+    const emailMessage: tttsapi.factory.creativeWork.message.email.ICreativeWork = {
+        typeOf: tttsapi.factory.creativeWorkType.EmailMessage,
         identifier: `updateOnlineStatus-${reservation.id}`,
+        name: `updateOnlineStatus-${reservation.id}`,
         sender: {
             typeOf: 'Corporation',
             name: emailAttributes.sender.name,
@@ -354,29 +365,41 @@ async function createEmail(
         },
         about: emailAttributes.about,
         text: emailAttributes.text
-    });
+    };
 
     // その場で送信ではなく、DBにタスクを登録
-    const taskAttributes = tttsapi.factory.task.sendEmailNotification.createAttributes({
+    const taskAttributes: tttsapi.factory.cinerino.task.IAttributes<tttsapi.factory.cinerino.taskName.SendEmailMessage> = {
+        name: tttsapi.factory.cinerino.taskName.SendEmailMessage,
+        project: order.project,
         status: tttsapi.factory.taskStatus.Ready,
         runsAt: new Date(), // なるはやで実行
         remainingNumberOfTries: 10,
-        lastTriedAt: null,
         numberOfTried: 0,
         executionResults: [],
         data: {
-            emailMessage: emailMessage
+            actionAttributes: {
+                typeOf: tttsapi.factory.actionType.SendAction,
+                agent: <any>req.staffUser,
+                object: emailMessage,
+                project: order.project,
+                purpose: order,
+                recipient: {
+                    id: order.customer.id,
+                    name: emailAttributes.toRecipient.name,
+                    typeOf: tttsapi.factory.personType.Person
+                }
+            }
+            // emailMessage: emailMessage
         }
-    });
+    };
     await taskService.create(taskAttributes);
     debug('sendEmail task created.');
 }
 
 /**
  * チケット情報取得
- *
  */
-export function getTicketInfo(reservations: tttsapi.factory.reservation.event.IReservation[], __: Function, locale: string): string[] {
+export function getTicketInfo(reservations: tttsapi.factory.order.IReservation[], __: Function, locale: string): string[] {
     // 券種ごとに合計枚数算出
     const ticketInfos: {
         [ticketTypeId: string]: {

@@ -125,7 +125,7 @@ function findSuspendedPerformances(req, conditions) {
             // パフォーマンスに対する予約数
             let searchReservationsResult = yield reservationService.search({
                 limit: 1,
-                typeOf: tttsapi.factory.reservationType.EventReservation,
+                typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
                 // クライアントがfrontend or pos
                 underName: {
                     identifiers: [
@@ -142,7 +142,7 @@ function findSuspendedPerformances(req, conditions) {
             // 未入場の予約数
             searchReservationsResult = yield reservationService.search({
                 limit: 1,
-                typeOf: tttsapi.factory.reservationType.EventReservation,
+                typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
                 // クライアントがfrontend or pos
                 underName: {
                     identifiers: [
@@ -161,7 +161,7 @@ function findSuspendedPerformances(req, conditions) {
             let reservationsAtLastUpdateDate = extension.reservationsAtLastUpdateDate;
             if (reservationsAtLastUpdateDate !== undefined) {
                 reservationsAtLastUpdateDate = reservationsAtLastUpdateDate
-                    .filter((r) => r.status === tttsapi.factory.reservationStatusType.ReservationConfirmed) // 確定ステータス
+                    .filter((r) => r.status === tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed) // 確定ステータス
                     // .filter((r) => r.purchaser_group === tttsapi.factory.person.Group.Customer) // 購入者一般
                     // frontendアプリケーションでの購入
                     .filter((r) => r.transaction_agent !== undefined
@@ -172,7 +172,7 @@ function findSuspendedPerformances(req, conditions) {
                 if (numberOfReservations > 0) {
                     searchReservationsResult = yield reservationService.search({
                         limit: 1,
-                        typeOf: tttsapi.factory.reservationType.EventReservation,
+                        typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
                         ids: reservationsAtLastUpdateDate.map((r) => r.id),
                         checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
                     });
@@ -233,18 +233,27 @@ function returnOrders(req, res) {
                 throw new Error('上映が終了していないので返品処理を実行できません。');
             }
             const task = yield taskService.create({
+                project: { typeOf: 'Project', id: process.env.PROJECT_ID },
                 name: tttsapi.factory.taskName.ReturnOrdersByPerformance,
                 status: tttsapi.factory.taskStatus.Ready,
                 runsAt: new Date(),
                 remainingNumberOfTries: 10,
-                lastTriedAt: null,
                 numberOfTried: 0,
                 executionResults: [],
                 data: {
                     agentId: process.env.API_CLIENT_ID,
                     performanceId: performanceId,
                     // 返品対象の注文クライアントID
-                    clientIds: [FRONTEND_CLIENT_ID, POS_CLIENT_ID]
+                    clientIds: [FRONTEND_CLIENT_ID, POS_CLIENT_ID],
+                    potentialActions: {
+                        returnOrder: {
+                            potentialActions: {
+                                informOrder: [
+                                    { recipient: { url: `${process.env.API_ENDPOINT}/webhooks/onReturnOrder` } }
+                                ]
+                            }
+                        }
+                    }
                 }
             });
             debug('returnAllByPerformance task created.', task);

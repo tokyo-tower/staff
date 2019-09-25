@@ -42,8 +42,8 @@ function processStart(req) {
         const expires = moment().add(conf.get('temporary_reservation_valid_period_seconds'), 'seconds').toDate();
         const transaction = yield placeOrderTransactionService.start({
             expires: expires,
-            sellerIdentifier: sellerIdentifier,
-            purchaserGroup: tttsapi.factory.person.Group.Staff
+            sellerIdentifier: sellerIdentifier // 電波塔さんの組織識別子(現時点で固定)
+            // purchaserGroup: tttsapi.factory.person.Group.Staff
         });
         debug('transaction started.', transaction.id);
         // 取引セッションを初期化
@@ -66,7 +66,7 @@ function processStart(req) {
                 gender: ''
             },
             paymentMethod: tttsapi.factory.paymentMethodType.CreditCard,
-            purchaserGroup: transaction.object.purchaser_group,
+            purchaserGroup: 'Staff',
             transactionGMO: {
                 orderId: '',
                 amount: 0,
@@ -240,9 +240,11 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
         });
         const performance = yield eventService.findPerofrmanceById({ id: perfomanceId });
         // 券種セット
-        reservationModel.transactionInProgress.ticketTypes = performance.ticket_type_group.ticket_types.map((t) => {
-            return Object.assign({}, t, { count: 0, watcher_name: '' }, { id: t.identifier });
-        });
+        if (performance.ticket_type_group !== undefined) {
+            reservationModel.transactionInProgress.ticketTypes = performance.ticket_type_group.ticket_types.map((t) => {
+                return Object.assign({}, t, { count: 0, watcher_name: '' }, { id: t.identifier });
+            });
+        }
         // パフォーマンス情報を保管
         reservationModel.transactionInProgress.performance = performance;
     });
@@ -264,9 +266,8 @@ function createEmailAttributes(order, reservations, res) {
             }
             return 0;
         });
-        const underName = reservations[0].underName;
-        const to = (underName !== undefined && underName.email !== undefined)
-            ? underName.email
+        const to = (order.customer.email !== undefined)
+            ? order.customer.email
             : '';
         debug('to is', to);
         if (to.length === 0) {
@@ -307,10 +308,10 @@ function createEmailAttributes(order, reservations, res) {
         const day = moment(event.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD');
         const time = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
         // 日本語の時は"姓名"他は"名姓"
-        const purchaserName = (underName !== undefined)
+        const purchaserName = (order.customer !== undefined)
             ? (res.locale === 'ja') ?
-                `${underName.familyName} ${underName.givenName}` :
-                `${underName.givenName} ${underName.familyName}`
+                `${order.customer.familyName} ${order.customer.givenName}` :
+                `${order.customer.givenName} ${order.customer.familyName}`
             : '';
         debug('rendering template...');
         return new Promise((resolve, reject) => {
@@ -332,6 +333,7 @@ function createEmailAttributes(order, reservations, res) {
                     return;
                 }
                 resolve({
+                    typeOf: tttsapi.factory.creativeWorkType.EmailMessage,
                     sender: {
                         name: conf.get('email.fromname'),
                         email: conf.get('email.from')
