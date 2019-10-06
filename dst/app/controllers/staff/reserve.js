@@ -16,6 +16,7 @@ const conf = require("config");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
+const numeral = require("numeral");
 const _ = require("underscore");
 const reservePerformanceForm_1 = require("../../forms/reserve/reservePerformanceForm");
 const session_1 = require("../../models/reserve/session");
@@ -270,9 +271,8 @@ function confirm(req, res, next) {
                     // 購入結果セッション作成
                     req.session.transactionResult = transactionResult;
                     try {
-                        const reservations = transactionResult.order.acceptedOffers.map((o) => o.itemOffered);
-                        // 完了メールキュー追加(あれば更新日時を更新するだけ)
-                        const emailAttributes = yield reserveBaseController.createEmailAttributes(transactionResult.order, reservations, res);
+                        // 完了メールキュー追加
+                        const emailAttributes = yield reserveBaseController.createEmailAttributes(transactionResult.order, res);
                         yield placeOrderTransactionService.sendEmailNotification({
                             transactionId: reservationModel.transactionInProgress.id,
                             emailMessageAttributes: emailAttributes
@@ -296,7 +296,24 @@ function confirm(req, res, next) {
             else {
                 // チケットを券種コードでソート
                 sortReservationstByTicketType(reservationModel.transactionInProgress.reservations);
-                const ticketInfos = reserveBaseController.getTicketInfos(reservationModel.transactionInProgress.reservations);
+                const ticketInfos = {};
+                for (const reservation of reservationModel.transactionInProgress.reservations) {
+                    const ticketType = reservation.reservedTicket.ticketType;
+                    const price = reservation.unitPrice;
+                    const dataValue = ticketType.identifier;
+                    // チケットタイプごとにチケット情報セット
+                    if (!ticketInfos.hasOwnProperty(dataValue)) {
+                        ticketInfos[dataValue] = {
+                            ticket_type_name: ticketType.name,
+                            charge: `\\${numeral(price).format('0,0')}`,
+                            watcher_name: reservation.additionalTicketText,
+                            count: 1
+                        };
+                    }
+                    else {
+                        ticketInfos[dataValue].count += 1;
+                    }
+                }
                 // 券種ごとの表示情報編集
                 Object.keys(ticketInfos).forEach((key) => {
                     const ticketInfo = ticketInfos[key];
@@ -328,8 +345,10 @@ function complete(req, res, next) {
                 next(new Error(req.__('NotFound')));
                 return;
             }
-            const reservations = transactionResult.order.acceptedOffers.map((o) => o.itemOffered);
-            debug(reservations.length, 'reservation(s) found.');
+            const reservations = transactionResult.order.acceptedOffers.map((o) => {
+                const unitPrice = reserveBaseController.getUnitPriceByAcceptedOffer(o);
+                return Object.assign({}, o.itemOffered, { unitPrice: unitPrice });
+            });
             // チケットを券種コードでソート
             sortReservationstByTicketType(reservations);
             res.render('staff/reserve/complete', {

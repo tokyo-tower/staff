@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- セッション中の仮予約情報を最適化
+
+- 注文アイテムの価格情報取得方法を調整
+
 ### Deprecated
 
 ### Removed

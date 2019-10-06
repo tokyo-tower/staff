@@ -43,7 +43,6 @@ function processStart(req) {
         const transaction = yield placeOrderTransactionService.start({
             expires: expires,
             sellerIdentifier: sellerIdentifier // 電波塔さんの組織識別子(現時点で固定)
-            // purchaserGroup: tttsapi.factory.person.Group.Staff
         });
         debug('transaction started.', transaction.id);
         // 取引セッションを初期化
@@ -127,9 +126,18 @@ function processFixSeatsAndTickets(reservationModel, req) {
             offers: offers
         });
         reservationModel.transactionInProgress.seatReservationAuthorizeActionId = action.id;
-        const tmpReservations = action.result.tmpReservations;
         // セッションに保管
-        reservationModel.transactionInProgress.reservations = tmpReservations;
+        reservationModel.transactionInProgress.reservations = offers.map((o) => {
+            const ticketType = reservationModel.transactionInProgress.ticketTypes.find((t) => t.id === o.ticket_type);
+            if (ticketType === undefined) {
+                throw new Error(`Unknown Ticket Type ${o.ticket_type}`);
+            }
+            return {
+                additionalTicketText: o.watcher_name,
+                reservedTicket: { ticketType: ticketType },
+                unitPrice: (ticketType.priceSpecification !== undefined) ? ticketType.priceSpecification.price : 0
+            };
+        });
     });
 }
 exports.processFixSeatsAndTickets = processFixSeatsAndTickets;
@@ -254,18 +262,22 @@ exports.processFixPerformance = processFixPerformance;
  * 予約完了メールを作成する
  */
 // tslint:disable-next-line:max-func-body-length
-function createEmailAttributes(order, reservations, res) {
+function createEmailAttributes(order, res) {
     return __awaiter(this, void 0, void 0, function* () {
+        const acceptedOffers = order.acceptedOffers;
         // チケットコード順にソート
-        reservations.sort((a, b) => {
-            if (a.reservedTicket.ticketType.identifier < b.reservedTicket.ticketType.identifier) {
+        acceptedOffers.sort((a, b) => {
+            if (a.itemOffered.reservedTicket.ticketType.identifier
+                < b.itemOffered.reservedTicket.ticketType.identifier) {
                 return -1;
             }
-            if (a.reservedTicket.ticketType.identifier > b.reservedTicket.ticketType.identifier) {
+            if (a.itemOffered.reservedTicket.ticketType.identifier
+                > b.itemOffered.reservedTicket.ticketType.identifier) {
                 return 1;
             }
             return 0;
         });
+        const reservations = acceptedOffers.map((o) => o.itemOffered);
         const to = (order.customer.email !== undefined)
             ? order.customer.email
             : '';
@@ -277,13 +289,10 @@ function createEmailAttributes(order, reservations, res) {
         const titleEmail = res.__('EmailTitle');
         // 券種ごとに合計枚数算出
         const ticketInfos = {};
-        for (const reservation of reservations) {
-            // チケットタイプセット
+        for (const acceptedOffer of acceptedOffers) {
+            const reservation = acceptedOffer.itemOffered;
             const ticketType = reservation.reservedTicket.ticketType;
-            let price = 0;
-            if (reservation.reservedTicket !== undefined && reservation.reservedTicket.ticketType.priceSpecification !== undefined) {
-                price = reservation.reservedTicket.ticketType.priceSpecification.price;
-            }
+            const price = getUnitPriceByAcceptedOffer(acceptedOffer);
             const dataValue = ticketType.identifier;
             // チケットタイプごとにチケット情報セット
             if (!ticketInfos.hasOwnProperty(dataValue)) {
@@ -313,7 +322,6 @@ function createEmailAttributes(order, reservations, res) {
                 `${order.customer.familyName} ${order.customer.givenName}` :
                 `${order.customer.givenName} ${order.customer.familyName}`
             : '';
-        debug('rendering template...');
         return new Promise((resolve, reject) => {
             res.render('email/reserve/complete', {
                 layout: false,
@@ -350,19 +358,43 @@ function createEmailAttributes(order, reservations, res) {
     });
 }
 exports.createEmailAttributes = createEmailAttributes;
+function getUnitPriceByAcceptedOffer(offer) {
+    let unitPrice = 0;
+    if (offer.priceSpecification !== undefined) {
+        const priceSpecification = offer.priceSpecification;
+        if (Array.isArray(priceSpecification.priceComponent)) {
+            const unitPriceSpec = priceSpecification.priceComponent.find((c) => c.typeOf === tttsapi.factory.chevre.priceSpecificationType.UnitPriceSpecification);
+            if (unitPriceSpec !== undefined && unitPriceSpec.price !== undefined && Number.isInteger(unitPriceSpec.price)) {
+                unitPrice = unitPriceSpec.price;
+            }
+        }
+    }
+    return unitPrice;
+}
+exports.getUnitPriceByAcceptedOffer = getUnitPriceByAcceptedOffer;
 /**
  * チケット情報(券種ごとの枚数)取得
  */
-function getTicketInfos(reservations) {
+function getTicketInfos(order) {
     // 券種ごとに合計枚数算出
     const ticketInfos = {};
-    for (const reservation of reservations) {
-        // チケットタイプセット
-        const ticketType = reservation.reservedTicket.ticketType;
-        let price = 0;
-        if (ticketType.priceSpecification !== undefined) {
-            price = ticketType.priceSpecification.price;
+    const acceptedOffers = order.acceptedOffers;
+    // チケットコード順にソート
+    acceptedOffers.sort((a, b) => {
+        if (a.itemOffered.reservedTicket.ticketType.identifier
+            < b.itemOffered.reservedTicket.ticketType.identifier) {
+            return -1;
         }
+        if (a.itemOffered.reservedTicket.ticketType.identifier
+            > b.itemOffered.reservedTicket.ticketType.identifier) {
+            return 1;
+        }
+        return 0;
+    });
+    for (const acceptedOffer of acceptedOffers) {
+        const reservation = acceptedOffer.itemOffered;
+        const ticketType = reservation.reservedTicket.ticketType;
+        const price = getUnitPriceByAcceptedOffer(acceptedOffer);
         const dataValue = ticketType.identifier;
         // チケットタイプごとにチケット情報セット
         if (!ticketInfos.hasOwnProperty(dataValue)) {

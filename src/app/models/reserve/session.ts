@@ -47,13 +47,10 @@ export default class ReserveSessionModel {
         let total = 0;
 
         if (Array.isArray(this.transactionInProgress.reservations)) {
-            this.transactionInProgress.reservations.forEach((reservation) => {
-                let price = 0;
-                if (reservation.reservedTicket !== undefined && reservation.reservedTicket.ticketType.priceSpecification !== undefined) {
-                    price = reservation.reservedTicket.ticketType.priceSpecification.price;
-                }
-                total += price;
-            });
+            total = this.transactionInProgress.reservations.reduce(
+                (a, b) => a + b.unitPrice,
+                0
+            );
         }
 
         return total;

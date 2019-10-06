@@ -8,6 +8,7 @@ import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 import { CONFLICT, TOO_MANY_REQUESTS } from 'http-status';
 import * as moment from 'moment-timezone';
+import * as numeral from 'numeral';
 import * as _ from 'underscore';
 
 import reservePerformanceForm from '../../forms/reserve/reservePerformanceForm';
@@ -279,11 +280,9 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                 (<Express.Session>req.session).transactionResult = transactionResult;
 
                 try {
-                    const reservations = <tttsapi.factory.order.IReservation[]>
-                        transactionResult.order.acceptedOffers.map((o) => o.itemOffered);
-                    // 完了メールキュー追加(あれば更新日時を更新するだけ)
+                    // 完了メールキュー追加
                     const emailAttributes = await reserveBaseController.createEmailAttributes(
-                        transactionResult.order, reservations, res
+                        transactionResult.order, res
                     );
 
                     await placeOrderTransactionService.sendEmailNotification({
@@ -311,7 +310,25 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
             // チケットを券種コードでソート
             sortReservationstByTicketType(reservationModel.transactionInProgress.reservations);
 
-            const ticketInfos: any = reserveBaseController.getTicketInfos(reservationModel.transactionInProgress.reservations);
+            const ticketInfos: { [key: string]: any } = {};
+            for (const reservation of reservationModel.transactionInProgress.reservations) {
+                const ticketType = reservation.reservedTicket.ticketType;
+                const price = reservation.unitPrice;
+
+                const dataValue = ticketType.identifier;
+                // チケットタイプごとにチケット情報セット
+                if (!ticketInfos.hasOwnProperty(dataValue)) {
+                    ticketInfos[dataValue] = {
+                        ticket_type_name: ticketType.name,
+                        charge: `\\${numeral(price).format('0,0')}`,
+                        watcher_name: reservation.additionalTicketText,
+                        count: 1
+                    };
+                } else {
+                    ticketInfos[dataValue].count += 1;
+                }
+            }
+
             // 券種ごとの表示情報編集
             Object.keys(ticketInfos).forEach((key) => {
                 const ticketInfo = ticketInfos[key];
@@ -343,8 +360,15 @@ export async function complete(req: Request, res: Response, next: NextFunction):
             return;
         }
 
-        const reservations = <tttsapi.factory.order.IReservation[]>transactionResult.order.acceptedOffers.map((o) => o.itemOffered);
-        debug(reservations.length, 'reservation(s) found.');
+        const reservations = transactionResult.order.acceptedOffers.map((o) => {
+            const unitPrice = reserveBaseController.getUnitPriceByAcceptedOffer(o);
+
+            return {
+                ...<tttsapi.factory.order.IReservation>o.itemOffered,
+                unitPrice: unitPrice
+            };
+        });
+
         // チケットを券種コードでソート
         sortReservationstByTicketType(reservations);
 
@@ -359,13 +383,10 @@ export async function complete(req: Request, res: Response, next: NextFunction):
     }
 }
 
-type IReservation = tttsapi.factory.action.authorize.seatReservation.ITmpReservation |
-    tttsapi.factory.order.IReservation;
-
 /**
  * チケットを券種コードでソートする
  */
-function sortReservationstByTicketType(reservations: IReservation[]): void {
+function sortReservationstByTicketType(reservations: Express.ITmpReservation[]): void {
     // チケットを券種コードでソート
     reservations.sort((a, b) => {
         if (a.reservedTicket.ticketType.identifier > b.reservedTicket.ticketType.identifier) {
