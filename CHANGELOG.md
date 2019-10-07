@@ -18,6 +18,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.9.0 - 2019-10-07
+
+### Changed
+
+- セッション中の仮予約情報を最適化
+- 注文アイテムの価格情報取得方法を調整
+
 ## v4.8.0 - 2019-09-25
 
 ### Changed

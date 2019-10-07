@@ -53,7 +53,7 @@ if (Array.isArray(performance.additionalProperty)) {
                             <span class="codeimg-barcode" data-qrcode=<%= reservation.id %>></span>
                             <p>
                                 <%- reservation.reservedTicket.ticketType.name[locale] || reservation.reservedTicket.ticketType.name.en %>
-                                <%- __('{{price}} yen', { price: reservation.reservedTicket.ticketType.priceSpecification.price } ) %><br>
+                                <%- __('{{price}} yen', { price: reservation.unitPrice } ) %><br>
                                 <%- `${__('EmailReserveDate')}: ${moment(reservations[0].reservationFor.startDate).tz('Asia/Tokyo').format('LLL')}` %><br>
                                 <%- `${__('TourNumber')}: ${tourNumber}` %><br>
                                 <%- reservation.reservedTicket.ticketedSeat.seatNumber %><br>

@@ -17,6 +17,7 @@ const createDebug = require("debug");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const numeral = require("numeral");
+const reserveBase_1 = require("../reserveBase");
 const debug = createDebug('ttts-staff:controllers');
 const STAFF_CLIENT_ID = process.env.API_CLIENT_ID;
 const POS_CLIENT_ID = process.env.POS_CLIENT_ID;
@@ -217,18 +218,7 @@ function createEmails(req, res, transactions, notice) {
         // 購入単位ごとにメール作成
         yield Promise.all(transactions.map((transaction) => __awaiter(this, void 0, void 0, function* () {
             const result = transaction.result;
-            const reservations = result.order.acceptedOffers.map((o) => o.itemOffered);
-            const confirmedReservations = reservations
-                .filter((r) => {
-                let extraProperty;
-                if (r.additionalProperty !== undefined) {
-                    extraProperty = r.additionalProperty.find((p) => p.name === 'extra');
-                }
-                return r.additionalProperty === undefined
-                    || extraProperty === undefined
-                    || extraProperty.value !== '1';
-            });
-            yield createEmail(req, res, result.order, confirmedReservations, notice);
+            yield createEmail(req, res, result.order, notice);
         })));
     });
 }
@@ -240,9 +230,9 @@ function createEmails(req, res, transactions, notice) {
  * @return {Promise<void>}
  */
 // tslint:disable-next-line:max-func-body-length
-function createEmail(req, res, order, reservations, notice) {
+function createEmail(req, res, order, notice) {
     return __awaiter(this, void 0, void 0, function* () {
-        const reservation = reservations[0];
+        const reservation = order.acceptedOffers[0].itemOffered;
         // タイトル編集
         // 東京タワー TOP DECK Ticket
         // 東京タワー TOP DECK エレベータ運行停止のお知らせ
@@ -264,7 +254,7 @@ function createEmail(req, res, order, reservations, notice) {
         paymentTicketInfos.push(`${res.__('PaymentNo')} : ${paymentNo}`);
         paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);
         paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`); // 券種 枚数
-        const infos = getTicketInfo(reservations, res.__, res.locale); // TOP DECKチケット(大人) 1枚
+        const infos = getTicketInfo(order, res.__, res.locale); // TOP DECKチケット(大人) 1枚
         paymentTicketInfos.push(infos.join('\n'));
         // 英語表記を追加
         paymentTicketInfos.push(''); // 日英の間の改行
@@ -272,7 +262,7 @@ function createEmail(req, res, order, reservations, notice) {
         paymentTicketInfos.push(`${res.__({ phrase: 'EmailReserveDate', locale: 'en' })} : ${day} ${time}`);
         paymentTicketInfos.push(`${res.__({ phrase: 'TicketType', locale: 'en' })} ${res.__({ phrase: 'TicketCount', locale: 'en' })}`);
         // TOP DECKチケット(大人) 1枚
-        const infosEn = getTicketInfo(reservations, res.__, 'en');
+        const infosEn = getTicketInfo(order, res.__, 'en');
         paymentTicketInfos.push(infosEn.join('\n'));
         // foot
         const foot1 = conf.get('emailSus.EmailFoot1');
@@ -356,16 +346,27 @@ function createEmail(req, res, order, reservations, notice) {
 /**
  * チケット情報取得
  */
-function getTicketInfo(reservations, __, locale) {
+function getTicketInfo(order, __, locale) {
+    const acceptedOffers = order.acceptedOffers;
+    // チケットコード順にソート
+    acceptedOffers.sort((a, b) => {
+        if (a.itemOffered.reservedTicket.ticketType.identifier
+            < b.itemOffered.reservedTicket.ticketType.identifier) {
+            return -1;
+        }
+        if (a.itemOffered.reservedTicket.ticketType.identifier
+            > b.itemOffered.reservedTicket.ticketType.identifier) {
+            return 1;
+        }
+        return 0;
+    });
     // 券種ごとに合計枚数算出
     const ticketInfos = {};
-    for (const reservation of reservations) {
+    for (const acceptedOffer of acceptedOffers) {
         // チケットタイプごとにチケット情報セット
+        const reservation = acceptedOffer.itemOffered;
         const ticketType = reservation.reservedTicket.ticketType;
-        let price = 0;
-        if (reservation.reservedTicket !== undefined && reservation.reservedTicket.ticketType.priceSpecification !== undefined) {
-            price = reservation.reservedTicket.ticketType.priceSpecification.price;
-        }
+        const price = reserveBase_1.getUnitPriceByAcceptedOffer(acceptedOffer);
         if (ticketInfos[ticketType.identifier] === undefined) {
             ticketInfos[ticketType.identifier] = {
                 ticket_type_name: ticketType.name[locale],
