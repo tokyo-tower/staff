@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.9.2 - 2019-10-09
+
+### Changed
+
+- 注文返品後アクションに予約通知アクションを指定するように変更
+
 ## v4.9.1 - 2019-10-09
 
 ### Changed
