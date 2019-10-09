@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 注文返品後アクションに予約通知アクションを指定するように変更
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v4.9.1 - 2019-10-09
+
+### Changed
+
+- 注文返品後アクションに予約通知アクションを指定するように変更
 
 ## v4.9.0 - 2019-10-07
 
