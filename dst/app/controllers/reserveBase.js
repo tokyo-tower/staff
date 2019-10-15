@@ -11,16 +11,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * 座席予約ベースコントローラー
  */
+const cinerinoapi = require("@cinerino/api-nodejs-client");
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const conf = require("config");
 const createDebug = require("debug");
 const moment = require("moment-timezone");
 const numeral = require("numeral");
+const request = require("request-promise-native");
 const _ = require("underscore");
 const reserveProfileForm_1 = require("../forms/reserve/reserveProfileForm");
 const reserveTicketForm_1 = require("../forms/reserve/reserveTicketForm");
 const session_1 = require("../models/reserve/session");
 const debug = createDebug('ttts-staff:controller');
+var PaymentMethodType;
+(function (PaymentMethodType) {
+    PaymentMethodType["CP"] = "CP";
+    PaymentMethodType["Invoice"] = "Invoice";
+    PaymentMethodType["GroupReservation"] = "GroupReservation";
+    PaymentMethodType["Charter"] = "Charter";
+    PaymentMethodType["OTC"] = "OTC";
+    PaymentMethodType["Invitation"] = "Invitation";
+})(PaymentMethodType = exports.PaymentMethodType || (exports.PaymentMethodType = {}));
 /**
  * 購入開始プロセス
  */
@@ -29,8 +40,8 @@ function processStart(req) {
     return __awaiter(this, void 0, void 0, function* () {
         // 言語も指定
         req.session.locale = (!_.isEmpty(req.query.locale)) ? req.query.locale : 'ja';
-        const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
-            endpoint: process.env.API_ENDPOINT,
+        const placeOrderTransactionService = new cinerinoapi.service.transaction.PlaceOrder4ttts({
+            endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
         const oragnizationService = new tttsapi.service.Organization({
@@ -39,10 +50,17 @@ function processStart(req) {
         });
         const sellerIdentifier = 'TokyoTower';
         const seller = yield oragnizationService.findCorporationByIdentifier({ identifier: sellerIdentifier });
+        // WAITER許可証を取得
+        const scope = 'placeOrderTransaction.TokyoTower.Staff';
+        const { token } = yield request.post(`${process.env.WAITER_ENDPOINT}/projects/${process.env.PROJECT_ID}/passports`, {
+            json: true,
+            body: { scope: scope }
+        }).then((body) => body);
         const expires = moment().add(conf.get('temporary_reservation_valid_period_seconds'), 'seconds').toDate();
         const transaction = yield placeOrderTransactionService.start({
             expires: expires,
-            sellerIdentifier: sellerIdentifier // 電波塔さんの組織識別子(現時点で固定)
+            sellerIdentifier: sellerIdentifier,
+            passportToken: token
         });
         debug('transaction started.', transaction.id);
         // 取引セッションを初期化
@@ -109,8 +127,8 @@ function processFixSeatsAndTickets(reservationModel, req) {
         // セッション中の予約リストを初期化
         reservationModel.transactionInProgress.reservations = [];
         // 座席承認アクション
-        const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
-            endpoint: process.env.API_ENDPOINT,
+        const placeOrderTransactionService = new cinerinoapi.service.transaction.PlaceOrder4ttts({
+            endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
         const offers = checkInfo.choicesAll.map((choice) => {
@@ -212,8 +230,8 @@ function processFixProfile(reservationModel, req, res) {
         };
         reservationModel.transactionInProgress.purchaser = contact;
         reservationModel.transactionInProgress.paymentMethod = req.body.paymentMethod;
-        const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
-            endpoint: process.env.API_ENDPOINT,
+        const placeOrderTransactionService = new cinerinoapi.service.transaction.PlaceOrder4ttts({
+            endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
         const customerContact = yield placeOrderTransactionService.setCustomerContact({

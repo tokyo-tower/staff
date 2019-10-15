@@ -1,6 +1,7 @@
 /**
  * パフォーマンスAPIコントローラー
  */
+import * as cinerinoapi from '@cinerino/api-nodejs-client';
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
 import * as conf from 'config';
@@ -158,7 +159,7 @@ export type IPlaceOrderTransaction = tttsapi.factory.transaction.placeOrder.ITra
  *  [同一購入単位に入塔記録のない]予約のid配列
  */
 export async function getTargetReservationsForRefund(req: Request, performanceIds: string[]): Promise<IPlaceOrderTransaction[]> {
-    const placeOrderService = new tttsapi.service.transaction.PlaceOrder({
+    const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
         endpoint: <string>process.env.API_ENDPOINT,
         auth: req.tttsAuthClient
     });

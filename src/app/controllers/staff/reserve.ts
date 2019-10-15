@@ -1,6 +1,7 @@
 /**
  * 内部関係者座席予約コントローラー
  */
+import * as cinerinoapi from '@cinerino/api-nodejs-client';
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
 import * as conf from 'config';
@@ -125,7 +126,7 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
             throw new Error(req.__('UnexpectedError'));
         }
 
-        reservationModel.transactionInProgress.paymentMethod = tttsapi.factory.paymentMethodType.CP;
+        reservationModel.transactionInProgress.paymentMethod = reserveBaseController.PaymentMethodType.CP;
 
         if (req.method === 'POST') {
             // 仮予約あればキャンセルする
@@ -135,8 +136,8 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
 
                 // 座席仮予約があればキャンセル
                 if (reservationModel.transactionInProgress.seatReservationAuthorizeActionId !== undefined) {
-                    const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
-                        endpoint: <string>process.env.API_ENDPOINT,
+                    const placeOrderTransactionService = new cinerinoapi.service.transaction.PlaceOrder4ttts({
+                        endpoint: <string>process.env.CINERINO_API_ENDPOINT,
                         auth: req.tttsAuthClient
                     });
                     debug('canceling seat reservation authorize action...');
@@ -239,7 +240,7 @@ export async function profile(req: Request, res: Response, next: NextFunction): 
             res.locals.paymentMethod =
                 (!_.isEmpty(reservationModel.transactionInProgress.paymentMethod))
                     ? reservationModel.transactionInProgress.paymentMethod
-                    : tttsapi.factory.paymentMethodType.CP;
+                    : reserveBaseController.PaymentMethodType.CP;
 
             res.render('staff/reserve/profile', {
                 reservationModel: reservationModel,
@@ -266,13 +267,15 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
         if (req.method === 'POST') {
             try {
                 // 予約確定
-                const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
-                    endpoint: <string>process.env.API_ENDPOINT,
+                const placeOrderTransactionService = new cinerinoapi.service.transaction.PlaceOrder4ttts({
+                    endpoint: <string>process.env.CINERINO_API_ENDPOINT,
                     auth: req.tttsAuthClient
                 });
                 const transactionResult = await placeOrderTransactionService.confirm({
                     transactionId: reservationModel.transactionInProgress.id,
-                    paymentMethod: reservationModel.transactionInProgress.paymentMethod
+                    paymentMethod: <any>reservationModel.transactionInProgress.paymentMethod,
+                    informOrderUrl: `${<string>process.env.API_ENDPOINT}/webhooks/onPlaceOrder`,
+                    informReservationUrl: `${<string>process.env.API_ENDPOINT}/webhooks/onReservationConfirmed`
                 });
                 debug('transaction confirmed. orderNumber:', transactionResult.order.orderNumber);
 

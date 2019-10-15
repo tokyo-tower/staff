@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * パフォーマンスAPIコントローラー
  */
+const cinerinoapi = require("@cinerino/api-nodejs-client");
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const conf = require("config");
 const createDebug = require("debug");
@@ -145,7 +146,7 @@ exports.updateOnlineStatus = updateOnlineStatus;
  */
 function getTargetReservationsForRefund(req, performanceIds) {
     return __awaiter(this, void 0, void 0, function* () {
-        const placeOrderService = new tttsapi.service.transaction.PlaceOrder({
+        const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
             endpoint: process.env.API_ENDPOINT,
             auth: req.tttsAuthClient
         });

@@ -1,3 +1,4 @@
+import * as cinerinoapi from '@cinerino/api-nodejs-client';
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
 import * as express from 'express';
@@ -11,7 +12,7 @@ declare global {
             tttsAuthClient: tttsapi.auth.OAuth2;
         }
 
-        export interface IPlaceOrderTransactionResult extends tttsapi.factory.transaction.placeOrder.IResult {
+        export interface IPlaceOrderTransactionResult extends cinerinoapi.factory.transaction.placeOrder.IResult {
             printToken: string;
         }
 
@@ -27,7 +28,7 @@ declare global {
                 /**
                  * 券種
                  */
-                ticketType: tttsapi.factory.chevre.ticketType.ITicketType;
+                ticketType: cinerinoapi.factory.chevre.ticketType.ITicketType;
             };
             /**
              * 単価
@@ -47,7 +48,7 @@ declare global {
             /**
              * 販売者ID
              */
-            seller: tttsapi.factory.seller.IOrganization<any>;
+            seller: cinerinoapi.factory.seller.IOrganization<any>;
             /**
              * 販売者ID
              */
@@ -85,7 +86,7 @@ declare global {
             /**
              * 決済方法
              */
-            paymentMethod: tttsapi.factory.paymentMethodType;
+            paymentMethod: String;
             /**
              * 購入者区分
              */
@@ -103,7 +104,7 @@ declare global {
         /**
          * チケット情報インターフェース
          */
-        type ITicketType = tttsapi.factory.chevre.ticketType.ITicketType & {
+        type ITicketType = cinerinoapi.factory.chevre.ticketType.ITicketType & {
             count: number;
         };
 

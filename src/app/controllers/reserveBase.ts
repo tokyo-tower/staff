@@ -1,6 +1,7 @@
 /**
  * 座席予約ベースコントローラー
  */
+import * as cinerinoapi from '@cinerino/api-nodejs-client';
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
 import * as conf from 'config';
@@ -8,6 +9,7 @@ import * as createDebug from 'debug';
 import { Request, Response } from 'express';
 import * as moment from 'moment-timezone';
 import * as numeral from 'numeral';
+import * as request from 'request-promise-native';
 import * as _ from 'underscore';
 
 import reserveProfileForm from '../forms/reserve/reserveProfileForm';
@@ -17,6 +19,15 @@ import StaffUser from '../models/user/staff';
 
 const debug = createDebug('ttts-staff:controller');
 
+export enum PaymentMethodType {
+    CP = 'CP',
+    Invoice = 'Invoice',
+    GroupReservation = 'GroupReservation',
+    Charter = 'Charter',
+    OTC = 'OTC',
+    Invitation = 'Invitation'
+}
+
 /**
  * 購入開始プロセス
  */
@@ -25,8 +36,8 @@ export async function processStart(req: Request): Promise<ReserveSessionModel> {
     // 言語も指定
     (<Express.Session>req.session).locale = (!_.isEmpty(req.query.locale)) ? req.query.locale : 'ja';
 
-    const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
-        endpoint: <string>process.env.API_ENDPOINT,
+    const placeOrderTransactionService = new cinerinoapi.service.transaction.PlaceOrder4ttts({
+        endpoint: <string>process.env.CINERINO_API_ENDPOINT,
         auth: req.tttsAuthClient
     });
     const oragnizationService = new tttsapi.service.Organization({
@@ -37,10 +48,21 @@ export async function processStart(req: Request): Promise<ReserveSessionModel> {
     const sellerIdentifier = 'TokyoTower';
     const seller = await oragnizationService.findCorporationByIdentifier({ identifier: sellerIdentifier });
 
+    // WAITER許可証を取得
+    const scope = 'placeOrderTransaction.TokyoTower.Staff';
+    const { token } = await request.post(
+        `${process.env.WAITER_ENDPOINT}/projects/${<string>process.env.PROJECT_ID}/passports`,
+        {
+            json: true,
+            body: { scope: scope }
+        }
+    ).then((body) => body);
+
     const expires = moment().add(conf.get<number>('temporary_reservation_valid_period_seconds'), 'seconds').toDate();
     const transaction = await placeOrderTransactionService.start({
         expires: expires,
-        sellerIdentifier: sellerIdentifier // 電波塔さんの組織識別子(現時点で固定)
+        sellerIdentifier: sellerIdentifier, // 電波塔さんの組織識別子(現時点で固定)
+        passportToken: token
     });
     debug('transaction started.', transaction.id);
 
@@ -114,8 +136,8 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
     reservationModel.transactionInProgress.reservations = [];
 
     // 座席承認アクション
-    const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
-        endpoint: <string>process.env.API_ENDPOINT,
+    const placeOrderTransactionService = new cinerinoapi.service.transaction.PlaceOrder4ttts({
+        endpoint: <string>process.env.CINERINO_API_ENDPOINT,
         auth: req.tttsAuthClient
     });
     const offers = checkInfo.choicesAll.map((choice) => {
@@ -251,8 +273,8 @@ export async function processFixProfile(reservationModel: ReserveSessionModel, r
     reservationModel.transactionInProgress.purchaser = contact;
     reservationModel.transactionInProgress.paymentMethod = req.body.paymentMethod;
 
-    const placeOrderTransactionService = new tttsapi.service.transaction.PlaceOrder({
-        endpoint: <string>process.env.API_ENDPOINT,
+    const placeOrderTransactionService = new cinerinoapi.service.transaction.PlaceOrder4ttts({
+        endpoint: <string>process.env.CINERINO_API_ENDPOINT,
         auth: req.tttsAuthClient
     });
     const customerContact = await placeOrderTransactionService.setCustomerContact({
