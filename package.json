@@ -17,9 +17,9 @@
     }
   ],
   "dependencies": {
-    "@cinerino/api-nodejs-client": "2.0.0-alpha.29",
+    "@cinerino/api-nodejs-client": "2.0.0-alpha.30",
     "@motionpicture/express-middleware": "0.0.0",
-    "@motionpicture/ttts-api-nodejs-client": "4.0.0-alpha.0",
+    "@motionpicture/ttts-api-nodejs-client": "^4.0.0",
     "body-parser": "^1.18.2",
     "config": "^1.29.2",
     "connect-redis": "^3.3.3",

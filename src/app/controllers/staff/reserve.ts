@@ -255,6 +255,7 @@ export async function profile(req: Request, res: Response, next: NextFunction): 
 /**
  * 予約内容確認
  */
+// tslint:disable-next-line:max-func-body-length
 export async function confirm(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const reservationModel = ReserveSessionModel.FIND(req);
@@ -266,11 +267,29 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
 
         if (req.method === 'POST') {
             try {
-                // 予約確定
                 const placeOrderTransactionService = new cinerinoapi.service.transaction.PlaceOrder4ttts({
                     endpoint: <string>process.env.CINERINO_API_ENDPOINT,
                     auth: req.tttsAuthClient
                 });
+                const paymentService = new cinerinoapi.service.Payment({
+                    endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+                    auth: req.tttsAuthClient
+                });
+
+                // 汎用決済承認
+                const amount = reservationModel.getTotalCharge();
+                const paymentAuthorization = await paymentService.authorizeAnyPayment({
+                    object: {
+                        typeOf: cinerinoapi.factory.paymentMethodType.Others,
+                        name: reservationModel.transactionInProgress.paymentMethod,
+                        additionalProperty: [],
+                        amount: amount
+                    },
+                    purpose: { typeOf: cinerinoapi.factory.transactionType.PlaceOrder, id: reservationModel.transactionInProgress.id }
+                });
+                debug('payment authorized', paymentAuthorization);
+
+                // 取引確定
                 const transactionResult = await placeOrderTransactionService.confirm({
                     transactionId: reservationModel.transactionInProgress.id,
                     paymentMethod: <any>reservationModel.transactionInProgress.paymentMethod,
