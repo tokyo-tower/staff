@@ -46,7 +46,7 @@ declare global {
              */
             agentId: string;
             /**
-             * 販売者ID
+             * 販売者
              */
             seller: cinerinoapi.factory.seller.IOrganization<any>;
             /**

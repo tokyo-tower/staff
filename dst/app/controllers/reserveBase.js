@@ -44,12 +44,7 @@ function processStart(req) {
             endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        const oragnizationService = new tttsapi.service.Organization({
-            endpoint: process.env.API_ENDPOINT,
-            auth: req.tttsAuthClient
-        });
         const sellerIdentifier = 'TokyoTower';
-        const seller = yield oragnizationService.findCorporationByIdentifier({ identifier: sellerIdentifier });
         // WAITER許可証を取得
         const scope = 'placeOrderTransaction.TokyoTower.Staff';
         const { token } = yield request.post(`${process.env.WAITER_ENDPOINT}/projects/${process.env.PROJECT_ID}/passports`, {
@@ -67,7 +62,7 @@ function processStart(req) {
         const transactionInProgress = {
             id: transaction.id,
             agentId: transaction.agent.id,
-            seller: seller,
+            seller: transaction.seller,
             sellerId: transaction.seller.id,
             category: req.query.category,
             expires: expires.toISOString(),

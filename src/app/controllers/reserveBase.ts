@@ -40,13 +40,8 @@ export async function processStart(req: Request): Promise<ReserveSessionModel> {
         endpoint: <string>process.env.CINERINO_API_ENDPOINT,
         auth: req.tttsAuthClient
     });
-    const oragnizationService = new tttsapi.service.Organization({
-        endpoint: <string>process.env.API_ENDPOINT,
-        auth: req.tttsAuthClient
-    });
 
     const sellerIdentifier = 'TokyoTower';
-    const seller = await oragnizationService.findCorporationByIdentifier({ identifier: sellerIdentifier });
 
     // WAITER許可証を取得
     const scope = 'placeOrderTransaction.TokyoTower.Staff';
@@ -70,7 +65,7 @@ export async function processStart(req: Request): Promise<ReserveSessionModel> {
     const transactionInProgress: Express.ITransactionInProgress = {
         id: transaction.id,
         agentId: transaction.agent.id,
-        seller: seller,
+        seller: transaction.seller,
         sellerId: transaction.seller.id,
         category: req.query.category,
         expires: expires.toISOString(),
