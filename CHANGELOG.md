@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 注文取引フローに汎用決済承認処理を追加
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v5.0.0 - 2019-10-17
+
+### Changed
+
+- 注文取引フローに汎用決済承認処理を追加
 
 ## v4.10.0 - 2019-10-16
 
