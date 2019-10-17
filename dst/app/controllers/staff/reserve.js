@@ -248,6 +248,7 @@ exports.profile = profile;
 /**
  * 予約内容確認
  */
+// tslint:disable-next-line:max-func-body-length
 function confirm(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -258,11 +259,27 @@ function confirm(req, res, next) {
             }
             if (req.method === 'POST') {
                 try {
-                    // 予約確定
                     const placeOrderTransactionService = new cinerinoapi.service.transaction.PlaceOrder4ttts({
                         endpoint: process.env.CINERINO_API_ENDPOINT,
                         auth: req.tttsAuthClient
                     });
+                    const paymentService = new cinerinoapi.service.Payment({
+                        endpoint: process.env.CINERINO_API_ENDPOINT,
+                        auth: req.tttsAuthClient
+                    });
+                    // 汎用決済承認
+                    const amount = reservationModel.getTotalCharge();
+                    const paymentAuthorization = yield paymentService.authorizeAnyPayment({
+                        object: {
+                            typeOf: cinerinoapi.factory.paymentMethodType.Others,
+                            name: reservationModel.transactionInProgress.paymentMethod,
+                            additionalProperty: [],
+                            amount: amount
+                        },
+                        purpose: { typeOf: cinerinoapi.factory.transactionType.PlaceOrder, id: reservationModel.transactionInProgress.id }
+                    });
+                    debug('payment authorized', paymentAuthorization);
+                    // 取引確定
                     const transactionResult = yield placeOrderTransactionService.confirm({
                         transactionId: reservationModel.transactionInProgress.id,
                         paymentMethod: reservationModel.transactionInProgress.paymentMethod,

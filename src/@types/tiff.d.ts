@@ -86,7 +86,7 @@ declare global {
             /**
              * 決済方法
              */
-            paymentMethod: String;
+            paymentMethod: string;
             /**
              * 購入者区分
              */
