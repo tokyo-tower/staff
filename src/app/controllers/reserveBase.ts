@@ -57,7 +57,14 @@ export async function processStart(req: Request): Promise<ReserveSessionModel> {
     const transaction = await placeOrderTransactionService.start({
         expires: expires,
         sellerIdentifier: sellerIdentifier, // 電波塔さんの組織識別子(現時点で固定)
-        passportToken: token
+        passportToken: token,
+        ...{
+            agent: {
+                identifier: [
+                    { name: 'customerGroup', value: 'Staff' }
+                ]
+            }
+        }
     });
     debug('transaction started.', transaction.id);
 

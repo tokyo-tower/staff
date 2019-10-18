@@ -52,11 +52,13 @@ function processStart(req) {
             body: { scope: scope }
         }).then((body) => body);
         const expires = moment().add(conf.get('temporary_reservation_valid_period_seconds'), 'seconds').toDate();
-        const transaction = yield placeOrderTransactionService.start({
-            expires: expires,
-            sellerIdentifier: sellerIdentifier,
-            passportToken: token
-        });
+        const transaction = yield placeOrderTransactionService.start(Object.assign({ expires: expires, sellerIdentifier: sellerIdentifier, passportToken: token }, {
+            agent: {
+                identifier: [
+                    { name: 'customerGroup', value: 'Staff' }
+                ]
+            }
+        }));
         debug('transaction started.', transaction.id);
         // 取引セッションを初期化
         const transactionInProgress = {

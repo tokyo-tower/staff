@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
+- 注文取引開始時にcustomerGroupを明示的に指定
+
 ### Changed
 
 ### Deprecated
