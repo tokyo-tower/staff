@@ -8,8 +8,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
-- 注文取引開始時にcustomerGroupを明示的に指定
-
 ### Changed
 
 ### Deprecated
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v5.1.0 - 2019-10-18
+
+### Added
+
+- 注文取引開始時にcustomerGroupを明示的に指定
 
 ## v5.0.0 - 2019-10-17
 
