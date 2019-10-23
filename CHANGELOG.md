@@ -16,9 +16,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Fixed
 
-- 注文取引検索のAPIエンドポイントを修正
-
 ### Security
+
+## v5.1.1 - 2019-10-23
+
+### Fixed
+
+- 注文取引検索のAPIエンドポイントを修正
 
 ## v5.1.0 - 2019-10-18
 
