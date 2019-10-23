@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v5.2.0 - 2019-10-23
+
+### Changed
+
+- イベントに対する全注文返品処理タスク作成にAPI認証情報を連携
+
 ## v5.1.1 - 2019-10-23
 
 ### Fixed
