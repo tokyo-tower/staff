@@ -147,7 +147,7 @@ exports.updateOnlineStatus = updateOnlineStatus;
 function getTargetReservationsForRefund(req, performanceIds) {
     return __awaiter(this, void 0, void 0, function* () {
         const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
-            endpoint: process.env.API_ENDPOINT,
+            endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
         // 返品されていない、かつ、入場履歴なし、の予約から、取引IDリストを取得
