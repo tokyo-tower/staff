@@ -241,6 +241,7 @@ function returnOrders(req, res) {
                 numberOfTried: 0,
                 executionResults: [],
                 data: {
+                    credentials: req.tttsAuthClient.credentials,
                     agentId: process.env.API_CLIENT_ID,
                     performanceId: performanceId,
                     // 返品対象の注文クライアントID

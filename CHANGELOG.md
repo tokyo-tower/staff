@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- イベントに対する全注文返品処理タスク作成にAPI認証情報を連携
+
 ### Deprecated
 
 ### Removed
