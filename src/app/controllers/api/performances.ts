@@ -160,7 +160,7 @@ export type IPlaceOrderTransaction = tttsapi.factory.transaction.placeOrder.ITra
  */
 export async function getTargetReservationsForRefund(req: Request, performanceIds: string[]): Promise<IPlaceOrderTransaction[]> {
     const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
-        endpoint: <string>process.env.API_ENDPOINT,
+        endpoint: <string>process.env.CINERINO_API_ENDPOINT,
         auth: req.tttsAuthClient
     });
 
