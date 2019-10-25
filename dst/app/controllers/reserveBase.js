@@ -79,7 +79,7 @@ function processStart(req) {
                 address: '',
                 gender: ''
             },
-            paymentMethod: tttsapi.factory.paymentMethodType.CreditCard,
+            paymentMethod: cinerinoapi.factory.paymentMethodType.CreditCard,
             purchaserGroup: 'Staff',
             transactionGMO: {
                 orderId: '',
@@ -356,7 +356,7 @@ function createEmailAttributes(order, res) {
                     return;
                 }
                 resolve({
-                    typeOf: tttsapi.factory.creativeWorkType.EmailMessage,
+                    typeOf: cinerinoapi.factory.creativeWorkType.EmailMessage,
                     sender: {
                         name: conf.get('email.fromname'),
                         email: conf.get('email.from')

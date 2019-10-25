@@ -21,6 +21,8 @@ const STAFF_CLIENT_ID = <string>process.env.API_CLIENT_ID;
 const POS_CLIENT_ID = <string>process.env.POS_CLIENT_ID;
 const FRONTEND_CLIENT_ID = <string>process.env.FRONTEND_CLIENT_ID;
 
+export type IReservationOrderItem = cinerinoapi.factory.order.IReservation;
+
 /**
  * 運行・オンライン販売ステータス変更
  */
@@ -111,7 +113,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
                             typeOf: tttsapi.factory.personType.Person,
                             id: clientId
                         },
-                        payment_method: <tttsapi.factory.paymentMethodType>paymentMethod,
+                        payment_method: <cinerinoapi.factory.paymentMethodType>paymentMethod,
                         order_number: orderNumber
                     };
                 });
@@ -150,7 +152,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
     }
 }
 
-export type IPlaceOrderTransaction = tttsapi.factory.transaction.placeOrder.ITransaction;
+export type IPlaceOrderTransaction = cinerinoapi.factory.transaction.placeOrder.ITransaction;
 
 /**
  * 返金対象予約情報取得
@@ -213,7 +215,7 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
             const searchTransactionsResult = await placeOrderService.search({
                 limit: limit,
                 page: page,
-                typeOf: tttsapi.factory.transactionType.PlaceOrder,
+                typeOf: cinerinoapi.factory.transactionType.PlaceOrder,
                 ids: targetTransactionIds
             });
             numData = searchTransactionsResult.data.length;
@@ -235,7 +237,7 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
 async function createEmails(
     req: Request,
     res: Response,
-    transactions: tttsapi.factory.transaction.placeOrder.ITransaction[],
+    transactions: cinerinoapi.factory.transaction.placeOrder.ITransaction[],
     notice: string
 ): Promise<void> {
     if (transactions.length === 0) {
@@ -244,7 +246,7 @@ async function createEmails(
 
     // 購入単位ごとにメール作成
     await Promise.all(transactions.map(async (transaction) => {
-        const result = <tttsapi.factory.transaction.placeOrder.IResult>transaction.result;
+        const result = <cinerinoapi.factory.transaction.placeOrder.IResult>transaction.result;
         await createEmail(req, res, result.order, notice);
     }));
 }
@@ -260,10 +262,10 @@ async function createEmails(
 async function createEmail(
     req: Request,
     res: Response,
-    order: tttsapi.factory.order.IOrder,
+    order: cinerinoapi.factory.order.IOrder,
     notice: string
 ): Promise<void> {
-    const reservation = <tttsapi.factory.order.IReservation>order.acceptedOffers[0].itemOffered;
+    const reservation = <IReservationOrderItem>order.acceptedOffers[0].itemOffered;
 
     // タイトル編集
     // 東京タワー TOP DECK Ticket
@@ -320,8 +322,8 @@ async function createEmail(
     const content: string = `${title}\n${titleEn}\n\n${purchaserName}\n${purchaserNameEn}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}\n\n\n${foot1}\n${foot2}\n${foot3}\n\n${footEn1}\n${footEn2}\n${footEn3}\n\n${access1}\n${access2}\n\n${accessEn1}\n${accessEn2}`;
 
     // メール編集
-    const emailAttributes: tttsapi.factory.creativeWork.message.email.IAttributes = {
-        typeOf: tttsapi.factory.creativeWorkType.EmailMessage,
+    const emailAttributes: cinerinoapi.factory.creativeWork.message.email.IAttributes = {
+        typeOf: cinerinoapi.factory.creativeWorkType.EmailMessage,
         sender: {
             name: conf.get<string>('email.fromname'),
             email: conf.get<string>('email.from')
@@ -340,8 +342,8 @@ async function createEmail(
         auth: req.tttsAuthClient
     });
 
-    const emailMessage: tttsapi.factory.creativeWork.message.email.ICreativeWork = {
-        typeOf: tttsapi.factory.creativeWorkType.EmailMessage,
+    const emailMessage: cinerinoapi.factory.creativeWork.message.email.ICreativeWork = {
+        typeOf: cinerinoapi.factory.creativeWorkType.EmailMessage,
         identifier: `updateOnlineStatus-${reservation.id}`,
         name: `updateOnlineStatus-${reservation.id}`,
         sender: {
@@ -359,8 +361,8 @@ async function createEmail(
     };
 
     // その場で送信ではなく、DBにタスクを登録
-    const taskAttributes: tttsapi.factory.cinerino.task.IAttributes<tttsapi.factory.cinerino.taskName.SendEmailMessage> = {
-        name: tttsapi.factory.cinerino.taskName.SendEmailMessage,
+    const taskAttributes: cinerinoapi.factory.task.IAttributes<cinerinoapi.factory.taskName.SendEmailMessage> = {
+        name: cinerinoapi.factory.taskName.SendEmailMessage,
         project: order.project,
         status: tttsapi.factory.taskStatus.Ready,
         runsAt: new Date(), // なるはやで実行
@@ -369,7 +371,7 @@ async function createEmail(
         executionResults: [],
         data: {
             actionAttributes: {
-                typeOf: tttsapi.factory.actionType.SendAction,
+                typeOf: cinerinoapi.factory.actionType.SendAction,
                 agent: <any>req.staffUser,
                 object: emailMessage,
                 project: order.project,
@@ -390,17 +392,17 @@ async function createEmail(
 /**
  * チケット情報取得
  */
-export function getTicketInfo(order: tttsapi.factory.order.IOrder, __: Function, locale: string): string[] {
+export function getTicketInfo(order: cinerinoapi.factory.order.IOrder, __: Function, locale: string): string[] {
     const acceptedOffers = order.acceptedOffers;
 
     // チケットコード順にソート
     acceptedOffers.sort((a, b) => {
-        if ((<tttsapi.factory.order.IReservation>a.itemOffered).reservedTicket.ticketType.identifier
-            < (<tttsapi.factory.order.IReservation>b.itemOffered).reservedTicket.ticketType.identifier) {
+        if ((<IReservationOrderItem>a.itemOffered).reservedTicket.ticketType.identifier
+            < (<IReservationOrderItem>b.itemOffered).reservedTicket.ticketType.identifier) {
             return -1;
         }
-        if ((<tttsapi.factory.order.IReservation>a.itemOffered).reservedTicket.ticketType.identifier
-            > (<tttsapi.factory.order.IReservation>b.itemOffered).reservedTicket.ticketType.identifier) {
+        if ((<IReservationOrderItem>a.itemOffered).reservedTicket.ticketType.identifier
+            > (<IReservationOrderItem>b.itemOffered).reservedTicket.ticketType.identifier) {
             return 1;
         }
 
@@ -418,7 +420,7 @@ export function getTicketInfo(order: tttsapi.factory.order.IOrder, __: Function,
 
     for (const acceptedOffer of acceptedOffers) {
         // チケットタイプごとにチケット情報セット
-        const reservation = <tttsapi.factory.order.IReservation>acceptedOffer.itemOffered;
+        const reservation = <IReservationOrderItem>acceptedOffer.itemOffered;
         const ticketType = reservation.reservedTicket.ticketType;
         const price = getUnitPriceByAcceptedOffer(acceptedOffer);
 

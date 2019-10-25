@@ -192,7 +192,7 @@ function getTargetReservationsForRefund(req, performanceIds) {
                 const searchTransactionsResult = yield placeOrderService.search({
                     limit: limit,
                     page: page,
-                    typeOf: tttsapi.factory.transactionType.PlaceOrder,
+                    typeOf: cinerinoapi.factory.transactionType.PlaceOrder,
                     ids: targetTransactionIds
                 });
                 numData = searchTransactionsResult.data.length;
@@ -281,7 +281,7 @@ function createEmail(req, res, order, notice) {
         const content = `${title}\n${titleEn}\n\n${purchaserName}\n${purchaserNameEn}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}\n\n\n${foot1}\n${foot2}\n${foot3}\n\n${footEn1}\n${footEn2}\n${footEn3}\n\n${access1}\n${access2}\n\n${accessEn1}\n${accessEn2}`;
         // メール編集
         const emailAttributes = {
-            typeOf: tttsapi.factory.creativeWorkType.EmailMessage,
+            typeOf: cinerinoapi.factory.creativeWorkType.EmailMessage,
             sender: {
                 name: conf.get('email.fromname'),
                 email: conf.get('email.from')
@@ -299,7 +299,7 @@ function createEmail(req, res, order, notice) {
             auth: req.tttsAuthClient
         });
         const emailMessage = {
-            typeOf: tttsapi.factory.creativeWorkType.EmailMessage,
+            typeOf: cinerinoapi.factory.creativeWorkType.EmailMessage,
             identifier: `updateOnlineStatus-${reservation.id}`,
             name: `updateOnlineStatus-${reservation.id}`,
             sender: {
@@ -317,7 +317,7 @@ function createEmail(req, res, order, notice) {
         };
         // その場で送信ではなく、DBにタスクを登録
         const taskAttributes = {
-            name: tttsapi.factory.cinerino.taskName.SendEmailMessage,
+            name: cinerinoapi.factory.taskName.SendEmailMessage,
             project: order.project,
             status: tttsapi.factory.taskStatus.Ready,
             runsAt: new Date(),
@@ -326,7 +326,7 @@ function createEmail(req, res, order, notice) {
             executionResults: [],
             data: {
                 actionAttributes: {
-                    typeOf: tttsapi.factory.actionType.SendAction,
+                    typeOf: cinerinoapi.factory.actionType.SendAction,
                     agent: req.staffUser,
                     object: emailMessage,
                     project: order.project,

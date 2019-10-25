@@ -2,7 +2,6 @@
  * 内部関係者座席予約コントローラー
  */
 import * as cinerinoapi from '@cinerino/api-nodejs-client';
-import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
 import * as conf from 'config';
 import * as createDebug from 'debug';
@@ -386,7 +385,7 @@ export async function complete(req: Request, res: Response, next: NextFunction):
             const unitPrice = reserveBaseController.getUnitPriceByAcceptedOffer(o);
 
             return {
-                ...<tttsapi.factory.order.IReservation>o.itemOffered,
+                ...<cinerinoapi.factory.order.IReservation>o.itemOffered,
                 unitPrice: unitPrice
             };
         });
