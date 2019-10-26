@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- メール送信タスクをCinerinoで作成するように変更
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v5.4.0 - 2019-10-26
+
+### Changed
+
+- メール送信タスクをCinerinoで作成するように変更
 
 ## v5.3.0 - 2019-10-25
 
