@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- メール送信タスクをCinerinoで作成するように変更
+
 ### Deprecated
 
 ### Removed

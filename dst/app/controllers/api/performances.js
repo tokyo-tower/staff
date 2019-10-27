@@ -295,7 +295,7 @@ function createEmail(req, res, order, notice) {
         };
         // メール作成
         const taskService = new cinerinoapi.service.Task({
-            endpoint: process.env.API_ENDPOINT,
+            endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
         const emailMessage = {
