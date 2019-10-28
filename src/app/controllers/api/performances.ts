@@ -338,7 +338,7 @@ async function createEmail(
 
     // メール作成
     const taskService = new cinerinoapi.service.Task({
-        endpoint: <string>process.env.API_ENDPOINT,
+        endpoint: <string>process.env.CINERINO_API_ENDPOINT,
         auth: req.tttsAuthClient
     });
 

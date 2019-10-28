@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v5.4.1 - 2019-10-27
+
+### Changed
+
+- メール送信タスクをCinerinoで作成するように変更
+
 ## v5.4.0 - 2019-10-26
 
 ### Changed
