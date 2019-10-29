@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v5.4.3 - 2019-10-29
+
+### Changed
+
+- 注文取引の購入者プロフィール指定をCinerino化
+
 ## v5.4.2 - 2019-10-29
 
 ### Changed

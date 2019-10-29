@@ -246,19 +246,16 @@ function processFixProfile(reservationModel, req, res) {
             endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        const customerContact = yield placeOrderTransactionService.setCustomerContact({
+        const profile = yield placeOrderTransactionService.setCustomerContact({
             transactionId: reservationModel.transactionInProgress.id,
-            contact: {
+            contact: Object.assign({ age: contact.age, address: contact.address, email: contact.email, gender: contact.gender, givenName: contact.firstName, familyName: contact.lastName, telephone: contact.tel }, {
+                telephoneRegion: contact.address,
                 last_name: contact.lastName,
                 first_name: contact.firstName,
-                email: contact.email,
-                tel: contact.tel,
-                age: contact.age,
-                address: contact.address,
-                gender: contact.gender
-            }
+                tel: contact.tel
+            })
         });
-        debug('customerContact set.', customerContact);
+        debug('profile set.', profile);
         // セッションに購入者情報格納
         req.session.purchaser = contact;
     });
