@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 注文取引の購入者プロフィール指定をCinerino化
+
 ### Deprecated
 
 ### Removed
