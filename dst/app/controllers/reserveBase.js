@@ -44,7 +44,18 @@ function processStart(req) {
             endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
+        const sellerService = new cinerinoapi.service.Seller({
+            endpoint: process.env.CINERINO_API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
         const sellerIdentifier = 'TokyoTower';
+        const searchSellersResult = yield sellerService.search({
+            limit: 1
+        });
+        const seller = searchSellersResult.data.shift();
+        if (seller === undefined) {
+            throw new Error('Seller not found');
+        }
         // WAITER許可証を取得
         const scope = 'placeOrderTransaction.TokyoTower.Staff';
         const { token } = yield request.post(`${process.env.WAITER_ENDPOINT}/projects/${process.env.PROJECT_ID}/passports`, {
@@ -57,6 +68,10 @@ function processStart(req) {
                 identifier: [
                     { name: 'customerGroup', value: 'Staff' }
                 ]
+            },
+            seller: {
+                typeOf: seller.typeOf,
+                id: seller.id
             }
         }));
         debug('transaction started.', transaction.id);
