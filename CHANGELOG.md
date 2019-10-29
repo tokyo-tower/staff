@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 注文取引開始時の販売者をIDで指定するように調整
+
 ### Deprecated
 
 ### Removed

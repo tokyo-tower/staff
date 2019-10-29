@@ -42,8 +42,19 @@ export async function processStart(req: Request): Promise<ReserveSessionModel> {
         endpoint: <string>process.env.CINERINO_API_ENDPOINT,
         auth: req.tttsAuthClient
     });
+    const sellerService = new cinerinoapi.service.Seller({
+        endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+        auth: req.tttsAuthClient
+    });
 
     const sellerIdentifier = 'TokyoTower';
+    const searchSellersResult = await sellerService.search({
+        limit: 1
+    });
+    const seller = searchSellersResult.data.shift();
+    if (seller === undefined) {
+        throw new Error('Seller not found');
+    }
 
     // WAITER許可証を取得
     const scope = 'placeOrderTransaction.TokyoTower.Staff';
@@ -65,6 +76,10 @@ export async function processStart(req: Request): Promise<ReserveSessionModel> {
                 identifier: [
                     { name: 'customerGroup', value: 'Staff' }
                 ]
+            },
+            seller: {
+                typeOf: seller.typeOf,
+                id: seller.id
             }
         }
     });
