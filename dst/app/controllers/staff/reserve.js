@@ -281,12 +281,10 @@ function confirm(req, res, next) {
                     debug('payment authorized', paymentAuthorization);
                     // 取引確定
                     const transactionResult = yield placeOrderTransactionService.confirm({
-                        transactionId: reservationModel.transactionInProgress.id,
+                        id: reservationModel.transactionInProgress.id,
                         paymentMethod: reservationModel.transactionInProgress.paymentMethod,
-                        informOrderUrl: `${process.env.API_ENDPOINT}/webhooks/onPlaceOrder`,
-                        informReservationUrl: `${process.env.API_ENDPOINT}/webhooks/onReservationConfirmed`
+                        informOrderUrl: `${process.env.API_ENDPOINT}/webhooks/onPlaceOrder`
                     });
-                    debug('transaction confirmed. orderNumber:', transactionResult.order.orderNumber);
                     // 購入結果セッション作成
                     req.session.transactionResult = transactionResult;
                     try {

@@ -48,7 +48,6 @@ function processStart(req) {
             endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        const sellerIdentifier = 'TokyoTower';
         const searchSellersResult = yield sellerService.search({
             limit: 1
         });
@@ -63,18 +62,21 @@ function processStart(req) {
             body: { scope: scope }
         }).then((body) => body);
         const expires = moment().add(conf.get('temporary_reservation_valid_period_seconds'), 'seconds').toDate();
-        const transaction = yield placeOrderTransactionService.start(Object.assign({ expires: expires, sellerIdentifier: sellerIdentifier, passportToken: token }, {
+        const transaction = yield placeOrderTransactionService.start({
             agent: {
                 identifier: [
                     { name: 'customerGroup', value: 'Staff' }
                 ]
             },
+            expires: expires,
+            object: {
+                passport: { token: token }
+            },
             seller: {
                 typeOf: seller.typeOf,
                 id: seller.id
             }
-        }));
-        debug('transaction started.', transaction.id);
+        });
         // 取引セッションを初期化
         const transactionInProgress = {
             id: transaction.id,
@@ -95,7 +97,6 @@ function processStart(req) {
                 gender: ''
             },
             paymentMethod: cinerinoapi.factory.paymentMethodType.CreditCard,
-            purchaserGroup: 'Staff',
             transactionGMO: {
                 orderId: '',
                 amount: 0,
@@ -247,13 +248,19 @@ function processFixProfile(reservationModel, req, res) {
             auth: req.tttsAuthClient
         });
         const profile = yield placeOrderTransactionService.setCustomerContact({
-            transactionId: reservationModel.transactionInProgress.id,
-            contact: Object.assign({ age: contact.age, address: contact.address, email: contact.email, gender: contact.gender, givenName: contact.firstName, familyName: contact.lastName, telephone: contact.tel }, {
-                telephoneRegion: contact.address,
-                last_name: contact.lastName,
-                first_name: contact.firstName,
-                tel: contact.tel
-            })
+            id: reservationModel.transactionInProgress.id,
+            object: {
+                customerContact: {
+                    age: contact.age,
+                    address: contact.address,
+                    email: contact.email,
+                    gender: contact.gender,
+                    givenName: contact.firstName,
+                    familyName: contact.lastName,
+                    telephone: contact.tel,
+                    telephoneRegion: contact.address
+                }
+            }
         });
         debug('profile set.', profile);
         // セッションに購入者情報格納

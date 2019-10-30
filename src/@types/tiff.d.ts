@@ -88,10 +88,6 @@ declare global {
              */
             paymentMethod: string;
             /**
-             * 購入者区分
-             */
-            purchaserGroup: string;
-            /**
              * GMO取引
              */
             transactionGMO: ITransactionGMO;

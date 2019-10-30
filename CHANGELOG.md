@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- @cinerino/api-nodejs-client@2.0.0-alpha.35で再構築
+
 ### Deprecated
 
 ### Removed
