@@ -43,9 +43,8 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
 
         const now = new Date();
 
-        // 返金対象予約情報取得(入塔記録のないもの)
-        const targetPlaceOrderTransactions = await getTargetReservationsForRefund(req, performanceIds);
-        debug('email target placeOrderTransactions:', targetPlaceOrderTransactions.map((t) => t.id));
+        // 返金対象注文情報取得
+        const targetOrders = await getTargetReservationsForRefund(req, performanceIds);
 
         // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
         const refundStatus: tttsapi.factory.performance.RefundStatus =
@@ -137,7 +136,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
         // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
         if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
             try {
-                await createEmails(req, res, targetPlaceOrderTransactions, notice);
+                await createEmails(req, res, targetOrders, notice);
             } catch (error) {
                 // no op
                 debug('createEmails failed', error);
@@ -152,25 +151,23 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
     }
 }
 
-export type IPlaceOrderTransaction = cinerinoapi.factory.transaction.placeOrder.ITransaction;
-
 /**
  * 返金対象予約情報取得
  * [一般予約]かつ
  * [予約データ]かつ
  * [同一購入単位に入塔記録のない]予約のid配列
  */
-export async function getTargetReservationsForRefund(req: Request, performanceIds: string[]): Promise<IPlaceOrderTransaction[]> {
-    const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
+export async function getTargetReservationsForRefund(req: Request, performanceIds: string[]): Promise<cinerinoapi.factory.order.IOrder[]> {
+    const orderService = new cinerinoapi.service.Order({
         endpoint: <string>process.env.CINERINO_API_ENDPOINT,
         auth: req.tttsAuthClient
     });
 
-    // 返品されていない、かつ、入場履歴なし、の予約から、取引IDリストを取得
     const reservationService = new tttsapi.service.Reservation({
         endpoint: <string>process.env.API_ENDPOINT,
         auth: req.tttsAuthClient
     });
+
     const targetReservations = await reservationService.distinct(
         'underName',
         {
@@ -203,29 +200,25 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
         []
     );
 
-    // 全取引検索
-    const transactions: IPlaceOrderTransaction[] = [];
+    // 全注文検索
+    const orders: cinerinoapi.factory.order.IOrder[] = [];
     if (targetOrderNumbers.length > 0) {
         const limit = 100;
         let page = 0;
         let numData: number = limit;
         while (numData === limit) {
             page += 1;
-            const searchTransactionsResult = await placeOrderService.search({
+            const searchOrdersResult = await orderService.search({
                 limit: limit,
                 page: page,
-                statuses: [cinerinoapi.factory.transactionStatusType.Confirmed],
-                typeOf: cinerinoapi.factory.transactionType.PlaceOrder,
-                result: {
-                    order: { orderNumbers: targetOrderNumbers }
-                }
+                orderNumbers: targetOrderNumbers
             });
-            numData = searchTransactionsResult.data.length;
-            transactions.push(...searchTransactionsResult.data);
+            numData = searchOrdersResult.data.length;
+            orders.push(...searchOrdersResult.data);
         }
     }
 
-    return transactions;
+    return orders;
 }
 
 /**
@@ -238,17 +231,16 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
 async function createEmails(
     req: Request,
     res: Response,
-    transactions: cinerinoapi.factory.transaction.placeOrder.ITransaction[],
+    orders: cinerinoapi.factory.order.IOrder[],
     notice: string
 ): Promise<void> {
-    if (transactions.length === 0) {
+    if (orders.length === 0) {
         return;
     }
 
     // 購入単位ごとにメール作成
-    await Promise.all(transactions.map(async (transaction) => {
-        const result = <cinerinoapi.factory.transaction.placeOrder.IResult>transaction.result;
-        await createEmail(req, res, result.order, notice);
+    await Promise.all(orders.map(async (order) => {
+        await createEmail(req, res, order, notice);
     }));
 }
 
