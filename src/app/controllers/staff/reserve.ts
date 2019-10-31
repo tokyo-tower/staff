@@ -290,12 +290,10 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
 
                 // 取引確定
                 const transactionResult = await placeOrderTransactionService.confirm({
-                    transactionId: reservationModel.transactionInProgress.id,
+                    id: reservationModel.transactionInProgress.id,
                     paymentMethod: <any>reservationModel.transactionInProgress.paymentMethod,
-                    informOrderUrl: `${<string>process.env.API_ENDPOINT}/webhooks/onPlaceOrder`,
-                    informReservationUrl: `${<string>process.env.API_ENDPOINT}/webhooks/onReservationConfirmed`
+                    informOrderUrl: `${<string>process.env.API_ENDPOINT}/webhooks/onPlaceOrder`
                 });
-                debug('transaction confirmed. orderNumber:', transactionResult.order.orderNumber);
 
                 // 購入結果セッション作成
                 (<Express.Session>req.session).transactionResult = transactionResult;
