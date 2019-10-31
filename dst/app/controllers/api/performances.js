@@ -140,9 +140,9 @@ function updateOnlineStatus(req, res) {
 exports.updateOnlineStatus = updateOnlineStatus;
 /**
  * 返金対象予約情報取得
- *  [一般予約]かつ
- *  [予約データ]かつ
- *  [同一購入単位に入塔記録のない]予約のid配列
+ * [一般予約]かつ
+ * [予約データ]かつ
+ * [同一購入単位に入塔記録のない]予約のid配列
  */
 function getTargetReservationsForRefund(req, performanceIds) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -155,9 +155,7 @@ function getTargetReservationsForRefund(req, performanceIds) {
             endpoint: process.env.API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        const targetReservations = yield reservationService.distinct('underName', 
-        // 'transaction',
-        {
+        const targetReservations = yield reservationService.distinct('underName', {
             typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
             reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
             // クライアントがfrontend or pos
@@ -172,18 +170,18 @@ function getTargetReservationsForRefund(req, performanceIds) {
             },
             checkins: { $size: 0 }
         });
-        const targetTransactionIds = targetReservations.reduce((a, b) => {
+        const targetOrderNumbers = targetReservations.reduce((a, b) => {
             if (Array.isArray(b.identifier)) {
-                const transactionProperty = b.identifier.find((p) => p.name === 'transaction');
-                if (transactionProperty !== undefined) {
-                    a.push(transactionProperty.value);
+                const orderNumberProperty = b.identifier.find((p) => p.name === 'orderNumber');
+                if (orderNumberProperty !== undefined) {
+                    a.push(orderNumberProperty.value);
                 }
             }
             return a;
         }, []);
         // 全取引検索
         const transactions = [];
-        if (targetTransactionIds.length > 0) {
+        if (targetOrderNumbers.length > 0) {
             const limit = 100;
             let page = 0;
             let numData = limit;
@@ -192,11 +190,13 @@ function getTargetReservationsForRefund(req, performanceIds) {
                 const searchTransactionsResult = yield placeOrderService.search({
                     limit: limit,
                     page: page,
+                    statuses: [cinerinoapi.factory.transactionStatusType.Confirmed],
                     typeOf: cinerinoapi.factory.transactionType.PlaceOrder,
-                    ids: targetTransactionIds
+                    result: {
+                        order: { orderNumbers: targetOrderNumbers }
+                    }
                 });
                 numData = searchTransactionsResult.data.length;
-                debug('numData:', numData);
                 transactions.push(...searchTransactionsResult.data);
             }
         }

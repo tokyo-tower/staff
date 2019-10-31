@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- イベントに対する注文返品処理における該当取引検索を注文番号に依存させる対応
+
 ### Deprecated
 
 ### Removed

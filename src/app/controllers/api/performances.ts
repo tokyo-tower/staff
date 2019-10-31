@@ -156,9 +156,9 @@ export type IPlaceOrderTransaction = cinerinoapi.factory.transaction.placeOrder.
 
 /**
  * 返金対象予約情報取得
- *  [一般予約]かつ
- *  [予約データ]かつ
- *  [同一購入単位に入塔記録のない]予約のid配列
+ * [一般予約]かつ
+ * [予約データ]かつ
+ * [同一購入単位に入塔記録のない]予約のid配列
  */
 export async function getTargetReservationsForRefund(req: Request, performanceIds: string[]): Promise<IPlaceOrderTransaction[]> {
     const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
@@ -173,7 +173,6 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
     });
     const targetReservations = await reservationService.distinct(
         'underName',
-        // 'transaction',
         {
             typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
             reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
@@ -190,12 +189,12 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
             checkins: { $size: 0 }
         }
     );
-    const targetTransactionIds = targetReservations.reduce<string[]>(
+    const targetOrderNumbers = targetReservations.reduce<string[]>(
         (a, b) => {
             if (Array.isArray(b.identifier)) {
-                const transactionProperty = b.identifier.find((p: any) => p.name === 'transaction');
-                if (transactionProperty !== undefined) {
-                    a.push(transactionProperty.value);
+                const orderNumberProperty = b.identifier.find((p: any) => p.name === 'orderNumber');
+                if (orderNumberProperty !== undefined) {
+                    a.push(orderNumberProperty.value);
                 }
             }
 
@@ -206,7 +205,7 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
 
     // 全取引検索
     const transactions: IPlaceOrderTransaction[] = [];
-    if (targetTransactionIds.length > 0) {
+    if (targetOrderNumbers.length > 0) {
         const limit = 100;
         let page = 0;
         let numData: number = limit;
@@ -215,11 +214,13 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
             const searchTransactionsResult = await placeOrderService.search({
                 limit: limit,
                 page: page,
+                statuses: [cinerinoapi.factory.transactionStatusType.Confirmed],
                 typeOf: cinerinoapi.factory.transactionType.PlaceOrder,
-                ids: targetTransactionIds
+                result: {
+                    order: { orderNumbers: targetOrderNumbers }
+                }
             });
             numData = searchTransactionsResult.data.length;
-            debug('numData:', numData);
             transactions.push(...searchTransactionsResult.data);
         }
     }
