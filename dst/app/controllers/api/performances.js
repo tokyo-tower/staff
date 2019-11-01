@@ -41,9 +41,8 @@ function updateOnlineStatus(req, res) {
             const notice = req.body.notice;
             debug('updating performances...', performanceIds, onlineStatus, evStatus, notice);
             const now = new Date();
-            // 返金対象予約情報取得(入塔記録のないもの)
-            const targetPlaceOrderTransactions = yield getTargetReservationsForRefund(req, performanceIds);
-            debug('email target placeOrderTransactions:', targetPlaceOrderTransactions.map((t) => t.id));
+            // 返金対象注文情報取得
+            const targetOrders = yield getTargetReservationsForRefund(req, performanceIds);
             // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
             const refundStatus = evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended ?
                 tttsapi.factory.performance.RefundStatus.NotInstructed :
@@ -121,7 +120,7 @@ function updateOnlineStatus(req, res) {
             // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
             if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
                 try {
-                    yield createEmails(req, res, targetPlaceOrderTransactions, notice);
+                    yield createEmails(req, res, targetOrders, notice);
                 }
                 catch (error) {
                     // no op
@@ -140,24 +139,21 @@ function updateOnlineStatus(req, res) {
 exports.updateOnlineStatus = updateOnlineStatus;
 /**
  * 返金対象予約情報取得
- *  [一般予約]かつ
- *  [予約データ]かつ
- *  [同一購入単位に入塔記録のない]予約のid配列
+ * [一般予約]かつ
+ * [予約データ]かつ
+ * [同一購入単位に入塔記録のない]予約のid配列
  */
 function getTargetReservationsForRefund(req, performanceIds) {
     return __awaiter(this, void 0, void 0, function* () {
-        const placeOrderService = new cinerinoapi.service.transaction.PlaceOrder({
+        const orderService = new cinerinoapi.service.Order({
             endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        // 返品されていない、かつ、入場履歴なし、の予約から、取引IDリストを取得
         const reservationService = new tttsapi.service.Reservation({
             endpoint: process.env.API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        const targetReservations = yield reservationService.distinct('underName', 
-        // 'transaction',
-        {
+        const targetReservations = yield reservationService.distinct('underName', {
             typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
             reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
             // クライアントがfrontend or pos
@@ -172,35 +168,33 @@ function getTargetReservationsForRefund(req, performanceIds) {
             },
             checkins: { $size: 0 }
         });
-        const targetTransactionIds = targetReservations.reduce((a, b) => {
+        const targetOrderNumbers = targetReservations.reduce((a, b) => {
             if (Array.isArray(b.identifier)) {
-                const transactionProperty = b.identifier.find((p) => p.name === 'transaction');
-                if (transactionProperty !== undefined) {
-                    a.push(transactionProperty.value);
+                const orderNumberProperty = b.identifier.find((p) => p.name === 'orderNumber');
+                if (orderNumberProperty !== undefined) {
+                    a.push(orderNumberProperty.value);
                 }
             }
             return a;
         }, []);
-        // 全取引検索
-        const transactions = [];
-        if (targetTransactionIds.length > 0) {
+        // 全注文検索
+        const orders = [];
+        if (targetOrderNumbers.length > 0) {
             const limit = 100;
             let page = 0;
             let numData = limit;
             while (numData === limit) {
                 page += 1;
-                const searchTransactionsResult = yield placeOrderService.search({
+                const searchOrdersResult = yield orderService.search({
                     limit: limit,
                     page: page,
-                    typeOf: cinerinoapi.factory.transactionType.PlaceOrder,
-                    ids: targetTransactionIds
+                    orderNumbers: targetOrderNumbers
                 });
-                numData = searchTransactionsResult.data.length;
-                debug('numData:', numData);
-                transactions.push(...searchTransactionsResult.data);
+                numData = searchOrdersResult.data.length;
+                orders.push(...searchOrdersResult.data);
             }
         }
-        return transactions;
+        return orders;
     });
 }
 exports.getTargetReservationsForRefund = getTargetReservationsForRefund;
@@ -211,15 +205,14 @@ exports.getTargetReservationsForRefund = getTargetReservationsForRefund;
  * @param {string} notice
  * @return {Promise<void>}
  */
-function createEmails(req, res, transactions, notice) {
+function createEmails(req, res, orders, notice) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (transactions.length === 0) {
+        if (orders.length === 0) {
             return;
         }
         // 購入単位ごとにメール作成
-        yield Promise.all(transactions.map((transaction) => __awaiter(this, void 0, void 0, function* () {
-            const result = transaction.result;
-            yield createEmail(req, res, result.order, notice);
+        yield Promise.all(orders.map((order) => __awaiter(this, void 0, void 0, function* () {
+            yield createEmail(req, res, order, notice);
         })));
     });
 }
