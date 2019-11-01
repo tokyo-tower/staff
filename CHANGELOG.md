@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- イベントに対する注文返品処理における該当取引検索を注文番号に依存させる対応
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v5.6.0 - 2019-11-01
+
+### Changed
+
+- イベントに対する注文返品処理における該当取引検索を注文番号に依存させる対応
 
 ## v5.5.0 - 2019-10-31
 
