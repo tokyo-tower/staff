@@ -299,13 +299,7 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
                                 potentialActions: {
                                     cancelReservation: {
                                         potentialActions: {
-                                            informReservation: [
-                                                {
-                                                    recipient: {
-                                                        url: `${<string>process.env.API_ENDPOINT}/webhooks/onReservationCancelled`
-                                                    }
-                                                }
-                                            ]
+                                            informReservation: []
                                         }
                                     }
                                 }

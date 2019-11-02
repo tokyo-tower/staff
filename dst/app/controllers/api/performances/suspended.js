@@ -253,13 +253,7 @@ function returnOrders(req, res) {
                                         potentialActions: {
                                             cancelReservation: {
                                                 potentialActions: {
-                                                    informReservation: [
-                                                        {
-                                                            recipient: {
-                                                                url: `${process.env.API_ENDPOINT}/webhooks/onReservationCancelled`
-                                                            }
-                                                        }
-                                                    ]
+                                                    informReservation: []
                                                 }
                                             }
                                         }
