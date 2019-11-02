@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 注文返品取引から予約通知URLの指定を削除
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v5.7.0 - 2019-11-02
+
+### Changed
+
+- 注文返品取引から予約通知URLの指定を削除
 
 ## v5.6.0 - 2019-11-01
 
