@@ -282,8 +282,15 @@ function confirm(req, res, next) {
                     // 取引確定
                     const transactionResult = yield placeOrderTransactionService.confirm({
                         id: reservationModel.transactionInProgress.id,
-                        paymentMethod: reservationModel.transactionInProgress.paymentMethod,
-                        informOrderUrl: `${process.env.API_ENDPOINT}/webhooks/onPlaceOrder`
+                        potentialActions: {
+                            order: {
+                                potentialActions: {
+                                    informOrder: [
+                                        { recipient: { url: `${process.env.API_ENDPOINT}/webhooks/onPlaceOrder` } }
+                                    ]
+                                }
+                            }
+                        }
                     });
                     // 購入結果セッション作成
                     req.session.transactionResult = transactionResult;
