@@ -85,6 +85,7 @@ export async function processStart(req: Request): Promise<ReserveSessionModel> {
     // 取引セッションを初期化
     const transactionInProgress: Express.ITransactionInProgress = {
         id: transaction.id,
+        agent: transaction.agent,
         agentId: transaction.agent.id,
         seller: transaction.seller,
         sellerId: transaction.seller.id,
@@ -170,6 +171,7 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
     reservationModel.transactionInProgress.seatReservationAuthorizeActionId = action.id;
 
     // セッションに保管
+    reservationModel.transactionInProgress.authorizeSeatReservationResult = action.result;
     reservationModel.transactionInProgress.reservations = offers.map((o) => {
         const ticketType = reservationModel.transactionInProgress.ticketTypes.find((t) => t.id === o.ticket_type);
         if (ticketType === undefined) {
@@ -308,6 +310,7 @@ export async function processFixProfile(reservationModel: ReserveSessionModel, r
         }
     });
     debug('profile set.', profile);
+    reservationModel.transactionInProgress.profile = profile;
 
     // セッションに購入者情報格納
     (<Express.Session>req.session).purchaser = contact;

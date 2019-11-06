@@ -41,6 +41,7 @@ declare global {
              * 取引ID
              */
             id: string;
+            agent?: cinerinoapi.factory.transaction.placeOrder.IAgent;
             /**
              * 取引主体ID
              */
@@ -54,6 +55,11 @@ declare global {
              */
             sellerId: string;
             seatReservationAuthorizeActionId?: string;
+            /**
+             * 座席予約承認結果
+             */
+            authorizeSeatReservationResult?:
+            cinerinoapi.factory.action.authorize.offer.seatReservation.IResult<cinerinoapi.factory.service.webAPI.Identifier.Chevre>;
             creditCardAuthorizeActionId?: string;
             /**
              * 予約対象カテゴリ("0":一般,"1":車椅子)
@@ -79,10 +85,8 @@ declare global {
              * 券種リスト
              */
             ticketTypes: ITicketType[];
-            /**
-             * 予約座席コードリスト
-             */
             purchaser: IPurchaser;
+            profile?: cinerinoapi.factory.person.IProfile;
             /**
              * 決済方法
              */
