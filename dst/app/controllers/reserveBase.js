@@ -80,6 +80,7 @@ function processStart(req) {
         // 取引セッションを初期化
         const transactionInProgress = {
             id: transaction.id,
+            agent: transaction.agent,
             agentId: transaction.agent.id,
             seller: transaction.seller,
             sellerId: transaction.seller.id,
@@ -158,6 +159,7 @@ function processFixSeatsAndTickets(reservationModel, req) {
         });
         reservationModel.transactionInProgress.seatReservationAuthorizeActionId = action.id;
         // セッションに保管
+        reservationModel.transactionInProgress.authorizeSeatReservationResult = action.result;
         reservationModel.transactionInProgress.reservations = offers.map((o) => {
             const ticketType = reservationModel.transactionInProgress.ticketTypes.find((t) => t.id === o.ticket_type);
             if (ticketType === undefined) {
@@ -263,6 +265,7 @@ function processFixProfile(reservationModel, req, res) {
             }
         });
         debug('profile set.', profile);
+        reservationModel.transactionInProgress.profile = profile;
         // セッションに購入者情報格納
         req.session.purchaser = contact;
     });

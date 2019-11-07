@@ -18,6 +18,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v5.8.0 - 2019-11-07
+
+### Changed
+
+- 注文取引確定時の注文通知先指定をCinerino化
+- 注文取引確定時の予約連携指定をCinerino化
+- 注文取引確定時の印刷トークンをアプリケーション側で生成
+
 ## v5.7.0 - 2019-11-02
 
 ### Changed
