@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 - 注文取引確定時の注文通知先指定をCinerino化
 - 注文取引確定時の予約連携指定をCinerino化
+- 注文取引確定時の印刷トークンをアプリケーション側で生成
 
 ### Deprecated
 

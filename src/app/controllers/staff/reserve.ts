@@ -1,5 +1,5 @@
 /**
- * 内部関係者座席予約コントローラー
+ * 座席予約コントローラー
  */
 import * as cinerinoapi from '@cinerino/api-nodejs-client';
 
@@ -7,6 +7,7 @@ import * as conf from 'config';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 import { CONFLICT, TOO_MANY_REQUESTS } from 'http-status';
+import * as jwt from 'jsonwebtoken';
 import * as moment from 'moment-timezone';
 import * as numeral from 'numeral';
 import * as _ from 'underscore';
@@ -296,8 +297,13 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                     potentialActions: potentialActions
                 });
 
+                // 印刷トークン生成
+                const reservationIds =
+                    transactionResult.order.acceptedOffers.map((o) => (<cinerinoapi.factory.order.IReservation>o.itemOffered).id);
+                const printToken = await createPrintToken(reservationIds);
+
                 // 購入結果セッション作成
-                (<Express.Session>req.session).transactionResult = transactionResult;
+                (<Express.Session>req.session).transactionResult = { ...transactionResult, printToken: printToken };
 
                 try {
                     // 完了メールキュー追加
@@ -365,6 +371,34 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
     } catch (error) {
         next(new Error(req.__('UnexpectedError')));
     }
+}
+
+/**
+ * 印刷トークンインターフェース
+ */
+export type IPrintToken = string;
+/**
+ * 印刷トークン対象(予約IDリスト)インターフェース
+ */
+export type IPrintObject = string[];
+
+/**
+ * 予約印刷トークンを発行する
+ */
+async function createPrintToken(object: IPrintObject): Promise<IPrintToken> {
+    return new Promise<IPrintToken>((resolve, reject) => {
+        const payload = {
+            object: object
+        };
+
+        jwt.sign(payload, <string>process.env.TTTS_TOKEN_SECRET, (jwtErr, token) => {
+            if (jwtErr instanceof Error) {
+                reject(jwtErr);
+            } else {
+                resolve(token);
+            }
+        });
+    });
 }
 
 // tslint:disable-next-line:max-func-body-length

@@ -9,12 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
- * 内部関係者座席予約コントローラー
+ * 座席予約コントローラー
  */
 const cinerinoapi = require("@cinerino/api-nodejs-client");
 const conf = require("config");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
+const jwt = require("jsonwebtoken");
 const moment = require("moment-timezone");
 const numeral = require("numeral");
 const _ = require("underscore");
@@ -285,8 +286,11 @@ function confirm(req, res, next) {
                         id: reservationModel.transactionInProgress.id,
                         potentialActions: potentialActions
                     });
+                    // 印刷トークン生成
+                    const reservationIds = transactionResult.order.acceptedOffers.map((o) => o.itemOffered.id);
+                    const printToken = yield createPrintToken(reservationIds);
                     // 購入結果セッション作成
-                    req.session.transactionResult = transactionResult;
+                    req.session.transactionResult = Object.assign({}, transactionResult, { printToken: printToken });
                     try {
                         // 完了メールキュー追加
                         const emailAttributes = yield reserveBaseController.createEmailAttributes(transactionResult.order, res);
@@ -350,6 +354,26 @@ function confirm(req, res, next) {
     });
 }
 exports.confirm = confirm;
+/**
+ * 予約印刷トークンを発行する
+ */
+function createPrintToken(object) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            const payload = {
+                object: object
+            };
+            jwt.sign(payload, process.env.TTTS_TOKEN_SECRET, (jwtErr, token) => {
+                if (jwtErr instanceof Error) {
+                    reject(jwtErr);
+                }
+                else {
+                    resolve(token);
+                }
+            });
+        });
+    });
+}
 // tslint:disable-next-line:max-func-body-length
 function createPotentialActions(reservationModel) {
     // 予約連携パラメータ作成
