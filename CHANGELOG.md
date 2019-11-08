@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 予約ごとの印刷トークンをローカルで発行するように調整
+
 ### Deprecated
 
 ### Removed

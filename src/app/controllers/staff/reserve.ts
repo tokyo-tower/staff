@@ -385,7 +385,7 @@ export type IPrintObject = string[];
 /**
  * 予約印刷トークンを発行する
  */
-async function createPrintToken(object: IPrintObject): Promise<IPrintToken> {
+export async function createPrintToken(object: IPrintObject): Promise<IPrintToken> {
     return new Promise<IPrintToken>((resolve, reject) => {
         const payload = {
             object: object

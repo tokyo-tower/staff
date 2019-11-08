@@ -7,6 +7,8 @@ import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 import * as querystring from 'querystring';
 
+import { createPrintToken } from './reserve';
+
 const debug = createDebug('ttts-staff:controllers:staff:mypage');
 const layout: string = 'layouts/staff/layout';
 
@@ -39,11 +41,7 @@ export async function print(req: Request, res: Response, next: NextFunction): Pr
         debug('printing reservations...ids:', ids);
 
         // 印刷トークン発行
-        const reservationService = new tttsapi.service.Reservation({
-            endpoint: <string>process.env.API_ENDPOINT,
-            auth: req.tttsAuthClient
-        });
-        const { token } = await reservationService.publishPrintToken({ ids });
+        const token = await createPrintToken(ids);
         debug('printToken created.', token);
 
         const query = querystring.stringify({

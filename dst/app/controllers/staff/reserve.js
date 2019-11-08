@@ -374,6 +374,7 @@ function createPrintToken(object) {
         });
     });
 }
+exports.createPrintToken = createPrintToken;
 // tslint:disable-next-line:max-func-body-length
 function createPotentialActions(reservationModel) {
     // 予約連携パラメータ作成
