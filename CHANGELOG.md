@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 注文取引確定サービスをCinerino本家へ変更
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v5.9.0 - 2019-11-08
+
+### Changed
+
+- 注文取引確定サービスをCinerino本家へ変更
 
 ## v5.8.0 - 2019-11-07
 
