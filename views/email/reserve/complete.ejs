@@ -2,15 +2,15 @@
 
 <%- __('EmailDestinationName{{name}}', {name: purchaserName}) %>
 
-<%- __('EmailHead1').replace('$theater_name$', reservations[0].reservationFor.superEvent.location.name[locale]) %>
+<%- __('EmailHead1').replace('$theater_name$', theaterName[locale]) %>
 <%- __('EmailHead2') %>
 
-<% /* 購入番号 */ %><%- __('PaymentNo') %> : <%- order.confirmationNumber.slice(-6) %>
+<% /* 購入番号 */ %><%- __('PaymentNo') %> : <%- paymentNo %>
 <% /* ご来塔日時 */ %><%- __('EmailReserveDate') %> : <%- dayTime %>
 <% /* 券種、枚数 */ %><%- __('TicketType') %> <%- __('TicketCount') %>
 <%- ticketInfoStr %>
 -------------------------------------
-<% /*合計枚数 */ %><%- __('EmailTotalTicketCount{{n}}', {n: reservations.length}) %>
+<% /*合計枚数 */ %><%- __('EmailTotalTicketCount{{n}}', {n: numTickets}) %>
 <% /* 合計金額 */ %><% if (totalCharge > 0) { %><%- __('TotalPrice') %> <%- __('{{price}} yen', {price: numeral(totalCharge).format('0,0')}) %><% } %>
 -------------------------------------
 <%- __('EmailAboutQR') %>
@@ -35,7 +35,7 @@
 <%= conf.get('official_url_top_by_locale')[locale] %>
 
 
-<%- __('EmailFoot1').replace('$theater_name$', reservations[0].reservationFor.superEvent.location.name[locale]) %>
+<%- __('EmailFoot1').replace('$theater_name$', theaterName[locale]) %>
 <%- __('EmailFoot2') %>
 <%- __('EmailFoot3') %>
 

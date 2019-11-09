@@ -289,7 +289,24 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                 });
                 debug('payment authorized', paymentAuthorization);
 
-                const potentialActions = createPotentialActions(reservationModel);
+                const event = reservationModel.transactionInProgress.performance;
+                if (event === undefined) {
+                    throw new Error(req.__('UnexpectedError'));
+                }
+                const ticketTypes = reservationModel.transactionInProgress.ticketTypes
+                    .filter((t) => Number(t.count) > 0);
+
+                const { potentialActions, customerProfile, paymentNo } = createPotentialActions(reservationModel);
+
+                // 完了メールキュー追加
+                const emailAttributes = await reserveBaseController.createEmailAttributes(
+                    // transactionResult.order,
+                    event,
+                    customerProfile,
+                    paymentNo,
+                    ticketTypes,
+                    res
+                );
 
                 // 取引確定
                 const transactionResult = await placeOrderTransactionService.confirm({
@@ -306,11 +323,6 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                 (<Express.Session>req.session).transactionResult = { ...transactionResult, printToken: printToken };
 
                 try {
-                    // 完了メールキュー追加
-                    const emailAttributes = await reserveBaseController.createEmailAttributes(
-                        transactionResult.order, res
-                    );
-
                     await placeOrderTransactionService.sendEmailNotification({
                         transactionId: reservationModel.transactionInProgress.id,
                         emailMessageAttributes: emailAttributes
@@ -402,7 +414,11 @@ export async function createPrintToken(object: IPrintObject): Promise<IPrintToke
 }
 
 // tslint:disable-next-line:max-func-body-length
-function createPotentialActions(reservationModel: ReserveSessionModel): cinerinoapi.factory.transaction.placeOrder.IPotentialActionsParams {
+function createPotentialActions(reservationModel: ReserveSessionModel): {
+    potentialActions: cinerinoapi.factory.transaction.placeOrder.IPotentialActionsParams;
+    customerProfile: cinerinoapi.factory.person.IProfile;
+    paymentNo: string;
+} {
     // 予約連携パラメータ作成
     const authorizeSeatReservationResult = reservationModel.transactionInProgress.authorizeSeatReservationResult;
     if (authorizeSeatReservationResult === undefined) {
@@ -429,6 +445,9 @@ function createPotentialActions(reservationModel: ReserveSessionModel): cinerino
         if (paymentNoProperty !== undefined) {
             paymentNo = paymentNoProperty.value;
         }
+    }
+    if (paymentNo === undefined) {
+        throw new Error('Payment No Not Found');
     }
 
     const transactionAgent = reservationModel.transactionInProgress.agent;
@@ -502,18 +521,22 @@ function createPotentialActions(reservationModel: ReserveSessionModel): cinerino
     });
 
     return {
-        order: {
-            potentialActions: {
-                sendOrder: {
-                    potentialActions: {
-                        confirmReservation: confirmReservationParams
-                    }
-                },
-                informOrder: [
-                    { recipient: { url: `${<string>process.env.API_ENDPOINT}/webhooks/onPlaceOrder` } }
-                ]
+        potentialActions: {
+            order: {
+                potentialActions: {
+                    sendOrder: {
+                        potentialActions: {
+                            confirmReservation: confirmReservationParams
+                        }
+                    },
+                    informOrder: [
+                        { recipient: { url: `${<string>process.env.API_ENDPOINT}/webhooks/onPlaceOrder` } }
+                    ]
+                }
             }
-        }
+        },
+        customerProfile: customerProfile,
+        paymentNo: paymentNo
     };
 }
 

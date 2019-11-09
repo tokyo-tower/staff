@@ -345,29 +345,33 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
  */
 // tslint:disable-next-line:max-func-body-length
 export async function createEmailAttributes(
-    order: cinerinoapi.factory.order.IOrder,
+    // order: cinerinoapi.factory.order.IOrder,
+    event: tttsapi.factory.performance.IPerformanceWithDetails,
+    customerProfile: cinerinoapi.factory.person.IProfile,
+    paymentNo: string,
+    ticketTypes: Express.ITicketType[],
     res: Response
 ): Promise<cinerinoapi.factory.creativeWork.message.email.IAttributes> {
-    const acceptedOffers = order.acceptedOffers;
+    // const acceptedOffers = order.acceptedOffers;
 
     // チケットコード順にソート
-    acceptedOffers.sort((a, b) => {
-        if ((<IReservationOrderItem>a.itemOffered).reservedTicket.ticketType.identifier
-            < (<IReservationOrderItem>b.itemOffered).reservedTicket.ticketType.identifier) {
-            return -1;
-        }
-        if ((<IReservationOrderItem>a.itemOffered).reservedTicket.ticketType.identifier
-            > (<IReservationOrderItem>b.itemOffered).reservedTicket.ticketType.identifier) {
-            return 1;
-        }
+    // acceptedOffers.sort((a, b) => {
+    //     if ((<IReservationOrderItem>a.itemOffered).reservedTicket.ticketType.identifier
+    //         < (<IReservationOrderItem>b.itemOffered).reservedTicket.ticketType.identifier) {
+    //         return -1;
+    //     }
+    //     if ((<IReservationOrderItem>a.itemOffered).reservedTicket.ticketType.identifier
+    //         > (<IReservationOrderItem>b.itemOffered).reservedTicket.ticketType.identifier) {
+    //         return 1;
+    //     }
 
-        return 0;
-    });
+    //     return 0;
+    // });
 
-    const reservations = acceptedOffers.map((o) => <IReservationOrderItem>o.itemOffered);
+    // const reservations = acceptedOffers.map((o) => <IReservationOrderItem>o.itemOffered);
 
-    const to = (order.customer.email !== undefined)
-        ? order.customer.email
+    const to = (typeof customerProfile.email === 'string')
+        ? customerProfile.email
         : '';
     debug('to is', to);
     if (to.length === 0) {
@@ -378,51 +382,56 @@ export async function createEmailAttributes(
     const titleEmail = res.__('EmailTitle');
 
     // 券種ごとに合計枚数算出
-    const ticketInfos: {} = {};
+    // const ticketInfos: {} = {};
 
-    for (const acceptedOffer of acceptedOffers) {
-        const reservation = <IReservationOrderItem>acceptedOffer.itemOffered;
-        const ticketType = reservation.reservedTicket.ticketType;
-        const price = getUnitPriceByAcceptedOffer(acceptedOffer);
+    // for (const acceptedOffer of acceptedOffers) {
+    //     const reservation = <IReservationOrderItem>acceptedOffer.itemOffered;
+    //     const ticketType = reservation.reservedTicket.ticketType;
+    //     const unitPrice = getUnitPriceByAcceptedOffer(acceptedOffer);
 
-        const dataValue = ticketType.identifier;
-        // チケットタイプごとにチケット情報セット
-        if (!ticketInfos.hasOwnProperty(dataValue)) {
-            (<any>ticketInfos)[dataValue] = {
-                ticket_type_name: ticketType.name,
-                charge: `\\${numeral(price).format('0,0')}`,
-                count: 1
-            };
-        } else {
-            (<any>ticketInfos)[dataValue].count += 1;
-        }
-    }
+    //     const dataValue = ticketType.identifier;
+    //     // チケットタイプごとにチケット情報セット
+    //     if (!ticketInfos.hasOwnProperty(dataValue)) {
+    //         (<any>ticketInfos)[dataValue] = {
+    //             ticket_type_name: ticketType.name,
+    //             charge: `\\${numeral(unitPrice).format('0,0')}`,
+    //             count: 1
+    //         };
+    //     } else {
+    //         (<any>ticketInfos)[dataValue].count += 1;
+    //     }
+    // }
     // 券種ごとの表示情報編集
     const ticketInfoArray: string[] = [];
-    Object.keys(ticketInfos).forEach((key) => {
-        const ticketInfo = (<any>ticketInfos)[key];
-        ticketInfoArray.push(`${ticketInfo.ticket_type_name[res.locale]} ${res.__('{{n}}Leaf', { n: ticketInfo.count })}`);
+    ticketTypes.forEach((ticketType) => {
+        const ticketCountEdit = res.__('{{n}}Leaf', { n: ticketType.count.toString() });
+        ticketInfoArray.push(`${(<any>ticketType.name)[res.locale]} ${ticketCountEdit}`);
     });
+    // Object.keys(ticketInfos).forEach((key) => {
+    //     const ticketInfo = (<any>ticketInfos)[key];
+    //     ticketInfoArray.push(`${ticketInfo.ticket_type_name[res.locale]} ${res.__('{{n}}Leaf', { n: ticketInfo.count })}`);
+    // });
     const ticketInfoStr = ticketInfoArray.join('\n');
 
-    const event = reservations[0].reservationFor;
+    // const event = reservations[0].reservationFor;
     const day: string = moment(event.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD');
     const time: string = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
 
     // 日本語の時は"姓名"他は"名姓"
-    const purchaserName = (order.customer !== undefined)
-        ? (res.locale === 'ja') ?
-            `${order.customer.familyName} ${order.customer.givenName}` :
-            `${order.customer.givenName} ${order.customer.familyName}`
-        : '';
+    const purchaserName = (res.locale === 'ja')
+        ? `${customerProfile.familyName} ${customerProfile.givenName}`
+        : `${customerProfile.givenName} ${customerProfile.familyName}`;
 
     return new Promise<cinerinoapi.factory.creativeWork.message.email.IAttributes>((resolve, reject) => {
         res.render(
             'email/reserve/complete',
             {
                 layout: false,
-                order: order,
-                reservations: reservations,
+                // order: order,
+                paymentNo: paymentNo,
+                // reservations: reservations,
+                theaterName: event.superEvent.location.name,
+                numTickets: ticketTypes.reduce((a, b) => a + Number(b.count), 0),
                 moment: moment,
                 numeral: numeral,
                 conf: conf,
