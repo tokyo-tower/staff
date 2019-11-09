@@ -36,30 +36,22 @@ declare global {
             unitPrice: number;
         }
 
+        type IAuthorizeSeatReservationResult =
+            cinerinoapi.factory.action.authorize.offer.seatReservation.IResult<cinerinoapi.factory.service.webAPI.Identifier.Chevre>;
+
         interface ITransactionInProgress {
             /**
              * 取引ID
              */
             id: string;
+            expires: string;
             agent?: cinerinoapi.factory.transaction.placeOrder.IAgent;
-            /**
-             * 取引主体ID
-             */
-            agentId: string;
-            /**
-             * 販売者
-             */
             seller: cinerinoapi.factory.seller.IOrganization<any>;
-            /**
-             * 販売者ID
-             */
-            sellerId: string;
             seatReservationAuthorizeActionId?: string;
             /**
              * 座席予約承認結果
              */
-            authorizeSeatReservationResult?:
-            cinerinoapi.factory.action.authorize.offer.seatReservation.IResult<cinerinoapi.factory.service.webAPI.Identifier.Chevre>;
+            authorizeSeatReservationResult?: IAuthorizeSeatReservationResult;
             creditCardAuthorizeActionId?: string;
             /**
              * 予約対象カテゴリ("0":一般,"1":車椅子)
@@ -69,10 +61,6 @@ declare global {
              * 購入管理番号
              */
             paymentNo?: string;
-            /**
-             * 座席仮予約有効期限ISO8601フォーマット
-             */
-            expires: string;
             /**
              * パフォーマンス
              */
@@ -91,10 +79,6 @@ declare global {
              * 決済方法
              */
             paymentMethod: string;
-            /**
-             * GMO取引
-             */
-            transactionGMO: ITransactionGMO;
             /**
              * 仮予約リスト
              */
@@ -119,12 +103,6 @@ declare global {
             age: string;
             address: string;
             gender: string;
-        }
-
-        interface ITransactionGMO {
-            orderId: string;
-            amount: number;
-            count: number;
         }
 
         export interface IGroup {

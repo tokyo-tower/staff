@@ -289,24 +289,7 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                 });
                 debug('payment authorized', paymentAuthorization);
 
-                const event = reservationModel.transactionInProgress.performance;
-                if (event === undefined) {
-                    throw new Error(req.__('UnexpectedError'));
-                }
-                const ticketTypes = reservationModel.transactionInProgress.ticketTypes
-                    .filter((t) => Number(t.count) > 0);
-
-                const { potentialActions, customerProfile, paymentNo } = createPotentialActions(reservationModel);
-
-                // 完了メールキュー追加
-                const emailAttributes = await reserveBaseController.createEmailAttributes(
-                    // transactionResult.order,
-                    event,
-                    customerProfile,
-                    paymentNo,
-                    ticketTypes,
-                    res
-                );
+                const potentialActions = await createPotentialActions(reservationModel, res);
 
                 // 取引確定
                 const transactionResult = await placeOrderTransactionService.confirm({
@@ -321,16 +304,6 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
 
                 // 購入結果セッション作成
                 (<Express.Session>req.session).transactionResult = { ...transactionResult, printToken: printToken };
-
-                try {
-                    await placeOrderTransactionService.sendEmailNotification({
-                        transactionId: reservationModel.transactionInProgress.id,
-                        emailMessageAttributes: emailAttributes
-                    });
-                    debug('email sent.');
-                } catch (error) {
-                    // 失敗してもスルー
-                }
 
                 // 購入フローセッションは削除
                 ReserveSessionModel.REMOVE(req);
@@ -414,11 +387,8 @@ export async function createPrintToken(object: IPrintObject): Promise<IPrintToke
 }
 
 // tslint:disable-next-line:max-func-body-length
-function createPotentialActions(reservationModel: ReserveSessionModel): {
-    potentialActions: cinerinoapi.factory.transaction.placeOrder.IPotentialActionsParams;
-    customerProfile: cinerinoapi.factory.person.IProfile;
-    paymentNo: string;
-} {
+async function createPotentialActions(reservationModel: ReserveSessionModel, res: Response):
+    Promise<cinerinoapi.factory.transaction.placeOrder.IPotentialActionsParams> {
     // 予約連携パラメータ作成
     const authorizeSeatReservationResult = reservationModel.transactionInProgress.authorizeSeatReservationResult;
     if (authorizeSeatReservationResult === undefined) {
@@ -434,10 +404,6 @@ function createPotentialActions(reservationModel: ReserveSessionModel): {
     const chevreReservations = (Array.isArray(reserveTransaction.object.reservations))
         ? reserveTransaction.object.reservations
         : [];
-    const event = reserveTransaction.object.reservationFor;
-    if (event === undefined || event === null) {
-        throw new cinerinoapi.factory.errors.Argument('Transaction', 'Event required');
-    }
 
     let paymentNo: string | undefined;
     if (chevreReservations[0].underName !== undefined && Array.isArray(chevreReservations[0].underName.identifier)) {
@@ -520,23 +486,37 @@ function createPotentialActions(reservationModel: ReserveSessionModel): {
         }
     });
 
+    const event = reservationModel.transactionInProgress.performance;
+    if (event === undefined) {
+        throw new cinerinoapi.factory.errors.Argument('Transaction', 'Event required');
+    }
+    const ticketTypes = reservationModel.transactionInProgress.ticketTypes
+        .filter((t) => Number(t.count) > 0);
+
+    const emailAttributes = await reserveBaseController.createEmailAttributes(
+        event,
+        customerProfile,
+        paymentNo,
+        ticketTypes,
+        res
+    );
+
     return {
-        potentialActions: {
-            order: {
-                potentialActions: {
-                    sendOrder: {
-                        potentialActions: {
-                            confirmReservation: confirmReservationParams
-                        }
-                    },
-                    informOrder: [
-                        { recipient: { url: `${<string>process.env.API_ENDPOINT}/webhooks/onPlaceOrder` } }
-                    ]
-                }
+        order: {
+            potentialActions: {
+                sendOrder: {
+                    potentialActions: {
+                        confirmReservation: confirmReservationParams,
+                        sendEmailMessage: [{
+                            object: emailAttributes
+                        }]
+                    }
+                },
+                informOrder: [
+                    { recipient: { url: `${<string>process.env.API_ENDPOINT}/webhooks/onPlaceOrder` } }
+                ]
             }
-        },
-        customerProfile: customerProfile,
-        paymentNo: paymentNo
+        }
     };
 }
 
