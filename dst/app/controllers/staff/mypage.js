@@ -14,6 +14,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const createDebug = require("debug");
 const querystring = require("querystring");
+const reserve_1 = require("./reserve");
 const debug = createDebug('ttts-staff:controllers:staff:mypage');
 const layout = 'layouts/staff/layout';
 /**
@@ -47,11 +48,7 @@ function print(req, res, next) {
             const ids = req.query.ids;
             debug('printing reservations...ids:', ids);
             // 印刷トークン発行
-            const reservationService = new tttsapi.service.Reservation({
-                endpoint: process.env.API_ENDPOINT,
-                auth: req.tttsAuthClient
-            });
-            const { token } = yield reservationService.publishPrintToken({ ids });
+            const token = yield reserve_1.createPrintToken(ids);
             debug('printToken created.', token);
             const query = querystring.stringify({
                 locale: 'ja',
