@@ -10,9 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 予約ごとの印刷トークンをローカルで発行するように調整
-- 注文取引確定前にメール送信内容を作成するように調整
-
 ### Deprecated
 
 ### Removed
@@ -20,6 +17,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v5.10.0 - 2019-11-11
+
+### Changed
+
+- 予約ごとの印刷トークンをローカルで発行するように調整
+- 注文取引確定前にメール送信内容を作成するように調整
 
 ## v5.9.0 - 2019-11-08
 
