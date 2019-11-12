@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 注文取引確定時に注文識別子を指定
+
 ### Deprecated
 
 ### Removed
