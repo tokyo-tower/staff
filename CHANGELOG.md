@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v5.11.0 - 2019-11-12
+
+### Changed
+
+- 注文取引確定時に注文識別子を指定
+
 ## v5.10.0 - 2019-11-11
 
 ### Changed

@@ -280,12 +280,11 @@ function confirm(req, res, next) {
                         purpose: { typeOf: cinerinoapi.factory.transactionType.PlaceOrder, id: reservationModel.transactionInProgress.id }
                     });
                     debug('payment authorized', paymentAuthorization);
-                    const potentialActions = yield createPotentialActions(reservationModel, res);
+                    const { potentialActions, result } = yield createPotentialActions(reservationModel, res);
                     // 取引確定
-                    const transactionResult = yield placeOrderTransactionService.confirm({
-                        id: reservationModel.transactionInProgress.id,
-                        potentialActions: potentialActions
-                    });
+                    const transactionResult = yield placeOrderTransactionService.confirm(Object.assign({ id: reservationModel.transactionInProgress.id, potentialActions: potentialActions }, {
+                        result: result
+                    }));
                     // 印刷トークン生成
                     const reservationIds = transactionResult.order.acceptedOffers.map((o) => o.itemOffered.id);
                     const printToken = yield createPrintToken(reservationIds);
@@ -459,19 +458,37 @@ function createPotentialActions(reservationModel, res) {
         const ticketTypes = reservationModel.transactionInProgress.ticketTypes
             .filter((t) => Number(t.count) > 0);
         const emailAttributes = yield reserveBaseController.createEmailAttributes(event, customerProfile, paymentNo, ticketTypes, res);
+        const eventStartDateStr = moment(event.startDate)
+            .tz('Asia/Tokyo')
+            .format('YYYYMMDD');
+        const confirmationNumber = `${eventStartDateStr}${paymentNo}`;
+        const confirmationPass = (typeof customerProfile.telephone === 'string')
+            // tslint:disable-next-line:no-magic-numbers
+            ? customerProfile.telephone.slice(-4)
+            : '9999';
         return {
-            order: {
-                potentialActions: {
-                    sendOrder: {
-                        potentialActions: {
-                            confirmReservation: confirmReservationParams,
-                            sendEmailMessage: [{
-                                    object: emailAttributes
-                                }]
-                        }
-                    },
-                    informOrder: [
-                        { recipient: { url: `${process.env.API_ENDPOINT}/webhooks/onPlaceOrder` } }
+            potentialActions: {
+                order: {
+                    potentialActions: {
+                        sendOrder: {
+                            potentialActions: {
+                                confirmReservation: confirmReservationParams,
+                                sendEmailMessage: [{
+                                        object: emailAttributes
+                                    }]
+                            }
+                        },
+                        informOrder: [
+                            { recipient: { url: `${process.env.API_ENDPOINT}/webhooks/onPlaceOrder` } }
+                        ]
+                    }
+                }
+            },
+            result: {
+                order: {
+                    identifier: [
+                        { name: 'confirmationNumber', value: confirmationNumber },
+                        { name: 'confirmationPass', value: confirmationPass }
                     ]
                 }
             }
