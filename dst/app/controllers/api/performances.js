@@ -243,8 +243,14 @@ function createEmail(req, res, order, notice) {
         const day = moment(event.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD');
         const time = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
         // 購入番号
-        // tslint:disable-next-line:no-magic-numbers
-        const paymentNo = order.confirmationNumber.slice(-6);
+        let paymentNo = '';
+        if (Array.isArray(order.identifier)) {
+            const confirmationNumberProperty = order.identifier.find((p) => p.name === 'confirmationNumber');
+            if (confirmationNumberProperty !== undefined) {
+                // tslint:disable-next-line:no-magic-numbers
+                paymentNo = confirmationNumberProperty.value.slice(-6);
+            }
+        }
         paymentTicketInfos.push(`${res.__('PaymentNo')} : ${paymentNo}`);
         paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);
         paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`); // 券種 枚数

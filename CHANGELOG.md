@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v5.12.0 - 2019-11-13
+
+### Changed
+
+- 購入番号をフロントで発行するように調整
+
 ## v5.11.0 - 2019-11-12
 
 ### Changed
