@@ -280,8 +280,14 @@ async function createEmail(
     const time: string = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
 
     // 購入番号
-    // tslint:disable-next-line:no-magic-numbers
-    const paymentNo: string = order.confirmationNumber.slice(-6);
+    let paymentNo = '';
+    if (Array.isArray(order.identifier)) {
+        const confirmationNumberProperty = order.identifier.find((p: any) => p.name === 'confirmationNumber');
+        if (confirmationNumberProperty !== undefined) {
+            // tslint:disable-next-line:no-magic-numbers
+            paymentNo = confirmationNumberProperty.value.slice(-6);
+        }
+    }
 
     paymentTicketInfos.push(`${res.__('PaymentNo')} : ${paymentNo}`);
     paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);

@@ -13,6 +13,7 @@ declare global {
         }
 
         export interface IPlaceOrderTransactionResult extends cinerinoapi.factory.transaction.placeOrder.IResult {
+            paymentNo: string;
             printToken: string;
         }
 
