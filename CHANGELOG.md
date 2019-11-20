@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 注文通知設定をCinerinoプロジェクト設定で移行
+
 ### Deprecated
 
 ### Removed

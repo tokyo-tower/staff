@@ -304,9 +304,7 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
                                     }
                                 }
                             }],
-                            informOrder: [
-                                { recipient: { url: `${<string>process.env.API_ENDPOINT}/webhooks/onReturnOrder` } }
-                            ]
+                            informOrder: []
                         }
                     }
                 }
