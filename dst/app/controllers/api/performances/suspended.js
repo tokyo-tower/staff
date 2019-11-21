@@ -258,9 +258,7 @@ function returnOrders(req, res) {
                                             }
                                         }
                                     }],
-                                informOrder: [
-                                    { recipient: { url: `${process.env.API_ENDPOINT}/webhooks/onReturnOrder` } }
-                                ]
+                                informOrder: []
                             }
                         }
                     }

@@ -529,10 +529,7 @@ async function createPotentialActions(paymentNo: string, reservationModel: Reser
                                 object: emailAttributes
                             }]
                         }
-                    },
-                    informOrder: [
-                        { recipient: { url: `${<string>process.env.API_ENDPOINT}/webhooks/onPlaceOrder` } }
-                    ]
+                    }
                 }
             }
         },

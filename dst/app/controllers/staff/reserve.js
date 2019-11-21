@@ -477,10 +477,7 @@ function createPotentialActions(paymentNo, reservationModel, res) {
                                         object: emailAttributes
                                     }]
                             }
-                        },
-                        informOrder: [
-                            { recipient: { url: `${process.env.API_ENDPOINT}/webhooks/onPlaceOrder` } }
-                        ]
+                        }
                     }
                 }
             },
