@@ -302,7 +302,7 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                     { event: { id: reservationModel.transactionInProgress.performance.id } }
                 );
 
-                const { potentialActions, result } = await createPotentialActions(paymentNo, reservationModel, res);
+                const { potentialActions, result } = await createPotentialActions(paymentNo, reservationModel);
 
                 // 取引確定
                 const transactionResult = await placeOrderTransactionService.confirm({
@@ -403,7 +403,7 @@ export async function createPrintToken(object: IPrintObject): Promise<IPrintToke
 }
 
 // tslint:disable-next-line:max-func-body-length
-async function createPotentialActions(paymentNo: string, reservationModel: ReserveSessionModel, res: Response):
+async function createPotentialActions(paymentNo: string, reservationModel: ReserveSessionModel):
     Promise<{
         potentialActions: cinerinoapi.factory.transaction.placeOrder.IPotentialActionsParams;
         result: any;
@@ -498,16 +498,6 @@ async function createPotentialActions(paymentNo: string, reservationModel: Reser
     if (event === undefined) {
         throw new cinerinoapi.factory.errors.Argument('Transaction', 'Event required');
     }
-    const ticketTypes = reservationModel.transactionInProgress.ticketTypes
-        .filter((t) => Number(t.count) > 0);
-
-    const emailAttributes = await reserveBaseController.createEmailAttributes(
-        event,
-        customerProfile,
-        paymentNo,
-        ticketTypes,
-        res
-    );
 
     const eventStartDateStr = moment(event.startDate)
         .tz('Asia/Tokyo')
@@ -524,10 +514,10 @@ async function createPotentialActions(paymentNo: string, reservationModel: Reser
                 potentialActions: {
                     sendOrder: {
                         potentialActions: {
-                            confirmReservation: confirmReservationParams,
-                            sendEmailMessage: [{
-                                object: emailAttributes
-                            }]
+                            confirmReservation: confirmReservationParams
+                            // sendEmailMessage: [{
+                            //     object: emailAttributes
+                            // }]
                         }
                     }
                 }
