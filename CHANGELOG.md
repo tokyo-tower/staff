@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v5.14.0 - 2019-11-25
+
+### Removed
+
+- 不要な購入完了メールを削除
+
 ## v5.13.0 - 2019-11-20
 
 ### Changed

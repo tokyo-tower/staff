@@ -290,7 +290,7 @@ function confirm(req, res, next) {
                         throw new cinerinoapi.factory.errors.Argument('Transaction', 'Event required');
                     }
                     const { paymentNo } = yield reservationService.publishPaymentNo({ event: { id: reservationModel.transactionInProgress.performance.id } });
-                    const { potentialActions, result } = yield createPotentialActions(paymentNo, reservationModel, res);
+                    const { potentialActions, result } = yield createPotentialActions(paymentNo, reservationModel);
                     // 取引確定
                     const transactionResult = yield placeOrderTransactionService.confirm(Object.assign({ id: reservationModel.transactionInProgress.id, potentialActions: potentialActions }, {
                         result: result
@@ -373,7 +373,7 @@ function createPrintToken(object) {
 }
 exports.createPrintToken = createPrintToken;
 // tslint:disable-next-line:max-func-body-length
-function createPotentialActions(paymentNo, reservationModel, res) {
+function createPotentialActions(paymentNo, reservationModel) {
     return __awaiter(this, void 0, void 0, function* () {
         // 予約連携パラメータ作成
         const authorizeSeatReservationResult = reservationModel.transactionInProgress.authorizeSeatReservationResult;
@@ -455,9 +455,6 @@ function createPotentialActions(paymentNo, reservationModel, res) {
         if (event === undefined) {
             throw new cinerinoapi.factory.errors.Argument('Transaction', 'Event required');
         }
-        const ticketTypes = reservationModel.transactionInProgress.ticketTypes
-            .filter((t) => Number(t.count) > 0);
-        const emailAttributes = yield reserveBaseController.createEmailAttributes(event, customerProfile, paymentNo, ticketTypes, res);
         const eventStartDateStr = moment(event.startDate)
             .tz('Asia/Tokyo')
             .format('YYYYMMDD');
@@ -472,10 +469,10 @@ function createPotentialActions(paymentNo, reservationModel, res) {
                     potentialActions: {
                         sendOrder: {
                             potentialActions: {
-                                confirmReservation: confirmReservationParams,
-                                sendEmailMessage: [{
-                                        object: emailAttributes
-                                    }]
+                                confirmReservation: confirmReservationParams
+                                // sendEmailMessage: [{
+                                //     object: emailAttributes
+                                // }]
                             }
                         }
                     }

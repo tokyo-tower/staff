@@ -8,7 +8,6 @@ import * as conf from 'config';
 import * as createDebug from 'debug';
 import { Request, Response } from 'express';
 import * as moment from 'moment-timezone';
-import * as numeral from 'numeral';
 import * as request from 'request-promise-native';
 import * as _ from 'underscore';
 
@@ -331,84 +330,6 @@ export async function processFixPerformance(reservationModel: ReserveSessionMode
 
     // パフォーマンス情報を保管
     reservationModel.transactionInProgress.performance = performance;
-}
-
-/**
- * 予約完了メールを作成する
- */
-export async function createEmailAttributes(
-    event: tttsapi.factory.performance.IPerformanceWithDetails,
-    customerProfile: cinerinoapi.factory.person.IProfile,
-    paymentNo: string,
-    ticketTypes: Express.ITicketType[],
-    res: Response
-): Promise<cinerinoapi.factory.creativeWork.message.email.IAttributes> {
-    const to = (typeof customerProfile.email === 'string')
-        ? customerProfile.email
-        : '';
-    debug('to is', to);
-    if (to.length === 0) {
-        throw new Error('email to unknown');
-    }
-
-    const title = res.__('Title');
-    const titleEmail = res.__('EmailTitle');
-
-    // 券種ごとの表示情報編集
-    const ticketInfoArray: string[] = [];
-    ticketTypes.forEach((ticketType) => {
-        const ticketCountEdit = res.__('{{n}}Leaf', { n: ticketType.count.toString() });
-        ticketInfoArray.push(`${(<any>ticketType.name)[res.locale]} ${ticketCountEdit}`);
-    });
-    const ticketInfoStr = ticketInfoArray.join('\n');
-
-    const day: string = moment(event.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD');
-    const time: string = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
-
-    // 日本語の時は"姓名"他は"名姓"
-    const purchaserName = (res.locale === 'ja')
-        ? `${customerProfile.familyName} ${customerProfile.givenName}`
-        : `${customerProfile.givenName} ${customerProfile.familyName}`;
-
-    return new Promise<cinerinoapi.factory.creativeWork.message.email.IAttributes>((resolve, reject) => {
-        res.render(
-            'email/reserve/complete',
-            {
-                layout: false,
-                paymentNo: paymentNo,
-                theaterName: event.superEvent.location.name,
-                numTickets: ticketTypes.reduce((a, b) => a + Number(b.count), 0),
-                moment: moment,
-                numeral: numeral,
-                conf: conf,
-                ticketInfoStr: ticketInfoStr,
-                totalCharge: 0,
-                dayTime: `${day} ${time}`,
-                purchaserName: purchaserName
-            },
-            async (renderErr, text) => {
-                debug('email template rendered.', renderErr);
-                if (renderErr instanceof Error) {
-                    reject(new Error('failed in rendering an email.'));
-
-                    return;
-                }
-
-                resolve({
-                    typeOf: cinerinoapi.factory.creativeWorkType.EmailMessage,
-                    sender: {
-                        name: conf.get<string>('email.fromname'),
-                        email: conf.get<string>('email.from')
-                    },
-                    toRecipient: {
-                        name: purchaserName,
-                        email: to
-                    },
-                    about: `${title} ${titleEmail}`,
-                    text: text
-                });
-            });
-    });
 }
 
 export type ICompoundPriceSpecification = tttsapi.factory.chevre.compoundPriceSpecification.IPriceSpecification<any>;

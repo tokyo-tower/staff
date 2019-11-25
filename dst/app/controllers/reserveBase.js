@@ -16,7 +16,6 @@ const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const conf = require("config");
 const createDebug = require("debug");
 const moment = require("moment-timezone");
-const numeral = require("numeral");
 const request = require("request-promise-native");
 const _ = require("underscore");
 const reserveProfileForm_1 = require("../forms/reserve/reserveProfileForm");
@@ -288,70 +287,6 @@ function processFixPerformance(reservationModel, perfomanceId, req) {
     });
 }
 exports.processFixPerformance = processFixPerformance;
-/**
- * 予約完了メールを作成する
- */
-function createEmailAttributes(event, customerProfile, paymentNo, ticketTypes, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const to = (typeof customerProfile.email === 'string')
-            ? customerProfile.email
-            : '';
-        debug('to is', to);
-        if (to.length === 0) {
-            throw new Error('email to unknown');
-        }
-        const title = res.__('Title');
-        const titleEmail = res.__('EmailTitle');
-        // 券種ごとの表示情報編集
-        const ticketInfoArray = [];
-        ticketTypes.forEach((ticketType) => {
-            const ticketCountEdit = res.__('{{n}}Leaf', { n: ticketType.count.toString() });
-            ticketInfoArray.push(`${ticketType.name[res.locale]} ${ticketCountEdit}`);
-        });
-        const ticketInfoStr = ticketInfoArray.join('\n');
-        const day = moment(event.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD');
-        const time = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
-        // 日本語の時は"姓名"他は"名姓"
-        const purchaserName = (res.locale === 'ja')
-            ? `${customerProfile.familyName} ${customerProfile.givenName}`
-            : `${customerProfile.givenName} ${customerProfile.familyName}`;
-        return new Promise((resolve, reject) => {
-            res.render('email/reserve/complete', {
-                layout: false,
-                paymentNo: paymentNo,
-                theaterName: event.superEvent.location.name,
-                numTickets: ticketTypes.reduce((a, b) => a + Number(b.count), 0),
-                moment: moment,
-                numeral: numeral,
-                conf: conf,
-                ticketInfoStr: ticketInfoStr,
-                totalCharge: 0,
-                dayTime: `${day} ${time}`,
-                purchaserName: purchaserName
-            }, (renderErr, text) => __awaiter(this, void 0, void 0, function* () {
-                debug('email template rendered.', renderErr);
-                if (renderErr instanceof Error) {
-                    reject(new Error('failed in rendering an email.'));
-                    return;
-                }
-                resolve({
-                    typeOf: cinerinoapi.factory.creativeWorkType.EmailMessage,
-                    sender: {
-                        name: conf.get('email.fromname'),
-                        email: conf.get('email.from')
-                    },
-                    toRecipient: {
-                        name: purchaserName,
-                        email: to
-                    },
-                    about: `${title} ${titleEmail}`,
-                    text: text
-                });
-            }));
-        });
-    });
-}
-exports.createEmailAttributes = createEmailAttributes;
 function getUnitPriceByAcceptedOffer(offer) {
     let unitPrice = 0;
     if (offer.priceSpecification !== undefined) {
