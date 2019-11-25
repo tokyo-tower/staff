@@ -14,11 +14,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Removed
 
-- 不要な購入完了メールを削除
-
 ### Fixed
 
 ### Security
+
+## v5.14.0 - 2019-11-25
+
+### Removed
+
+- 不要な購入完了メールを削除
 
 ## v5.13.0 - 2019-11-20
 
