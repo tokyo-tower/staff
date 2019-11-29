@@ -17,9 +17,16 @@ import { getUnitPriceByAcceptedOffer } from '../reserveBase';
 
 const debug = createDebug('ttts-staff:controllers');
 
-const STAFF_CLIENT_ID = <string>process.env.API_CLIENT_ID;
-const POS_CLIENT_ID = <string>process.env.POS_CLIENT_ID;
-const FRONTEND_CLIENT_ID = <string>process.env.FRONTEND_CLIENT_ID;
+const STAFF_CLIENT_IDS = [
+    ...(typeof process.env.API_CLIENT_ID === 'string') ? [process.env.API_CLIENT_ID] : [],
+    ...(typeof process.env.API_CLIENT_ID_OLD === 'string') ? [process.env.API_CLIENT_ID_OLD] : []
+];
+const POS_CLIENT_IDS = (typeof process.env.POS_CLIENT_ID === 'string')
+    ? process.env.POS_CLIENT_ID.split(',')
+    : [];
+const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
+    ? process.env.FRONTEND_CLIENT_ID.split(',')
+    : [];
 
 export type IReservationOrderItem = cinerinoapi.factory.order.IReservation;
 
@@ -99,7 +106,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
                         }
 
                         // クライアントIDがstaffであればStaffグループ(その他はCustomer)
-                        if (clientId === STAFF_CLIENT_ID) {
+                        if (STAFF_CLIENT_IDS.indexOf(clientId) >= 0) {
                             purchaserGroup = 'Staff';
                         }
                     }
@@ -176,8 +183,12 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
             // クライアントがfrontend or pos
             underName: {
                 identifiers: [
-                    { name: 'clientId', value: POS_CLIENT_ID },
-                    { name: 'clientId', value: FRONTEND_CLIENT_ID }
+                    ...POS_CLIENT_IDS.map((clientId) => {
+                        return { name: 'clientId', value: clientId };
+                    }),
+                    ...FRONTEND_CLIENT_IDS.map((clientId) => {
+                        return { name: 'clientId', value: clientId };
+                    })
                 ]
             },
             reservationFor: {

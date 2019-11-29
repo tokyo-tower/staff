@@ -27,11 +27,12 @@ REFUND_STATUS_NAMES[tttsapi.factory.performance.RefundStatus.Compeleted] = '返�
 if (process.env.API_CLIENT_ID === undefined) {
     throw new Error('Please set an environment variable \'API_CLIENT_ID\'');
 }
-const POS_CLIENT_ID = <string>process.env.POS_CLIENT_ID;
-const FRONTEND_CLIENT_ID = <string>process.env.FRONTEND_CLIENT_ID;
-if (FRONTEND_CLIENT_ID === undefined) {
-    throw new Error('Please set an environment variable \'FRONTEND_CLIENT_ID\'');
-}
+const POS_CLIENT_IDS = (typeof process.env.POS_CLIENT_ID === 'string')
+    ? process.env.POS_CLIENT_ID.split(',')
+    : [];
+const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
+    ? process.env.FRONTEND_CLIENT_ID.split(',')
+    : [];
 
 /**
  * 販売中止一覧検索(api)
@@ -166,8 +167,12 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             // クライアントがfrontend or pos
             underName: {
                 identifiers: [
-                    { name: 'clientId', value: POS_CLIENT_ID },
-                    { name: 'clientId', value: FRONTEND_CLIENT_ID }
+                    ...POS_CLIENT_IDS.map((clientId) => {
+                        return { name: 'clientId', value: clientId };
+                    }),
+                    ...FRONTEND_CLIENT_IDS.map((clientId) => {
+                        return { name: 'clientId', value: clientId };
+                    })
                 ]
             },
             // purchaser_group: tttsapi.factory.person.Group.Customer,
@@ -184,8 +189,12 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             // クライアントがfrontend or pos
             underName: {
                 identifiers: [
-                    { name: 'clientId', value: POS_CLIENT_ID },
-                    { name: 'clientId', value: FRONTEND_CLIENT_ID }
+                    ...POS_CLIENT_IDS.map((clientId) => {
+                        return { name: 'clientId', value: clientId };
+                    }),
+                    ...FRONTEND_CLIENT_IDS.map((clientId) => {
+                        return { name: 'clientId', value: clientId };
+                    })
                 ]
             },
             reservationFor: {
@@ -206,7 +215,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
                 // frontendアプリケーションでの購入
                 .filter((r) => r.transaction_agent !== undefined
                     && r.transaction_agent !== null
-                    && r.transaction_agent.id === FRONTEND_CLIENT_ID);
+                    && FRONTEND_CLIENT_IDS.indexOf(r.transaction_agent.id) >= 0);
 
             numberOfReservations = reservationsAtLastUpdateDate.length;
             // 時点での予約が存在していれば、そのうちの未入場数を検索
@@ -291,7 +300,7 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
                 agentId: <string>process.env.API_CLIENT_ID,
                 performanceId: performanceId,
                 // 返品対象の注文クライアントID
-                clientIds: [FRONTEND_CLIENT_ID, POS_CLIENT_ID],
+                clientIds: [...FRONTEND_CLIENT_IDS, ...POS_CLIENT_IDS],
                 potentialActions: {
                     returnOrder: {
                         potentialActions: {

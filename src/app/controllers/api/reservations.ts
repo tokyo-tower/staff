@@ -15,9 +15,16 @@ const debug = createDebug('ttts-staff:controllers');
 const paymentMethodsForCustomer = conf.get<any>('paymentMethodsForCustomer');
 const paymentMethodsForStaff = conf.get<any>('paymentMethodsForStaff');
 
-const POS_CLIENT_ID = <string>process.env.POS_CLIENT_ID;
-const FRONTEND_CLIENT_ID = <string>process.env.FRONTEND_CLIENT_ID;
-const STAFF_CLIENT_ID = <string>process.env.API_CLIENT_ID;
+const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
+    ? process.env.FRONTEND_CLIENT_ID.split(',')
+    : [];
+const POS_CLIENT_IDS = (typeof process.env.POS_CLIENT_ID === 'string')
+    ? process.env.POS_CLIENT_ID.split(',')
+    : [];
+const STAFF_CLIENT_IDS = [
+    ...(typeof process.env.API_CLIENT_ID === 'string') ? [process.env.API_CLIENT_ID] : [],
+    ...(typeof process.env.API_CLIENT_ID_OLD === 'string') ? [process.env.API_CLIENT_ID_OLD] : []
+];
 
 /**
  * 予約検索
@@ -104,13 +111,13 @@ export async function search(req: Request, res: Response): Promise<void> {
     const clientIds: string[] = [];
     switch (purchaserGroup) {
         case 'Customer':
-            clientIds.push(FRONTEND_CLIENT_ID);
+            clientIds.push(...FRONTEND_CLIENT_IDS);
             break;
         case 'Staff':
-            clientIds.push(STAFF_CLIENT_ID);
+            clientIds.push(...STAFF_CLIENT_IDS);
             break;
         case 'POS':
-            clientIds.push(POS_CLIENT_ID);
+            clientIds.push(...POS_CLIENT_IDS);
             break;
         default:
     }
@@ -240,7 +247,7 @@ function addCustomAttributes(
             performance_canceled: false,
             ticket_type: reservation.reservedTicket.ticketType.identifier,
             ticket_type_name: <any>reservation.reservedTicket.ticketType.name,
-            purchaser_group: (clientId === STAFF_CLIENT_ID) ? 'Staff' : 'Customer',
+            purchaser_group: (STAFF_CLIENT_IDS.indexOf(clientId) >= 0) ? 'Staff' : 'Customer',
             purchased_at: (reservation.bookingTime !== undefined) ? reservation.bookingTime : (<any>reservation).purchased_at,
             purchaser_name: (underName !== undefined) ? underName.name : '',
             purchaser_last_name: (underName !== undefined) ? underName.familyName : '',

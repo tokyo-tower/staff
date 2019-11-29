@@ -20,9 +20,16 @@ const moment = require("moment-timezone");
 const numeral = require("numeral");
 const reserveBase_1 = require("../reserveBase");
 const debug = createDebug('ttts-staff:controllers');
-const STAFF_CLIENT_ID = process.env.API_CLIENT_ID;
-const POS_CLIENT_ID = process.env.POS_CLIENT_ID;
-const FRONTEND_CLIENT_ID = process.env.FRONTEND_CLIENT_ID;
+const STAFF_CLIENT_IDS = [
+    ...(typeof process.env.API_CLIENT_ID === 'string') ? [process.env.API_CLIENT_ID] : [],
+    ...(typeof process.env.API_CLIENT_ID_OLD === 'string') ? [process.env.API_CLIENT_ID_OLD] : []
+];
+const POS_CLIENT_IDS = (typeof process.env.POS_CLIENT_ID === 'string')
+    ? process.env.POS_CLIENT_ID.split(',')
+    : [];
+const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
+    ? process.env.FRONTEND_CLIENT_ID.split(',')
+    : [];
 /**
  * 運行・オンライン販売ステータス変更
  */
@@ -86,7 +93,7 @@ function updateOnlineStatus(req, res) {
                             clientId = clientIdProperty.value;
                         }
                         // クライアントIDがstaffであればStaffグループ(その他はCustomer)
-                        if (clientId === STAFF_CLIENT_ID) {
+                        if (STAFF_CLIENT_IDS.indexOf(clientId) >= 0) {
                             purchaserGroup = 'Staff';
                         }
                     }
@@ -159,8 +166,12 @@ function getTargetReservationsForRefund(req, performanceIds) {
             // クライアントがfrontend or pos
             underName: {
                 identifiers: [
-                    { name: 'clientId', value: POS_CLIENT_ID },
-                    { name: 'clientId', value: FRONTEND_CLIENT_ID }
+                    ...POS_CLIENT_IDS.map((clientId) => {
+                        return { name: 'clientId', value: clientId };
+                    }),
+                    ...FRONTEND_CLIENT_IDS.map((clientId) => {
+                        return { name: 'clientId', value: clientId };
+                    })
                 ]
             },
             reservationFor: {

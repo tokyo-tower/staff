@@ -20,9 +20,16 @@ const _ = require("underscore");
 const debug = createDebug('ttts-staff:controllers');
 const paymentMethodsForCustomer = conf.get('paymentMethodsForCustomer');
 const paymentMethodsForStaff = conf.get('paymentMethodsForStaff');
-const POS_CLIENT_ID = process.env.POS_CLIENT_ID;
-const FRONTEND_CLIENT_ID = process.env.FRONTEND_CLIENT_ID;
-const STAFF_CLIENT_ID = process.env.API_CLIENT_ID;
+const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
+    ? process.env.FRONTEND_CLIENT_ID.split(',')
+    : [];
+const POS_CLIENT_IDS = (typeof process.env.POS_CLIENT_ID === 'string')
+    ? process.env.POS_CLIENT_ID.split(',')
+    : [];
+const STAFF_CLIENT_IDS = [
+    ...(typeof process.env.API_CLIENT_ID === 'string') ? [process.env.API_CLIENT_ID] : [],
+    ...(typeof process.env.API_CLIENT_ID_OLD === 'string') ? [process.env.API_CLIENT_ID_OLD] : []
+];
 /**
  * 予約検索
  */
@@ -99,13 +106,13 @@ function search(req, res) {
         const clientIds = [];
         switch (purchaserGroup) {
             case 'Customer':
-                clientIds.push(FRONTEND_CLIENT_ID);
+                clientIds.push(...FRONTEND_CLIENT_IDS);
                 break;
             case 'Staff':
-                clientIds.push(STAFF_CLIENT_ID);
+                clientIds.push(...STAFF_CLIENT_IDS);
                 break;
             case 'POS':
-                clientIds.push(POS_CLIENT_ID);
+                clientIds.push(...POS_CLIENT_IDS);
                 break;
             default:
         }
@@ -210,7 +217,7 @@ function addCustomAttributes(reservations) {
                 paymentNo = paymentNoProperty.value;
             }
         }
-        return Object.assign({}, reservation, { paymentNo: paymentNo, payment_method_name: paymentMethod2name(paymentMethod4reservation), performance: reservation.reservationFor.id, performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'), performance_start_time: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HHmm'), performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'), performance_canceled: false, ticket_type: reservation.reservedTicket.ticketType.identifier, ticket_type_name: reservation.reservedTicket.ticketType.name, purchaser_group: (clientId === STAFF_CLIENT_ID) ? 'Staff' : 'Customer', purchased_at: (reservation.bookingTime !== undefined) ? reservation.bookingTime : reservation.purchased_at, purchaser_name: (underName !== undefined) ? underName.name : '', purchaser_last_name: (underName !== undefined) ? underName.familyName : '', purchaser_first_name: (underName !== undefined) ? underName.givenName : '', purchaser_email: (underName !== undefined) ? underName.email : '', purchaser_tel: (underName !== undefined) ? underName.telephone : '', purchaser_international_tel: '', purchaser_age: age, purchaser_address: (underName !== undefined) ? underName.address : '', purchaser_gender: (underName !== undefined) ? underName.gender : '', watcher_name: reservation.additionalTicketText });
+        return Object.assign({}, reservation, { paymentNo: paymentNo, payment_method_name: paymentMethod2name(paymentMethod4reservation), performance: reservation.reservationFor.id, performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'), performance_start_time: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HHmm'), performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'), performance_canceled: false, ticket_type: reservation.reservedTicket.ticketType.identifier, ticket_type_name: reservation.reservedTicket.ticketType.name, purchaser_group: (STAFF_CLIENT_IDS.indexOf(clientId) >= 0) ? 'Staff' : 'Customer', purchased_at: (reservation.bookingTime !== undefined) ? reservation.bookingTime : reservation.purchased_at, purchaser_name: (underName !== undefined) ? underName.name : '', purchaser_last_name: (underName !== undefined) ? underName.familyName : '', purchaser_first_name: (underName !== undefined) ? underName.givenName : '', purchaser_email: (underName !== undefined) ? underName.email : '', purchaser_tel: (underName !== undefined) ? underName.telephone : '', purchaser_international_tel: '', purchaser_age: age, purchaser_address: (underName !== undefined) ? underName.address : '', purchaser_gender: (underName !== undefined) ? underName.gender : '', watcher_name: reservation.additionalTicketText });
     });
 }
 /**
