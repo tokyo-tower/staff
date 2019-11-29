@@ -19,6 +19,7 @@
 | `API_ENDPOINT`                    | true     |              | APIエンドポイント                       |
 | `API_CLIENT_ID`                   | true     |              | APIクライアントID                       |
 | `API_CLIENT_SECRET`               | true     |              | APIクライアントシークレット             |
+| `API_CLIENT_ID_OLD`               | true     |              |                                         |
 | `API_AUTHORIZE_SERVER_DOMAIN`     | true     |              | API認可サーバードメイン                 |
 | `API_RESOURECE_SERVER_IDENTIFIER` | true     |              | APIリソースサーバー識別子               |
 | `REDIS_HOST`                      | true     |              | redis host                              |

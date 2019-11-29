@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 複数のフロントエンドクライアントIDに対応
+- 複数のPOSクライアントIDに対応
+
 ### Deprecated
 
 ### Removed
