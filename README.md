@@ -12,23 +12,22 @@
 
 ### Environment variables
 
-| Name                              | Required | Value        | Purpose                                 |
-| --------------------------------- | -------- | ------------ | --------------------------------------- |
-| `DEBUG`                           | false    | ttts-staff:* | Debug                                   |
-| `NODE_ENV`                        | true     |              | 環境名(development,test,productionなど) |
-| `API_ENDPOINT`                    | true     |              | APIエンドポイント                       |
-| `API_CLIENT_ID`                   | true     |              | APIクライアントID                       |
-| `API_CLIENT_SECRET`               | true     |              | APIクライアントシークレット             |
-| `API_CLIENT_ID_OLD`               | true     |              |                                         |
-| `API_AUTHORIZE_SERVER_DOMAIN`     | true     |              | API認可サーバードメイン                 |
-| `API_RESOURECE_SERVER_IDENTIFIER` | true     |              | APIリソースサーバー識別子               |
-| `REDIS_HOST`                      | true     |              | redis host                              |
-| `REDIS_PORT`                      | true     |              | redis port                              |
-| `REDIS_KEY`                       | true     |              | redis key                               |
-| `RESERVATIONS_PRINT_URL`          | true     |              | 予約印刷URL                             |
-| `TTTS_TOKEN_SECRET`               | true     |              | トークン検証シークレット                |
-| `POS_CLIENT_ID`                   | true     |              | POSアプリケーションクライアントID       |
-| `FRONTEND_CLIENT_ID`              | true     |              | frontendアプリケーションクライアントID  |
+| Name                          | Required | Value        | Purpose                                 |
+| ----------------------------- | -------- | ------------ | --------------------------------------- |
+| `DEBUG`                       | false    | ttts-staff:* | Debug                                   |
+| `NODE_ENV`                    | true     |              | 環境名(development,test,productionなど) |
+| `API_ENDPOINT`                | true     |              | APIエンドポイント                       |
+| `API_CLIENT_ID`               | true     |              | APIクライアントID                       |
+| `API_CLIENT_SECRET`           | true     |              | APIクライアントシークレット             |
+| `API_CLIENT_ID_OLD`           | true     |              |                                         |
+| `API_AUTHORIZE_SERVER_DOMAIN` | true     |              | API認可サーバードメイン                 |
+| `REDIS_HOST`                  | true     |              | redis host                              |
+| `REDIS_PORT`                  | true     |              | redis port                              |
+| `REDIS_KEY`                   | true     |              | redis key                               |
+| `RESERVATIONS_PRINT_URL`      | true     |              | 予約印刷URL                             |
+| `TTTS_TOKEN_SECRET`           | true     |              | トークン検証シークレット                |
+| `POS_CLIENT_ID`               | true     |              | POSアプリケーションクライアントID       |
+| `FRONTEND_CLIENT_ID`          | true     |              | frontendアプリケーションクライアントID  |
 
 ## License
 
