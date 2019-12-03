@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 券種カテゴリーレート制限解除を実装
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v5.16.0 - 2019-12-03
+
+### Changed
+
+- 券種カテゴリーレート制限解除を実装
 
 ## v5.15.0 - 2019-11-29
 
