@@ -143,6 +143,7 @@ function tickets(req, res, next) {
                             actionId: actionId
                         });
                         debug('seat reservation authorize action canceled.');
+                        yield reserveBaseController.processUnlockTicketTypeCategoryRateLimit(reservationModel, req);
                     }
                 }
                 catch (error) {

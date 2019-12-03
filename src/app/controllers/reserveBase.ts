@@ -155,11 +155,20 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
         };
     });
     debug(`creating seatReservation authorizeAction on ${offers.length} offers...`);
-    const action = await placeOrderTransactionService.createSeatReservationAuthorization({
-        transactionId: reservationModel.transactionInProgress.id,
-        performanceId: reservationModel.transactionInProgress.performance.id,
-        offers: offers
-    });
+    // tslint:disable-next-line:max-line-length
+    let action: cinerinoapi.factory.action.authorize.offer.seatReservation.IAction<cinerinoapi.factory.service.webAPI.Identifier.Chevre> | undefined;
+    try {
+        action = await placeOrderTransactionService.createSeatReservationAuthorization({
+            transactionId: reservationModel.transactionInProgress.id,
+            performanceId: reservationModel.transactionInProgress.performance.id,
+            offers: offers
+        });
+    } catch (error) {
+        await processUnlockTicketTypeCategoryRateLimit(reservationModel, req);
+
+        throw error;
+    }
+
     reservationModel.transactionInProgress.seatReservationAuthorizeActionId = action.id;
 
     // セッションに保管
@@ -176,6 +185,43 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
             unitPrice: (ticketType.priceSpecification !== undefined) ? ticketType.priceSpecification.price : 0
         };
     });
+}
+
+export async function processUnlockTicketTypeCategoryRateLimit(reservationModel: ReserveSessionModel, req: Request) {
+    // パフォーマンスは指定済みのはず
+    if (reservationModel.transactionInProgress.performance !== undefined) {
+        const tickeTypeCategoryRateLimitService = new tttsapi.service.TicketTypeCategoryRateLimit({
+            endpoint: <string>process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+
+        // 車椅子レート制限解放
+        const performanceStartDate = moment(reservationModel.transactionInProgress.performance.startDate)
+            .toDate();
+
+        await Promise.all(reservationModel.transactionInProgress.ticketTypes.map(async (ticketType) => {
+            if (ticketType.count > 0) {
+                let ticketTypeCategory = tttsapi.factory.ticketTypeCategory.Normal;
+                if (Array.isArray(ticketType.additionalProperty)) {
+                    const categoryProperty = ticketType.additionalProperty.find((p) => p.name === 'category');
+                    if (categoryProperty !== undefined) {
+                        ticketTypeCategory = <tttsapi.factory.ticketTypeCategory>categoryProperty.value;
+                    }
+                }
+
+                if (ticketTypeCategory === tttsapi.factory.ticketTypeCategory.Wheelchair) {
+                    const rateLimitKey = {
+                        performanceStartDate: performanceStartDate,
+                        ticketTypeCategory: ticketTypeCategory,
+                        holder: reservationModel.transactionInProgress.id
+                    };
+                    debug('unlocking ticket catefory rate limit...ticketTypeCategory:', ticketTypeCategory);
+                    await tickeTypeCategoryRateLimitService.unlock(rateLimitKey);
+                    debug('ticket catefory rate limit unlocked');
+                }
+            }
+        }));
+    }
 }
 
 export interface ICheckInfo {

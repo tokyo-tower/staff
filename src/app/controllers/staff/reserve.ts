@@ -149,6 +149,8 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
                         actionId: actionId
                     });
                     debug('seat reservation authorize action canceled.');
+
+                    await reserveBaseController.processUnlockTicketTypeCategoryRateLimit(reservationModel, req);
                 }
             } catch (error) {
                 next(error);
