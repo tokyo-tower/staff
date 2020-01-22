@@ -191,7 +191,7 @@ function getTargetReservationsForRefund(req, performanceIds) {
         // 全注文検索
         const orders = [];
         if (targetOrderNumbers.length > 0) {
-            const limit = 100;
+            const limit = 10;
             let page = 0;
             let numData = limit;
             while (numData === limit) {

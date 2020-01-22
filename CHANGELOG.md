@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v5.17.1 - 2020-01-22
+
+### Changed
+
+- 運行停止イベントの返金対象注文検索を10件ずつ取得するように調整
+
 ## v5.17.0 - 2019-12-04
 
 ### Changed

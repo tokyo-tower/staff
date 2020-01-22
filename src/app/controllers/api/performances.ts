@@ -214,7 +214,7 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
     // 全注文検索
     const orders: cinerinoapi.factory.order.IOrder[] = [];
     if (targetOrderNumbers.length > 0) {
-        const limit = 100;
+        const limit = 10;
         let page = 0;
         let numData: number = limit;
         while (numData === limit) {
