@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 運行停止イベントの返金対象注文検索を10件ずつ取得するように調整
+
 ### Deprecated
 
 ### Removed
