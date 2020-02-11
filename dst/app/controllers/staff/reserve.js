@@ -429,23 +429,9 @@ function createPotentialActions(paymentNo, reservationModel) {
                             // プロジェクト固有の値を連携
                             return {
                                 id: r.id,
-                                additionalTicketText: r.additionalTicketText,
+                                // additionalTicketText: r.additionalTicketText,
                                 underName: r.underName,
                                 additionalProperty: r.additionalProperty
-                            };
-                        }),
-                        // 余分確保分の予約にもextraプロパティを連携
-                        ...chevreReservations.filter((r) => {
-                            // 注文アイテムに存在しない予約(余分確保分)にフィルタリング
-                            const orderItem = eventReservations.find((eventReservation) => eventReservation.id === r.id);
-                            return orderItem === undefined;
-                        })
-                            .map((r) => {
-                            return {
-                                id: r.id,
-                                additionalProperty: [
-                                    { name: 'extra', value: '1' }
-                                ]
                             };
                         })
                     ]
@@ -513,7 +499,7 @@ function temporaryReservation2confirmed(params) {
     return Object.assign({}, params.chevreReservation, { underName: underName, additionalProperty: [
             ...(Array.isArray(params.reservation.additionalProperty)) ? params.reservation.additionalProperty : [],
             { name: 'paymentSeatIndex', value: params.paymentSeatIndex }
-        ], additionalTicketText: params.reservation.additionalTicketText });
+        ] });
 }
 /**
  * 予約完了
