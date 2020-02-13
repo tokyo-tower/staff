@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * 座席予約コントローラー
  */
 const cinerinoapi = require("@cinerino/api-nodejs-client");
-const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
+// import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 const conf = require("config");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
@@ -270,10 +270,10 @@ function confirm(req, res, next) {
                         endpoint: process.env.CINERINO_API_ENDPOINT,
                         auth: req.tttsAuthClient
                     });
-                    const reservationService = new tttsapi.service.Reservation({
-                        endpoint: process.env.API_ENDPOINT,
-                        auth: req.tttsAuthClient
-                    });
+                    // const reservationService = new tttsapi.service.Reservation({
+                    //     endpoint: <string>process.env.API_ENDPOINT,
+                    //     auth: req.tttsAuthClient
+                    // });
                     // 汎用決済承認
                     const amount = reservationModel.getTotalCharge();
                     const paymentAuthorization = yield paymentService.authorizeAnyPayment({
@@ -290,15 +290,28 @@ function confirm(req, res, next) {
                     if (reservationModel.transactionInProgress.performance === undefined) {
                         throw new cinerinoapi.factory.errors.Argument('Transaction', 'Event required');
                     }
-                    const { paymentNo } = yield reservationService.publishPaymentNo({ event: { id: reservationModel.transactionInProgress.performance.id } });
-                    const { potentialActions, result } = yield createPotentialActions(paymentNo, reservationModel);
+                    // const { paymentNo } = await reservationService.publishPaymentNo(
+                    //     { event: { id: reservationModel.transactionInProgress.performance.id } }
+                    // );
+                    // const { potentialActions, result } = await createPotentialActions(paymentNo, reservationModel);
                     // 取引確定
-                    const transactionResult = yield placeOrderTransactionService.confirm(Object.assign({ id: reservationModel.transactionInProgress.id, potentialActions: potentialActions }, {
-                        result: result
-                    }));
+                    const transactionResult = yield placeOrderTransactionService.confirm({
+                        id: reservationModel.transactionInProgress.id
+                        // potentialActions: potentialActions,
+                        // ...{
+                        //     result: result
+                        // }
+                    });
                     // 印刷トークン生成
                     const reservationIds = transactionResult.order.acceptedOffers.map((o) => o.itemOffered.id);
                     const printToken = yield createPrintToken(reservationIds);
+                    let paymentNo = '';
+                    if (Array.isArray(transactionResult.order.identifier)) {
+                        const paymentNoProperty = transactionResult.order.identifier.find((p) => p.name === 'paymentNo');
+                        if (paymentNoProperty !== undefined) {
+                            paymentNo = paymentNoProperty.value;
+                        }
+                    }
                     // 購入結果セッション作成
                     req.session.transactionResult = Object.assign({}, transactionResult, { printToken, paymentNo });
                     // 購入フローセッションは削除
@@ -476,6 +489,7 @@ function createPotentialActions(paymentNo, reservationModel) {
         };
     });
 }
+exports.createPotentialActions = createPotentialActions;
 /**
  * 仮予約から確定予約を生成する
  */

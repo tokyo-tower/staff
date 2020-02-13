@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 - 注文確定後の余分確保分予約へのextraプロパティ連携を削除
+- 独自購入番号発行を削除
+- 注文取引確定後のアクションカスタムを削除
+- 注文識別子カスタムを削除
 
 ### Deprecated
 

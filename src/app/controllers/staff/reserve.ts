@@ -2,7 +2,7 @@
  * 座席予約コントローラー
  */
 import * as cinerinoapi from '@cinerino/api-nodejs-client';
-import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
+// import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
 import * as conf from 'config';
 import * as createDebug from 'debug';
@@ -278,10 +278,10 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                     endpoint: <string>process.env.CINERINO_API_ENDPOINT,
                     auth: req.tttsAuthClient
                 });
-                const reservationService = new tttsapi.service.Reservation({
-                    endpoint: <string>process.env.API_ENDPOINT,
-                    auth: req.tttsAuthClient
-                });
+                // const reservationService = new tttsapi.service.Reservation({
+                //     endpoint: <string>process.env.API_ENDPOINT,
+                //     auth: req.tttsAuthClient
+                // });
 
                 // 汎用決済承認
                 const amount = reservationModel.getTotalCharge();
@@ -300,25 +300,33 @@ export async function confirm(req: Request, res: Response, next: NextFunction): 
                 if (reservationModel.transactionInProgress.performance === undefined) {
                     throw new cinerinoapi.factory.errors.Argument('Transaction', 'Event required');
                 }
-                const { paymentNo } = await reservationService.publishPaymentNo(
-                    { event: { id: reservationModel.transactionInProgress.performance.id } }
-                );
+                // const { paymentNo } = await reservationService.publishPaymentNo(
+                //     { event: { id: reservationModel.transactionInProgress.performance.id } }
+                // );
 
-                const { potentialActions, result } = await createPotentialActions(paymentNo, reservationModel);
+                // const { potentialActions, result } = await createPotentialActions(paymentNo, reservationModel);
 
                 // 取引確定
                 const transactionResult = await placeOrderTransactionService.confirm({
-                    id: reservationModel.transactionInProgress.id,
-                    potentialActions: potentialActions,
-                    ...{
-                        result: result
-                    }
+                    id: reservationModel.transactionInProgress.id
+                    // potentialActions: potentialActions,
+                    // ...{
+                    //     result: result
+                    // }
                 });
 
                 // 印刷トークン生成
                 const reservationIds =
                     transactionResult.order.acceptedOffers.map((o) => (<cinerinoapi.factory.order.IReservation>o.itemOffered).id);
                 const printToken = await createPrintToken(reservationIds);
+
+                let paymentNo = '';
+                if (Array.isArray(transactionResult.order.identifier)) {
+                    const paymentNoProperty = transactionResult.order.identifier.find((p) => p.name === 'paymentNo');
+                    if (paymentNoProperty !== undefined) {
+                        paymentNo = paymentNoProperty.value;
+                    }
+                }
 
                 // 購入結果セッション作成
                 (<Express.Session>req.session).transactionResult = { ...transactionResult, printToken, paymentNo };
@@ -405,7 +413,7 @@ export async function createPrintToken(object: IPrintObject): Promise<IPrintToke
 }
 
 // tslint:disable-next-line:max-func-body-length
-async function createPotentialActions(paymentNo: string, reservationModel: ReserveSessionModel):
+export async function createPotentialActions(paymentNo: string, reservationModel: ReserveSessionModel):
     Promise<{
         potentialActions: cinerinoapi.factory.transaction.placeOrder.IPotentialActionsParams;
         result: any;
