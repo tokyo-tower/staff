@@ -144,9 +144,10 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
                     debug('canceling seat reservation authorize action...');
                     const actionId = reservationModel.transactionInProgress.seatReservationAuthorizeActionId;
                     delete reservationModel.transactionInProgress.seatReservationAuthorizeActionId;
-                    await placeOrderTransactionService.cancelSeatReservationAuthorization({
-                        transactionId: reservationModel.transactionInProgress.id,
-                        actionId: actionId
+
+                    await placeOrderTransactionService.voidSeatReservation({
+                        id: actionId,
+                        purpose: { typeOf: cinerinoapi.factory.transactionType.PlaceOrder, id: reservationModel.transactionInProgress.id }
                     });
                     debug('seat reservation authorize action canceled.');
 

@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - 独自購入番号発行を削除
 - 注文取引確定後のアクションカスタムを削除
 - 注文識別子カスタムを削除
+- 新しい予約承認取消サービスを使用するように調整
 
 ### Deprecated
 

@@ -138,9 +138,9 @@ function tickets(req, res, next) {
                         debug('canceling seat reservation authorize action...');
                         const actionId = reservationModel.transactionInProgress.seatReservationAuthorizeActionId;
                         delete reservationModel.transactionInProgress.seatReservationAuthorizeActionId;
-                        yield placeOrderTransactionService.cancelSeatReservationAuthorization({
-                            transactionId: reservationModel.transactionInProgress.id,
-                            actionId: actionId
+                        yield placeOrderTransactionService.voidSeatReservation({
+                            id: actionId,
+                            purpose: { typeOf: cinerinoapi.factory.transactionType.PlaceOrder, id: reservationModel.transactionInProgress.id }
                         });
                         debug('seat reservation authorize action canceled.');
                         yield reserveBaseController.processUnlockTicketTypeCategoryRateLimit(reservationModel, req);
