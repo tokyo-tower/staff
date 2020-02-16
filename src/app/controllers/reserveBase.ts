@@ -160,7 +160,7 @@ export async function processFixSeatsAndTickets(reservationModel: ReserveSession
     let action: cinerinoapi.factory.action.authorize.offer.seatReservation.IAction<cinerinoapi.factory.service.webAPI.Identifier.Chevre> | undefined;
     try {
         // 車椅子レート制限
-        await processLockTicketTypeCategoryRateLimit(reservationModel, req);
+        // await processLockTicketTypeCategoryRateLimit(reservationModel, req);
 
         action = await placeOrderTransactionService.createSeatReservationAuthorization({
             transactionId: reservationModel.transactionInProgress.id,

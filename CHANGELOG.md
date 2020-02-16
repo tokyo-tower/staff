@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 車椅子レート制限をChevreへ移行
+
 ### Deprecated
 
 ### Removed
