@@ -149,8 +149,6 @@ export async function tickets(req: Request, res: Response, next: NextFunction): 
                         purpose: { typeOf: cinerinoapi.factory.transactionType.PlaceOrder, id: reservationModel.transactionInProgress.id }
                     });
                     debug('seat reservation authorize action canceled.');
-
-                    await reserveBaseController.processUnlockTicketTypeCategoryRateLimit(reservationModel, req);
                 }
             } catch (error) {
                 next(error);

@@ -156,7 +156,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
     debug('suspended performances found.', searchResults);
     const performances = searchResults.data.data;
 
-    const totalCount = searchResults.totalCount;
+    const totalCount = <number>searchResults.totalCount;
     debug(totalCount, 'total results.');
 
     const results = await Promise.all(performances.map(async (performance) => {
@@ -180,7 +180,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
                 id: performance.id
             }
         });
-        let numberOfReservations = searchReservationsResult.totalCount;
+        let numberOfReservations = <number>searchReservationsResult.totalCount;
 
         // 未入場の予約数
         searchReservationsResult = await reservationService.search({
@@ -202,7 +202,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             },
             checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
         });
-        let nubmerOfUncheckedReservations = searchReservationsResult.totalCount;
+        let nubmerOfUncheckedReservations = <number>searchReservationsResult.totalCount;
 
         const extension = performance.extension;
 
@@ -226,7 +226,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
                     ids: reservationsAtLastUpdateDate.map((r) => r.id),
                     checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
                 });
-                nubmerOfUncheckedReservations = searchReservationsResult.totalCount;
+                nubmerOfUncheckedReservations = <number>searchReservationsResult.totalCount;
             }
         }
 
@@ -288,7 +288,7 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
         }
 
         const task = await taskService.create({
-            project: { typeOf: 'Project', id: <string>process.env.PROJECT_ID },
+            project: { typeOf: <any>'Project', id: <string>process.env.PROJECT_ID },
             name: <any>tttsapi.factory.taskName.ReturnOrdersByPerformance,
             status: tttsapi.factory.taskStatus.Ready,
             runsAt: new Date(), // なるはやで実行

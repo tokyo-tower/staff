@@ -142,7 +142,6 @@ function tickets(req, res, next) {
                             purpose: { typeOf: cinerinoapi.factory.transactionType.PlaceOrder, id: reservationModel.transactionInProgress.id }
                         });
                         debug('seat reservation authorize action canceled.');
-                        yield reserveBaseController.processUnlockTicketTypeCategoryRateLimit(reservationModel, req);
                     }
                 }
                 catch (error) {
