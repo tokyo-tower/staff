@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 内部予約として扱うクライアントID設定を追加
+
 ### Deprecated
 
 ### Removed
