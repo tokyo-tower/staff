@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v5.20.0 - 2020-03-15
+
+### Changed
+
+- 内部予約として扱うクライアントID設定を追加
+
 ## v5.19.0 - 2020-02-18
 
 ### Changed

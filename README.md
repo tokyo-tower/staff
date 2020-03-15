@@ -28,6 +28,7 @@
 | `TTTS_TOKEN_SECRET`           | true     |              | トークン検証シークレット                |
 | `POS_CLIENT_ID`               | true     |              | POSアプリケーションクライアントID       |
 | `FRONTEND_CLIENT_ID`          | true     |              | frontendアプリケーションクライアントID  |
+| `STAFF_CLIENT_IDS`            | true     |              | 代理予約として扱うクライアントID        |
 
 ## License
 

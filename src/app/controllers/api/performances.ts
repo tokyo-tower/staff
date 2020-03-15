@@ -18,6 +18,7 @@ import { getUnitPriceByAcceptedOffer } from '../reserveBase';
 const debug = createDebug('ttts-staff:controllers');
 
 const STAFF_CLIENT_IDS = [
+    ...(typeof process.env.STAFF_CLIENT_IDS === 'string') ? process.env.STAFF_CLIENT_IDS.split(',') : [],
     ...(typeof process.env.API_CLIENT_ID === 'string') ? [process.env.API_CLIENT_ID] : [],
     ...(typeof process.env.API_CLIENT_ID_OLD === 'string') ? [process.env.API_CLIENT_ID_OLD] : []
 ];
