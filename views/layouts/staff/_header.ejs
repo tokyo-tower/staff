@@ -14,7 +14,7 @@ if (req.hasOwnProperty('route')) {
                 <p class="myname"><%= req.staffUser.familyName %> <%= req.staffUser.givenName %></p>
 
                 <% if (!/reserve/.test(routeName)) { %>
-                    <a class="btn-newticket" href="/staff/reserve/start"><span>代理予約</span></a>
+                    <!-- <a class="btn-newticket" href="/staff/reserve/start"><span>代理予約</span></a> -->
                 <% } %>
 
                 <% if (routeName !== '/mypage') { %>
