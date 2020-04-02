@@ -18,7 +18,6 @@ const createDebug = require("debug");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const numeral = require("numeral");
-const reserveBase_1 = require("../reserveBase");
 const debug = createDebug('ttts-staff:controllers');
 const STAFF_CLIENT_IDS = [
     ...(typeof process.env.STAFF_CLIENT_IDS === 'string') ? process.env.STAFF_CLIENT_IDS.split(',') : [],
@@ -31,6 +30,20 @@ const POS_CLIENT_IDS = (typeof process.env.POS_CLIENT_ID === 'string')
 const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
     ? process.env.FRONTEND_CLIENT_ID.split(',')
     : [];
+function getUnitPriceByAcceptedOffer(offer) {
+    let unitPrice = 0;
+    if (offer.priceSpecification !== undefined) {
+        const priceSpecification = offer.priceSpecification;
+        if (Array.isArray(priceSpecification.priceComponent)) {
+            const unitPriceSpec = priceSpecification.priceComponent.find((c) => c.typeOf === tttsapi.factory.chevre.priceSpecificationType.UnitPriceSpecification);
+            if (unitPriceSpec !== undefined && unitPriceSpec.price !== undefined && Number.isInteger(unitPriceSpec.price)) {
+                unitPrice = unitPriceSpec.price;
+            }
+        }
+    }
+    return unitPrice;
+}
+exports.getUnitPriceByAcceptedOffer = getUnitPriceByAcceptedOffer;
 /**
  * 運行・オンライン販売ステータス変更
  */
@@ -378,7 +391,7 @@ function getTicketInfo(order, __, locale) {
         // チケットタイプごとにチケット情報セット
         const reservation = acceptedOffer.itemOffered;
         const ticketType = reservation.reservedTicket.ticketType;
-        const price = reserveBase_1.getUnitPriceByAcceptedOffer(acceptedOffer);
+        const price = getUnitPriceByAcceptedOffer(acceptedOffer);
         if (ticketInfos[ticketType.identifier] === undefined) {
             ticketInfos[ticketType.identifier] = {
                 ticket_type_name: ticketType.name[locale],

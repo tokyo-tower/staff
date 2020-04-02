@@ -13,8 +13,6 @@ import * as numeral from 'numeral';
 
 import StaffUser from '../../models/user/staff';
 
-import { getUnitPriceByAcceptedOffer } from '../reserveBase';
-
 const debug = createDebug('ttts-staff:controllers');
 
 const STAFF_CLIENT_IDS = [
@@ -30,6 +28,26 @@ const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
     : [];
 
 export type IReservationOrderItem = cinerinoapi.factory.order.IReservation;
+
+export type ICompoundPriceSpecification = tttsapi.factory.chevre.compoundPriceSpecification.IPriceSpecification<any>;
+
+export function getUnitPriceByAcceptedOffer(offer: cinerinoapi.factory.order.IAcceptedOffer<any>) {
+    let unitPrice: number = 0;
+
+    if (offer.priceSpecification !== undefined) {
+        const priceSpecification = <ICompoundPriceSpecification>offer.priceSpecification;
+        if (Array.isArray(priceSpecification.priceComponent)) {
+            const unitPriceSpec = priceSpecification.priceComponent.find(
+                (c) => c.typeOf === tttsapi.factory.chevre.priceSpecificationType.UnitPriceSpecification
+            );
+            if (unitPriceSpec !== undefined && unitPriceSpec.price !== undefined && Number.isInteger(unitPriceSpec.price)) {
+                unitPrice = unitPriceSpec.price;
+            }
+        }
+    }
+
+    return unitPrice;
+}
 
 /**
  * 運行・オンライン販売ステータス変更

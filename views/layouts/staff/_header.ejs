@@ -13,14 +13,6 @@ if (req.hasOwnProperty('route')) {
             <div class="menu-staff">
                 <p class="myname"><%= req.staffUser.familyName %> <%= req.staffUser.givenName %></p>
 
-                <% const HIDE_RESERVE_TRANSACTION_FROM = process.env.HIDE_RESERVE_TRANSACTION_FROM; %>
-                <% const HIDE_RESERVE_TRANSACTION = (typeof HIDE_RESERVE_TRANSACTION_FROM === 'string' && moment().isSameOrAfter(moment(HIDE_RESERVE_TRANSACTION_FROM))) %>
-                <% if (!HIDE_RESERVE_TRANSACTION) { %>
-                <% if (!/reserve/.test(routeName)) { %>
-                <a class="btn-newticket" href="/staff/reserve/start"><span>代理予約</span></a>
-                <% } %>
-                <% } %>
-
                 <% if (routeName !== '/mypage') { %>
                 <a class="btn-mypage" href="/staff/mypage"><span>予約一覧</span></a>
                 <% } %>

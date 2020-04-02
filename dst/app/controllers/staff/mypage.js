@@ -13,10 +13,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const createDebug = require("debug");
+const jwt = require("jsonwebtoken");
 const querystring = require("querystring");
-const reserve_1 = require("./reserve");
 const debug = createDebug('ttts-staff:controllers:staff:mypage');
 const layout = 'layouts/staff/layout';
+/**
+ * 予約印刷トークンを発行する
+ */
+function createPrintToken(object) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            const payload = {
+                object: object
+            };
+            jwt.sign(payload, process.env.TTTS_TOKEN_SECRET, (jwtErr, token) => {
+                if (jwtErr instanceof Error) {
+                    reject(jwtErr);
+                }
+                else {
+                    resolve(token);
+                }
+            });
+        });
+    });
+}
+exports.createPrintToken = createPrintToken;
 /**
  * マイページ(予約一覧)
  */
@@ -48,7 +69,7 @@ function print(req, res, next) {
             const ids = req.query.ids;
             debug('printing reservations...ids:', ids);
             // 印刷トークン発行
-            const token = yield reserve_1.createPrintToken(ids);
+            const token = yield createPrintToken(ids);
             debug('printToken created.', token);
             const query = querystring.stringify({
                 locale: 'ja',

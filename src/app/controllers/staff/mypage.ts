@@ -5,12 +5,39 @@ import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
+import * as jwt from 'jsonwebtoken';
 import * as querystring from 'querystring';
-
-import { createPrintToken } from './reserve';
 
 const debug = createDebug('ttts-staff:controllers:staff:mypage');
 const layout: string = 'layouts/staff/layout';
+
+/**
+ * 印刷トークンインターフェース
+ */
+export type IPrintToken = string;
+/**
+ * 印刷トークン対象(予約IDリスト)インターフェース
+ */
+export type IPrintObject = string[];
+
+/**
+ * 予約印刷トークンを発行する
+ */
+export async function createPrintToken(object: IPrintObject): Promise<IPrintToken> {
+    return new Promise<IPrintToken>((resolve, reject) => {
+        const payload = {
+            object: object
+        };
+
+        jwt.sign(payload, <string>process.env.TTTS_TOKEN_SECRET, (jwtErr, token) => {
+            if (jwtErr instanceof Error) {
+                reject(jwtErr);
+            } else {
+                resolve(token);
+            }
+        });
+    });
+}
 
 /**
  * マイページ(予約一覧)
