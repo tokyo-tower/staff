@@ -14,11 +14,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Removed
 
-- 代理予約機能を削除
-
 ### Fixed
 
 ### Security
+
+## v6.0.0 - 2020-04-03
+
+### Removed
+
+- 代理予約機能を削除
 
 ## v5.20.0 - 2020-03-15
 
