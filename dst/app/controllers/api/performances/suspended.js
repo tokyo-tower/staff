@@ -254,23 +254,7 @@ function returnOrders(req, res) {
                     agentId: process.env.API_CLIENT_ID,
                     performanceId: performanceId,
                     // 返品対象の注文クライアントID
-                    clientIds: [...FRONTEND_CLIENT_IDS, ...POS_CLIENT_IDS],
-                    potentialActions: {
-                        returnOrder: {
-                            potentialActions: {
-                                cancelReservation: [{
-                                        potentialActions: {
-                                            cancelReservation: {
-                                                potentialActions: {
-                                                    informReservation: []
-                                                }
-                                            }
-                                        }
-                                    }],
-                                informOrder: []
-                            }
-                        }
-                    }
+                    clientIds: [...FRONTEND_CLIENT_IDS, ...POS_CLIENT_IDS]
                 }
             });
             debug('returnAllByPerformance task created.', task);

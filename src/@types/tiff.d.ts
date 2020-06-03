@@ -29,7 +29,7 @@ declare global {
                 /**
                  * 券種
                  */
-                ticketType: cinerinoapi.factory.chevre.ticketType.ITicketType;
+                ticketType: cinerinoapi.factory.chevre.offer.IOffer;
             };
             /**
              * 単価
@@ -89,7 +89,7 @@ declare global {
         /**
          * チケット情報インターフェース
          */
-        type ITicketType = cinerinoapi.factory.chevre.ticketType.ITicketType & {
+        type ITicketType = cinerinoapi.factory.chevre.offer.IOffer & {
             count: number;
         };
 

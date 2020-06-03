@@ -8,18 +8,14 @@
       "email": "hataguchi@motionpicture.jp"
     },
     {
-      "name": "Mariko Kusunose",
-      "email": "kusunose@motionpicture.jp"
-    },
-    {
       "name": "Tetsu Yamazaki",
       "email": "yamazaki@motionpicture.jp"
     }
   ],
   "dependencies": {
-    "@cinerino/api-nodejs-client": "2.0.0-alpha.43",
+    "@cinerino/api-nodejs-client": "2.0.0-alpha.93",
     "@motionpicture/express-middleware": "0.0.0",
-    "@motionpicture/ttts-api-nodejs-client": "^6.0.0",
+    "@motionpicture/ttts-api-nodejs-client": "^6.3.0",
     "body-parser": "^1.18.2",
     "config": "^1.29.2",
     "connect-redis": "^3.3.3",
@@ -44,7 +40,7 @@
     "serve-favicon": "^2.4.5",
     "underscore": "^1.8.3"
   },
-  "description": "This is a repogitory for TTTS online website.",
+  "description": "Repogitory for TTTS Staff Application",
   "devDependencies": {
     "@types/body-parser": "0.0.34",
     "@types/config": "0.0.32",
