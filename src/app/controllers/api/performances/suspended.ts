@@ -1,11 +1,16 @@
 /**
  * 販売停止パフォーマンスAPIコントローラー
  */
+import * as cinerinoapi from '@cinerino/api-nodejs-client';
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
-
 import * as createDebug from 'debug';
+import * as Email from 'email-templates';
 import { Request, Response } from 'express';
-import { CREATED, INTERNAL_SERVER_ERROR } from 'http-status';
+import { INTERNAL_SERVER_ERROR, NO_CONTENT } from 'http-status';
+// @ts-ignore
+import * as difference from 'lodash.difference';
+// @ts-ignore
+import * as uniq from 'lodash.uniq';
 import * as moment from 'moment-timezone';
 import * as _ from 'underscore';
 
@@ -270,10 +275,10 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
             endpoint: <string>process.env.API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        const taskService = new tttsapi.service.Task({
-            endpoint: <string>process.env.API_ENDPOINT,
-            auth: req.tttsAuthClient
-        });
+        // const taskService = new tttsapi.service.Task({
+        //     endpoint: <string>process.env.API_ENDPOINT,
+        //     auth: req.tttsAuthClient
+        // });
 
         const performanceId = req.params.performanceId;
 
@@ -287,26 +292,49 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
             throw new Error('上映が終了していないので返品処理を実行できません。');
         }
 
-        const task = await taskService.create({
-            project: { typeOf: <any>'Project', id: <string>process.env.PROJECT_ID },
-            name: <any>tttsapi.factory.taskName.ReturnOrdersByPerformance,
-            status: tttsapi.factory.taskStatus.Ready,
-            runsAt: new Date(), // なるはやで実行
-            remainingNumberOfTries: 10,
-            numberOfTried: 0,
-            executionResults: [],
-            data: {
-                credentials: req.tttsAuthClient.credentials,
-                agentId: <string>process.env.API_CLIENT_ID,
-                performanceId: performanceId,
-                // 返品対象の注文クライアントID
-                clientIds: [...FRONTEND_CLIENT_IDS, ...POS_CLIENT_IDS]
+        // 返金対象注文を抽出する
+        const returningOrders = await searchOrderNumberss4refund(req, performanceId, [...FRONTEND_CLIENT_IDS, ...POS_CLIENT_IDS]);
+
+        // パフォーマンス返金ステータス調整
+        await eventService.updateExtension({
+            id: performanceId,
+            refundStatus: tttsapi.factory.performance.RefundStatus.Instructed,
+            refundStatusUpdateAt: new Date(),
+            ...{
+                refundCount: 0, // 返金済数は最初0
+                unrefundCount: returningOrders.length // 未返金数をセット
             }
         });
-        debug('returnAllByPerformance task created.', task);
 
-        res.status(CREATED)
-            .json(task);
+        await processReturnOrders({
+            req: req,
+            agentId: <string>process.env.API_CLIENT_ID,
+            orders: returningOrders
+        });
+
+        // const task = await taskService.create({
+        //     project: { typeOf: <any>'Project', id: <string>process.env.PROJECT_ID },
+        //     name: <any>tttsapi.factory.taskName.ReturnOrdersByPerformance,
+        //     status: tttsapi.factory.taskStatus.Ready,
+        //     runsAt: new Date(), // なるはやで実行
+        //     remainingNumberOfTries: 10,
+        //     numberOfTried: 0,
+        //     executionResults: [],
+        //     data: {
+        //         credentials: req.tttsAuthClient.credentials,
+        //         agentId: <string>process.env.API_CLIENT_ID,
+        //         performanceId: performanceId,
+        //         // 返品対象の注文クライアントID
+        //         clientIds: [...FRONTEND_CLIENT_IDS, ...POS_CLIENT_IDS]
+        //     }
+        // });
+        // debug('returnAllByPerformance task created.', task);
+
+        // res.status(CREATED)
+        //     .json(task);
+
+        res.status(NO_CONTENT)
+            .end();
     } catch (error) {
         res.status(INTERNAL_SERVER_ERROR).json({
             errors: [
@@ -314,4 +342,275 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
             ]
         });
     }
+}
+
+async function searchOrderNumberss4refund(
+    req: Request,
+    performanceId: string,
+    /**
+     * 返品対象の注文クライアントID
+     */
+    clientIds: string[]
+): Promise<cinerinoapi.factory.order.IOrder[]> {
+    const reservationService = new tttsapi.service.Reservation({
+        endpoint: <string>process.env.API_ENDPOINT,
+        auth: req.tttsAuthClient
+    });
+
+    // パフォーマンスに対する取引リストを、予約コレクションから検索する
+    let reservations: tttsapi.factory.reservation.event.IReservation[] = [];
+    if (clientIds.length > 0) {
+        const searchReservationsResult = await reservationService.search(
+            {
+                limit: 100,
+                typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+                reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+                reservationFor: { id: performanceId },
+                underName: {
+                    identifiers: clientIds.map((clientId) => {
+                        return { name: 'clientId', value: clientId };
+                    })
+                }
+            }
+        );
+
+        reservations = searchReservationsResult.data;
+    }
+
+    // 入場履歴なしの取引IDを取り出す
+    let orderNumbers = reservations.map((r) => {
+        let orderNumber: string | undefined;
+        if (r.underName !== undefined && Array.isArray(r.underName.identifier)) {
+            const orderNumberProperty = r.underName.identifier.find((p) => p.name === 'orderNumber');
+            if (orderNumberProperty !== undefined) {
+                orderNumber = orderNumberProperty.value;
+            }
+        }
+
+        return orderNumber;
+    });
+    const orderNumbersWithCheckins = reservations.filter((r) => (r.checkins.length > 0))
+        .map((r) => {
+            let orderNumber: string | undefined;
+            if (r.underName !== undefined && Array.isArray(r.underName.identifier)) {
+                const orderNumberProperty = r.underName.identifier.find((p) => p.name === 'orderNumber');
+                if (orderNumberProperty !== undefined) {
+                    orderNumber = orderNumberProperty.value;
+                }
+            }
+
+            return orderNumber;
+        });
+    orderNumbers = uniq(difference(orderNumbers, orderNumbersWithCheckins));
+
+    const returningOrderNumbers = <string[]>orderNumbers.filter((orderNumber) => typeof orderNumber === 'string');
+
+    const orderService = new cinerinoapi.service.Order({
+        endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+        auth: req.tttsAuthClient
+    });
+    const searchOrdersResult = await orderService.search({
+        limit: 100,
+        orderNumbers: returningOrderNumbers
+    });
+
+    return searchOrdersResult.data;
+}
+
+async function processReturnOrders(params: {
+    req: Request;
+    orders: cinerinoapi.factory.order.IOrder[];
+    agentId: string;
+}) {
+    const returnOrderService = new cinerinoapi.service.transaction.ReturnOrder({
+        endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+        auth: params.req.tttsAuthClient
+    });
+
+    const returnableOrders: cinerinoapi.factory.transaction.returnOrder.IReturnableOrder[] = [];
+    const returnOrderActions: cinerinoapi.factory.transaction.returnOrder.IReturnOrderActionParams[] = [];
+
+    await Promise.all(params.orders.map(async (order) => {
+        // 返品メール作成
+        const emailCustomization = await createEmailMessage4sellerReason(order);
+
+        const paymentMethods = order.paymentMethods;
+        const refundCreditCardActionsParams: cinerinoapi.factory.transaction.returnOrder.IRefundCreditCardParams[] =
+            paymentMethods
+                .filter((p) => p.typeOf === cinerinoapi.factory.paymentMethodType.CreditCard)
+                .map((p) => {
+                    return {
+                        object: {
+                            object: [{
+                                paymentMethod: {
+                                    paymentMethodId: p.paymentMethodId
+                                }
+                            }]
+                        },
+                        potentialActions: {
+                            sendEmailMessage: {
+                                object: {
+                                    sender: emailCustomization.sender,
+                                    toRecipient: emailCustomization.toRecipient,
+                                    about: emailCustomization.about,
+                                    text: emailCustomization.text
+                                }
+                            }
+                        }
+                    };
+                })
+            ;
+
+        returnableOrders.push({ orderNumber: order.orderNumber });
+        returnOrderActions.push({
+            object: { orderNumber: order.orderNumber },
+            potentialActions: {
+                refundCreditCard: refundCreditCardActionsParams
+            }
+        });
+    }));
+
+    const returnOrderTransaction = await returnOrderService.start({
+        expires: moment()
+            .add(1, 'minute')
+            .toDate(),
+        object: {
+            order: returnableOrders
+        },
+        agent: {
+            identifier: [
+                { name: 'reason', value: cinerinoapi.factory.transaction.returnOrder.Reason.Seller }
+            ],
+            ...{
+                typeOf: cinerinoapi.factory.personType.Person,
+                id: params.agentId
+            }
+        }
+    });
+    await returnOrderService.confirm({
+        id: returnOrderTransaction.id,
+        potentialActions: {
+            returnOrder: returnOrderActions
+        }
+    });
+}
+
+export type ICompoundPriceSpecification = cinerinoapi.factory.chevre.compoundPriceSpecification.IPriceSpecification<any>;
+
+function getUnitPriceByAcceptedOffer(offer: cinerinoapi.factory.order.IAcceptedOffer<any>) {
+    let unitPrice: number = 0;
+
+    if (offer.priceSpecification !== undefined) {
+        const priceSpecification = <ICompoundPriceSpecification>offer.priceSpecification;
+        if (Array.isArray(priceSpecification.priceComponent)) {
+            const unitPriceSpec = priceSpecification.priceComponent.find(
+                (c) => c.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification
+            );
+            if (unitPriceSpec !== undefined && unitPriceSpec.price !== undefined && Number.isInteger(unitPriceSpec.price)) {
+                unitPrice = unitPriceSpec.price;
+            }
+        }
+    } else if (offer.price !== undefined && Number.isInteger(offer.price)) {
+        unitPrice = offer.price;
+    }
+
+    return unitPrice;
+}
+
+/**
+ * 販売者都合での返品メール作成
+ */
+async function createEmailMessage4sellerReason(
+    // placeOrderTransaction: cinerinoapi.factory.transaction.placeOrder.ITransaction
+    order: cinerinoapi.factory.order.IOrder
+): Promise<cinerinoapi.factory.creativeWork.message.email.IAttributes> {
+    // const transactionResult = <cinerinoapi.factory.transaction.placeOrder.IResult>placeOrderTransaction.result;
+    // const order = transactionResult.order;
+    const reservation = <cinerinoapi.factory.order.IReservation>order.acceptedOffers[0].itemOffered;
+
+    const email = new Email({
+        views: { root: `${__dirname}/../../../../../emails` },
+        message: {},
+        // uncomment below to send emails in development/test env:
+        // send: true
+        transport: {
+            jsonTransport: true
+        }
+        // htmlToText: false
+    });
+
+    // 券種ごとに合計枚数算出
+    const ticketInfos: {
+        [ticketTypeId: string]: {
+            name: {
+                ja?: string;
+                en?: string;
+            };
+            charge: string;
+            count: number;
+        };
+    } = {};
+    order.acceptedOffers.forEach((o) => {
+        const r = <cinerinoapi.factory.order.IReservation>o.itemOffered;
+        const unitPrice = getUnitPriceByAcceptedOffer(o);
+
+        // チケットタイプごとにチケット情報セット
+        if (ticketInfos[<string>r.reservedTicket.ticketType.id] === undefined) {
+            ticketInfos[<string>r.reservedTicket.ticketType.id] = {
+                name: <cinerinoapi.factory.chevre.multilingualString>r.reservedTicket.ticketType.name,
+                charge: `\\${numeral(unitPrice).format('0,0')}`,
+                count: 0
+            };
+        }
+
+        ticketInfos[<string>r.reservedTicket.ticketType.id].count += 1;
+    });
+    // 券種ごとの表示情報編集 (sort順を変えないよう同期Loop:"for of")
+    const ticketInfoJa = Object.keys(ticketInfos).map((ticketTypeId) => {
+        const ticketInfo = ticketInfos[ticketTypeId];
+
+        return `${ticketInfo.name.ja} ${ticketInfo.charge} × ${ticketInfo.count}枚`;
+    }).join('\n');
+    const ticketInfoEn = Object.keys(ticketInfos).map((ticketTypeId) => {
+        const ticketInfo = ticketInfos[ticketTypeId];
+
+        return `${ticketInfo.name.en} ${ticketInfo.charge} × ${ticketInfo.count} ticket(s)`;
+    }).join('\n');
+
+    let paymentNo = '';
+    if (Array.isArray(order.identifier)) {
+        const confirmationNumberProperty = order.identifier.find((p: any) => p.name === 'confirmationNumber');
+        if (confirmationNumberProperty !== undefined) {
+            // tslint:disable-next-line:no-magic-numbers
+            paymentNo = confirmationNumberProperty.value.slice(-6);
+        }
+    }
+
+    const message = await email.render('returnOrderBySeller', {
+        purchaserNameJa: `${order.customer.familyName} ${order.customer.givenName}`,
+        purchaserNameEn: order.customer.name,
+        paymentNo: paymentNo,
+        day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD'),
+        startTime: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HH:mm'),
+        amount: numeral(order.price).format('0,0'),
+        numberOfReservations: order.acceptedOffers.length,
+        ticketInfoJa,
+        ticketInfoEn
+    });
+
+    return {
+        typeOf: cinerinoapi.factory.creativeWorkType.EmailMessage,
+        sender: {
+            typeOf: cinerinoapi.factory.organizationType.Corporation,
+            name: 'Tokyo Tower TOP DECK TOUR Online Ticket',
+            email: 'noreply@tokyotower.co.jp'
+        },
+        toRecipient: {
+            typeOf: cinerinoapi.factory.personType.Person,
+            name: (order.customer.name !== undefined) ? String(order.customer.name) : '',
+            email: (order.customer.email !== undefined) ? order.customer.email : ''
+        },
+        about: '東京タワートップデッキツアー 返金完了のお知らせ (Payment Refund Notification for the Tokyo Tower Top Deck Tour)',
+        text: message
+    };
 }
