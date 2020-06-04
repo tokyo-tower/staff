@@ -10,10 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- イベントに対する注文返品処理時の不要なパラメータ指定を削除
-- メール送信タスク作成を独自APIで実行するように変更
-- イベントに対する注文返品処理をAPIから移行
-
 ### Deprecated
 
 ### Removed
@@ -21,6 +17,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.1.0 - 2020-06-04
+
+### Changed
+
+- イベントに対する注文返品処理時の不要なパラメータ指定を削除
+- メール送信タスク作成を独自APIで実行するように変更
+- イベントに対する注文返品処理をAPIから移行
 
 ## v6.0.0 - 2020-04-03
 
