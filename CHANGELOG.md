@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 - ログインユーザープロフィールをid_tokenから取得するように調整
+- 購入アカウント検索をCinerino IAMサービスで実装
 
 ### Deprecated
 

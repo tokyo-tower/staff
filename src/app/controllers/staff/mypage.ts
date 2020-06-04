@@ -1,7 +1,8 @@
 /**
- * 内部関係者マイページコントローラー
+ * マイページコントローラー
  */
-import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
+import * as cinerinoapi from '@cinerino/api-nodejs-client';
+// import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
@@ -44,11 +45,30 @@ export async function createPrintToken(object: IPrintObject): Promise<IPrintToke
  */
 export async function index(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const adminService = new tttsapi.service.Admin({
-            endpoint: <string>process.env.API_ENDPOINT,
+        const iamService = new cinerinoapi.service.IAM({
+            endpoint: <string>process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        const owners = await adminService.search({ group: 'Staff' });
+        const searchMembersResult = await iamService.searchMembers({
+            member: { typeOf: { $eq: cinerinoapi.factory.personType.Person } }
+        });
+
+        // ticketClerkロールを持つ管理者のみ表示
+        const owners: {
+            username?: string;
+            familyName?: string;
+            givenName: string;
+        }[] = searchMembersResult.data
+            .filter((m) => {
+                return Array.isArray(m.member.hasRole) && m.member.hasRole.some((r) => r.roleName === 'ticketClerk');
+            })
+            .map((m) => {
+                return {
+                    username: m.member.username,
+                    familyName: m.member.name,
+                    givenName: ''
+                };
+            });
 
         res.render('staff/mypage/index', {
             owners: owners,
