@@ -21,6 +21,7 @@ const difference = require("lodash.difference");
 // @ts-ignore
 const uniq = require("lodash.uniq");
 const moment = require("moment-timezone");
+const numeral = require("numeral");
 const _ = require("underscore");
 const debug = createDebug('ttts-staff:controllers');
 const EMPTY_STRING = '-';

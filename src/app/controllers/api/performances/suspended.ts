@@ -12,6 +12,7 @@ import * as difference from 'lodash.difference';
 // @ts-ignore
 import * as uniq from 'lodash.uniq';
 import * as moment from 'moment-timezone';
+import * as numeral from 'numeral';
 import * as _ from 'underscore';
 
 const debug = createDebug('ttts-staff:controllers');
