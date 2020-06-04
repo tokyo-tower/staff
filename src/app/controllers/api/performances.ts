@@ -366,8 +366,8 @@ async function createEmail(
     };
 
     // メール作成
-    const taskService = new cinerinoapi.service.Task({
-        endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+    const taskService = new tttsapi.service.Task({
+        endpoint: <string>process.env.API_ENDPOINT,
         auth: req.tttsAuthClient
     });
 
@@ -390,8 +390,8 @@ async function createEmail(
     };
 
     // その場で送信ではなく、DBにタスクを登録
-    const taskAttributes: cinerinoapi.factory.task.IAttributes<cinerinoapi.factory.taskName.SendEmailMessage> = {
-        name: cinerinoapi.factory.taskName.SendEmailMessage,
+    const taskAttributes: tttsapi.factory.task.sendEmailMessage.IAttributes = {
+        name: <any>tttsapi.factory.taskName.SendEmailMessage,
         project: order.project,
         status: tttsapi.factory.taskStatus.Ready,
         runsAt: new Date(), // なるはやで実行
@@ -411,7 +411,6 @@ async function createEmail(
                     typeOf: tttsapi.factory.personType.Person
                 }
             }
-            // emailMessage: emailMessage
         }
     };
     await taskService.create(taskAttributes);

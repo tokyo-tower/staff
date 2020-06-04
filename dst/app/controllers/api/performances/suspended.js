@@ -11,10 +11,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * 販売停止パフォーマンスAPIコントローラー
  */
+const cinerinoapi = require("@cinerino/api-nodejs-client");
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const createDebug = require("debug");
+const Email = require("email-templates");
 const http_status_1 = require("http-status");
+// @ts-ignore
+const difference = require("lodash.difference");
+// @ts-ignore
+const uniq = require("lodash.uniq");
 const moment = require("moment-timezone");
+const numeral = require("numeral");
 const _ = require("underscore");
 const debug = createDebug('ttts-staff:controllers');
 const EMPTY_STRING = '-';
@@ -227,10 +234,10 @@ function returnOrders(req, res) {
                 endpoint: process.env.API_ENDPOINT,
                 auth: req.tttsAuthClient
             });
-            const taskService = new tttsapi.service.Task({
-                endpoint: process.env.API_ENDPOINT,
-                auth: req.tttsAuthClient
-            });
+            // const taskService = new tttsapi.service.Task({
+            //     endpoint: <string>process.env.API_ENDPOINT,
+            //     auth: req.tttsAuthClient
+            // });
             const performanceId = req.params.performanceId;
             // パフォーマンス終了済かどうか確認
             const performance = yield eventService.findPerofrmanceById({ id: performanceId });
@@ -241,41 +248,39 @@ function returnOrders(req, res) {
             if (endDate >= now) {
                 throw new Error('上映が終了していないので返品処理を実行できません。');
             }
-            const task = yield taskService.create({
-                project: { typeOf: 'Project', id: process.env.PROJECT_ID },
-                name: tttsapi.factory.taskName.ReturnOrdersByPerformance,
-                status: tttsapi.factory.taskStatus.Ready,
-                runsAt: new Date(),
-                remainingNumberOfTries: 10,
-                numberOfTried: 0,
-                executionResults: [],
-                data: {
-                    credentials: req.tttsAuthClient.credentials,
-                    agentId: process.env.API_CLIENT_ID,
-                    performanceId: performanceId,
-                    // 返品対象の注文クライアントID
-                    clientIds: [...FRONTEND_CLIENT_IDS, ...POS_CLIENT_IDS],
-                    potentialActions: {
-                        returnOrder: {
-                            potentialActions: {
-                                cancelReservation: [{
-                                        potentialActions: {
-                                            cancelReservation: {
-                                                potentialActions: {
-                                                    informReservation: []
-                                                }
-                                            }
-                                        }
-                                    }],
-                                informOrder: []
-                            }
-                        }
-                    }
-                }
+            // 返金対象注文を抽出する
+            const returningOrders = yield searchOrderNumberss4refund(req, performanceId, [...FRONTEND_CLIENT_IDS, ...POS_CLIENT_IDS]);
+            // パフォーマンス返金ステータス調整
+            yield eventService.updateExtension(Object.assign({ id: performanceId, refundStatus: tttsapi.factory.performance.RefundStatus.Instructed, refundStatusUpdateAt: new Date() }, {
+                refundCount: 0,
+                unrefundCount: returningOrders.length // 未返金数をセット
+            }));
+            yield processReturnOrders({
+                req: req,
+                agentId: process.env.API_CLIENT_ID,
+                orders: returningOrders
             });
-            debug('returnAllByPerformance task created.', task);
-            res.status(http_status_1.CREATED)
-                .json(task);
+            // const task = await taskService.create({
+            //     project: { typeOf: <any>'Project', id: <string>process.env.PROJECT_ID },
+            //     name: <any>tttsapi.factory.taskName.ReturnOrdersByPerformance,
+            //     status: tttsapi.factory.taskStatus.Ready,
+            //     runsAt: new Date(), // なるはやで実行
+            //     remainingNumberOfTries: 10,
+            //     numberOfTried: 0,
+            //     executionResults: [],
+            //     data: {
+            //         credentials: req.tttsAuthClient.credentials,
+            //         agentId: <string>process.env.API_CLIENT_ID,
+            //         performanceId: performanceId,
+            //         // 返品対象の注文クライアントID
+            //         clientIds: [...FRONTEND_CLIENT_IDS, ...POS_CLIENT_IDS]
+            //     }
+            // });
+            // debug('returnAllByPerformance task created.', task);
+            // res.status(CREATED)
+            //     .json(task);
+            res.status(http_status_1.NO_CONTENT)
+                .end();
         }
         catch (error) {
             res.status(http_status_1.INTERNAL_SERVER_ERROR).json({
@@ -287,3 +292,225 @@ function returnOrders(req, res) {
     });
 }
 exports.returnOrders = returnOrders;
+function searchOrderNumberss4refund(req, performanceId, 
+/**
+ * 返品対象の注文クライアントID
+ */
+clientIds) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const reservationService = new tttsapi.service.Reservation({
+            endpoint: process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+        // パフォーマンスに対する取引リストを、予約コレクションから検索する
+        let reservations = [];
+        if (clientIds.length > 0) {
+            const searchReservationsResult = yield reservationService.search({
+                limit: 100,
+                typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+                reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+                reservationFor: { id: performanceId },
+                underName: {
+                    identifiers: clientIds.map((clientId) => {
+                        return { name: 'clientId', value: clientId };
+                    })
+                }
+            });
+            reservations = searchReservationsResult.data;
+        }
+        // 入場履歴なしの取引IDを取り出す
+        let orderNumbers = reservations.map((r) => {
+            let orderNumber;
+            if (r.underName !== undefined && Array.isArray(r.underName.identifier)) {
+                const orderNumberProperty = r.underName.identifier.find((p) => p.name === 'orderNumber');
+                if (orderNumberProperty !== undefined) {
+                    orderNumber = orderNumberProperty.value;
+                }
+            }
+            return orderNumber;
+        });
+        const orderNumbersWithCheckins = reservations.filter((r) => (r.checkins.length > 0))
+            .map((r) => {
+            let orderNumber;
+            if (r.underName !== undefined && Array.isArray(r.underName.identifier)) {
+                const orderNumberProperty = r.underName.identifier.find((p) => p.name === 'orderNumber');
+                if (orderNumberProperty !== undefined) {
+                    orderNumber = orderNumberProperty.value;
+                }
+            }
+            return orderNumber;
+        });
+        orderNumbers = uniq(difference(orderNumbers, orderNumbersWithCheckins));
+        const returningOrderNumbers = orderNumbers.filter((orderNumber) => typeof orderNumber === 'string');
+        const orderService = new cinerinoapi.service.Order({
+            endpoint: process.env.CINERINO_API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+        const searchOrdersResult = yield orderService.search({
+            limit: 100,
+            orderNumbers: returningOrderNumbers
+        });
+        return searchOrdersResult.data;
+    });
+}
+function processReturnOrders(params) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const returnOrderService = new cinerinoapi.service.transaction.ReturnOrder({
+            endpoint: process.env.CINERINO_API_ENDPOINT,
+            auth: params.req.tttsAuthClient
+        });
+        const returnableOrders = [];
+        const returnOrderActions = [];
+        yield Promise.all(params.orders.map((order) => __awaiter(this, void 0, void 0, function* () {
+            // 返品メール作成
+            const emailCustomization = yield createEmailMessage4sellerReason(order);
+            const paymentMethods = order.paymentMethods;
+            const refundCreditCardActionsParams = paymentMethods
+                .filter((p) => p.typeOf === cinerinoapi.factory.paymentMethodType.CreditCard)
+                .map((p) => {
+                return {
+                    object: {
+                        object: [{
+                                paymentMethod: {
+                                    paymentMethodId: p.paymentMethodId
+                                }
+                            }]
+                    },
+                    potentialActions: {
+                        sendEmailMessage: {
+                            object: {
+                                sender: emailCustomization.sender,
+                                toRecipient: emailCustomization.toRecipient,
+                                about: emailCustomization.about,
+                                text: emailCustomization.text
+                            }
+                        }
+                    }
+                };
+            });
+            returnableOrders.push({ orderNumber: order.orderNumber });
+            returnOrderActions.push({
+                object: { orderNumber: order.orderNumber },
+                potentialActions: {
+                    refundCreditCard: refundCreditCardActionsParams
+                }
+            });
+        })));
+        const returnOrderTransaction = yield returnOrderService.start({
+            expires: moment()
+                .add(1, 'minute')
+                .toDate(),
+            object: {
+                order: returnableOrders
+            },
+            agent: Object.assign({ identifier: [
+                    { name: 'reason', value: cinerinoapi.factory.transaction.returnOrder.Reason.Seller }
+                ] }, {
+                typeOf: cinerinoapi.factory.personType.Person,
+                id: params.agentId
+            })
+        });
+        yield returnOrderService.confirm({
+            id: returnOrderTransaction.id,
+            potentialActions: {
+                returnOrder: returnOrderActions
+            }
+        });
+    });
+}
+function getUnitPriceByAcceptedOffer(offer) {
+    let unitPrice = 0;
+    if (offer.priceSpecification !== undefined) {
+        const priceSpecification = offer.priceSpecification;
+        if (Array.isArray(priceSpecification.priceComponent)) {
+            const unitPriceSpec = priceSpecification.priceComponent.find((c) => c.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification);
+            if (unitPriceSpec !== undefined && unitPriceSpec.price !== undefined && Number.isInteger(unitPriceSpec.price)) {
+                unitPrice = unitPriceSpec.price;
+            }
+        }
+    }
+    else if (offer.price !== undefined && Number.isInteger(offer.price)) {
+        unitPrice = offer.price;
+    }
+    return unitPrice;
+}
+/**
+ * 販売者都合での返品メール作成
+ */
+function createEmailMessage4sellerReason(
+// placeOrderTransaction: cinerinoapi.factory.transaction.placeOrder.ITransaction
+order) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // const transactionResult = <cinerinoapi.factory.transaction.placeOrder.IResult>placeOrderTransaction.result;
+        // const order = transactionResult.order;
+        const reservation = order.acceptedOffers[0].itemOffered;
+        const email = new Email({
+            views: { root: `${__dirname}/../../../../../emails` },
+            message: {},
+            // uncomment below to send emails in development/test env:
+            // send: true
+            transport: {
+                jsonTransport: true
+            }
+            // htmlToText: false
+        });
+        // 券種ごとに合計枚数算出
+        const ticketInfos = {};
+        order.acceptedOffers.forEach((o) => {
+            const r = o.itemOffered;
+            const unitPrice = getUnitPriceByAcceptedOffer(o);
+            // チケットタイプごとにチケット情報セット
+            if (ticketInfos[r.reservedTicket.ticketType.id] === undefined) {
+                ticketInfos[r.reservedTicket.ticketType.id] = {
+                    name: r.reservedTicket.ticketType.name,
+                    charge: `\\${numeral(unitPrice).format('0,0')}`,
+                    count: 0
+                };
+            }
+            ticketInfos[r.reservedTicket.ticketType.id].count += 1;
+        });
+        // 券種ごとの表示情報編集 (sort順を変えないよう同期Loop:"for of")
+        const ticketInfoJa = Object.keys(ticketInfos).map((ticketTypeId) => {
+            const ticketInfo = ticketInfos[ticketTypeId];
+            return `${ticketInfo.name.ja} ${ticketInfo.charge} × ${ticketInfo.count}枚`;
+        }).join('\n');
+        const ticketInfoEn = Object.keys(ticketInfos).map((ticketTypeId) => {
+            const ticketInfo = ticketInfos[ticketTypeId];
+            return `${ticketInfo.name.en} ${ticketInfo.charge} × ${ticketInfo.count} ticket(s)`;
+        }).join('\n');
+        let paymentNo = '';
+        if (Array.isArray(order.identifier)) {
+            const confirmationNumberProperty = order.identifier.find((p) => p.name === 'confirmationNumber');
+            if (confirmationNumberProperty !== undefined) {
+                // tslint:disable-next-line:no-magic-numbers
+                paymentNo = confirmationNumberProperty.value.slice(-6);
+            }
+        }
+        const message = yield email.render('returnOrderBySeller', {
+            purchaserNameJa: `${order.customer.familyName} ${order.customer.givenName}`,
+            purchaserNameEn: order.customer.name,
+            paymentNo: paymentNo,
+            day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD'),
+            startTime: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HH:mm'),
+            amount: numeral(order.price).format('0,0'),
+            numberOfReservations: order.acceptedOffers.length,
+            ticketInfoJa,
+            ticketInfoEn
+        });
+        return {
+            typeOf: cinerinoapi.factory.creativeWorkType.EmailMessage,
+            sender: {
+                typeOf: cinerinoapi.factory.organizationType.Corporation,
+                name: 'Tokyo Tower TOP DECK TOUR Online Ticket',
+                email: 'noreply@tokyotower.co.jp'
+            },
+            toRecipient: {
+                typeOf: cinerinoapi.factory.personType.Person,
+                name: (order.customer.name !== undefined) ? String(order.customer.name) : '',
+                email: (order.customer.email !== undefined) ? order.customer.email : ''
+            },
+            about: '東京タワートップデッキツアー 返金完了のお知らせ (Payment Refund Notification for the Tokyo Tower Top Deck Tour)',
+            text: message
+        };
+    });
+}
