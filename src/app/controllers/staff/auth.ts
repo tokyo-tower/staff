@@ -54,7 +54,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
                 try {
                     // ログイン情報が有効であれば、Cognitoでもログイン
                     (<Express.Session>req.session).cognitoCredentials = await request.post(
-                        `${process.env.API_ENDPOINT}/oauth/token`,
+                        `${process.env.TTTS_AUTHORIZE_SERVER}/oauth/token`,
                         {
                             auth: {
                                 user: <string>process.env.API_CLIENT_ID,
