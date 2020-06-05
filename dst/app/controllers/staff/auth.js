@@ -44,7 +44,7 @@ function login(req, res, next) {
                 if (validationResult.isEmpty()) {
                     try {
                         // ログイン情報が有効であれば、Cognitoでもログイン
-                        req.session.cognitoCredentials = yield request.post(`${process.env.API_ENDPOINT}/oauth/token`, {
+                        req.session.cognitoCredentials = yield request.post(`${process.env.TTTS_AUTHORIZE_SERVER}/oauth/token`, {
                             auth: {
                                 user: process.env.API_CLIENT_ID,
                                 pass: process.env.API_CLIENT_SECRET
