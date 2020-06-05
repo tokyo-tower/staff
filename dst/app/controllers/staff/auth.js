@@ -14,6 +14,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const createDebug = require("debug");
+const jwt = require("jsonwebtoken");
 const request = require("request-promise-native");
 const _ = require("underscore");
 const staffLoginForm_1 = require("../../forms/staff/staffLoginForm");
@@ -75,15 +76,20 @@ function login(req, res, next) {
                             access_token: cognitoCredentials.accessToken,
                             token_type: cognitoCredentials.tokenType
                         });
-                        const adminService = new tttsapi.service.Admin({
-                            endpoint: process.env.API_ENDPOINT,
-                            auth: authClient
-                        });
-                        const cognitoUser = yield adminService.getProfile();
-                        const groups = yield adminService.getGroups();
-                        debug('groups:', groups);
+                        yield authClient.refreshAccessToken();
+                        const profile = jwt.decode(authClient.credentials.id_token);
+                        const group = (Array.isArray(profile['cognito:groups']) && profile['cognito:groups'].length > 0)
+                            ? { name: profile['cognito:groups'][0], description: '' }
+                            : { name: '', description: '' };
                         // ログイン
-                        req.session.staffUser = Object.assign({}, cognitoUser, { group: groups[0] });
+                        req.session.staffUser = {
+                            username: profile['cognito:username'],
+                            familyName: profile.family_name,
+                            givenName: profile.given_name,
+                            email: profile.email,
+                            telephone: profile.phone_number,
+                            group: group
+                        };
                         const cb = (!_.isEmpty(req.query.cb)) ? req.query.cb : '/staff/mypage';
                         res.redirect(cb);
                         return;
