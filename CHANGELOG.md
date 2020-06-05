@@ -10,9 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- ログインユーザープロフィールをid_tokenから取得するように調整
-- 購入アカウント検索をCinerino IAMサービスで実装
-
 ### Deprecated
 
 ### Removed
@@ -20,6 +17,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.2.0 - 2020-06-05
+
+### Changed
+
+- ログインユーザープロフィールをid_tokenから取得するように調整
+- 購入アカウント検索をCinerino IAMサービスで実装
 
 ## v6.1.0 - 2020-06-04
 
