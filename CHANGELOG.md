@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.2.2 - 2020-06-08
+
+### Changed
+
+- update @motionpicture/ttts-api-nodejs-client
+
 ## v6.2.1 - 2020-06-05
 
 ### Changed
