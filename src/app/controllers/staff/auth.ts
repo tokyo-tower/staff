@@ -1,12 +1,9 @@
 /**
- * 内部関係者認証コントローラー
- * @namespace controllers.staff.auth
+ * 認証コントローラー
  */
-
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
-import * as jwt from 'jsonwebtoken';
 import * as request from 'request-promise-native';
 import * as _ from 'underscore';
 
@@ -89,8 +86,15 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
                         token_type: cognitoCredentials.tokenType
                     });
                     await authClient.refreshAccessToken();
-                    const profile = <IProfile>jwt.decode((<any>authClient.credentials).id_token);
-                    const group = (Array.isArray(profile['cognito:groups']) && profile['cognito:groups'].length > 0)
+
+                    const loginTicket = authClient.verifyIdToken({});
+                    const profile = <IProfile>(<any>loginTicket).payload;
+                    if (profile === undefined) {
+                        throw new Error('cannot get profile from id_token');
+                    }
+
+                    // const profile = <IProfile>jwt.decode((<any>authClient.credentials).id_token);
+                    const group = (Array.isArray((profile)['cognito:groups']) && profile['cognito:groups'].length > 0)
                         ? { name: profile['cognito:groups'][0], description: '' }
                         : { name: '', description: '' };
 

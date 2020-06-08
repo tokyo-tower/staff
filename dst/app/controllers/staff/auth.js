@@ -1,8 +1,4 @@
 "use strict";
-/**
- * 内部関係者認証コントローラー
- * @namespace controllers.staff.auth
- */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -12,9 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * 認証コントローラー
+ */
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const createDebug = require("debug");
-const jwt = require("jsonwebtoken");
 const request = require("request-promise-native");
 const _ = require("underscore");
 const staffLoginForm_1 = require("../../forms/staff/staffLoginForm");
@@ -77,8 +75,13 @@ function login(req, res, next) {
                             token_type: cognitoCredentials.tokenType
                         });
                         yield authClient.refreshAccessToken();
-                        const profile = jwt.decode(authClient.credentials.id_token);
-                        const group = (Array.isArray(profile['cognito:groups']) && profile['cognito:groups'].length > 0)
+                        const loginTicket = authClient.verifyIdToken({});
+                        const profile = loginTicket.payload;
+                        if (profile === undefined) {
+                            throw new Error('cannot get profile from id_token');
+                        }
+                        // const profile = <IProfile>jwt.decode((<any>authClient.credentials).id_token);
+                        const group = (Array.isArray((profile)['cognito:groups']) && profile['cognito:groups'].length > 0)
                             ? { name: profile['cognito:groups'][0], description: '' }
                             : { name: '', description: '' };
                         // ログイン
