@@ -125,11 +125,10 @@ function findSuspendedPerformances(req, conditions) {
         });
         debug('finfing performances...', conditions);
         const searchResults = yield eventService.searchPerformances(conditions);
-        debug('suspended performances found.', searchResults);
         const performances = searchResults.data.data;
         const totalCount = searchResults.totalCount;
-        debug(totalCount, 'total results.');
-        const results = yield Promise.all(performances.map((performance) => __awaiter(this, void 0, void 0, function* () {
+        const results = [];
+        for (const performance of performances) {
             // パフォーマンスに対する予約数
             let searchReservationsResult = yield reservationService.search({
                 limit: 1,
@@ -202,7 +201,7 @@ function findSuspendedPerformances(req, conditions) {
                     tourNumber = tourNumberProperty.value;
                 }
             }
-            return {
+            results.push({
                 performance_id: performance.id,
                 performance_day: moment(performance.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD'),
                 start_time: moment(performance.startDate).tz('Asia/Tokyo').format('HHmm'),
@@ -219,8 +218,16 @@ function findSuspendedPerformances(req, conditions) {
                 refund_status: extension.refund_status,
                 refund_status_name: (extension.refund_status !== undefined) ? REFUND_STATUS_NAMES[extension.refund_status] : undefined,
                 refunded: extension.refunded_count
-            };
-        })));
+            });
+            // レート制限に考慮して、やや時間をおく
+            yield new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve();
+                }, 
+                // tslint:disable-next-line:no-magic-numbers
+                300);
+            });
+        }
         return { results, totalCount };
     });
 }

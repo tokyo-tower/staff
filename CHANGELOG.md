@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 販売停止検索処理を、apiのレート制限を考慮して調整
+
 ### Deprecated
 
 ### Removed

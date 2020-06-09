@@ -159,13 +159,12 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
 
     debug('finfing performances...', conditions);
     const searchResults = await eventService.searchPerformances(conditions);
-    debug('suspended performances found.', searchResults);
     const performances = searchResults.data.data;
 
     const totalCount = <number>searchResults.totalCount;
-    debug(totalCount, 'total results.');
+    const results: ISuspendedPerformances[] = [];
 
-    const results = await Promise.all(performances.map(async (performance) => {
+    for (const performance of performances) {
         // パフォーマンスに対する予約数
         let searchReservationsResult = await reservationService.search({
             limit: 1,
@@ -244,7 +243,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             }
         }
 
-        return {
+        results.push({
             performance_id: performance.id,
             performance_day: moment(performance.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD'),
             start_time: moment(performance.startDate).tz('Asia/Tokyo').format('HHmm'),
@@ -261,8 +260,19 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             refund_status: extension.refund_status,
             refund_status_name: (extension.refund_status !== undefined) ? REFUND_STATUS_NAMES[extension.refund_status] : undefined,
             refunded: extension.refunded_count
-        };
-    }));
+        });
+
+        // レート制限に考慮して、やや時間をおく
+        await new Promise((resolve) => {
+            setTimeout(
+                () => {
+                    resolve();
+                },
+                // tslint:disable-next-line:no-magic-numbers
+                300
+            );
+        });
+    }
 
     return { results, totalCount };
 }
