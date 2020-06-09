@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.3.0 - 2020-06-09
+
+### Changed
+
+- 販売停止検索処理を、apiのレート制限を考慮して調整
+
 ## v6.2.2 - 2020-06-08
 
 ### Changed
