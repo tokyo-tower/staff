@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.3.1 - 2020-07-16
+
+### Changed
+
+- 購入番号として注文のpaymentNoを参照するように変更
+
 ## v6.3.0 - 2020-06-09
 
 ### Changed
