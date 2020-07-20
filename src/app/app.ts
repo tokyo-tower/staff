@@ -82,7 +82,7 @@ app.use(expressValidator()); // バリデーション
 app.use(setLocals); // ローカル変数セット
 
 // ルーティング登録の順序に注意！
-app.use('/auth', authRouter);
+app.use(authRouter);
 app.use(authentication);
 
 app.use('/api', apiRouter);

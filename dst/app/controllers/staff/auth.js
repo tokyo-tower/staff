@@ -114,8 +114,6 @@ function logout(req, res, next) {
                 delete req.session.staffUser;
                 delete req.session.cognitoCredentials;
             }
-            // await ttts.Models.Authentication.remove({ token: req.cookies.remember_staff }).exec();
-            res.clearCookie('remember_staff');
             res.redirect('/staff/mypage');
         }
         catch (error) {

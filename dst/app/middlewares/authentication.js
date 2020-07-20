@@ -14,7 +14,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const staff_1 = require("../models/user/staff");
 exports.default = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
-    req.staffUser = staff_1.default.PARSE(req.session);
+    req.staffUser = staff_1.default.PARSE(req.session, req.hostname);
     // 既ログインの場合
     if (req.staffUser.isAuthenticated()) {
         // tttsapi認証クライアントをリクエストオブジェクトにセット
@@ -46,6 +46,8 @@ exports.default = (req, res, next) => __awaiter(this, void 0, void 0, function* 
         });
     }
     else {
-        res.redirect(`/auth/login?cb=${req.originalUrl}`);
+        // ログインページへリダイレクト
+        res.redirect(req.staffUser.generateAuthUrl());
+        // res.redirect(`/auth/login?cb=${req.originalUrl}`);
     }
 });

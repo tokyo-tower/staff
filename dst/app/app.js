@@ -66,7 +66,7 @@ app.use((req, _res, next) => {
 app.use(expressValidator()); // バリデーション
 app.use(setLocals_1.default); // ローカル変数セット
 // ルーティング登録の順序に注意！
-app.use('/auth', auth_1.default);
+app.use(auth_1.default);
 app.use(authentication_1.default);
 app.use('/api', api_1.default);
 app.use('/staff', staff_1.default);

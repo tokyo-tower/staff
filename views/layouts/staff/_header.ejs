@@ -26,7 +26,7 @@ if (req.hasOwnProperty('route')) {
                 <a class="btn-suspension-list" href="/staff/suspension/list"><span>販売停止<br>一覧表示</span></a>
                 <% } %>
 
-                <a class="btn-logout" href="/auth/logout"><span>ログアウト</span></a>
+                <a class="btn-logout" href="<%= req.staffUser.generateLogoutUrl() %>"><span>ログアウト</span></a>
             </div>
 
         </div>

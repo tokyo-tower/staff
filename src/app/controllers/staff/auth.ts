@@ -129,9 +129,6 @@ export async function logout(req: Request, res: Response, next: NextFunction): P
             delete req.session.cognitoCredentials;
         }
 
-        // await ttts.Models.Authentication.remove({ token: req.cookies.remember_staff }).exec();
-
-        res.clearCookie('remember_staff');
         res.redirect('/staff/mypage');
     } catch (error) {
         next(error);

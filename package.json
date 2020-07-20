@@ -102,6 +102,7 @@
     "css": "gulp",
     "doc": "echo \"implementing...\" && exit 0",
     "start": "node ./dst/index.js",
+    "start:development": "node ./dst/ssl",
     "test": "npm run check && mocha",
     "precommit": "npm test",
     "preversion": "npm run clean && npm run build && npm test",
