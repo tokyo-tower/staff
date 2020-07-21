@@ -11,7 +11,7 @@ import { INTERNAL_SERVER_ERROR, NO_CONTENT } from 'http-status';
 import * as moment from 'moment-timezone';
 import * as numeral from 'numeral';
 
-import StaffUser from '../../models/user/staff';
+import { User } from '../../user';
 
 const debug = createDebug('ttts-staff:controllers');
 
@@ -90,7 +90,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             auth: req.tttsAuthClient
         });
 
-        const updateUser = (<StaffUser>req.staffUser).username;
+        const updateUser = (<User>req.staffUser).username;
 
         await Promise.all(performanceIds.map(async (performanceId) => {
             // パフォーマンスに対する予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)

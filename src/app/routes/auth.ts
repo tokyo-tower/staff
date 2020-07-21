@@ -4,7 +4,7 @@
 import * as express from 'express';
 import * as staffAuthController from '../controllers/staff/auth';
 
-import StaffUser from '../models/user/staff';
+import { User } from '../user';
 
 const authRouter = express.Router();
 
@@ -22,7 +22,7 @@ authRouter.get(
     async (req, res, next) => {
         try {
             // stateにはイベントオブジェクトとして受け取ったリクエストボディが入っている
-            const user = StaffUser.PARSE(req.session, req.hostname);
+            const user = User.PARSE(req.session, req.hostname);
 
             await user.signIn(req.query.code);
 
@@ -69,7 +69,7 @@ authRouter.get(
     '/logout',
     async (req, res, next) => {
         try {
-            const user = StaffUser.PARSE(req.session, req.hostname);
+            const user = User.PARSE(req.session, req.hostname);
 
             user.logout();
             res.redirect('/');

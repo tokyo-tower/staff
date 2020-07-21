@@ -5,7 +5,6 @@ import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';
 import * as request from 'request-promise-native';
-import * as _ from 'underscore';
 
 import staffLoginForm from '../../forms/staff/staffLoginForm';
 
@@ -108,7 +107,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
                         group: group
                     };
 
-                    const cb = (!_.isEmpty(req.query.cb)) ? req.query.cb : '/staff/mypage';
+                    const cb = (typeof req.query.cb === 'string' && req.query.cb.length > 0) ? req.query.cb : '/staff/mypage';
                     res.redirect(cb);
 
                     return;

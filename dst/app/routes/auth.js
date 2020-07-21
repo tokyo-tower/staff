@@ -14,7 +14,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const express = require("express");
 const staffAuthController = require("../controllers/staff/auth");
-const staff_1 = require("../models/user/staff");
+const user_1 = require("../user");
 const authRouter = express.Router();
 authRouter.all('/auth/login', staffAuthController.login);
 authRouter.all('/auth/logout', staffAuthController.logout);
@@ -27,7 +27,7 @@ authRouter.all('/auth/logout', staffAuthController.logout);
 authRouter.get('/signIn', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // stateにはイベントオブジェクトとして受け取ったリクエストボディが入っている
-        const user = staff_1.default.PARSE(req.session, req.hostname);
+        const user = user_1.User.PARSE(req.session, req.hostname);
         yield user.signIn(req.query.code);
         user.authClient.setCredentials({
             refresh_token: user.getRefreshToken()
@@ -65,7 +65,7 @@ authRouter.get('/signIn', (req, res, next) => __awaiter(void 0, void 0, void 0, 
 /* istanbul ignore next */
 authRouter.get('/logout', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = staff_1.default.PARSE(req.session, req.hostname);
+        const user = user_1.User.PARSE(req.session, req.hostname);
         user.logout();
         res.redirect('/');
     }

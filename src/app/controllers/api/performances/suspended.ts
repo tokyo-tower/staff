@@ -13,7 +13,6 @@ import * as difference from 'lodash.difference';
 import * as uniq from 'lodash.uniq';
 import * as moment from 'moment-timezone';
 import * as numeral from 'numeral';
-import * as _ from 'underscore';
 
 const debug = createDebug('ttts-staff:controllers');
 
@@ -45,13 +44,12 @@ const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
  */
 export async function searchSuspendedPerformances(req: Request, res: Response): Promise<void> {
     // tslint:disable-next-line:no-magic-numbers
-    const limit: number = (!_.isEmpty(req.query.limit)) ? parseInt(req.query.limit, 10) : 10;
-    // tslint:disable-next-line:no-magic-numbers
-    const page: number = (!_.isEmpty(req.query.page)) ? parseInt(req.query.page, 10) : 1;
+    const limit: number = (typeof req.query.limit === 'string' && req.query.limit.length > 0) ? Number(req.query.limit) : 10;
+    const page: number = (typeof req.query.query === 'string' && req.query.query.length > 0) ? Number(req.query.page) : 1;
 
     // 入力値またはnull取得
     const getValue = (value: string | null) => {
-        return (!_.isEmpty(value)) ? value : null;
+        return (typeof value === 'string' && value.length > 0) ? value : null;
     };
     // 販売停止処理日
     const day1: string | null = getValue(req.query.input_onlinedate1);

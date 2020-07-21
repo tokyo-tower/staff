@@ -19,6 +19,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Removed
 
+- 言語切替機能を削除
+
 ### Fixed
 
 ### Security

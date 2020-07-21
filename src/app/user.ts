@@ -1,9 +1,9 @@
 import * as cinerinoapi from '@cinerino/sdk';
 
 /**
- * 代理予約スタッフユーザー
+ * 予約管理ユーザー
  */
-export default class StaffUser {
+export class User {
     public familyName: string;
     public givenName: string;
     public email: string;
@@ -13,8 +13,8 @@ export default class StaffUser {
     public session: Express.Session;
     public state: string;
 
-    public static PARSE(session: Express.Session | undefined, host: string): StaffUser {
-        const user = new StaffUser();
+    public static PARSE(session: Express.Session | undefined, host: string): User {
+        const user = new User();
 
         user.session = <Express.Session>session;
 

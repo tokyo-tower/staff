@@ -16,7 +16,6 @@ exports.auth = exports.logout = exports.login = void 0;
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const createDebug = require("debug");
 const request = require("request-promise-native");
-const _ = require("underscore");
 const staffLoginForm_1 = require("../../forms/staff/staffLoginForm");
 const debug = createDebug('ttts-staff:controller:staff:auth');
 /**
@@ -95,7 +94,7 @@ function login(req, res, next) {
                             telephone: profile.phone_number,
                             group: group
                         };
-                        const cb = (!_.isEmpty(req.query.cb)) ? req.query.cb : '/staff/mypage';
+                        const cb = (typeof req.query.cb === 'string' && req.query.cb.length > 0) ? req.query.cb : '/staff/mypage';
                         res.redirect(cb);
                         return;
                     }

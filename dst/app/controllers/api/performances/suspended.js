@@ -24,7 +24,6 @@ const difference = require("lodash.difference");
 const uniq = require("lodash.uniq");
 const moment = require("moment-timezone");
 const numeral = require("numeral");
-const _ = require("underscore");
 const debug = createDebug('ttts-staff:controllers');
 const EMPTY_STRING = '-';
 const EV_SERVICE_STATUS_NAMES = {};
@@ -51,12 +50,11 @@ const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
 function searchSuspendedPerformances(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         // tslint:disable-next-line:no-magic-numbers
-        const limit = (!_.isEmpty(req.query.limit)) ? parseInt(req.query.limit, 10) : 10;
-        // tslint:disable-next-line:no-magic-numbers
-        const page = (!_.isEmpty(req.query.page)) ? parseInt(req.query.page, 10) : 1;
+        const limit = (typeof req.query.limit === 'string' && req.query.limit.length > 0) ? Number(req.query.limit) : 10;
+        const page = (typeof req.query.query === 'string' && req.query.query.length > 0) ? Number(req.query.page) : 1;
         // 入力値またはnull取得
         const getValue = (value) => {
-            return (!_.isEmpty(value)) ? value : null;
+            return (typeof value === 'string' && value.length > 0) ? value : null;
         };
         // 販売停止処理日
         const day1 = getValue(req.query.input_onlinedate1);

@@ -5,10 +5,10 @@ import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
 import { NextFunction, Request, Response } from 'express';
 
-import StaffUser from '../models/user/staff';
+import { User } from '../user';
 
 export default async (req: Request, res: Response, next: NextFunction) => {
-    req.staffUser = StaffUser.PARSE(req.session, req.hostname);
+    req.staffUser = User.PARSE(req.session, req.hostname);
 
     // 既ログインの場合
     if (req.staffUser.isAuthenticated()) {
