@@ -1,4 +1,4 @@
-import * as cinerinoapi from '@cinerino/api-nodejs-client';
+import * as cinerinoapi from '@cinerino/sdk';
 
 /**
  * 代理予約スタッフユーザー

@@ -1,17 +1,19 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.returnOrders = exports.searchSuspendedPerformances = void 0;
 /**
  * 販売停止パフォーマンスAPIコントローラー
  */
-const cinerinoapi = require("@cinerino/api-nodejs-client");
+const cinerinoapi = require("@cinerino/sdk");
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const createDebug = require("debug");
 const Email = require("email-templates");
@@ -76,9 +78,9 @@ function searchSuspendedPerformances(req, res) {
             ttts_extension: {
                 online_sales_status: tttsapi.factory.performance.OnlineSalesStatus.Suspended,
                 online_sales_update_at: (day1 !== null || day2 !== null)
-                    ? Object.assign({}, (day1 !== null)
+                    ? Object.assign(Object.assign({}, (day1 !== null)
                         ? { $gte: moment(`${day1}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').toDate() }
-                        : undefined, (day2 !== null)
+                        : undefined), (day2 !== null)
                         ? { $lt: moment(`${day2}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').add(1, 'day').toDate() }
                         : undefined) : undefined,
                 refund_status: (refundStatus !== null) ? refundStatus : undefined

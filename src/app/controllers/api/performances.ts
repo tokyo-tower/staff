@@ -1,7 +1,7 @@
 /**
  * パフォーマンスAPIコントローラー
  */
-import * as cinerinoapi from '@cinerino/api-nodejs-client';
+import * as cinerinoapi from '@cinerino/sdk';
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
 import * as conf from 'config';
@@ -391,7 +391,7 @@ async function createEmail(
     // その場で送信ではなく、DBにタスクを登録
     const taskAttributes: tttsapi.factory.task.sendEmailMessage.IAttributes = {
         name: <any>tttsapi.factory.taskName.SendEmailMessage,
-        project: order.project,
+        project: { typeOf: order.project.typeOf, id: order.project.id },
         status: tttsapi.factory.taskStatus.Ready,
         runsAt: new Date(), // なるはやで実行
         remainingNumberOfTries: 10,

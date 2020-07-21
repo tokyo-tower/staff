@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 - ログイン認証をCognito UIで対応
+- update typescript
+- update tslint
+- @cinerino/api-nodejs-client -> @cinerino/sdk
 
 ### Deprecated
 
