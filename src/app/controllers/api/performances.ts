@@ -1,7 +1,7 @@
 /**
  * パフォーマンスAPIコントローラー
  */
-import * as cinerinoapi from '@cinerino/api-nodejs-client';
+import * as cinerinoapi from '@cinerino/sdk';
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
 import * as conf from 'config';
@@ -11,7 +11,7 @@ import { INTERNAL_SERVER_ERROR, NO_CONTENT } from 'http-status';
 import * as moment from 'moment-timezone';
 import * as numeral from 'numeral';
 
-import StaffUser from '../../models/user/staff';
+import { User } from '../../user';
 
 const debug = createDebug('ttts-staff:controllers');
 
@@ -90,7 +90,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             auth: req.tttsAuthClient
         });
 
-        const updateUser = (<StaffUser>req.staffUser).username;
+        const updateUser = (<User>req.staffUser).username;
 
         await Promise.all(performanceIds.map(async (performanceId) => {
             // パフォーマンスに対する予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
@@ -391,7 +391,7 @@ async function createEmail(
     // その場で送信ではなく、DBにタスクを登録
     const taskAttributes: tttsapi.factory.task.sendEmailMessage.IAttributes = {
         name: <any>tttsapi.factory.taskName.SendEmailMessage,
-        project: order.project,
+        project: { typeOf: order.project.typeOf, id: order.project.id },
         status: tttsapi.factory.taskStatus.Ready,
         runsAt: new Date(), // なるはやで実行
         remainingNumberOfTries: 10,

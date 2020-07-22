@@ -11,7 +11,6 @@ import * as expressValidator from 'express-validator';
 import * as i18n from 'i18n';
 import * as multer from 'multer';
 import * as favicon from 'serve-favicon';
-import * as _ from 'underscore';
 
 import authentication from './middlewares/authentication';
 import errorHandler from './middlewares/errorHandler';
@@ -53,7 +52,8 @@ app.use(express.static(`${__dirname}/../../public`));
 
 // i18n を利用する設定
 i18n.configure({
-    locales: ['en', 'ja'],
+    // locales: ['en', 'ja'],
+    locales: ['ja'],
     defaultLocale: 'ja',
     directory: `${__dirname}/../../locales`,
     objectNotation: true,
@@ -62,27 +62,12 @@ i18n.configure({
 // i18n の設定を有効化
 app.use(i18n.init);
 
-// セッションで言語管理
-// tslint:disable-next-line:variable-name
-app.use((req, _res, next) => {
-    if (!_.isEmpty((<any>req.session).locale)) {
-        req.setLocale((<any>req.session).locale);
-    }
-
-    if (!_.isEmpty(req.query.locale)) {
-        req.setLocale(req.query.locale);
-        (<any>req.session).locale = req.query.locale;
-    }
-
-    next();
-});
-
 app.use(expressValidator()); // バリデーション
 
 app.use(setLocals); // ローカル変数セット
 
 // ルーティング登録の順序に注意！
-app.use('/auth', authRouter);
+app.use(authRouter);
 app.use(authentication);
 
 app.use('/api', apiRouter);

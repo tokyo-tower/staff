@@ -2,26 +2,31 @@
  * Module dependencies.
  */
 
-const startTime = process.hrtime();
-
 import * as createDebug from 'debug';
-import * as http from 'http';
+import * as fs from 'fs';
+import * as https from 'https';
 import * as app from './app/app';
 
-const debug = createDebug('ttts-staff:index');
+const debug = createDebug('cinerino-console:server');
 
 /**
  * Get port from environment and store in Express.
  */
 
-const port = normalizePort((process.env.PORT === undefined) ? '8080' : process.env.PORT);
+const port = normalizePort((process.env.PORT === undefined) ? '443' : process.env.PORT);
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-const server = http.createServer(app);
+const options = {
+    // tslint:disable-next-line:non-literal-fs-path
+    key: fs.readFileSync(`${__dirname}/../ssl/server.key`),
+    // tslint:disable-next-line:non-literal-fs-path
+    cert: fs.readFileSync(`${__dirname}/../ssl/server.crt`)
+};
+const server = https.createServer(options, app);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -90,7 +95,4 @@ function onListening() {
         ? `pipe ${addr}`
         : `port ${addr.port.toString()}`;
     debug(`Listening on ${bind}`);
-
-    const diff = process.hrtime(startTime);
-    debug(`api server listening took ${diff[0]} seconds and ${diff[1]} nanoseconds.`);
 }

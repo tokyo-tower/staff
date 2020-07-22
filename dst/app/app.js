@@ -12,7 +12,6 @@ const expressValidator = require("express-validator");
 const i18n = require("i18n");
 const multer = require("multer");
 const favicon = require("serve-favicon");
-const _ = require("underscore");
 const authentication_1 = require("./middlewares/authentication");
 const errorHandler_1 = require("./middlewares/errorHandler");
 const notFoundHandler_1 = require("./middlewares/notFoundHandler");
@@ -43,7 +42,8 @@ app.use(cookieParser());
 app.use(express.static(`${__dirname}/../../public`));
 // i18n を利用する設定
 i18n.configure({
-    locales: ['en', 'ja'],
+    // locales: ['en', 'ja'],
+    locales: ['ja'],
     defaultLocale: 'ja',
     directory: `${__dirname}/../../locales`,
     objectNotation: true,
@@ -51,22 +51,10 @@ i18n.configure({
 });
 // i18n の設定を有効化
 app.use(i18n.init);
-// セッションで言語管理
-// tslint:disable-next-line:variable-name
-app.use((req, _res, next) => {
-    if (!_.isEmpty(req.session.locale)) {
-        req.setLocale(req.session.locale);
-    }
-    if (!_.isEmpty(req.query.locale)) {
-        req.setLocale(req.query.locale);
-        req.session.locale = req.query.locale;
-    }
-    next();
-});
 app.use(expressValidator()); // バリデーション
 app.use(setLocals_1.default); // ローカル変数セット
 // ルーティング登録の順序に注意！
-app.use('/auth', auth_1.default);
+app.use(auth_1.default);
 app.use(authentication_1.default);
 app.use('/api', api_1.default);
 app.use('/staff', staff_1.default);

@@ -1,17 +1,19 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.returnOrders = exports.searchSuspendedPerformances = void 0;
 /**
  * 販売停止パフォーマンスAPIコントローラー
  */
-const cinerinoapi = require("@cinerino/api-nodejs-client");
+const cinerinoapi = require("@cinerino/sdk");
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const createDebug = require("debug");
 const Email = require("email-templates");
@@ -22,7 +24,6 @@ const difference = require("lodash.difference");
 const uniq = require("lodash.uniq");
 const moment = require("moment-timezone");
 const numeral = require("numeral");
-const _ = require("underscore");
 const debug = createDebug('ttts-staff:controllers');
 const EMPTY_STRING = '-';
 const EV_SERVICE_STATUS_NAMES = {};
@@ -49,12 +50,11 @@ const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
 function searchSuspendedPerformances(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         // tslint:disable-next-line:no-magic-numbers
-        const limit = (!_.isEmpty(req.query.limit)) ? parseInt(req.query.limit, 10) : 10;
-        // tslint:disable-next-line:no-magic-numbers
-        const page = (!_.isEmpty(req.query.page)) ? parseInt(req.query.page, 10) : 1;
+        const limit = (typeof req.query.limit === 'string' && req.query.limit.length > 0) ? Number(req.query.limit) : 10;
+        const page = (typeof req.query.query === 'string' && req.query.query.length > 0) ? Number(req.query.page) : 1;
         // 入力値またはnull取得
         const getValue = (value) => {
-            return (!_.isEmpty(value)) ? value : null;
+            return (typeof value === 'string' && value.length > 0) ? value : null;
         };
         // 販売停止処理日
         const day1 = getValue(req.query.input_onlinedate1);
@@ -76,9 +76,9 @@ function searchSuspendedPerformances(req, res) {
             ttts_extension: {
                 online_sales_status: tttsapi.factory.performance.OnlineSalesStatus.Suspended,
                 online_sales_update_at: (day1 !== null || day2 !== null)
-                    ? Object.assign({}, (day1 !== null)
+                    ? Object.assign(Object.assign({}, (day1 !== null)
                         ? { $gte: moment(`${day1}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').toDate() }
-                        : undefined, (day2 !== null)
+                        : undefined), (day2 !== null)
                         ? { $lt: moment(`${day2}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').add(1, 'day').toDate() }
                         : undefined) : undefined,
                 refund_status: (refundStatus !== null) ? refundStatus : undefined

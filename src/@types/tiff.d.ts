@@ -1,12 +1,12 @@
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
-import StaffUser from '../app/models/user/staff';
+import { User } from '../app/user';
 
 declare global {
     namespace Express {
         // tslint:disable-next-line:interface-name
         export interface Request {
-            staffUser?: StaffUser;
+            staffUser?: User;
             tttsAuthClient: tttsapi.auth.OAuth2;
         }
 

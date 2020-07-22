@@ -18,6 +18,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.4.0 - 2020-07-22
+
+### Changed
+
+- ログイン認証をCognito UIで対応
+- update typescript
+- update tslint
+- @cinerino/api-nodejs-client -> @cinerino/sdk
+
+### Removed
+
+- 言語切替機能を削除
+
 ## v6.3.1 - 2020-07-16
 
 ### Changed
