@@ -10,20 +10,26 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## v6.4.0 - 2020-07-22
+
+### Changed
+
 - ログイン認証をCognito UIで対応
 - update typescript
 - update tslint
 - @cinerino/api-nodejs-client -> @cinerino/sdk
 
-### Deprecated
-
 ### Removed
 
 - 言語切替機能を削除
-
-### Fixed
-
-### Security
 
 ## v6.3.1 - 2020-07-16
 
