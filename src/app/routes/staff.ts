@@ -2,7 +2,7 @@
  * 代理予約スタッフルーティング
  */
 import * as express from 'express';
-import * as staffAuthController from '../controllers/staff/auth';
+
 import * as staffMyPageController from '../controllers/staff/mypage';
 import * as staffSuspensionListController from '../controllers/staff/suspensionList';
 import * as staffSuspensionSettingController from '../controllers/staff/suspensionSetting';
@@ -20,6 +20,27 @@ staffRouter.get('/suspension/setting/performances', authentication, staffSuspens
 // 運行・オンライン販売停止一覧コントローラー
 staffRouter.get('/suspension/list', authentication, staffSuspensionListController.index);
 
-staffRouter.get('/auth', staffAuthController.auth);
+staffRouter.get(
+    '/auth',
+    (req, res) => {
+        try {
+            if (req.session === undefined) {
+                throw new Error('session undefined.');
+            }
+
+            res.json({
+                success: true,
+                token: req.tttsAuthClient.credentials,
+                errors: null
+            });
+        } catch (error) {
+            res.json({
+                success: false,
+                token: null,
+                errors: error
+            });
+        }
+    }
+);
 
 export default staffRouter;

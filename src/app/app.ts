@@ -62,21 +62,6 @@ i18n.configure({
 // i18n の設定を有効化
 app.use(i18n.init);
 
-// セッションで言語管理
-// tslint:disable-next-line:variable-name
-// app.use((req, _res, next) => {
-//     if (!_.isEmpty((<any>req.session).locale)) {
-//         req.setLocale((<any>req.session).locale);
-//     }
-
-//     if (!_.isEmpty(req.query.locale)) {
-//         req.setLocale(req.query.locale);
-//         (<any>req.session).locale = req.query.locale;
-//     }
-
-//     next();
-// });
-
 app.use(expressValidator()); // バリデーション
 
 app.use(setLocals); // ローカル変数セット

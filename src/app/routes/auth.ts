@@ -2,14 +2,10 @@
  * 認証ルーティング
  */
 import * as express from 'express';
-import * as staffAuthController from '../controllers/staff/auth';
 
 import { User } from '../user';
 
 const authRouter = express.Router();
-
-authRouter.all('/auth/login', staffAuthController.login);
-authRouter.all('/auth/logout', staffAuthController.logout);
 
 /**
  * サインイン

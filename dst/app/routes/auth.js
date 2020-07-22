@@ -13,11 +13,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * 認証ルーティング
  */
 const express = require("express");
-const staffAuthController = require("../controllers/staff/auth");
 const user_1 = require("../user");
 const authRouter = express.Router();
-authRouter.all('/auth/login', staffAuthController.login);
-authRouter.all('/auth/logout', staffAuthController.logout);
 /**
  * サインイン
  * Cognitoからリダイレクトしてくる

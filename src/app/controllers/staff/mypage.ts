@@ -2,7 +2,6 @@
  * マイページコントローラー
  */
 import * as cinerinoapi from '@cinerino/sdk';
-// import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
 import * as createDebug from 'debug';
 import { NextFunction, Request, Response } from 'express';

@@ -14,7 +14,6 @@ exports.print = exports.index = exports.createPrintToken = void 0;
  * マイページコントローラー
  */
 const cinerinoapi = require("@cinerino/sdk");
-// import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 const createDebug = require("debug");
 const jwt = require("jsonwebtoken");
 const querystring = require("querystring");
