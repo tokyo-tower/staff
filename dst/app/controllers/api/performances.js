@@ -83,12 +83,9 @@ function updateOnlineStatus(req, res) {
             const updateUser = req.staffUser.username;
             yield Promise.all(performanceIds.map((performanceId) => __awaiter(this, void 0, void 0, function* () {
                 // パフォーマンスに対する予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
-                const searchReservationsResult = yield reservationService.search({
-                    limit: 100,
-                    typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-                    reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
-                    reservationFor: { id: performanceId }
-                });
+                const searchReservationsResult = yield reservationService.search(Object.assign({ limit: 100, typeOf: tttsapi.factory.chevre.reservationType.EventReservation, reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed], reservationFor: { id: performanceId } }, {
+                    noTotalCount: '1'
+                }));
                 const reservations4performance = searchReservationsResult.data;
                 const reservationsAtLastUpdateDate = reservations4performance.map((r) => {
                     let clientId = '';
