@@ -312,17 +312,13 @@ clientIds) {
         // パフォーマンスに対する取引リストを、予約コレクションから検索する
         let reservations = [];
         if (clientIds.length > 0) {
-            const searchReservationsResult = yield reservationService.search({
-                limit: 100,
-                typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-                reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
-                reservationFor: { id: performanceId },
-                underName: {
+            const searchReservationsResult = yield reservationService.search(Object.assign({ limit: 100, typeOf: tttsapi.factory.chevre.reservationType.EventReservation, reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed], reservationFor: { id: performanceId }, underName: {
                     identifiers: clientIds.map((clientId) => {
                         return { name: 'clientId', value: clientId };
                     })
-                }
-            });
+                } }, {
+                noTotalCount: '1'
+            }));
             reservations = searchReservationsResult.data;
         }
         // 入場履歴なしの取引IDを取り出す

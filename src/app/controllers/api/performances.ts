@@ -98,7 +98,10 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
                 limit: 100,
                 typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
                 reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
-                reservationFor: { id: performanceId }
+                reservationFor: { id: performanceId },
+                ...{
+                    noTotalCount: '1'
+                }
             });
             const reservations4performance = searchReservationsResult.data;
 

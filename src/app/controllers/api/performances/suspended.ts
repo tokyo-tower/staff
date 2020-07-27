@@ -379,6 +379,9 @@ async function searchOrderNumberss4refund(
                     identifiers: clientIds.map((clientId) => {
                         return { name: 'clientId', value: clientId };
                     })
+                },
+                ...{
+                    noTotalCount: '1'
                 }
             }
         );
