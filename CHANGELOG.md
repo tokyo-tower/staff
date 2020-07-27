@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 予約検索時に不要にカウントをしないように調整
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.4.1 - 2020-07-27
+
+### Changed
+
+- 予約検索時に不要にカウントをしないように調整
 
 ## v6.4.0 - 2020-07-22
 
