@@ -178,7 +178,6 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
                     })
                 ]
             },
-            // purchaser_group: tttsapi.factory.person.Group.Customer,
             reservationFor: {
                 id: performance.id
             }
@@ -214,7 +213,6 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
         if (reservationsAtLastUpdateDate !== undefined) {
             reservationsAtLastUpdateDate = reservationsAtLastUpdateDate
                 .filter((r) => r.status === tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed) // 確定ステータス
-                // .filter((r) => r.purchaser_group === tttsapi.factory.person.Group.Customer) // 購入者一般
                 // frontendアプリケーションでの購入
                 .filter((r) => r.transaction_agent !== undefined
                     && r.transaction_agent !== null

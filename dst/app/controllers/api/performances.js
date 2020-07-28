@@ -21,11 +21,11 @@ const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const numeral = require("numeral");
 const debug = createDebug('ttts-staff:controllers');
-const STAFF_CLIENT_IDS = [
-    ...(typeof process.env.STAFF_CLIENT_IDS === 'string') ? process.env.STAFF_CLIENT_IDS.split(',') : [],
-    ...(typeof process.env.API_CLIENT_ID === 'string') ? [process.env.API_CLIENT_ID] : [],
-    ...(typeof process.env.API_CLIENT_ID_OLD === 'string') ? [process.env.API_CLIENT_ID_OLD] : []
-];
+// const STAFF_CLIENT_IDS = [
+//     ...(typeof process.env.STAFF_CLIENT_IDS === 'string') ? process.env.STAFF_CLIENT_IDS.split(',') : [],
+//     ...(typeof process.env.API_CLIENT_ID === 'string') ? [process.env.API_CLIENT_ID] : [],
+//     ...(typeof process.env.API_CLIENT_ID_OLD === 'string') ? [process.env.API_CLIENT_ID_OLD] : []
+// ];
 const POS_CLIENT_IDS = (typeof process.env.POS_CLIENT_ID === 'string')
     ? process.env.POS_CLIENT_ID.split(',')
     : [];
@@ -76,50 +76,36 @@ function updateOnlineStatus(req, res) {
                 endpoint: process.env.API_ENDPOINT,
                 auth: req.tttsAuthClient
             });
-            const reservationService = new tttsapi.service.Reservation({
-                endpoint: process.env.API_ENDPOINT,
+            // const reservationService = new tttsapi.service.Reservation({
+            //     endpoint: <string>process.env.API_ENDPOINT,
+            //     auth: req.tttsAuthClient
+            // });
+            const reservationService = new cinerinoapi.service.Reservation({
+                endpoint: process.env.CINERINO_API_ENDPOINT,
                 auth: req.tttsAuthClient
             });
             const updateUser = req.staffUser.username;
-            yield Promise.all(performanceIds.map((performanceId) => __awaiter(this, void 0, void 0, function* () {
-                // パフォーマンスに対する予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
-                const searchReservationsResult = yield reservationService.search(Object.assign({ limit: 100, typeOf: tttsapi.factory.chevre.reservationType.EventReservation, reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed], reservationFor: { id: performanceId } }, {
-                    noTotalCount: '1'
-                }));
-                const reservations4performance = searchReservationsResult.data;
-                const reservationsAtLastUpdateDate = reservations4performance.map((r) => {
-                    let clientId = '';
-                    let purchaserGroup = 'Customer';
-                    let paymentMethod = '';
-                    let orderNumber = '';
-                    if (r.underName !== undefined && r.underName.identifier !== undefined) {
-                        const paymentMethodProperty = r.underName.identifier.find((p) => p.name === 'paymentMethod');
-                        if (paymentMethodProperty !== undefined) {
-                            paymentMethod = paymentMethodProperty.value;
-                        }
-                        const orderNumberProperty = r.underName.identifier.find((p) => p.name === 'orderNumber');
-                        if (orderNumberProperty !== undefined) {
-                            orderNumber = orderNumberProperty.value;
-                        }
-                        const clientIdProperty = r.underName.identifier.find((p) => p.name === 'clientId');
-                        if (clientIdProperty !== undefined) {
-                            clientId = clientIdProperty.value;
-                        }
-                        // クライアントIDがstaffであればStaffグループ(その他はCustomer)
-                        if (STAFF_CLIENT_IDS.indexOf(clientId) >= 0) {
-                            purchaserGroup = 'Staff';
-                        }
-                    }
+            for (const performanceId of performanceIds) {
+                // Chevreで予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
+                const searchReservationsResult = yield reservationService.search({
+                    limit: 100,
+                    typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+                    reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+                    reservationFor: { id: performanceId }
+                    // ...{
+                    //     noTotalCount: '1'
+                    // }
+                });
+                const reservationsAtLastUpdateDate = searchReservationsResult.data.map((r) => {
+                    var _a, _b, _c;
+                    const clientId = (_c = (_b = (_a = r.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'clientId')) === null || _c === void 0 ? void 0 : _c.value;
                     return {
-                        id: r.id,
+                        id: String(r.id),
                         status: r.reservationStatus,
-                        purchaser_group: purchaserGroup,
                         transaction_agent: {
-                            typeOf: tttsapi.factory.personType.Person,
-                            id: clientId
-                        },
-                        payment_method: paymentMethod,
-                        order_number: orderNumber
+                            typeOf: cinerinoapi.factory.personType.Person,
+                            id: (typeof clientId === 'string') ? clientId : ''
+                        }
                     };
                 });
                 yield eventService.updateExtension({
@@ -135,7 +121,7 @@ function updateOnlineStatus(req, res) {
                     refundStatusUpdateUser: updateUser,
                     refundStatusUpdateAt: now
                 });
-            })));
+            }
             debug('performance online_sales_status updated.');
             // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
             if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
@@ -330,7 +316,7 @@ function createEmail(req, res, order, notice) {
                 email: emailAttributes.sender.email
             },
             toRecipient: {
-                typeOf: tttsapi.factory.personType.Person,
+                typeOf: cinerinoapi.factory.personType.Person,
                 name: emailAttributes.toRecipient.name,
                 email: emailAttributes.toRecipient.email
             },
@@ -356,7 +342,7 @@ function createEmail(req, res, order, notice) {
                     recipient: {
                         id: order.customer.id,
                         name: emailAttributes.toRecipient.name,
-                        typeOf: tttsapi.factory.personType.Person
+                        typeOf: cinerinoapi.factory.personType.Person
                     }
                 }
             }
