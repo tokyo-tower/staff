@@ -65,15 +65,11 @@ function searchSuspendedPerformances(req, res) {
         // 返金ステータス
         const refundStatus = getValue(req.query.refund_status);
         // 検索条件を作成
-        const searchConditions = {
-            limit: limit,
-            page: page,
-            sort: {
+        const searchConditions = Object.assign({ limit: limit, page: page, sort: {
                 startDate: -1
                 // day: -1,
                 // start_time: 1
-            },
-            ttts_extension: {
+            }, ttts_extension: {
                 online_sales_status: tttsapi.factory.performance.OnlineSalesStatus.Suspended,
                 online_sales_update_at: (day1 !== null || day2 !== null)
                     ? Object.assign(Object.assign({}, (day1 !== null)
@@ -82,17 +78,16 @@ function searchSuspendedPerformances(req, res) {
                         ? { $lt: moment(`${day2}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').add(1, 'day').toDate() }
                         : undefined) : undefined,
                 refund_status: (refundStatus !== null) ? refundStatus : undefined
-            },
-            startFrom: (performanceDate1 !== null)
+            }, startFrom: (performanceDate1 !== null)
                 ? moment(`${performanceDate1}T00:00:00+09:00`, 'YYYYMMDDTHH:mm:ssZ')
                     .toDate()
-                : undefined,
-            startThrough: (performanceDate2 !== null)
+                : undefined, startThrough: (performanceDate2 !== null)
                 ? moment(`${performanceDate2}T00:00:00+09:00`, 'YYYYMMDDTHH:mm:ssZ')
                     .add(1, 'day')
                     .toDate()
-                : undefined
-        };
+                : undefined }, {
+            noTotalCount: '1'
+        });
         try {
             // 販売停止パフォーマンス情報を検索
             const { results, totalCount } = yield findSuspendedPerformances(req, searchConditions);
@@ -114,6 +109,7 @@ exports.searchSuspendedPerformances = searchSuspendedPerformances;
  */
 // tslint:disable-next-line:max-func-body-length
 function findSuspendedPerformances(req, conditions) {
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         const eventService = new tttsapi.service.Event({
             endpoint: process.env.API_ENDPOINT,
@@ -176,10 +172,7 @@ function findSuspendedPerformances(req, conditions) {
             if (reservationsAtLastUpdateDate !== undefined) {
                 reservationsAtLastUpdateDate = reservationsAtLastUpdateDate
                     .filter((r) => r.status === tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed) // 確定ステータス
-                    // frontendアプリケーションでの購入
-                    .filter((r) => r.transaction_agent !== undefined
-                    && r.transaction_agent !== null
-                    && FRONTEND_CLIENT_IDS.indexOf(r.transaction_agent.id) >= 0);
+                    .filter((r) => { var _a; return FRONTEND_CLIENT_IDS.indexOf((_a = r.transaction_agent) === null || _a === void 0 ? void 0 : _a.id) >= 0; }); // frontendアプリケーションでの購入
                 numberOfReservations = reservationsAtLastUpdateDate.length;
                 // 時点での予約が存在していれば、そのうちの未入場数を検索
                 if (numberOfReservations > 0) {
@@ -193,11 +186,9 @@ function findSuspendedPerformances(req, conditions) {
                 }
             }
             let tourNumber = performance.tourNumber; // 古いデーターに対する互換性対応
-            if (performance.additionalProperty !== undefined) {
-                const tourNumberProperty = performance.additionalProperty.find((p) => p.name === 'tourNumber');
-                if (tourNumberProperty !== undefined) {
-                    tourNumber = tourNumberProperty.value;
-                }
+            const tourNumberFromAdditionalProperty = (_b = (_a = performance.additionalProperty) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'tourNumber')) === null || _b === void 0 ? void 0 : _b.value;
+            if (typeof tourNumberFromAdditionalProperty === 'string') {
+                tourNumber = tourNumberFromAdditionalProperty;
             }
             results.push({
                 performance_id: performance.id,
@@ -239,17 +230,12 @@ function returnOrders(req, res) {
                 endpoint: process.env.API_ENDPOINT,
                 auth: req.tttsAuthClient
             });
-            // const taskService = new tttsapi.service.Task({
-            //     endpoint: <string>process.env.API_ENDPOINT,
-            //     auth: req.tttsAuthClient
-            // });
             const performanceId = req.params.performanceId;
             // パフォーマンス終了済かどうか確認
             const performance = yield eventService.findPerofrmanceById({ id: performanceId });
             debug('starting returnOrders by performance...', performance.id);
             const now = moment();
             const endDate = moment(performance.endDate);
-            debug(now, endDate);
             if (endDate >= now) {
                 throw new Error('上映が終了していないので返品処理を実行できません。');
             }
@@ -265,25 +251,6 @@ function returnOrders(req, res) {
                 agentId: process.env.API_CLIENT_ID,
                 orders: returningOrders
             });
-            // const task = await taskService.create({
-            //     project: { typeOf: <any>'Project', id: <string>process.env.PROJECT_ID },
-            //     name: <any>tttsapi.factory.taskName.ReturnOrdersByPerformance,
-            //     status: tttsapi.factory.taskStatus.Ready,
-            //     runsAt: new Date(), // なるはやで実行
-            //     remainingNumberOfTries: 10,
-            //     numberOfTried: 0,
-            //     executionResults: [],
-            //     data: {
-            //         credentials: req.tttsAuthClient.credentials,
-            //         agentId: <string>process.env.API_CLIENT_ID,
-            //         performanceId: performanceId,
-            //         // 返品対象の注文クライアントID
-            //         clientIds: [...FRONTEND_CLIENT_IDS, ...POS_CLIENT_IDS]
-            //     }
-            // });
-            // debug('returnAllByPerformance task created.', task);
-            // res.status(CREATED)
-            //     .json(task);
             res.status(http_status_1.NO_CONTENT)
                 .end();
         }
@@ -319,28 +286,11 @@ clientIds) {
             }));
             reservations = searchReservationsResult.data;
         }
-        // 入場履歴なしの取引IDを取り出す
-        let orderNumbers = reservations.map((r) => {
-            let orderNumber;
-            if (r.underName !== undefined && Array.isArray(r.underName.identifier)) {
-                const orderNumberProperty = r.underName.identifier.find((p) => p.name === 'orderNumber');
-                if (orderNumberProperty !== undefined) {
-                    orderNumber = orderNumberProperty.value;
-                }
-            }
-            return orderNumber;
-        });
-        const orderNumbersWithCheckins = reservations.filter((r) => (r.checkins.length > 0))
-            .map((r) => {
-            let orderNumber;
-            if (r.underName !== undefined && Array.isArray(r.underName.identifier)) {
-                const orderNumberProperty = r.underName.identifier.find((p) => p.name === 'orderNumber');
-                if (orderNumberProperty !== undefined) {
-                    orderNumber = orderNumberProperty.value;
-                }
-            }
-            return orderNumber;
-        });
+        // 入場履歴なしの注文番号を取り出す
+        let orderNumbers = reservations.map((r) => { var _a, _b, _c; return (_c = (_b = (_a = r.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'orderNumber')) === null || _c === void 0 ? void 0 : _c.value; });
+        const orderNumbersWithCheckins = reservations
+            .filter((r) => (r.checkins.length > 0))
+            .map((r) => { var _a, _b, _c; return (_c = (_b = (_a = r.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'orderNumber')) === null || _c === void 0 ? void 0 : _c.value; });
         orderNumbers = uniq(difference(orderNumbers, orderNumbersWithCheckins));
         const returningOrderNumbers = orderNumbers.filter((orderNumber) => typeof orderNumber === 'string');
         const orderService = new cinerinoapi.service.Order({
@@ -420,17 +370,15 @@ function processReturnOrders(params) {
     });
 }
 function getUnitPriceByAcceptedOffer(offer) {
+    var _a, _b;
     let unitPrice = 0;
     if (offer.priceSpecification !== undefined) {
-        const priceSpecification = offer.priceSpecification;
-        if (Array.isArray(priceSpecification.priceComponent)) {
-            const unitPriceSpec = priceSpecification.priceComponent.find((c) => c.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification);
-            if (unitPriceSpec !== undefined && unitPriceSpec.price !== undefined && Number.isInteger(unitPriceSpec.price)) {
-                unitPrice = unitPriceSpec.price;
-            }
+        const priceFromUnitPriceSpec = (_b = (_a = offer.priceSpecification.priceComponent) === null || _a === void 0 ? void 0 : _a.find((c) => c.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification)) === null || _b === void 0 ? void 0 : _b.price;
+        if (typeof priceFromUnitPriceSpec === 'number') {
+            unitPrice = priceFromUnitPriceSpec;
         }
     }
-    else if (offer.price !== undefined && Number.isInteger(offer.price)) {
+    else if (typeof offer.price === 'number') {
         unitPrice = offer.price;
     }
     return unitPrice;
@@ -438,12 +386,8 @@ function getUnitPriceByAcceptedOffer(offer) {
 /**
  * 販売者都合での返品メール作成
  */
-function createEmailMessage4sellerReason(
-// placeOrderTransaction: cinerinoapi.factory.transaction.placeOrder.ITransaction
-order) {
+function createEmailMessage4sellerReason(order) {
     return __awaiter(this, void 0, void 0, function* () {
-        // const transactionResult = <cinerinoapi.factory.transaction.placeOrder.IResult>placeOrderTransaction.result;
-        // const order = transactionResult.order;
         const reservation = order.acceptedOffers[0].itemOffered;
         const email = new Email({
             views: { root: `${__dirname}/../../../../../emails` },

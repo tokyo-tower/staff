@@ -91,7 +91,10 @@ export async function searchSuspendedPerformances(req: Request, res: Response): 
             ? moment(`${performanceDate2}T00:00:00+09:00`, 'YYYYMMDDTHH:mm:ssZ')
                 .add(1, 'day')
                 .toDate()
-            : undefined
+            : undefined,
+        ...{
+            noTotalCount: '1'
+        }
     };
 
     try {
@@ -213,10 +216,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
         if (reservationsAtLastUpdateDate !== undefined) {
             reservationsAtLastUpdateDate = reservationsAtLastUpdateDate
                 .filter((r) => r.status === tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed) // 確定ステータス
-                // frontendアプリケーションでの購入
-                .filter((r) => r.transaction_agent !== undefined
-                    && r.transaction_agent !== null
-                    && FRONTEND_CLIENT_IDS.indexOf(r.transaction_agent.id) >= 0);
+                .filter((r) => FRONTEND_CLIENT_IDS.indexOf(r.transaction_agent?.id) >= 0); // frontendアプリケーションでの購入
 
             numberOfReservations = reservationsAtLastUpdateDate.length;
             // 時点での予約が存在していれば、そのうちの未入場数を検索
@@ -232,11 +232,9 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
         }
 
         let tourNumber: string = (<any>performance).tourNumber; // 古いデーターに対する互換性対応
-        if (performance.additionalProperty !== undefined) {
-            const tourNumberProperty = performance.additionalProperty.find((p) => p.name === 'tourNumber');
-            if (tourNumberProperty !== undefined) {
-                tourNumber = tourNumberProperty.value;
-            }
+        const tourNumberFromAdditionalProperty = performance.additionalProperty?.find((p) => p.name === 'tourNumber')?.value;
+        if (typeof tourNumberFromAdditionalProperty === 'string') {
+            tourNumber = tourNumberFromAdditionalProperty;
         }
 
         results.push({
@@ -282,10 +280,6 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
             endpoint: <string>process.env.API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        // const taskService = new tttsapi.service.Task({
-        //     endpoint: <string>process.env.API_ENDPOINT,
-        //     auth: req.tttsAuthClient
-        // });
 
         const performanceId = req.params.performanceId;
 
@@ -294,7 +288,6 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
         debug('starting returnOrders by performance...', performance.id);
         const now = moment();
         const endDate = moment(performance.endDate);
-        debug(now, endDate);
         if (endDate >= now) {
             throw new Error('上映が終了していないので返品処理を実行できません。');
         }
@@ -318,27 +311,6 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
             agentId: <string>process.env.API_CLIENT_ID,
             orders: returningOrders
         });
-
-        // const task = await taskService.create({
-        //     project: { typeOf: <any>'Project', id: <string>process.env.PROJECT_ID },
-        //     name: <any>tttsapi.factory.taskName.ReturnOrdersByPerformance,
-        //     status: tttsapi.factory.taskStatus.Ready,
-        //     runsAt: new Date(), // なるはやで実行
-        //     remainingNumberOfTries: 10,
-        //     numberOfTried: 0,
-        //     executionResults: [],
-        //     data: {
-        //         credentials: req.tttsAuthClient.credentials,
-        //         agentId: <string>process.env.API_CLIENT_ID,
-        //         performanceId: performanceId,
-        //         // 返品対象の注文クライアントID
-        //         clientIds: [...FRONTEND_CLIENT_IDS, ...POS_CLIENT_IDS]
-        //     }
-        // });
-        // debug('returnAllByPerformance task created.', task);
-
-        // res.status(CREATED)
-        //     .json(task);
 
         res.status(NO_CONTENT)
             .end();
@@ -387,30 +359,11 @@ async function searchOrderNumberss4refund(
         reservations = searchReservationsResult.data;
     }
 
-    // 入場履歴なしの取引IDを取り出す
-    let orderNumbers = reservations.map((r) => {
-        let orderNumber: string | undefined;
-        if (r.underName !== undefined && Array.isArray(r.underName.identifier)) {
-            const orderNumberProperty = r.underName.identifier.find((p) => p.name === 'orderNumber');
-            if (orderNumberProperty !== undefined) {
-                orderNumber = orderNumberProperty.value;
-            }
-        }
-
-        return orderNumber;
-    });
-    const orderNumbersWithCheckins = reservations.filter((r) => (r.checkins.length > 0))
-        .map((r) => {
-            let orderNumber: string | undefined;
-            if (r.underName !== undefined && Array.isArray(r.underName.identifier)) {
-                const orderNumberProperty = r.underName.identifier.find((p) => p.name === 'orderNumber');
-                if (orderNumberProperty !== undefined) {
-                    orderNumber = orderNumberProperty.value;
-                }
-            }
-
-            return orderNumber;
-        });
+    // 入場履歴なしの注文番号を取り出す
+    let orderNumbers = reservations.map((r) => r.underName?.identifier?.find((p) => p.name === 'orderNumber')?.value);
+    const orderNumbersWithCheckins = reservations
+        .filter((r) => (r.checkins.length > 0))
+        .map((r) => r.underName?.identifier?.find((p) => p.name === 'orderNumber')?.value);
     orderNumbers = uniq(difference(orderNumbers, orderNumbersWithCheckins));
 
     const returningOrderNumbers = <string[]>orderNumbers.filter((orderNumber) => typeof orderNumber === 'string');
@@ -511,16 +464,13 @@ function getUnitPriceByAcceptedOffer(offer: cinerinoapi.factory.order.IAcceptedO
     let unitPrice: number = 0;
 
     if (offer.priceSpecification !== undefined) {
-        const priceSpecification = <ICompoundPriceSpecification>offer.priceSpecification;
-        if (Array.isArray(priceSpecification.priceComponent)) {
-            const unitPriceSpec = priceSpecification.priceComponent.find(
-                (c) => c.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification
-            );
-            if (unitPriceSpec !== undefined && unitPriceSpec.price !== undefined && Number.isInteger(unitPriceSpec.price)) {
-                unitPrice = unitPriceSpec.price;
-            }
+        const priceFromUnitPriceSpec = (<ICompoundPriceSpecification>offer.priceSpecification).priceComponent?.find(
+            (c) => c.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification
+        )?.price;
+        if (typeof priceFromUnitPriceSpec === 'number') {
+            unitPrice = priceFromUnitPriceSpec;
         }
-    } else if (offer.price !== undefined && Number.isInteger(offer.price)) {
+    } else if (typeof offer.price === 'number') {
         unitPrice = offer.price;
     }
 
@@ -531,11 +481,8 @@ function getUnitPriceByAcceptedOffer(offer: cinerinoapi.factory.order.IAcceptedO
  * 販売者都合での返品メール作成
  */
 async function createEmailMessage4sellerReason(
-    // placeOrderTransaction: cinerinoapi.factory.transaction.placeOrder.ITransaction
     order: cinerinoapi.factory.order.IOrder
 ): Promise<cinerinoapi.factory.creativeWork.message.email.IAttributes> {
-    // const transactionResult = <cinerinoapi.factory.transaction.placeOrder.IResult>placeOrderTransaction.result;
-    // const order = transactionResult.order;
     const reservation = <cinerinoapi.factory.order.IReservation>order.acceptedOffers[0].itemOffered;
 
     const email = new Email({
