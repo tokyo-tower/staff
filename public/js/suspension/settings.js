@@ -173,7 +173,6 @@ $(function () {
             }
         }).done(function (body) {
             if ($.isArray(body.data) && body.data.length > 0) {
-                // sales_suspended = body.meta.sales_suspended;
                 showPerformances(body.data);
             } else {
                 dom_performances.innerHTML = '';
@@ -208,7 +207,8 @@ $(function () {
             ymd = dateStr.replace(/\-/g, ''); // Y-m-dをYmdに整形
             search({
                 page: 1,
-                day: ymd
+                day: ymd,
+                noTotalCount: '1'
             });
         }
     });
