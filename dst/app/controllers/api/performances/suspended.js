@@ -65,11 +65,15 @@ function searchSuspendedPerformances(req, res) {
         // 返金ステータス
         const refundStatus = getValue(req.query.refund_status);
         // 検索条件を作成
-        const searchConditions = Object.assign({ limit: limit, page: page, sort: {
+        const searchConditions = {
+            limit: limit,
+            page: page,
+            sort: {
                 startDate: -1
                 // day: -1,
                 // start_time: 1
-            }, ttts_extension: {
+            },
+            ttts_extension: {
                 online_sales_status: tttsapi.factory.performance.OnlineSalesStatus.Suspended,
                 online_sales_update_at: (day1 !== null || day2 !== null)
                     ? Object.assign(Object.assign({}, (day1 !== null)
@@ -78,16 +82,17 @@ function searchSuspendedPerformances(req, res) {
                         ? { $lt: moment(`${day2}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').add(1, 'day').toDate() }
                         : undefined) : undefined,
                 refund_status: (refundStatus !== null) ? refundStatus : undefined
-            }, startFrom: (performanceDate1 !== null)
+            },
+            startFrom: (performanceDate1 !== null)
                 ? moment(`${performanceDate1}T00:00:00+09:00`, 'YYYYMMDDTHH:mm:ssZ')
                     .toDate()
-                : undefined, startThrough: (performanceDate2 !== null)
+                : undefined,
+            startThrough: (performanceDate2 !== null)
                 ? moment(`${performanceDate2}T00:00:00+09:00`, 'YYYYMMDDTHH:mm:ssZ')
                     .add(1, 'day')
                     .toDate()
-                : undefined }, {
-            noTotalCount: '1'
-        });
+                : undefined
+        };
         try {
             // 販売停止パフォーマンス情報を検索
             const { results, totalCount } = yield findSuspendedPerformances(req, searchConditions);

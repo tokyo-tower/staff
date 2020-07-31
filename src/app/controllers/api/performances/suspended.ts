@@ -91,10 +91,7 @@ export async function searchSuspendedPerformances(req: Request, res: Response): 
             ? moment(`${performanceDate2}T00:00:00+09:00`, 'YYYYMMDDTHH:mm:ssZ')
                 .add(1, 'day')
                 .toDate()
-            : undefined,
-        ...{
-            noTotalCount: '1'
-        }
+            : undefined
     };
 
     try {
