@@ -125,7 +125,9 @@ function findSuspendedPerformances(req, conditions) {
             auth: req.tttsAuthClient
         });
         debug('finfing performances...', conditions);
-        const searchResults = yield eventService.searchPerformances(conditions);
+        const searchResults = yield eventService.searchPerformances(Object.assign(Object.assign({}, conditions), {
+            countDocuments: '1'
+        }));
         const performances = searchResults.data.data;
         const totalCount = searchResults.totalCount;
         const results = [];
