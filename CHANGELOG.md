@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 必要な部分のみパフォーマンス検索時にcountDocumentsを指定
+
 ### Deprecated
 
 ### Removed

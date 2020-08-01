@@ -156,7 +156,12 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
     });
 
     debug('finfing performances...', conditions);
-    const searchResults = await eventService.searchPerformances(conditions);
+    const searchResults = await eventService.searchPerformances({
+        ...conditions,
+        ...{
+            countDocuments: '1'
+        }
+    });
     const performances = searchResults.data.data;
 
     const totalCount = <number>searchResults.totalCount;
