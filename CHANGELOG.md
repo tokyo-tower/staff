@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 必要な部分のみパフォーマンス検索時にcountDocumentsを指定
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.4.5 - 2020-08-01
+
+### Changed
+
+- 必要な部分のみパフォーマンス検索時にcountDocumentsを指定
 
 ## v6.4.4 - 2020-07-31
 
