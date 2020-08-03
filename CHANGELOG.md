@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- イベントの販売ステータスをChevreへ連携するように調整
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.5.0 - 2020-08-03
+
+### Changed
+
+- イベントの販売ステータスをChevreへ連携するように調整
 
 ## v6.4.5 - 2020-08-01
 
