@@ -72,15 +72,15 @@ function updateOnlineStatus(req, res) {
                 tttsapi.factory.performance.RefundStatus.None;
             // パフォーマンス更新
             debug('updating performance online_sales_status...');
-            const eventService = new tttsapi.service.Event({
+            const performanceService = new tttsapi.service.Event({
                 endpoint: process.env.API_ENDPOINT,
                 auth: req.tttsAuthClient
             });
-            // const reservationService = new tttsapi.service.Reservation({
-            //     endpoint: <string>process.env.API_ENDPOINT,
-            //     auth: req.tttsAuthClient
-            // });
             const reservationService = new cinerinoapi.service.Reservation({
+                endpoint: process.env.CINERINO_API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
+            const eventService = new cinerinoapi.service.Event({
                 endpoint: process.env.CINERINO_API_ENDPOINT,
                 auth: req.tttsAuthClient
             });
@@ -108,7 +108,7 @@ function updateOnlineStatus(req, res) {
                         }
                     };
                 });
-                yield eventService.updateExtension({
+                yield performanceService.updateExtension({
                     id: performanceId,
                     reservationsAtLastUpdateDate: reservationsAtLastUpdateDate,
                     onlineSalesStatus: onlineStatus,
@@ -121,6 +121,18 @@ function updateOnlineStatus(req, res) {
                     refundStatusUpdateUser: updateUser,
                     refundStatusUpdateAt: now
                 });
+                try {
+                    // Chevreイベントステータスに反映
+                    yield eventService.updatePartially({
+                        id: performanceId,
+                        eventStatus: (onlineStatus === tttsapi.factory.performance.OnlineSalesStatus.Normal)
+                            ? cinerinoapi.factory.chevre.eventStatusType.EventScheduled
+                            : cinerinoapi.factory.chevre.eventStatusType.EventCancelled
+                    });
+                }
+                catch (error) {
+                    // no op
+                }
             }
             debug('performance online_sales_status updated.');
             // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成

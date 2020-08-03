@@ -81,15 +81,15 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
         // パフォーマンス更新
         debug('updating performance online_sales_status...');
 
-        const eventService = new tttsapi.service.Event({
+        const performanceService = new tttsapi.service.Event({
             endpoint: <string>process.env.API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        // const reservationService = new tttsapi.service.Reservation({
-        //     endpoint: <string>process.env.API_ENDPOINT,
-        //     auth: req.tttsAuthClient
-        // });
         const reservationService = new cinerinoapi.service.Reservation({
+            endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+        const eventService = new cinerinoapi.service.Event({
             endpoint: <string>process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
@@ -122,7 +122,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
                     };
                 });
 
-            await eventService.updateExtension({
+            await performanceService.updateExtension({
                 id: performanceId,
                 reservationsAtLastUpdateDate: reservationsAtLastUpdateDate,
                 onlineSalesStatus: onlineStatus,
@@ -135,6 +135,18 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
                 refundStatusUpdateUser: updateUser,
                 refundStatusUpdateAt: now
             });
+
+            try {
+                // Chevreイベントステータスに反映
+                await eventService.updatePartially({
+                    id: performanceId,
+                    eventStatus: (onlineStatus === tttsapi.factory.performance.OnlineSalesStatus.Normal)
+                        ? cinerinoapi.factory.chevre.eventStatusType.EventScheduled
+                        : cinerinoapi.factory.chevre.eventStatusType.EventCancelled
+                });
+            } catch (error) {
+                // no op
+            }
         }
         debug('performance online_sales_status updated.');
 
