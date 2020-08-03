@@ -13,7 +13,7 @@
     }
   ],
   "dependencies": {
-    "@cinerino/sdk": "^1.3.1",
+    "@cinerino/sdk": "^1.4.0",
     "@motionpicture/express-middleware": "0.0.0",
     "@motionpicture/ttts-api-nodejs-client": "^7.2.1",
     "@types/node": "^8.10.61",
