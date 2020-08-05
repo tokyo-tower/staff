@@ -126,7 +126,8 @@ function findSuspendedPerformances(req, conditions) {
         });
         debug('finfing performances...', conditions);
         const searchResults = yield eventService.searchPerformances(Object.assign(Object.assign({}, conditions), {
-            countDocuments: '1'
+            countDocuments: '1',
+            useLegacySearch: '1'
         }));
         const performances = searchResults.data.data;
         const totalCount = searchResults.totalCount;

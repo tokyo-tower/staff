@@ -208,7 +208,8 @@ $(function () {
             search({
                 page: 1,
                 day: ymd,
-                noTotalCount: '1'
+                noTotalCount: '1',
+                useLegacySearch: '1'
             });
         }
     });
