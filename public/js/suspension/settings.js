@@ -94,8 +94,8 @@ $(function () {
                     start_time: performance.attributes.start_time,
                     end_time: performance.attributes.end_time,
                     seat_status: performance.attributes.seat_status,
-                    ev_service_status: performance.attributes.ev_service_status,
-                    online_sales_status: performance.attributes.online_sales_status,
+                    ev_service_status: performance.evServiceStatus,
+                    online_sales_status: performance.onlineSalesStatus,
                     tour_number: tourNumber
                 });
                 performancesById[performance.id] = performance;

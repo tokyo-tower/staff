@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 販売中止設定を調整
+
 ### Deprecated
 
 ### Removed
