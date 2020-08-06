@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 販売停止パフォーマンス検索時にuseExtensionを指定
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.5.4 - 2020-08-06
+
+### Changed
+
+- 販売停止パフォーマンス検索時にuseExtensionを指定
 
 ## v6.5.3 - 2020-08-06
 
