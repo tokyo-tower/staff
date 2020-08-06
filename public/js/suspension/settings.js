@@ -330,7 +330,9 @@ $(function () {
             busy_suspend = false;
             search({
                 page: 1,
-                day: ymd
+                day: ymd,
+                noTotalCount: '1',
+                useLegacySearch: '1'
             });
         });
     };
