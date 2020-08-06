@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.5.3 - 2020-08-06
+
+### Changed
+
+- パフォーマンス検索時にuseLegacySearchを指定
+
 ## v6.5.2 - 2020-08-05
 
 ### Changed
