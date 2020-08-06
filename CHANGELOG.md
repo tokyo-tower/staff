@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- パフォーマンス検索結果のattributes属性を使用しないように調整
+
 ### Deprecated
 
 ### Removed
