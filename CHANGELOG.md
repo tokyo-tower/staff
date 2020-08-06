@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- パフォーマンス検索結果のattributes属性を使用しないように調整
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.5.5 - 2020-08-06
+
+### Changed
+
+- パフォーマンス検索結果のattributes属性を使用しないように調整
 
 ## v6.5.4 - 2020-08-06
 
