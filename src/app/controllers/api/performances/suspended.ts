@@ -160,7 +160,8 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
         ...conditions,
         ...{
             countDocuments: '1',
-            useLegacySearch: '1'
+            useLegacySearch: '1',
+            useExtension: '1'
         }
     });
     const performances = searchResults.data.data;
