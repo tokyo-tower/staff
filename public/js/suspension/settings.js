@@ -69,9 +69,19 @@ $(function () {
         var moment_now = moment();
         performanceArray.forEach(function (performance) {
             try {
-                var hour = performance.attributes.start_time.slice(0, 2);
+                var day = moment(performance.startDate)
+                    .tz('Asia/Tokyo')
+                    .format('YYYYMMDD');
+                var start_time = moment(performance.startDate)
+                    .tz('Asia/Tokyo')
+                    .format('HHmm');
+                var end_time = moment(performance.endDate)
+                    .tz('Asia/Tokyo')
+                    .format('HHmm');
+
+                var hour = start_time.slice(0, 2);
                 // 終了後のperformanceは無視
-                if (moment_now.isAfter(moment(performance.attributes.day + '' + performance.attributes.end_time, 'YYYYMMDDHHmm'))) {
+                if (moment_now.isAfter(moment(day + '' + end_time, 'YYYYMMDDHHmm'))) {
                     return true;
                 }
                 if (!~hourArray.indexOf(hour)) {
@@ -79,7 +89,7 @@ $(function () {
                     performancesByHour[hour] = [];
                 }
 
-                var tourNumber = performance.attributes.tour_number;
+                var tourNumber = '';
                 if (Array.isArray(performance.additionalProperty)) {
                     var tourNumberProperty = performance.additionalProperty.find(function (p) {
                         return p.name === 'tourNumber';
@@ -91,9 +101,9 @@ $(function () {
                 performancesByHour[hour].push({
                     id: performance.id,
                     hour: hour,
-                    start_time: performance.attributes.start_time,
-                    end_time: performance.attributes.end_time,
-                    seat_status: performance.attributes.seat_status,
+                    start_time: start_time,
+                    end_time: end_time,
+                    seat_status: performance.remainingAttendeeCapacity,
                     ev_service_status: performance.evServiceStatus,
                     online_sales_status: performance.onlineSalesStatus,
                     tour_number: tourNumber
