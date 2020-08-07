@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.5.7 - 2020-08-07
+
+### Fxied
+
+- 販売停止検索のページャー修正
+
 ## v6.5.6 - 2020-08-07
 
 ### Changed
