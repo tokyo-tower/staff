@@ -125,7 +125,7 @@ function findSuspendedPerformances(req, conditions) {
             auth: req.tttsAuthClient
         });
         debug('finfing performances...', conditions);
-        const searchResults = yield eventService.searchPerformances(Object.assign(Object.assign({}, conditions), {
+        const searchResults = yield eventService.search(Object.assign(Object.assign({}, conditions), {
             countDocuments: '1',
             useLegacySearch: '1',
             useExtension: '1'
@@ -177,7 +177,7 @@ function findSuspendedPerformances(req, conditions) {
             let nubmerOfUncheckedReservations = searchReservationsResult.totalCount;
             const extension = performance.extension;
             // 時点での予約
-            let reservationsAtLastUpdateDate = extension.reservationsAtLastUpdateDate;
+            let reservationsAtLastUpdateDate = extension === null || extension === void 0 ? void 0 : extension.reservationsAtLastUpdateDate;
             if (reservationsAtLastUpdateDate !== undefined) {
                 reservationsAtLastUpdateDate = reservationsAtLastUpdateDate
                     .filter((r) => r.status === tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed) // 確定ステータス
@@ -207,15 +207,17 @@ function findSuspendedPerformances(req, conditions) {
                 start_date: performance.startDate,
                 end_date: performance.endDate,
                 tour_number: tourNumber,
-                ev_service_status: extension.ev_service_status,
-                ev_service_status_name: EV_SERVICE_STATUS_NAMES[extension.ev_service_status],
-                online_sales_update_at: extension.online_sales_update_at,
-                online_sales_update_user: extension.online_sales_update_user,
+                ev_service_status: extension === null || extension === void 0 ? void 0 : extension.ev_service_status,
+                ev_service_status_name: ((extension === null || extension === void 0 ? void 0 : extension.ev_service_status) !== undefined)
+                    ? EV_SERVICE_STATUS_NAMES[extension.ev_service_status]
+                    : undefined,
+                online_sales_update_at: extension === null || extension === void 0 ? void 0 : extension.online_sales_update_at,
+                online_sales_update_user: extension === null || extension === void 0 ? void 0 : extension.online_sales_update_user,
                 canceled: numberOfReservations,
                 arrived: numberOfReservations - nubmerOfUncheckedReservations,
-                refund_status: extension.refund_status,
-                refund_status_name: (extension.refund_status !== undefined) ? REFUND_STATUS_NAMES[extension.refund_status] : undefined,
-                refunded: extension.refunded_count
+                refund_status: extension === null || extension === void 0 ? void 0 : extension.refund_status,
+                refund_status_name: ((extension === null || extension === void 0 ? void 0 : extension.refund_status) !== undefined) ? REFUND_STATUS_NAMES[extension.refund_status] : undefined,
+                refunded: extension === null || extension === void 0 ? void 0 : extension.refunded_count
             });
             // レート制限に考慮して、やや時間をおく
             yield new Promise((resolve) => {

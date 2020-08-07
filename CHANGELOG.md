@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- POSから分離されたパフォーマンス検索で再構築
+
 ### Deprecated
 
 ### Removed
