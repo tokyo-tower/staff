@@ -51,7 +51,7 @@ function searchSuspendedPerformances(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         // tslint:disable-next-line:no-magic-numbers
         const limit = (typeof req.query.limit === 'string' && req.query.limit.length > 0) ? Number(req.query.limit) : 10;
-        const page = (typeof req.query.query === 'string' && req.query.query.length > 0) ? Number(req.query.page) : 1;
+        const page = (typeof req.query.page === 'string' && req.query.page.length > 0) ? Number(req.query.page) : 1;
         // 入力値またはnull取得
         const getValue = (value) => {
             return (typeof value === 'string' && value.length > 0) ? value : null;
