@@ -174,7 +174,8 @@ $(function () {
     var search = function (condition) {
         $.ajax({
             dataType: 'json',
-            url: window.ttts.API_ENDPOINT + '/performances',
+            url: window.ttts.API_ENDPOINT + '/events',
+            // url: window.ttts.API_ENDPOINT + '/performances',
             type: 'GET',
             data: condition,
             beforeSend: function (xhr) {

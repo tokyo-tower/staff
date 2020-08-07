@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.5.6 - 2020-08-07
+
+### Changed
+
+- POSから分離されたパフォーマンス検索で再構築
+
 ## v6.5.5 - 2020-08-06
 
 ### Changed

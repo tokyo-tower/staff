@@ -119,9 +119,9 @@ export interface ISuspendedPerformances {
     // 対象ツアーNo
     tour_number: string;
     // 運転状況
-    ev_service_status: string;
+    ev_service_status?: string;
     // 運転状況(名称)
-    ev_service_status_name: string;
+    ev_service_status_name?: string;
     // 販売停止処理日時
     online_sales_update_at?: Date;
     // 処理実施者
@@ -156,7 +156,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
     });
 
     debug('finfing performances...', conditions);
-    const searchResults = await eventService.searchPerformances({
+    const searchResults = await eventService.search({
         ...conditions,
         ...{
             countDocuments: '1',
@@ -216,7 +216,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
         const extension = performance.extension;
 
         // 時点での予約
-        let reservationsAtLastUpdateDate = extension.reservationsAtLastUpdateDate;
+        let reservationsAtLastUpdateDate = extension?.reservationsAtLastUpdateDate;
         if (reservationsAtLastUpdateDate !== undefined) {
             reservationsAtLastUpdateDate = reservationsAtLastUpdateDate
                 .filter((r) => r.status === tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed) // 確定ステータス
@@ -249,15 +249,17 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             start_date: performance.startDate,
             end_date: performance.endDate,
             tour_number: tourNumber,
-            ev_service_status: extension.ev_service_status,
-            ev_service_status_name: EV_SERVICE_STATUS_NAMES[extension.ev_service_status],
-            online_sales_update_at: extension.online_sales_update_at,
-            online_sales_update_user: extension.online_sales_update_user,
+            ev_service_status: extension?.ev_service_status,
+            ev_service_status_name: (extension?.ev_service_status !== undefined)
+                ? EV_SERVICE_STATUS_NAMES[extension.ev_service_status]
+                : undefined,
+            online_sales_update_at: extension?.online_sales_update_at,
+            online_sales_update_user: extension?.online_sales_update_user,
             canceled: numberOfReservations,
             arrived: numberOfReservations - nubmerOfUncheckedReservations,
-            refund_status: extension.refund_status,
-            refund_status_name: (extension.refund_status !== undefined) ? REFUND_STATUS_NAMES[extension.refund_status] : undefined,
-            refunded: extension.refunded_count
+            refund_status: extension?.refund_status,
+            refund_status_name: (extension?.refund_status !== undefined) ? REFUND_STATUS_NAMES[extension.refund_status] : undefined,
+            refunded: extension?.refunded_count
         });
 
         // レート制限に考慮して、やや時間をおく
