@@ -122,12 +122,23 @@ function updateOnlineStatus(req, res) {
                     refundStatusUpdateAt: now
                 });
                 try {
+                    let newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventScheduled;
+                    switch (evStatus) {
+                        case tttsapi.factory.performance.EvServiceStatus.Slowdown:
+                            newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventPostponed;
+                            break;
+                        case tttsapi.factory.performance.EvServiceStatus.Suspended:
+                            newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventCancelled;
+                            break;
+                        default:
+                    }
                     // Chevreイベントステータスに反映
                     yield eventService.updatePartially({
                         id: performanceId,
-                        eventStatus: (onlineStatus === tttsapi.factory.performance.OnlineSalesStatus.Normal)
-                            ? cinerinoapi.factory.chevre.eventStatusType.EventScheduled
-                            : cinerinoapi.factory.chevre.eventStatusType.EventCancelled
+                        eventStatus: newEventStatus
+                        // eventStatus: (onlineStatus === tttsapi.factory.performance.OnlineSalesStatus.Normal)
+                        //     ? cinerinoapi.factory.chevre.eventStatusType.EventScheduled
+                        //     : newEventStatus
                     });
                 }
                 catch (error) {

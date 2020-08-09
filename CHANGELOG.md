@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.6.0 - 2020-08-09
+
+### Changed
+
+- エレベータ運行ステータスをイベントステータスへ連動するように調整
+
 ## v6.5.7 - 2020-08-07
 
 ### Fxied
