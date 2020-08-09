@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- エレベータ運行ステータスをイベントステータスへ連動するように調整
+
 ### Deprecated
 
 ### Removed
