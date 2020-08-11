@@ -50,6 +50,27 @@ export function getUnitPriceByAcceptedOffer(offer: cinerinoapi.factory.order.IAc
 }
 
 /**
+ * パフォーマンス検索
+ */
+export async function search(req: Request, res: Response): Promise<void> {
+    try {
+        const performanceService = new tttsapi.service.Event({
+            endpoint: <string>process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+
+        const searchResult = await performanceService.search(req.query);
+
+        res.json(searchResult.data);
+    } catch (error) {
+        res.status(INTERNAL_SERVER_ERROR)
+            .json({
+                message: error.message
+            });
+    }
+}
+
+/**
  * 運行・オンライン販売ステータス変更
  */
 // tslint:disable-next-line:max-func-body-length

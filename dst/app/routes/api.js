@@ -16,4 +16,5 @@ apiRouter.post('/performances/updateOnlineStatus', authentication_1.default, Per
 // 運行・オンライン販売停止一覧コントローラー
 apiRouter.get('/performances/suspended', authentication_1.default, SuspendedPerformancesController.searchSuspendedPerformances);
 apiRouter.post('/performances/suspended/:performanceId/tasks/returnOrders', authentication_1.default, SuspendedPerformancesController.returnOrders);
+apiRouter.get('/events', authentication_1.default, PerformancesController.search);
 exports.default = apiRouter;

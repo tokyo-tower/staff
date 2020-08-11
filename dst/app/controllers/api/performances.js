@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTicketInfo = exports.getTargetReservationsForRefund = exports.updateOnlineStatus = exports.getUnitPriceByAcceptedOffer = void 0;
+exports.getTicketInfo = exports.getTargetReservationsForRefund = exports.updateOnlineStatus = exports.search = exports.getUnitPriceByAcceptedOffer = void 0;
 /**
  * パフォーマンスAPIコントローラー
  */
@@ -46,6 +46,28 @@ function getUnitPriceByAcceptedOffer(offer) {
     return unitPrice;
 }
 exports.getUnitPriceByAcceptedOffer = getUnitPriceByAcceptedOffer;
+/**
+ * パフォーマンス検索
+ */
+function search(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const performanceService = new tttsapi.service.Event({
+                endpoint: process.env.API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
+            const searchResult = yield performanceService.search(req.query);
+            res.json(searchResult.data);
+        }
+        catch (error) {
+            res.status(http_status_1.INTERNAL_SERVER_ERROR)
+                .json({
+                message: error.message
+            });
+        }
+    });
+}
+exports.search = search;
 /**
  * 運行・オンライン販売ステータス変更
  */

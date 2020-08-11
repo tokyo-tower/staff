@@ -26,9 +26,6 @@ if (!Array.prototype.find) {
 
 $(function () {
     'use strict';
-    if (!window.ttts.API_ENDPOINT) { return alert('API_ENDPOINT undefined'); }
-    if (!window.ttts.API_TOKEN.VALUE) { return alert('API_TOKEN undefined'); }
-
 
     // statusからCSSクラス名を得る
     var getClassNameByStatus = function (performance) {
@@ -174,12 +171,11 @@ $(function () {
     var search = function (condition) {
         $.ajax({
             dataType: 'json',
-            url: window.ttts.API_ENDPOINT + '/events',
-            // url: window.ttts.API_ENDPOINT + '/performances',
+            // ローカルapiに変更
+            url: '/api/events',
             type: 'GET',
             data: condition,
             beforeSend: function (xhr) {
-                xhr.setRequestHeader('Authorization', 'Bearer ' + window.ttts.API_TOKEN.VALUE);
                 $loading.modal();
             }
         }).done(function (body) {
