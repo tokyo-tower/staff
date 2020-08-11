@@ -21,4 +21,6 @@ apiRouter.get('/performances/suspended', authentication, SuspendedPerformancesCo
 apiRouter.post(
     '/performances/suspended/:performanceId/tasks/returnOrders', authentication, SuspendedPerformancesController.returnOrders);
 
+apiRouter.get('/events', authentication, PerformancesController.search);
+
 export default apiRouter;
