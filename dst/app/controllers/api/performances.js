@@ -57,7 +57,25 @@ function search(req, res) {
                 auth: req.tttsAuthClient
             });
             const searchResult = yield performanceService.search(req.query);
-            res.json(searchResult.data);
+            const performances = searchResult.data.data.map((d) => {
+                let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
+                let onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Normal;
+                switch (d.eventStatus) {
+                    case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:
+                        evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Suspended;
+                        onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Suspended;
+                        break;
+                    case cinerinoapi.factory.chevre.eventStatusType.EventPostponed:
+                        evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Slowdown;
+                        onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Suspended;
+                        break;
+                    case cinerinoapi.factory.chevre.eventStatusType.EventScheduled:
+                        break;
+                    default:
+                }
+                return Object.assign(Object.assign({}, d), { evServiceStatus: evServiceStatus, onlineSalesStatus: onlineSalesStatus });
+            });
+            res.json({ data: performances });
         }
         catch (error) {
             res.status(http_status_1.INTERNAL_SERVER_ERROR)

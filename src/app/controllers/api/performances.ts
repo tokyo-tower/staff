@@ -61,7 +61,33 @@ export async function search(req: Request, res: Response): Promise<void> {
 
         const searchResult = await performanceService.search(req.query);
 
-        res.json(searchResult.data);
+        const performances = searchResult.data.data.map((d) => {
+            let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
+            let onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Normal;
+
+            switch ((<any>d).eventStatus) {
+                case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:
+                    evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Suspended;
+                    onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Suspended;
+                    break;
+                case cinerinoapi.factory.chevre.eventStatusType.EventPostponed:
+                    evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Slowdown;
+                    onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Suspended;
+                    break;
+                case cinerinoapi.factory.chevre.eventStatusType.EventScheduled:
+                    break;
+
+                default:
+            }
+
+            return {
+                ...d,
+                evServiceStatus: evServiceStatus,
+                onlineSalesStatus: onlineSalesStatus
+            };
+        });
+
+        res.json({ data: performances });
     } catch (error) {
         res.status(INTERNAL_SERVER_ERROR)
             .json({

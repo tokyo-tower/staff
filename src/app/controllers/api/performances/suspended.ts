@@ -241,6 +241,20 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             tourNumber = tourNumberFromAdditionalProperty;
         }
 
+        let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
+        switch ((<any>performance).eventStatus) {
+            case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:
+                evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Suspended;
+                break;
+            case cinerinoapi.factory.chevre.eventStatusType.EventPostponed:
+                evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Slowdown;
+                break;
+            case cinerinoapi.factory.chevre.eventStatusType.EventScheduled:
+                break;
+
+            default:
+        }
+
         results.push({
             performance_id: performance.id,
             performance_day: moment(performance.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD'),
@@ -249,9 +263,9 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             start_date: performance.startDate,
             end_date: performance.endDate,
             tour_number: tourNumber,
-            ev_service_status: extension?.ev_service_status,
-            ev_service_status_name: (extension?.ev_service_status !== undefined)
-                ? EV_SERVICE_STATUS_NAMES[extension.ev_service_status]
+            ev_service_status: evServiceStatus,
+            ev_service_status_name: (evServiceStatus !== undefined)
+                ? EV_SERVICE_STATUS_NAMES[evServiceStatus]
                 : undefined,
             online_sales_update_at: extension?.online_sales_update_at,
             online_sales_update_user: extension?.online_sales_update_user,
