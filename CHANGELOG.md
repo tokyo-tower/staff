@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- エレベータ運行ステータスとオンライン販売ステータスをイベントステータスから判定するように変更
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.7.0 - 2020-08-11
+
+### Changed
+
+- エレベータ運行ステータスとオンライン販売ステータスをイベントステータスから判定するように変更
 
 ## v6.6.1 - 2020-08-11
 
