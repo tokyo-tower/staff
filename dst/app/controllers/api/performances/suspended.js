@@ -138,57 +138,59 @@ function findSuspendedPerformances(req, conditions) {
         const results = [];
         for (const performance of performances) {
             // パフォーマンスに対する予約数
-            let searchReservationsResult = yield reservationService.search({
-                limit: 1,
-                typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-                // クライアントがfrontend or pos
-                underName: {
-                    identifiers: [
-                        ...POS_CLIENT_IDS.map((clientId) => {
-                            return { name: 'clientId', value: clientId };
-                        }),
-                        ...FRONTEND_CLIENT_IDS.map((clientId) => {
-                            return { name: 'clientId', value: clientId };
-                        })
-                    ]
-                },
-                reservationFor: {
-                    id: performance.id
-                }
-            });
-            let numberOfReservations = searchReservationsResult.totalCount;
+            // let searchReservationsResult = await reservationService.search({
+            //     limit: 1,
+            //     typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+            //     // クライアントがfrontend or pos
+            //     underName: {
+            //         identifiers: [
+            //             ...POS_CLIENT_IDS.map((clientId) => {
+            //                 return { name: 'clientId', value: clientId };
+            //             }),
+            //             ...FRONTEND_CLIENT_IDS.map((clientId) => {
+            //                 return { name: 'clientId', value: clientId };
+            //             })
+            //         ]
+            //     },
+            //     reservationFor: {
+            //         id: performance.id
+            //     }
+            // });
+            // let numberOfReservations = <number>searchReservationsResult.totalCount;
+            let numberOfReservations = 0;
             // 未入場の予約数
-            searchReservationsResult = yield reservationService.search({
-                limit: 1,
-                typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-                // クライアントがfrontend or pos
-                underName: {
-                    identifiers: [
-                        ...POS_CLIENT_IDS.map((clientId) => {
-                            return { name: 'clientId', value: clientId };
-                        }),
-                        ...FRONTEND_CLIENT_IDS.map((clientId) => {
-                            return { name: 'clientId', value: clientId };
-                        })
-                    ]
-                },
-                reservationFor: {
-                    id: performance.id
-                },
-                checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
-            });
-            let nubmerOfUncheckedReservations = searchReservationsResult.totalCount;
+            // let searchReservationsResult = await reservationService.search({
+            //     limit: 1,
+            //     typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+            //     // クライアントがfrontend or pos
+            //     underName: {
+            //         identifiers: [
+            //             ...POS_CLIENT_IDS.map((clientId) => {
+            //                 return { name: 'clientId', value: clientId };
+            //             }),
+            //             ...FRONTEND_CLIENT_IDS.map((clientId) => {
+            //                 return { name: 'clientId', value: clientId };
+            //             })
+            //         ]
+            //     },
+            //     reservationFor: {
+            //         id: performance.id
+            //     },
+            //     checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
+            // });
+            // let nubmerOfUncheckedReservations = <number>searchReservationsResult.totalCount;
+            let nubmerOfUncheckedReservations = 0;
             const extension = performance.ttts_extension;
             // 時点での予約
             let reservationsAtLastUpdateDate = extension === null || extension === void 0 ? void 0 : extension.reservationsAtLastUpdateDate;
-            if (reservationsAtLastUpdateDate !== undefined) {
+            if (Array.isArray(reservationsAtLastUpdateDate)) {
                 reservationsAtLastUpdateDate = reservationsAtLastUpdateDate
                     .filter((r) => r.status === tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed) // 確定ステータス
                     .filter((r) => { var _a; return FRONTEND_CLIENT_IDS.indexOf((_a = r.transaction_agent) === null || _a === void 0 ? void 0 : _a.id) >= 0; }); // frontendアプリケーションでの購入
                 numberOfReservations = reservationsAtLastUpdateDate.length;
                 // 時点での予約が存在していれば、そのうちの未入場数を検索
                 if (numberOfReservations > 0) {
-                    searchReservationsResult = yield reservationService.search({
+                    const searchReservationsResult = yield reservationService.search({
                         limit: 1,
                         typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
                         ids: reservationsAtLastUpdateDate.map((r) => r.id),
@@ -197,11 +199,7 @@ function findSuspendedPerformances(req, conditions) {
                     nubmerOfUncheckedReservations = searchReservationsResult.totalCount;
                 }
             }
-            let tourNumber = performance.tourNumber; // 古いデーターに対する互換性対応
-            const tourNumberFromAdditionalProperty = (_b = (_a = performance.additionalProperty) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'tourNumber')) === null || _b === void 0 ? void 0 : _b.value;
-            if (typeof tourNumberFromAdditionalProperty === 'string') {
-                tourNumber = tourNumberFromAdditionalProperty;
-            }
+            const tourNumber = (_b = (_a = performance.additionalProperty) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'tourNumber')) === null || _b === void 0 ? void 0 : _b.value;
             let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
             switch (performance.eventStatus) {
                 case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:
