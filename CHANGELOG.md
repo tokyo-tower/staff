@@ -10,9 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 販売停止イベントをイベントステータスで検索するように調整
-- オンライン販売ステータス変更時にイベントステータスも指定するように調整
-
 ### Deprecated
 
 ### Removed
@@ -20,6 +17,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.8.0 - 2020-08-12
+
+### Changed
+
+- 販売停止イベントをイベントステータスで検索するように調整
+- オンライン販売ステータス変更時にイベントステータスも指定するように調整
 
 ## v6.7.0 - 2020-08-11
 
