@@ -65,7 +65,7 @@ export async function search(req: Request, res: Response): Promise<void> {
             let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
             let onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Normal;
 
-            switch ((<any>d).eventStatus) {
+            switch (d.eventStatus) {
                 case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:
                     evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Suspended;
                     onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Suspended;

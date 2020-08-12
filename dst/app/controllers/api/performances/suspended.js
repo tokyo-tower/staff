@@ -73,8 +73,11 @@ function searchSuspendedPerformances(req, res) {
                 // day: -1,
                 // start_time: 1
             },
+            eventStatus: {
+                $in: [tttsapi.factory.chevre.eventStatusType.EventCancelled, tttsapi.factory.chevre.eventStatusType.EventPostponed]
+            },
             ttts_extension: {
-                online_sales_status: tttsapi.factory.performance.OnlineSalesStatus.Suspended,
+                // online_sales_status: tttsapi.factory.performance.OnlineSalesStatus.Suspended,
                 online_sales_update_at: (day1 !== null || day2 !== null)
                     ? Object.assign(Object.assign({}, (day1 !== null)
                         ? { $gte: moment(`${day1}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').toDate() }
@@ -175,7 +178,7 @@ function findSuspendedPerformances(req, conditions) {
                 checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
             });
             let nubmerOfUncheckedReservations = searchReservationsResult.totalCount;
-            const extension = performance.extension;
+            const extension = performance.ttts_extension;
             // 時点での予約
             let reservationsAtLastUpdateDate = extension === null || extension === void 0 ? void 0 : extension.reservationsAtLastUpdateDate;
             if (reservationsAtLastUpdateDate !== undefined) {
