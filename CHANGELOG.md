@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 - 販売停止イベントをイベントステータスで検索するように調整
+- オンライン販売ステータス変更時にイベントステータスも指定するように調整
 
 ### Deprecated
 
