@@ -120,7 +120,7 @@ export interface ISuspendedPerformances {
     start_date: Date;
     end_date: Date;
     // 対象ツアーNo
-    tour_number: string;
+    tour_number?: string;
     // 運転状況
     ev_service_status?: string;
     // 運転状況(名称)
@@ -174,53 +174,55 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
 
     for (const performance of performances) {
         // パフォーマンスに対する予約数
-        let searchReservationsResult = await reservationService.search({
-            limit: 1,
-            typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-            // クライアントがfrontend or pos
-            underName: {
-                identifiers: [
-                    ...POS_CLIENT_IDS.map((clientId) => {
-                        return { name: 'clientId', value: clientId };
-                    }),
-                    ...FRONTEND_CLIENT_IDS.map((clientId) => {
-                        return { name: 'clientId', value: clientId };
-                    })
-                ]
-            },
-            reservationFor: {
-                id: performance.id
-            }
-        });
-        let numberOfReservations = <number>searchReservationsResult.totalCount;
+        // let searchReservationsResult = await reservationService.search({
+        //     limit: 1,
+        //     typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+        //     // クライアントがfrontend or pos
+        //     underName: {
+        //         identifiers: [
+        //             ...POS_CLIENT_IDS.map((clientId) => {
+        //                 return { name: 'clientId', value: clientId };
+        //             }),
+        //             ...FRONTEND_CLIENT_IDS.map((clientId) => {
+        //                 return { name: 'clientId', value: clientId };
+        //             })
+        //         ]
+        //     },
+        //     reservationFor: {
+        //         id: performance.id
+        //     }
+        // });
+        // let numberOfReservations = <number>searchReservationsResult.totalCount;
+        let numberOfReservations = 0;
 
         // 未入場の予約数
-        searchReservationsResult = await reservationService.search({
-            limit: 1,
-            typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-            // クライアントがfrontend or pos
-            underName: {
-                identifiers: [
-                    ...POS_CLIENT_IDS.map((clientId) => {
-                        return { name: 'clientId', value: clientId };
-                    }),
-                    ...FRONTEND_CLIENT_IDS.map((clientId) => {
-                        return { name: 'clientId', value: clientId };
-                    })
-                ]
-            },
-            reservationFor: {
-                id: performance.id
-            },
-            checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
-        });
-        let nubmerOfUncheckedReservations = <number>searchReservationsResult.totalCount;
+        // let searchReservationsResult = await reservationService.search({
+        //     limit: 1,
+        //     typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+        //     // クライアントがfrontend or pos
+        //     underName: {
+        //         identifiers: [
+        //             ...POS_CLIENT_IDS.map((clientId) => {
+        //                 return { name: 'clientId', value: clientId };
+        //             }),
+        //             ...FRONTEND_CLIENT_IDS.map((clientId) => {
+        //                 return { name: 'clientId', value: clientId };
+        //             })
+        //         ]
+        //     },
+        //     reservationFor: {
+        //         id: performance.id
+        //     },
+        //     checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
+        // });
+        // let nubmerOfUncheckedReservations = <number>searchReservationsResult.totalCount;
+        let nubmerOfUncheckedReservations = 0;
 
         const extension = performance.ttts_extension;
 
         // 時点での予約
         let reservationsAtLastUpdateDate = extension?.reservationsAtLastUpdateDate;
-        if (reservationsAtLastUpdateDate !== undefined) {
+        if (Array.isArray(reservationsAtLastUpdateDate)) {
             reservationsAtLastUpdateDate = reservationsAtLastUpdateDate
                 .filter((r) => r.status === tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed) // 確定ステータス
                 .filter((r) => FRONTEND_CLIENT_IDS.indexOf(r.transaction_agent?.id) >= 0); // frontendアプリケーションでの購入
@@ -228,7 +230,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             numberOfReservations = reservationsAtLastUpdateDate.length;
             // 時点での予約が存在していれば、そのうちの未入場数を検索
             if (numberOfReservations > 0) {
-                searchReservationsResult = await reservationService.search({
+                const searchReservationsResult = await reservationService.search({
                     limit: 1,
                     typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
                     ids: reservationsAtLastUpdateDate.map((r) => r.id),
@@ -238,11 +240,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             }
         }
 
-        let tourNumber: string = (<any>performance).tourNumber; // 古いデーターに対する互換性対応
-        const tourNumberFromAdditionalProperty = performance.additionalProperty?.find((p) => p.name === 'tourNumber')?.value;
-        if (typeof tourNumberFromAdditionalProperty === 'string') {
-            tourNumber = tourNumberFromAdditionalProperty;
-        }
+        const tourNumber = performance.additionalProperty?.find((p) => p.name === 'tourNumber')?.value;
 
         let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
         switch ((<any>performance).eventStatus) {
