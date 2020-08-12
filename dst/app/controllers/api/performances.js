@@ -148,9 +148,22 @@ function updateOnlineStatus(req, res) {
                         }
                     };
                 });
+                let eventStatus = cinerinoapi.factory.chevre.eventStatusType.EventScheduled;
+                switch (evStatus) {
+                    case tttsapi.factory.performance.EvServiceStatus.Normal:
+                        break;
+                    case tttsapi.factory.performance.EvServiceStatus.Slowdown:
+                        eventStatus = cinerinoapi.factory.chevre.eventStatusType.EventPostponed;
+                        break;
+                    case tttsapi.factory.performance.EvServiceStatus.Suspended:
+                        eventStatus = cinerinoapi.factory.chevre.eventStatusType.EventCancelled;
+                        break;
+                    default:
+                }
                 yield performanceService.updateExtension({
                     id: performanceId,
                     reservationsAtLastUpdateDate: reservationsAtLastUpdateDate,
+                    eventStatus: eventStatus,
                     onlineSalesStatus: onlineStatus,
                     onlineSalesStatusUpdateUser: updateUser,
                     onlineSalesStatusUpdateAt: now,

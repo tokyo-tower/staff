@@ -65,7 +65,7 @@ export async function search(req: Request, res: Response): Promise<void> {
             let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
             let onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Normal;
 
-            switch ((<any>d).eventStatus) {
+            switch (d.eventStatus) {
                 case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:
                     evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Suspended;
                     onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Suspended;
@@ -169,9 +169,24 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
                     };
                 });
 
+            let eventStatus = cinerinoapi.factory.chevre.eventStatusType.EventScheduled;
+            switch (evStatus) {
+                case tttsapi.factory.performance.EvServiceStatus.Normal:
+                    break;
+                case tttsapi.factory.performance.EvServiceStatus.Slowdown:
+                    eventStatus = cinerinoapi.factory.chevre.eventStatusType.EventPostponed;
+                    break;
+                case tttsapi.factory.performance.EvServiceStatus.Suspended:
+                    eventStatus = cinerinoapi.factory.chevre.eventStatusType.EventCancelled;
+                    break;
+
+                default:
+            }
+
             await performanceService.updateExtension({
                 id: performanceId,
                 reservationsAtLastUpdateDate: reservationsAtLastUpdateDate,
+                eventStatus: eventStatus,
                 onlineSalesStatus: onlineStatus,
                 onlineSalesStatusUpdateUser: updateUser,
                 onlineSalesStatusUpdateAt: now,
