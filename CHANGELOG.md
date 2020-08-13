@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- パフォーマンス更新からevServiceStatusとonlineSalesStatusの指定を削除
+- 不要なテンプレートファイルを削除
+
 ### Deprecated
 
 ### Removed
