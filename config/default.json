@@ -213,11 +213,6 @@
         "from": "noreply@tokyotower.co.jp",
         "fromname": "Tokyo Tower TOP DECK TOUR Online Ticket"
     },
-    "temporary_reservation_valid_period_seconds": 900,
-    "reservation_maxq": 41,
-    "reserve_max_date": {
-        "days": 90
-    },
     "paymentMethodsForCustomer": {
         "CreditCard": "クレジットカード"
     },

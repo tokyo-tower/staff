@@ -15,11 +15,6 @@ import { User } from '../../user';
 
 const debug = createDebug('ttts-staff:controllers');
 
-// const STAFF_CLIENT_IDS = [
-//     ...(typeof process.env.STAFF_CLIENT_IDS === 'string') ? process.env.STAFF_CLIENT_IDS.split(',') : [],
-//     ...(typeof process.env.API_CLIENT_ID === 'string') ? [process.env.API_CLIENT_ID] : [],
-//     ...(typeof process.env.API_CLIENT_ID_OLD === 'string') ? [process.env.API_CLIENT_ID_OLD] : []
-// ];
 const POS_CLIENT_IDS = (typeof process.env.POS_CLIENT_ID === 'string')
     ? process.env.POS_CLIENT_ID.split(',')
     : [];
@@ -169,15 +164,14 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
                     };
                 });
 
-            let eventStatus = cinerinoapi.factory.chevre.eventStatusType.EventScheduled;
+            let newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventScheduled;
             switch (evStatus) {
-                case tttsapi.factory.performance.EvServiceStatus.Normal:
-                    break;
                 case tttsapi.factory.performance.EvServiceStatus.Slowdown:
-                    eventStatus = cinerinoapi.factory.chevre.eventStatusType.EventPostponed;
+                    newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventPostponed;
                     break;
+
                 case tttsapi.factory.performance.EvServiceStatus.Suspended:
-                    eventStatus = cinerinoapi.factory.chevre.eventStatusType.EventCancelled;
+                    newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventCancelled;
                     break;
 
                 default:
@@ -186,11 +180,9 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             await performanceService.updateExtension({
                 id: performanceId,
                 reservationsAtLastUpdateDate: reservationsAtLastUpdateDate,
-                eventStatus: eventStatus,
-                onlineSalesStatus: onlineStatus,
+                eventStatus: newEventStatus,
                 onlineSalesStatusUpdateUser: updateUser,
                 onlineSalesStatusUpdateAt: now,
-                evServiceStatus: evStatus,
                 evServiceStatusUpdateUser: updateUser,
                 evServiceStatusUpdateAt: now,
                 refundStatus: refundStatus,
@@ -199,26 +191,10 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             });
 
             try {
-                let newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventScheduled;
-                switch (evStatus) {
-                    case tttsapi.factory.performance.EvServiceStatus.Slowdown:
-                        newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventPostponed;
-                        break;
-
-                    case tttsapi.factory.performance.EvServiceStatus.Suspended:
-                        newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventCancelled;
-                        break;
-
-                    default:
-                }
-
                 // Chevreイベントステータスに反映
                 await eventService.updatePartially({
                     id: performanceId,
                     eventStatus: newEventStatus
-                    // eventStatus: (onlineStatus === tttsapi.factory.performance.OnlineSalesStatus.Normal)
-                    //     ? cinerinoapi.factory.chevre.eventStatusType.EventScheduled
-                    //     : newEventStatus
                 });
             } catch (error) {
                 // no op
