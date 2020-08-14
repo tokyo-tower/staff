@@ -18,10 +18,8 @@ import notFoundHandler from './middlewares/notFoundHandler';
 import session from './middlewares/session';
 import setLocals from './middlewares/setLocals';
 
-import apiRouter from './routes/api';
 import authRouter from './routes/auth';
 import router from './routes/router';
-import staffRouter from './routes/staff';
 
 const app = express();
 
@@ -70,8 +68,6 @@ app.use(setLocals); // ローカル変数セット
 app.use(authRouter);
 app.use(authentication);
 
-app.use('/api', apiRouter);
-app.use('/staff', staffRouter);
 app.use('/', router);
 
 // 404

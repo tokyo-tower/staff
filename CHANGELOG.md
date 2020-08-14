@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.11.0 - 2020-08-14
+
+### Added
+
+- レポートダウンロード機能を追加
+
 ## v6.10.0 - 2020-08-13
 
 ### Changed

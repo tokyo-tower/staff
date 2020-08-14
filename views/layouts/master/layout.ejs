@@ -1,0 +1,65 @@
+<%
+let pageId = (routeName) ? `page_backuend_${routeName.replace(/\./g,'_')}` : '';
+let pageClassName = (routeName) ? `page-${routeName.replace(/\./g,' page-')}` : '';
+%>
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>
+        <%= title %>
+    </title>
+    <meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1">
+    <meta name="format-detection" content="telephone=no">
+
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/bootstrap-datepicker.css" rel="stylesheet">
+    <link href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script src="/js/bootstrap-datepicker.js"></script>
+    <script src="/js/locales/bootstrap-datepicker.ja.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/locale/ja.js"></script>
+    <script src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+    <%- // defineContent('scripts') %>
+</head>
+
+<body id="<%- pageId %>" class="page-ja page-backend <%- pageClassName %>">
+    <div class="container" id="maincontainer">
+        <div id="adminmenu">
+            <h1><img src="/images/common/logo.png"></h1>
+            <ul>
+                <li class="menu-report">
+                    <a href="javascript:void(0);" class="<%- (~pageClassName.indexOf('report')) ? 'is-open' : '' %>"
+                        onclick="$(this).toggleClass('is-open').next().slideToggle(200);">レポート</a>
+                    <ul class="submenu submenu-report">
+                        <li class="submenu-report-sales"><a href="/reports/sales">売上レポート出力</a></li>
+                        <!-- <li class="submenu-report-account"><a href="/reports/account">アカウント別レポート出力</a></li> -->
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <main>
+            <div id="loginstatus">
+                <p>
+                    <%= req.staffUser.familyName %>
+                    <%= req.staffUser.givenName %>
+                </p>
+                <p>
+                    <a class="btn-logout" href="<%= req.staffUser.generateLogoutUrl() %>">
+                        <span></span>
+                    </a>
+                </p>
+            </div>
+            <div class="content">
+                <%- body %>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

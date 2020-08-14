@@ -1,0 +1,30 @@
+<script src="/js/reportSales.js"></script>
+
+<section>
+    <h1>売上レポート出力</h1>
+    <hr>
+    <form method="post" class="form-salesReport">
+        <%- include('../common/master/_hidden') %>
+        <input type="hidden" name="reportType" value="<%= ReportType.Sales %>">
+
+        <label for="dateFrom">売上期間選択</label>
+        <div class="daterange">
+            <input type="text" class="form-control datepicker" name="dateFrom" id="dateFrom"> ～
+            <input type="text" class="form-control datepicker" name="dateTo" id="dateTo">
+        </div>
+
+        <label for="dateFrom">来塔予定日期間選択</label>
+        <div class="daterange">
+            <input type="text" class="form-control datepicker" name="eventStartFrom" id="eventStartFrom"> ～
+            <input type="text" class="form-control datepicker" name="eventStartThrough" id="eventStartThrough">
+        </div>
+
+        <hr>
+
+        <a class="btn btn-ok btn-download">
+            <span>レポートダウンロード</span>
+        </a>
+    </form>
+</section>
+
+<%- include('../common/master/_loading') %>

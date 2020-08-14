@@ -1,0 +1,4 @@
+<input type="hidden" name="apiEndpoint" value="<%= process.env.API_ENDPOINT %>">
+<% if (req && req.masterAdminUser) { %>
+  <input type="hidden" name="username" value="<%- req.masterAdminUser.username %>">
+<% } %>

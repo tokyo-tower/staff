@@ -15,6 +15,7 @@
 | Name                          | Required | Value        | Purpose                                 |
 | ----------------------------- | -------- | ------------ | --------------------------------------- |
 | `DEBUG`                       | false    | ttts-staff:* | Debug                                   |
+| `DEFAULT_CALLBACK`            | true     |              | Default callback path                   |
 | `NODE_ENV`                    | true     |              | 環境名(development,test,productionなど) |
 | `API_ENDPOINT`                | true     |              | APIエンドポイント                       |
 | `API_CLIENT_ID`               | true     |              | APIクライアントID                       |
