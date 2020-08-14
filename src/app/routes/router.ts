@@ -6,6 +6,10 @@
 import { Router } from 'express';
 import * as languageController from '../controllers/language';
 
+import apiRouter from './api';
+import reportsRouter from './reports';
+import staffRouter from './staff';
+
 // 本体サイトのトップページの言語別URL
 // const topUrlByLocale = conf.get<any>('official_url_top_by_locale');
 
@@ -35,6 +39,10 @@ import * as languageController from '../controllers/language';
 // };
 
 const router = Router();
+
+router.use('/api', apiRouter);
+router.use('/staff', staffRouter);
+router.use('/reports', reportsRouter); //レポート出力
 
 // 言語
 router.get('/language/update/:locale', languageController.update);

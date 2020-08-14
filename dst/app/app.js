@@ -17,10 +17,8 @@ const errorHandler_1 = require("./middlewares/errorHandler");
 const notFoundHandler_1 = require("./middlewares/notFoundHandler");
 const session_1 = require("./middlewares/session");
 const setLocals_1 = require("./middlewares/setLocals");
-const api_1 = require("./routes/api");
 const auth_1 = require("./routes/auth");
 const router_1 = require("./routes/router");
-const staff_1 = require("./routes/staff");
 const app = express();
 app.use(middlewares.basicAuth({
     name: process.env.BASIC_AUTH_NAME,
@@ -56,8 +54,6 @@ app.use(setLocals_1.default); // ローカル変数セット
 // ルーティング登録の順序に注意！
 app.use(auth_1.default);
 app.use(authentication_1.default);
-app.use('/api', api_1.default);
-app.use('/staff', staff_1.default);
 app.use('/', router_1.default);
 // 404
 app.use(notFoundHandler_1.default);

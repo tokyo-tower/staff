@@ -5,6 +5,8 @@ import * as express from 'express';
 
 import { User } from '../user';
 
+const DEFAULT_CALLBACK = process.env.DEFAULT_CALLBACK;
+
 const authRouter = express.Router();
 
 /**
@@ -48,7 +50,7 @@ authRouter.get(
                 group: group
             };
 
-            const cb = (typeof req.query.cb === 'string' && req.query.cb.length > 0) ? req.query.cb : '/staff/mypage';
+            const cb = (typeof req.query.cb === 'string' && req.query.cb.length > 0) ? req.query.cb : DEFAULT_CALLBACK;
             res.redirect(cb);
         } catch (error) {
             next(error);

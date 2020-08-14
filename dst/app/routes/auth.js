@@ -14,6 +14,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 const express = require("express");
 const user_1 = require("../user");
+const DEFAULT_CALLBACK = process.env.DEFAULT_CALLBACK;
 const authRouter = express.Router();
 /**
  * サインイン
@@ -48,7 +49,7 @@ authRouter.get('/signIn', (req, res, next) => __awaiter(void 0, void 0, void 0, 
             telephone: profile.phone_number,
             group: group
         };
-        const cb = (typeof req.query.cb === 'string' && req.query.cb.length > 0) ? req.query.cb : '/staff/mypage';
+        const cb = (typeof req.query.cb === 'string' && req.query.cb.length > 0) ? req.query.cb : DEFAULT_CALLBACK;
         res.redirect(cb);
     }
     catch (error) {

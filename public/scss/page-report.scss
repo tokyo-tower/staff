@@ -1,0 +1,83 @@
+.page-report {
+    .submenu-report {
+        display: block;
+    }
+    hr {
+        border-top-style: dashed;        
+    }
+    .daterange {
+        input {
+            width: 200px;
+            display: inline-block;
+            cursor: pointer;
+        }
+    }
+    section {
+        background-color: #fff;
+        padding: 2em;
+        >h1 {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        label {
+            font-weight: bold;
+            line-height: 2;
+            cursor: pointer;
+        }
+    }
+    .btn-download {
+        background-color: #cc0000;
+        width: 200px;
+        height: 45px;
+        margin-top: 1em;
+        font-size: 16px;
+    }
+    .form-accountreport {
+        >div {
+            margin-bottom: 1em;
+        }
+        .input-daterangepicker {
+            width: 360px;        
+            cursor: pointer;
+        }    
+    }
+    .daterangepicker {
+        .btn-sm {
+            padding: 0.5em 2em;
+            margin-bottom: 1em;
+            font-size: 1.3em;
+            &:hover {
+                background-color: #5e5e5e;
+            }
+        }
+        .applyBtn {
+            background-color: #cc0000;
+            &:hover {
+                background-color: #dd0000;
+            }
+            &:disabled {
+                background-color: #efefef;
+                color: #777;
+                pointer-events: none;
+            }
+        }
+    }
+
+    &.page-sales {
+        #adminmenu .submenu-report-sales {
+            background-color: #5e5e5e;
+            a {
+                color: #fff;
+            }
+        }
+    }
+    &.page-account {
+        #adminmenu .submenu-report-account {
+            background-color: #5e5e5e;
+            a {
+                color: #fff;
+            }
+        }
+    }
+}

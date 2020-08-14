@@ -7,6 +7,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // import { Request, Response, Router } from 'express';
 const express_1 = require("express");
 const languageController = require("../controllers/language");
+const api_1 = require("./api");
+const reports_1 = require("./reports");
+const staff_1 = require("./staff");
 // 本体サイトのトップページの言語別URL
 // const topUrlByLocale = conf.get<any>('official_url_top_by_locale');
 // 本体サイトのFAQページの言語別URL
@@ -27,6 +30,9 @@ const languageController = require("../controllers/language");
 //     return (urlByLocale[locale] !== undefined) ? urlByLocale[locale] : urlByLocale.en;
 // };
 const router = express_1.Router();
+router.use('/api', api_1.default);
+router.use('/staff', staff_1.default);
+router.use('/reports', reports_1.default); //レポート出力
 // 言語
 router.get('/language/update/:locale', languageController.update);
 // 利用規約ページ
