@@ -54,7 +54,7 @@ app.use(setLocals_1.default); // ローカル変数セット
 // ルーティング登録の順序に注意！
 app.use(auth_1.default);
 app.use(authentication_1.default);
-app.use('/', router_1.default);
+app.use(router_1.default);
 // 404
 app.use(notFoundHandler_1.default);
 // error handlers

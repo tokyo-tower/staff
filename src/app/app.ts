@@ -68,7 +68,7 @@ app.use(setLocals); // ローカル変数セット
 app.use(authRouter);
 app.use(authentication);
 
-app.use('/', router);
+app.use(router);
 
 // 404
 app.use(notFoundHandler);

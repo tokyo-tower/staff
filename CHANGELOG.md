@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- デフォルトトップページへの自動リダイレクト設定を追加
+
 ### Deprecated
 
 ### Removed

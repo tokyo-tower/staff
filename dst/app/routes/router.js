@@ -10,6 +10,7 @@ const languageController = require("../controllers/language");
 const api_1 = require("./api");
 const reports_1 = require("./reports");
 const staff_1 = require("./staff");
+const DEFAULT_CALLBACK = process.env.DEFAULT_CALLBACK;
 // 本体サイトのトップページの言語別URL
 // const topUrlByLocale = conf.get<any>('official_url_top_by_locale');
 // 本体サイトのFAQページの言語別URL
@@ -30,6 +31,14 @@ const staff_1 = require("./staff");
 //     return (urlByLocale[locale] !== undefined) ? urlByLocale[locale] : urlByLocale.en;
 // };
 const router = express_1.Router();
+// デフォルトトップページ
+router.get('/', (_, res, next) => {
+    if (typeof DEFAULT_CALLBACK === 'string' && DEFAULT_CALLBACK.length > 0) {
+        res.redirect(DEFAULT_CALLBACK);
+        return;
+    }
+    next();
+});
 router.use('/api', api_1.default);
 router.use('/staff', staff_1.default);
 router.use('/reports', reports_1.default); //レポート出力

@@ -10,6 +10,8 @@ import apiRouter from './api';
 import reportsRouter from './reports';
 import staffRouter from './staff';
 
+const DEFAULT_CALLBACK = process.env.DEFAULT_CALLBACK;
+
 // 本体サイトのトップページの言語別URL
 // const topUrlByLocale = conf.get<any>('official_url_top_by_locale');
 
@@ -39,6 +41,17 @@ import staffRouter from './staff';
 // };
 
 const router = Router();
+
+// デフォルトトップページ
+router.get('/', (_, res, next) => {
+    if (typeof DEFAULT_CALLBACK === 'string' && DEFAULT_CALLBACK.length > 0) {
+        res.redirect(DEFAULT_CALLBACK);
+
+        return;
+    }
+
+    next();
+});
 
 router.use('/api', apiRouter);
 router.use('/staff', staffRouter);
