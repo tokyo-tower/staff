@@ -466,9 +466,9 @@ function createEmailMessage4sellerReason(order) {
             ticketInfoEn
         });
         return {
-            typeOf: cinerinoapi.factory.creativeWorkType.EmailMessage,
+            typeOf: cinerinoapi.factory.chevre.creativeWorkType.EmailMessage,
             sender: {
-                typeOf: cinerinoapi.factory.organizationType.Corporation,
+                typeOf: cinerinoapi.factory.chevre.organizationType.Corporation,
                 name: 'Tokyo Tower TOP DECK TOUR Online Ticket',
                 email: 'noreply@tokyotower.co.jp'
             },

@@ -165,44 +165,31 @@ function updateOnlineStatus(req, res) {
                     refundStatusUpdateUser: updateUser,
                     refundStatusUpdateAt: now
                 });
-                try {
-                    let sendEmailMessageParams = [];
-                    // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、Cinerinoにメール送信指定
-                    if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
-                        const targetOrders4performance = targetOrders.filter((o) => {
-                            return o.acceptedOffers.some((offer) => {
-                                const reservation = offer.itemOffered;
-                                return reservation.typeOf === cinerinoapi.factory.chevre.reservationType.EventReservation
-                                    && reservation.reservationFor.id === performanceId;
-                            });
+                let sendEmailMessageParams = [];
+                // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、Cinerinoにメール送信指定
+                if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
+                    const targetOrders4performance = targetOrders.filter((o) => {
+                        return o.acceptedOffers.some((offer) => {
+                            const reservation = offer.itemOffered;
+                            return reservation.typeOf === cinerinoapi.factory.chevre.reservationType.EventReservation
+                                && reservation.reservationFor.id === performanceId;
                         });
-                        const tasks = yield createEmails(req, res, targetOrders4performance, notice, false);
-                        sendEmailMessageParams = tasks.map((task) => task.data.actionAttributes);
+                    });
+                    sendEmailMessageParams = yield createEmails(res, targetOrders4performance, notice);
+                }
+                // Chevreイベントステータスに反映
+                yield eventService.updatePartially(Object.assign({ id: performanceId, eventStatus: newEventStatus }, {
+                    onUpdated: {
+                        sendEmailMessage: sendEmailMessageParams
                     }
-                    // Chevreイベントステータスに反映
-                    yield eventService.updatePartially(Object.assign({ id: performanceId, eventStatus: newEventStatus }, {
-                        onUpdated: {
-                            sendEmailMessage: sendEmailMessageParams
-                        }
-                    }));
-                }
-                catch (error) {
-                    // no op
-                }
+                }));
             }
-            // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成(Cinerino移行を確認できたら削除する)
-            // if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
-            //     try {
-            //         await createEmails(req, res, targetOrders, notice, true);
-            //     } catch (error) {
-            //         // no op
-            //         debug('createEmails failed', error);
-            //     }
-            // }
-            res.status(http_status_1.NO_CONTENT).end();
+            res.status(http_status_1.NO_CONTENT)
+                .end();
         }
         catch (error) {
-            res.status(http_status_1.INTERNAL_SERVER_ERROR).json({
+            res.status(http_status_1.INTERNAL_SERVER_ERROR)
+                .json({
                 message: error.message
             });
         }
@@ -277,14 +264,13 @@ exports.getTargetReservationsForRefund = getTargetReservationsForRefund;
 /**
  * 運行・オンライン販売停止メール作成
  */
-function createEmails(req, res, orders, notice, createTask) {
+function createEmails(res, orders, notice) {
     return __awaiter(this, void 0, void 0, function* () {
         if (orders.length === 0) {
             return [];
         }
-        // 購入単位ごとにメール作成
         return Promise.all(orders.map((order) => __awaiter(this, void 0, void 0, function* () {
-            return createEmail(req, res, order, notice, createTask);
+            return createEmail(res, order, notice);
         })));
     });
 }
@@ -292,7 +278,8 @@ function createEmails(req, res, orders, notice, createTask) {
  * 運行・オンライン販売停止メール作成(1通)
  */
 // tslint:disable-next-line:max-func-body-length
-function createEmail(req, res, order, notice, createTask) {
+function createEmail(res, order, notice) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const reservation = order.acceptedOffers[0].itemOffered;
         // タイトル編集
@@ -312,11 +299,9 @@ function createEmail(req, res, order, notice, createTask) {
         const time = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
         // 購入番号
         let paymentNo = '';
-        if (Array.isArray(order.identifier)) {
-            const paymentNoProperty = order.identifier.find((p) => p.name === 'paymentNo');
-            if (paymentNoProperty !== undefined) {
-                paymentNo = paymentNoProperty.value;
-            }
+        const paymentNoProperty = (_a = order.identifier) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'paymentNo');
+        if (paymentNoProperty !== undefined) {
+            paymentNo = paymentNoProperty.value;
         }
         paymentTicketInfos.push(`${res.__('PaymentNo')} : ${paymentNo}`);
         paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);
@@ -344,45 +329,52 @@ function createEmail(req, res, order, notice, createTask) {
         const accessEn2 = conf.get('emailSus.EmailAccessEn2');
         // 本文セット
         // tslint:disable-next-line:max-line-length
-        const content = `${title}\n${titleEn}\n\n${purchaserName}\n${purchaserNameEn}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}\n\n\n${foot1}\n${foot2}\n${foot3}\n\n${footEn1}\n${footEn2}\n${footEn3}\n\n${access1}\n${access2}\n\n${accessEn1}\n${accessEn2}`;
-        // メール編集
-        const emailAttributes = {
-            typeOf: cinerinoapi.factory.creativeWorkType.EmailMessage,
+        // const content: string = `${title}\n${titleEn}\n\n${purchaserName}\n${purchaserNameEn}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}\n\n\n${foot1}\n${foot2}\n${foot3}\n\n${footEn1}\n${footEn2}\n${footEn3}\n\n${access1}\n${access2}\n\n${accessEn1}\n${accessEn2}`;
+        const content = `${title}
+${titleEn}
+
+${purchaserName}
+${purchaserNameEn}
+
+${notice}
+
+${paymentTicketInfos.join('\n')}
+
+
+${foot1}
+${foot2}
+${foot3}
+
+${footEn1}
+${footEn2}
+${footEn3}
+
+${access1}
+${access2}
+
+${accessEn1}
+${accessEn2}`;
+        // メール作成
+        const emailMessage = {
+            project: { typeOf: order.project.typeOf, id: order.project.id },
+            typeOf: cinerinoapi.factory.chevre.creativeWorkType.EmailMessage,
+            identifier: `updateOnlineStatus-${reservation.id}`,
+            name: `updateOnlineStatus-${reservation.id}`,
             sender: {
+                typeOf: order.seller.typeOf,
                 name: conf.get('email.fromname'),
                 email: conf.get('email.from')
             },
             toRecipient: {
+                typeOf: order.customer.typeOf,
                 name: order.customer.name,
                 email: order.customer.email
             },
             about: `${title} ${titleEn}`,
             text: content
         };
-        // メール作成
-        const taskService = new tttsapi.service.Task({
-            endpoint: process.env.API_ENDPOINT,
-            auth: req.tttsAuthClient
-        });
-        const emailMessage = {
-            typeOf: cinerinoapi.factory.creativeWorkType.EmailMessage,
-            identifier: `updateOnlineStatus-${reservation.id}`,
-            name: `updateOnlineStatus-${reservation.id}`,
-            sender: {
-                typeOf: order.seller.typeOf,
-                name: emailAttributes.sender.name,
-                email: emailAttributes.sender.email
-            },
-            toRecipient: {
-                typeOf: order.customer.typeOf,
-                name: emailAttributes.toRecipient.name,
-                email: emailAttributes.toRecipient.email
-            },
-            about: emailAttributes.about,
-            text: emailAttributes.text
-        };
         const purpose = {
-            project: order.project,
+            project: { typeOf: order.project.typeOf, id: order.project.id },
             typeOf: order.typeOf,
             seller: order.seller,
             customer: order.customer,
@@ -393,36 +385,21 @@ function createEmail(req, res, order, notice, createTask) {
             orderDate: moment(order.orderDate)
                 .toDate()
         };
-        const actionAttributes = {
+        return {
             typeOf: cinerinoapi.factory.actionType.SendAction,
-            agent: req.staffUser,
+            agent: {
+                typeOf: cinerinoapi.factory.personType.Person,
+                id: ''
+            },
             object: emailMessage,
-            project: order.project,
+            project: { typeOf: order.project.typeOf, id: order.project.id },
             purpose: purpose,
             recipient: {
                 id: order.customer.id,
-                name: emailAttributes.toRecipient.name,
+                name: emailMessage.toRecipient.name,
                 typeOf: order.customer.typeOf
             }
         };
-        // その場で送信ではなく、DBにタスクを登録
-        const taskAttributes = {
-            name: tttsapi.factory.taskName.SendEmailMessage,
-            project: { typeOf: order.project.typeOf, id: order.project.id },
-            status: tttsapi.factory.taskStatus.Ready,
-            runsAt: new Date(),
-            remainingNumberOfTries: 10,
-            numberOfTried: 0,
-            executionResults: [],
-            data: {
-                actionAttributes: actionAttributes
-            }
-        };
-        if (createTask) {
-            yield taskService.create(taskAttributes);
-            debug('sendEmail task created.');
-        }
-        return taskAttributes;
     });
 }
 /**
