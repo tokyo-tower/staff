@@ -377,17 +377,41 @@ function createEmail(req, res, order, notice, createTask) {
             identifier: `updateOnlineStatus-${reservation.id}`,
             name: `updateOnlineStatus-${reservation.id}`,
             sender: {
-                typeOf: 'Corporation',
+                typeOf: order.seller.typeOf,
                 name: emailAttributes.sender.name,
                 email: emailAttributes.sender.email
             },
             toRecipient: {
-                typeOf: cinerinoapi.factory.personType.Person,
+                typeOf: order.customer.typeOf,
                 name: emailAttributes.toRecipient.name,
                 email: emailAttributes.toRecipient.email
             },
             about: emailAttributes.about,
             text: emailAttributes.text
+        };
+        const purpose = {
+            project: order.project,
+            typeOf: order.typeOf,
+            seller: order.seller,
+            customer: order.customer,
+            confirmationNumber: order.confirmationNumber,
+            orderNumber: order.orderNumber,
+            price: order.price,
+            priceCurrency: order.priceCurrency,
+            orderDate: moment(order.orderDate)
+                .toDate()
+        };
+        const actionAttributes = {
+            typeOf: cinerinoapi.factory.actionType.SendAction,
+            agent: req.staffUser,
+            object: emailMessage,
+            project: order.project,
+            purpose: purpose,
+            recipient: {
+                id: order.customer.id,
+                name: emailAttributes.toRecipient.name,
+                typeOf: order.customer.typeOf
+            }
         };
         // その場で送信ではなく、DBにタスクを登録
         const taskAttributes = {
@@ -399,18 +423,7 @@ function createEmail(req, res, order, notice, createTask) {
             numberOfTried: 0,
             executionResults: [],
             data: {
-                actionAttributes: {
-                    typeOf: cinerinoapi.factory.actionType.SendAction,
-                    agent: req.staffUser,
-                    object: emailMessage,
-                    project: order.project,
-                    purpose: order,
-                    recipient: {
-                        id: order.customer.id,
-                        name: emailAttributes.toRecipient.name,
-                        typeOf: cinerinoapi.factory.personType.Person
-                    }
-                }
+                actionAttributes: actionAttributes
             }
         };
         if (createTask) {
