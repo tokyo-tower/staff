@@ -49,18 +49,48 @@ function getUnitPriceByAcceptedOffer(offer: cinerinoapi.factory.order.IAcceptedO
  */
 export async function search(req: Request, res: Response): Promise<void> {
     try {
-        const performanceService = new tttsapi.service.Event({
-            endpoint: <string>process.env.API_ENDPOINT,
+        // Cinerinoで検索
+        // query:
+        // page: 1,
+        // day: ymd,
+        // noTotalCount: '1',
+        // useLegacySearch: '1'
+        const day = String(req.query.day);
+
+        const eventService = new cinerinoapi.service.Event({
+            endpoint: <string>process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
+        const searchResult = await eventService.search({
+            limit: 100,
+            page: 1,
+            typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent,
+            // tslint:disable-next-line:no-magic-numbers
+            startFrom: moment(`${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6, 8)}T00:00:00+09:00`)
+                .toDate(),
+            // tslint:disable-next-line:no-magic-numbers
+            startThrough: moment(`${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6, 8)}T23:59:59+09:00`)
+                .toDate(),
+            ...{
+                $projection: { aggregateReservation: 0 }
+            }
+        });
 
-        const searchResult = await performanceService.search(req.query);
+        // const performanceService = new tttsapi.service.Event({
+        //     endpoint: <string>process.env.API_ENDPOINT,
+        //     auth: req.tttsAuthClient
+        // });
+        // const searchResult = await performanceService.search(req.query);
 
-        const performances = searchResult.data.data.map((d) => {
+        const performances = searchResult.data.map((event) => {
+            // const performances = searchResult.data.data.map((d) => {
             let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
             let onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Normal;
 
-            switch (d.eventStatus) {
+            // 一般座席の残席数に変更
+            const remainingAttendeeCapacity = event.aggregateOffer?.offers?.find((o) => o.identifier === '001')?.remainingAttendeeCapacity;
+
+            switch (event.eventStatus) {
                 case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:
                     evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Suspended;
                     onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Suspended;
@@ -76,7 +106,8 @@ export async function search(req: Request, res: Response): Promise<void> {
             }
 
             return {
-                ...d,
+                ...event,
+                remainingAttendeeCapacity: (typeof remainingAttendeeCapacity === 'number') ? remainingAttendeeCapacity : '?',
                 evServiceStatus: evServiceStatus,
                 onlineSalesStatus: onlineSalesStatus
             };

@@ -130,55 +130,13 @@ function findSuspendedPerformances(req, conditions) {
         debug('finfing performances...', conditions);
         const searchResults = yield eventService.search(Object.assign(Object.assign({}, conditions), {
             countDocuments: '1',
-            useLegacySearch: '1',
             useExtension: '1'
         }));
         const performances = searchResults.data.data;
         const totalCount = searchResults.totalCount;
         const results = [];
         for (const performance of performances) {
-            // パフォーマンスに対する予約数
-            // let searchReservationsResult = await reservationService.search({
-            //     limit: 1,
-            //     typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-            //     // クライアントがfrontend or pos
-            //     underName: {
-            //         identifiers: [
-            //             ...POS_CLIENT_IDS.map((clientId) => {
-            //                 return { name: 'clientId', value: clientId };
-            //             }),
-            //             ...FRONTEND_CLIENT_IDS.map((clientId) => {
-            //                 return { name: 'clientId', value: clientId };
-            //             })
-            //         ]
-            //     },
-            //     reservationFor: {
-            //         id: performance.id
-            //     }
-            // });
-            // let numberOfReservations = <number>searchReservationsResult.totalCount;
             let numberOfReservations = 0;
-            // 未入場の予約数
-            // let searchReservationsResult = await reservationService.search({
-            //     limit: 1,
-            //     typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-            //     // クライアントがfrontend or pos
-            //     underName: {
-            //         identifiers: [
-            //             ...POS_CLIENT_IDS.map((clientId) => {
-            //                 return { name: 'clientId', value: clientId };
-            //             }),
-            //             ...FRONTEND_CLIENT_IDS.map((clientId) => {
-            //                 return { name: 'clientId', value: clientId };
-            //             })
-            //         ]
-            //     },
-            //     reservationFor: {
-            //         id: performance.id
-            //     },
-            //     checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
-            // });
-            // let nubmerOfUncheckedReservations = <number>searchReservationsResult.totalCount;
             let nubmerOfUncheckedReservations = 0;
             const extension = performance.ttts_extension;
             // 時点での予約

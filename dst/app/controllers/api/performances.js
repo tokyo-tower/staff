@@ -47,15 +47,39 @@ function getUnitPriceByAcceptedOffer(offer) {
 function search(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const performanceService = new tttsapi.service.Event({
-                endpoint: process.env.API_ENDPOINT,
+            // Cinerinoで検索
+            // query:
+            // page: 1,
+            // day: ymd,
+            // noTotalCount: '1',
+            // useLegacySearch: '1'
+            const day = String(req.query.day);
+            const eventService = new cinerinoapi.service.Event({
+                endpoint: process.env.CINERINO_API_ENDPOINT,
                 auth: req.tttsAuthClient
             });
-            const searchResult = yield performanceService.search(req.query);
-            const performances = searchResult.data.data.map((d) => {
+            const searchResult = yield eventService.search(Object.assign({ limit: 100, page: 1, typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent, 
+                // tslint:disable-next-line:no-magic-numbers
+                startFrom: moment(`${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6, 8)}T00:00:00+09:00`)
+                    .toDate(), 
+                // tslint:disable-next-line:no-magic-numbers
+                startThrough: moment(`${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6, 8)}T23:59:59+09:00`)
+                    .toDate() }, {
+                $projection: { aggregateReservation: 0 }
+            }));
+            // const performanceService = new tttsapi.service.Event({
+            //     endpoint: <string>process.env.API_ENDPOINT,
+            //     auth: req.tttsAuthClient
+            // });
+            // const searchResult = await performanceService.search(req.query);
+            const performances = searchResult.data.map((event) => {
+                var _a, _b, _c;
+                // const performances = searchResult.data.data.map((d) => {
                 let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
                 let onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Normal;
-                switch (d.eventStatus) {
+                // 一般座席の残席数に変更
+                const remainingAttendeeCapacity = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => o.identifier === '001')) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
+                switch (event.eventStatus) {
                     case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:
                         evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Suspended;
                         onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Suspended;
@@ -68,7 +92,7 @@ function search(req, res) {
                         break;
                     default:
                 }
-                return Object.assign(Object.assign({}, d), { evServiceStatus: evServiceStatus, onlineSalesStatus: onlineSalesStatus });
+                return Object.assign(Object.assign({}, event), { remainingAttendeeCapacity: (typeof remainingAttendeeCapacity === 'number') ? remainingAttendeeCapacity : '?', evServiceStatus: evServiceStatus, onlineSalesStatus: onlineSalesStatus });
             });
             res.json({ data: performances });
         }

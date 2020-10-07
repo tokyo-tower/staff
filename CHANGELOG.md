@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 - イベントステータス変更後のメール送信をCinerinoで実装
+- 販売ステータス確認のイベント検索をCinerinoで実装
 
 ### Deprecated
 
