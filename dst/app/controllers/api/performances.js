@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTicketInfo = exports.getTargetReservationsForRefund = exports.updateOnlineStatus = exports.search = exports.getUnitPriceByAcceptedOffer = void 0;
+exports.updateOnlineStatus = exports.search = void 0;
 /**
  * パフォーマンスAPIコントローラー
  */
@@ -17,6 +17,7 @@ const cinerinoapi = require("@cinerino/sdk");
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const conf = require("config");
 const createDebug = require("debug");
+const Email = require("email-templates");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const numeral = require("numeral");
@@ -40,7 +41,6 @@ function getUnitPriceByAcceptedOffer(offer) {
     }
     return unitPrice;
 }
-exports.getUnitPriceByAcceptedOffer = getUnitPriceByAcceptedOffer;
 /**
  * パフォーマンス検索
  */
@@ -260,7 +260,6 @@ function getTargetReservationsForRefund(req, performanceIds) {
         return orders;
     });
 }
-exports.getTargetReservationsForRefund = getTargetReservationsForRefund;
 /**
  * 運行・オンライン販売停止メール作成
  */
@@ -277,89 +276,34 @@ function createEmails(res, orders, notice) {
 /**
  * 運行・オンライン販売停止メール作成(1通)
  */
-// tslint:disable-next-line:max-func-body-length
 function createEmail(res, order, notice) {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        const reservation = order.acceptedOffers[0].itemOffered;
-        // タイトル編集
-        // 東京タワー TOP DECK Ticket
-        // 東京タワー TOP DECK エレベータ運行停止のお知らせ
-        const title = conf.get('emailSus.title');
-        const titleEn = conf.get('emailSus.titleEn');
-        //トウキョウ タロウ 様
         const purchaserNameJp = `${order.customer.familyName} ${order.customer.givenName}`;
         const purchaserName = `${res.__('{{name}}様', { name: purchaserNameJp })}`;
         const purchaserNameEn = `${res.__('Mr./Ms.{{name}}', { name: order.customer.name })}`;
-        // 購入チケット情報
-        const paymentTicketInfos = [];
-        // ご来塔日時 : 2017/12/10 09:15
-        const event = reservation.reservationFor;
-        const day = moment(event.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD');
-        const time = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
-        // 購入番号
-        let paymentNo = '';
-        const paymentNoProperty = (_a = order.identifier) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'paymentNo');
-        if (paymentNoProperty !== undefined) {
-            paymentNo = paymentNoProperty.value;
-        }
-        paymentTicketInfos.push(`${res.__('PaymentNo')} : ${paymentNo}`);
-        paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);
-        paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`); // 券種 枚数
-        const infos = getTicketInfo(order, res.__, res.locale); // TOP DECKチケット(大人) 1枚
-        paymentTicketInfos.push(infos.join('\n'));
-        // 英語表記を追加
-        paymentTicketInfos.push(''); // 日英の間の改行
-        paymentTicketInfos.push(`${res.__({ phrase: 'PaymentNo', locale: 'en' })} : ${paymentNo}`);
-        paymentTicketInfos.push(`${res.__({ phrase: 'EmailReserveDate', locale: 'en' })} : ${day} ${time}`);
-        paymentTicketInfos.push(`${res.__({ phrase: 'TicketType', locale: 'en' })} ${res.__({ phrase: 'TicketCount', locale: 'en' })}`);
-        // TOP DECKチケット(大人) 1枚
-        const infosEn = getTicketInfo(order, res.__, 'en');
-        paymentTicketInfos.push(infosEn.join('\n'));
-        // foot
-        const foot1 = conf.get('emailSus.EmailFoot1');
-        const footEn1 = conf.get('emailSus.EmailFootEn1');
-        const foot2 = conf.get('emailSus.EmailFoot2');
-        const footEn2 = conf.get('emailSus.EmailFootEn2');
-        const foot3 = conf.get('emailSus.EmailFoot3');
-        const footEn3 = conf.get('emailSus.EmailFootEn3');
-        const access1 = conf.get('emailSus.EmailAccess1');
-        const accessEn1 = conf.get('emailSus.EmailAccessEn1');
-        const access2 = conf.get('emailSus.EmailAccess2');
-        const accessEn2 = conf.get('emailSus.EmailAccessEn2');
-        // 本文セット
-        // tslint:disable-next-line:max-line-length
-        // const content: string = `${title}\n${titleEn}\n\n${purchaserName}\n${purchaserNameEn}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}\n\n\n${foot1}\n${foot2}\n${foot3}\n\n${footEn1}\n${footEn2}\n${footEn3}\n\n${access1}\n${access2}\n\n${accessEn1}\n${accessEn2}`;
-        const content = `${title}
-${titleEn}
-
-${purchaserName}
-${purchaserNameEn}
-
-${notice}
-
-${paymentTicketInfos.join('\n')}
-
-
-${foot1}
-${foot2}
-${foot3}
-
-${footEn1}
-${footEn2}
-${footEn3}
-
-${access1}
-${access2}
-
-${accessEn1}
-${accessEn2}`;
+        const paymentTicketInfoText = createPaymentTicketInfoText(res, order);
+        const email = new Email({
+            views: { root: `${__dirname}/../../../../emails` },
+            message: {},
+            // uncomment below to send emails in development/test env:
+            // send: true
+            transport: {
+                jsonTransport: true
+            }
+            // htmlToText: false
+        });
+        const content = yield email.render('updateEventStatus', {
+            purchaserName,
+            purchaserNameEn,
+            notice,
+            paymentTicketInfos: paymentTicketInfoText
+        });
         // メール作成
         const emailMessage = {
             project: { typeOf: order.project.typeOf, id: order.project.id },
             typeOf: cinerinoapi.factory.chevre.creativeWorkType.EmailMessage,
-            identifier: `updateOnlineStatus-${reservation.id}`,
-            name: `updateOnlineStatus-${reservation.id}`,
+            identifier: `updateOnlineStatus-${order.orderNumber}`,
+            name: `updateOnlineStatus-${order.orderNumber}`,
             sender: {
                 typeOf: order.seller.typeOf,
                 name: conf.get('email.fromname'),
@@ -370,7 +314,7 @@ ${accessEn2}`;
                 name: order.customer.name,
                 email: order.customer.email
             },
-            about: `${title} ${titleEn}`,
+            about: `東京タワートップデッキツアー中止のお知らせ Tokyo Tower Top Deck Tour Cancelled`,
             text: content
         };
         const purpose = {
@@ -401,6 +345,36 @@ ${accessEn2}`;
             }
         };
     });
+}
+function createPaymentTicketInfoText(res, order) {
+    var _a;
+    const reservation = order.acceptedOffers[0].itemOffered;
+    // ご来塔日時 : 2017/12/10 09:15
+    const event = reservation.reservationFor;
+    const day = moment(event.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD');
+    const time = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
+    // 購入番号
+    let paymentNo = '';
+    const paymentNoProperty = (_a = order.identifier) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'paymentNo');
+    if (paymentNoProperty !== undefined) {
+        paymentNo = paymentNoProperty.value;
+    }
+    // 購入チケット情報
+    const paymentTicketInfos = [];
+    paymentTicketInfos.push(`${res.__('PaymentNo')} : ${paymentNo}`);
+    paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);
+    paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`); // 券種 枚数
+    const infos = getTicketInfo(order, res.__, res.locale); // TOP DECKチケット(大人) 1枚
+    paymentTicketInfos.push(infos.join('\n'));
+    // 英語表記を追加
+    paymentTicketInfos.push(''); // 日英の間の改行
+    paymentTicketInfos.push(`${res.__({ phrase: 'PaymentNo', locale: 'en' })} : ${paymentNo}`);
+    paymentTicketInfos.push(`${res.__({ phrase: 'EmailReserveDate', locale: 'en' })} : ${day} ${time}`);
+    paymentTicketInfos.push(`${res.__({ phrase: 'TicketType', locale: 'en' })} ${res.__({ phrase: 'TicketCount', locale: 'en' })}`);
+    // TOP DECKチケット(大人) 1枚
+    const infosEn = getTicketInfo(order, res.__, 'en');
+    paymentTicketInfos.push(infosEn.join('\n'));
+    return paymentTicketInfos.join('\n');
 }
 /**
  * チケット情報取得
@@ -442,4 +416,3 @@ function getTicketInfo(order, __, locale) {
         return `${ticketInfos[ticketTypeId].ticket_type_name} ${__('{{n}}Leaf', { n: ticketInfos[ticketTypeId].count })}`;
     });
 }
-exports.getTicketInfo = getTicketInfo;
