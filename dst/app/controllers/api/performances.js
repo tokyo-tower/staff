@@ -32,7 +32,7 @@ function getUnitPriceByAcceptedOffer(offer) {
     if (offer.priceSpecification !== undefined) {
         const priceSpecification = offer.priceSpecification;
         if (Array.isArray(priceSpecification.priceComponent)) {
-            const unitPriceSpec = priceSpecification.priceComponent.find((c) => c.typeOf === tttsapi.factory.chevre.priceSpecificationType.UnitPriceSpecification);
+            const unitPriceSpec = priceSpecification.priceComponent.find((c) => c.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification);
             if (unitPriceSpec !== undefined && unitPriceSpec.price !== undefined && Number.isInteger(unitPriceSpec.price)) {
                 unitPrice = unitPriceSpec.price;
             }
@@ -124,8 +124,8 @@ function updateOnlineStatus(req, res) {
                 // Chevreで予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
                 const searchReservationsResult = yield reservationService.search({
                     limit: 100,
-                    typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-                    reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+                    typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+                    reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
                     reservationFor: { id: performanceId }
                     // ...{
                     //     noTotalCount: '1'
@@ -226,8 +226,8 @@ function getTargetReservationsForRefund(req, performanceIds) {
             auth: req.tttsAuthClient
         });
         const targetReservations = yield reservationService.distinct('underName', {
-            typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-            reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+            typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+            reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
             // クライアントがfrontend or pos
             underName: {
                 identifiers: [
@@ -276,10 +276,6 @@ function getTargetReservationsForRefund(req, performanceIds) {
 exports.getTargetReservationsForRefund = getTargetReservationsForRefund;
 /**
  * 運行・オンライン販売停止メール作成
- * @param {Response} res
- * @param {tttsapi.factory.transaction.placeOrder.ITransaction[]} transactions
- * @param {string} notice
- * @return {Promise<void>}
  */
 function createEmails(req, res, orders, notice, createTask) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -294,10 +290,6 @@ function createEmails(req, res, orders, notice, createTask) {
 }
 /**
  * 運行・オンライン販売停止メール作成(1通)
- * @param {Response} res
- * @param {tttsapi.factory.reservation.event.IReservation[]} reservation
- * @param {string} notice
- * @return {Promise<void>}
  */
 // tslint:disable-next-line:max-func-body-length
 function createEmail(req, res, order, notice, createTask) {

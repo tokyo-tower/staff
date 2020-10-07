@@ -24,7 +24,7 @@ const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
 
 export type IReservationOrderItem = cinerinoapi.factory.order.IReservation;
 
-export type ICompoundPriceSpecification = tttsapi.factory.chevre.compoundPriceSpecification.IPriceSpecification<any>;
+export type ICompoundPriceSpecification = cinerinoapi.factory.chevre.compoundPriceSpecification.IPriceSpecification<any>;
 
 export function getUnitPriceByAcceptedOffer(offer: cinerinoapi.factory.order.IAcceptedOffer<any>) {
     let unitPrice: number = 0;
@@ -33,7 +33,7 @@ export function getUnitPriceByAcceptedOffer(offer: cinerinoapi.factory.order.IAc
         const priceSpecification = <ICompoundPriceSpecification>offer.priceSpecification;
         if (Array.isArray(priceSpecification.priceComponent)) {
             const unitPriceSpec = priceSpecification.priceComponent.find(
-                (c) => c.typeOf === tttsapi.factory.chevre.priceSpecificationType.UnitPriceSpecification
+                (c) => c.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification
             );
             if (unitPriceSpec !== undefined && unitPriceSpec.price !== undefined && Number.isInteger(unitPriceSpec.price)) {
                 unitPrice = unitPriceSpec.price;
@@ -142,8 +142,8 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             // Chevreで予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
             const searchReservationsResult = await reservationService.search({
                 limit: 100,
-                typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-                reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+                typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+                reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
                 reservationFor: { id: performanceId }
                 // ...{
                 //     noTotalCount: '1'
@@ -156,7 +156,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
 
                     return {
                         id: String(r.id),
-                        status: <tttsapi.factory.chevre.reservationStatusType>r.reservationStatus,
+                        status: <cinerinoapi.factory.chevre.reservationStatusType>r.reservationStatus,
                         transaction_agent: {
                             typeOf: cinerinoapi.factory.personType.Person,
                             id: (typeof clientId === 'string') ? clientId : ''
@@ -260,8 +260,8 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
     const targetReservations = await reservationService.distinct(
         'underName',
         {
-            typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-            reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+            typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+            reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
             // クライアントがfrontend or pos
             underName: {
                 identifiers: [
@@ -316,10 +316,6 @@ export async function getTargetReservationsForRefund(req: Request, performanceId
 
 /**
  * 運行・オンライン販売停止メール作成
- * @param {Response} res
- * @param {tttsapi.factory.transaction.placeOrder.ITransaction[]} transactions
- * @param {string} notice
- * @return {Promise<void>}
  */
 async function createEmails(
     req: Request,
@@ -340,10 +336,6 @@ async function createEmails(
 
 /**
  * 運行・オンライン販売停止メール作成(1通)
- * @param {Response} res
- * @param {tttsapi.factory.reservation.event.IReservation[]} reservation
- * @param {string} notice
- * @return {Promise<void>}
  */
 // tslint:disable-next-line:max-func-body-length
 async function createEmail(
