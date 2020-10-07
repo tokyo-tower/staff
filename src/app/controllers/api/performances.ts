@@ -191,26 +191,46 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             });
 
             try {
+                let sendEmailMessageParams: cinerinoapi.factory.action.transfer.send.message.email.IAttributes[] = [];
+
+                // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、Cinerinoにメール送信指定
+                if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
+                    const targetOrders4performance = targetOrders.filter((o) => {
+                        return o.acceptedOffers.some((offer) => {
+                            const reservation = <cinerinoapi.factory.order.IReservation>offer.itemOffered;
+
+                            return reservation.typeOf === cinerinoapi.factory.chevre.reservationType.EventReservation
+                                && reservation.reservationFor.id === performanceId;
+                        });
+                    });
+                    const tasks = await createEmails(req, res, targetOrders4performance, notice, false);
+                    sendEmailMessageParams = tasks.map((task) => task.data.actionAttributes);
+                }
+
                 // Chevreイベントステータスに反映
                 await eventService.updatePartially({
                     id: performanceId,
-                    eventStatus: newEventStatus
+                    eventStatus: newEventStatus,
+                    ...{
+                        onUpdated: {
+                            sendEmailMessage: sendEmailMessageParams
+                        }
+                    }
                 });
             } catch (error) {
                 // no op
             }
         }
-        debug('performance online_sales_status updated.');
 
-        // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
-        if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
-            try {
-                await createEmails(req, res, targetOrders, notice);
-            } catch (error) {
-                // no op
-                debug('createEmails failed', error);
-            }
-        }
+        // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成(Cinerino移行を確認できたら削除する)
+        // if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
+        //     try {
+        //         await createEmails(req, res, targetOrders, notice, true);
+        //     } catch (error) {
+        //         // no op
+        //         debug('createEmails failed', error);
+        //     }
+        // }
 
         res.status(NO_CONTENT).end();
     } catch (error) {
@@ -305,15 +325,16 @@ async function createEmails(
     req: Request,
     res: Response,
     orders: cinerinoapi.factory.order.IOrder[],
-    notice: string
-): Promise<void> {
+    notice: string,
+    createTask: boolean
+): Promise<tttsapi.factory.task.sendEmailMessage.IAttributes[]> {
     if (orders.length === 0) {
-        return;
+        return [];
     }
 
     // 購入単位ごとにメール作成
-    await Promise.all(orders.map(async (order) => {
-        await createEmail(req, res, order, notice);
+    return Promise.all(orders.map(async (order) => {
+        return createEmail(req, res, order, notice, createTask);
     }));
 }
 
@@ -329,8 +350,9 @@ async function createEmail(
     req: Request,
     res: Response,
     order: cinerinoapi.factory.order.IOrder,
-    notice: string
-): Promise<void> {
+    notice: string,
+    createTask: boolean
+): Promise<tttsapi.factory.task.sendEmailMessage.IAttributes> {
     const reservation = <IReservationOrderItem>order.acceptedOffers[0].itemOffered;
 
     // タイトル編集
@@ -455,8 +477,13 @@ async function createEmail(
             }
         }
     };
-    await taskService.create(taskAttributes);
-    debug('sendEmail task created.');
+
+    if (createTask) {
+        await taskService.create(taskAttributes);
+        debug('sendEmail task created.');
+    }
+
+    return taskAttributes;
 }
 
 /**

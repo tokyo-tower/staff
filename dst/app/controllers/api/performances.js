@@ -166,27 +166,39 @@ function updateOnlineStatus(req, res) {
                     refundStatusUpdateAt: now
                 });
                 try {
+                    let sendEmailMessageParams = [];
+                    // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、Cinerinoにメール送信指定
+                    if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
+                        const targetOrders4performance = targetOrders.filter((o) => {
+                            return o.acceptedOffers.some((offer) => {
+                                const reservation = offer.itemOffered;
+                                return reservation.typeOf === cinerinoapi.factory.chevre.reservationType.EventReservation
+                                    && reservation.reservationFor.id === performanceId;
+                            });
+                        });
+                        const tasks = yield createEmails(req, res, targetOrders4performance, notice, false);
+                        sendEmailMessageParams = tasks.map((task) => task.data.actionAttributes);
+                    }
                     // Chevreイベントステータスに反映
-                    yield eventService.updatePartially({
-                        id: performanceId,
-                        eventStatus: newEventStatus
-                    });
+                    yield eventService.updatePartially(Object.assign({ id: performanceId, eventStatus: newEventStatus }, {
+                        onUpdated: {
+                            sendEmailMessage: sendEmailMessageParams
+                        }
+                    }));
                 }
                 catch (error) {
                     // no op
                 }
             }
-            debug('performance online_sales_status updated.');
-            // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
-            if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
-                try {
-                    yield createEmails(req, res, targetOrders, notice);
-                }
-                catch (error) {
-                    // no op
-                    debug('createEmails failed', error);
-                }
-            }
+            // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成(Cinerino移行を確認できたら削除する)
+            // if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
+            //     try {
+            //         await createEmails(req, res, targetOrders, notice, true);
+            //     } catch (error) {
+            //         // no op
+            //         debug('createEmails failed', error);
+            //     }
+            // }
             res.status(http_status_1.NO_CONTENT).end();
         }
         catch (error) {
@@ -269,14 +281,14 @@ exports.getTargetReservationsForRefund = getTargetReservationsForRefund;
  * @param {string} notice
  * @return {Promise<void>}
  */
-function createEmails(req, res, orders, notice) {
+function createEmails(req, res, orders, notice, createTask) {
     return __awaiter(this, void 0, void 0, function* () {
         if (orders.length === 0) {
-            return;
+            return [];
         }
         // 購入単位ごとにメール作成
-        yield Promise.all(orders.map((order) => __awaiter(this, void 0, void 0, function* () {
-            yield createEmail(req, res, order, notice);
+        return Promise.all(orders.map((order) => __awaiter(this, void 0, void 0, function* () {
+            return createEmail(req, res, order, notice, createTask);
         })));
     });
 }
@@ -288,7 +300,7 @@ function createEmails(req, res, orders, notice) {
  * @return {Promise<void>}
  */
 // tslint:disable-next-line:max-func-body-length
-function createEmail(req, res, order, notice) {
+function createEmail(req, res, order, notice, createTask) {
     return __awaiter(this, void 0, void 0, function* () {
         const reservation = order.acceptedOffers[0].itemOffered;
         // タイトル編集
@@ -401,8 +413,11 @@ function createEmail(req, res, order, notice) {
                 }
             }
         };
-        yield taskService.create(taskAttributes);
-        debug('sendEmail task created.');
+        if (createTask) {
+            yield taskService.create(taskAttributes);
+            debug('sendEmail task created.');
+        }
+        return taskAttributes;
     });
 }
 /**
