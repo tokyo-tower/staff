@@ -74,25 +74,9 @@ function search(req, res) {
             // const searchResult = await performanceService.search(req.query);
             const performances = searchResult.data.map((event) => {
                 var _a, _b, _c;
-                // const performances = searchResult.data.data.map((d) => {
-                let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
-                let onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Normal;
                 // 一般座席の残席数に変更
                 const remainingAttendeeCapacity = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => o.identifier === '001')) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
-                switch (event.eventStatus) {
-                    case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:
-                        evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Suspended;
-                        onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Suspended;
-                        break;
-                    case cinerinoapi.factory.chevre.eventStatusType.EventPostponed:
-                        evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Slowdown;
-                        onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Suspended;
-                        break;
-                    case cinerinoapi.factory.chevre.eventStatusType.EventScheduled:
-                        break;
-                    default:
-                }
-                return Object.assign(Object.assign({}, event), { remainingAttendeeCapacity: (typeof remainingAttendeeCapacity === 'number') ? remainingAttendeeCapacity : '?', evServiceStatus: evServiceStatus, onlineSalesStatus: onlineSalesStatus });
+                return Object.assign(Object.assign({}, event), { remainingAttendeeCapacity: (typeof remainingAttendeeCapacity === 'number') ? remainingAttendeeCapacity : '?' });
             });
             res.json({ data: performances });
         }
@@ -118,15 +102,14 @@ function updateOnlineStatus(req, res) {
                 throw new Error(req.__('UnexpectedError'));
             }
             // パフォーマンス・予約(入塔記録のないもの)のステータス更新
-            const onlineStatus = req.body.onlineStatus;
             const evStatus = req.body.evStatus;
             const notice = req.body.notice;
-            debug('updating performances...', performanceIds, onlineStatus, evStatus, notice);
+            debug('updating performances...', performanceIds, evStatus, notice);
             const now = new Date();
             // 返金対象注文情報取得
             const targetOrders = yield getTargetReservationsForRefund(req, performanceIds);
             // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
-            const refundStatus = evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended ?
+            const refundStatus = evStatus === cinerinoapi.factory.chevre.eventStatusType.EventCancelled ?
                 tttsapi.factory.performance.RefundStatus.NotInstructed :
                 tttsapi.factory.performance.RefundStatus.None;
             // パフォーマンス更新
@@ -167,20 +150,10 @@ function updateOnlineStatus(req, res) {
                         }
                     };
                 });
-                let newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventScheduled;
-                switch (evStatus) {
-                    case tttsapi.factory.performance.EvServiceStatus.Slowdown:
-                        newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventPostponed;
-                        break;
-                    case tttsapi.factory.performance.EvServiceStatus.Suspended:
-                        newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventCancelled;
-                        break;
-                    default:
-                }
                 yield performanceService.updateExtension({
                     id: performanceId,
                     reservationsAtLastUpdateDate: reservationsAtLastUpdateDate,
-                    eventStatus: newEventStatus,
+                    eventStatus: evStatus,
                     onlineSalesStatusUpdateUser: updateUser,
                     onlineSalesStatusUpdateAt: now,
                     evServiceStatusUpdateUser: updateUser,
@@ -191,7 +164,7 @@ function updateOnlineStatus(req, res) {
                 });
                 let sendEmailMessageParams = [];
                 // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、Cinerinoにメール送信指定
-                if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
+                if (evStatus === cinerinoapi.factory.chevre.eventStatusType.EventCancelled) {
                     const targetOrders4performance = targetOrders.filter((o) => {
                         return o.acceptedOffers.some((offer) => {
                             const reservation = offer.itemOffered;
@@ -202,7 +175,7 @@ function updateOnlineStatus(req, res) {
                     sendEmailMessageParams = yield createEmails(res, targetOrders4performance, notice);
                 }
                 // Chevreイベントステータスに反映
-                yield eventService.updatePartially(Object.assign({ id: performanceId, eventStatus: newEventStatus }, {
+                yield eventService.updatePartially(Object.assign({ id: performanceId, eventStatus: evStatus }, {
                     onUpdated: {
                         sendEmailMessage: sendEmailMessageParams
                     }

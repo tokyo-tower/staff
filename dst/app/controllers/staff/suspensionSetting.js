@@ -25,8 +25,7 @@ function performances(req, res, next) {
             res.render('staff/suspension/performances', {
                 token: req.tttsAuthClient.credentials,
                 layout: layout,
-                EvServiceStatus: tttsapi.factory.performance.EvServiceStatus,
-                OnlineSalesStatus: tttsapi.factory.performance.OnlineSalesStatus,
+                EventStatusType: tttsapi.factory.chevre.eventStatusType,
                 RefundStatus: tttsapi.factory.performance.RefundStatus
             });
         }
