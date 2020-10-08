@@ -10,9 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- イベントステータス変更後のメール送信をCinerinoで実装
-- 販売ステータス確認のイベント検索をCinerinoで実装
-
 ### Deprecated
 
 ### Removed
@@ -20,6 +17,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.12.0 - 2020-10-08
+
+### Changed
+
+- イベントステータス変更後のメール送信をCinerinoで実装
+- 販売ステータス確認のイベント検索をCinerinoで実装
 
 ## v6.11.1 - 2020-08-24
 
