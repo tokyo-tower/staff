@@ -74,13 +74,13 @@
                         <p>状況を選択してください。</p>
                         <label class="for-suspend">
                             <input class="radio-ev" type="radio" id="radio_ev_slow" name="ev"
-                                value="<%- EvServiceStatus.Slowdown %>" checked>一時休止</label>
+                                value="<%- EventStatusType.EventPostponed %>" checked>一時休止</label>
                         <label class="for-suspend">
                             <input class="radio-ev" type="radio" id="radio_ev_stop" name="ev"
-                                value="<%- EvServiceStatus.Suspended %>">完全中止（メールが送信されます。）</label>
+                                value="<%- EventStatusType.EventCancelled %>">完全中止（メールが送信されます。）</label>
                         <label class="for-resume">
                             <input class="radio-ev" type="radio" id="radio_ev_restart" name="ev"
-                                value="<%- EvServiceStatus.Normal %>">販売再開</label>
+                                value="<%- EventStatusType.EventScheduled %>">販売再開</label>
                     </div>
                     <div class="for-suspend for-evstop">
                         <h3>お客様通知内容</h3>

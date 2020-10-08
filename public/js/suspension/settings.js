@@ -30,12 +30,13 @@ $(function () {
     // statusからCSSクラス名を得る
     var getClassNameByStatus = function (performance) {
         var className = '';
-        if (performance.ev_service_status === 'Slowdown') {
+        if (performance.eventStatus === 'EventPostponed') {
             className += 'item-ev-slow ';
-        } else if (performance.ev_service_status === 'Suspended') {
+        } else if (performance.eventStatus === 'EventCancelled') {
             className += 'item-ev-stopped ';
         }
-        if (performance.online_sales_status === 'Suspended') {
+
+        if (performance.eventStatus === 'EventPostponed' || performance.eventStatus === 'EventCancelled') {
             className += 'item-supenpeded ';
         }
         className += 'item-hour-' + performance.hour;
@@ -101,8 +102,7 @@ $(function () {
                     start_time: start_time,
                     end_time: end_time,
                     seat_status: performance.remainingAttendeeCapacity,
-                    ev_service_status: performance.evServiceStatus,
-                    online_sales_status: performance.onlineSalesStatus,
+                    eventStatus: performance.eventStatus,
                     tour_number: tourNumber
                 });
                 performancesById[performance.id] = performance;
@@ -138,16 +138,13 @@ $(function () {
                 '<div class="items">';
             performancesByHour[hour].forEach(function (performance) {
                 var suspensionStatusStr = '';
-                // var separatorStr = '';
-                // if (performance.online_sales_status === 'Suspended') {
-                //    suspensionStatusStr += '販売中止';
-                // }
-                // separatorStr += (suspensionStatusStr) ? ' / ' : '';
-                if (performance.ev_service_status === 'Slowdown') {
+
+                if (performance.eventStatus === 'EventPostponed') {
                     suspensionStatusStr += '販売休止中';
-                } else if (performance.ev_service_status === 'Suspended') {
+                } else if (performance.eventStatus === 'EventCancelled') {
                     suspensionStatusStr += '販売中止中';
                 }
+
                 html += '<div class="item ' + getClassNameByStatus(performance) + '" data-performance-id="' + performance.id + '">' +
                     '<p class="time">' + spliceStr(performance.start_time, 2, ':') + ' - ' + spliceStr(performance.end_time, 2, ':') + '</p>' +
                     '<div class="wrapper-status">' +
@@ -215,8 +212,7 @@ $(function () {
             search({
                 page: 1,
                 day: ymd,
-                noTotalCount: '1',
-                useLegacySearch: '1'
+                noTotalCount: '1'
             });
         }
     });
@@ -300,12 +296,11 @@ $(function () {
     var busy_suspend = false;
     document.getElementById('btn_exec').onclick = function () {
         if (busy_suspend || !confirm('よろしいですか？')) { return false; }
-        // 'Normal': 解除 'Suspended': 停止
-        var onlineStatus = (bool_forResume) ? 'Normal' : 'Suspended';
+
         // 運行状況
         var evStatus = $('input[name="ev"]:checked').val();
         var notice = '';
-        if (!bool_forResume && evStatus === 'Suspended') {
+        if (!bool_forResume && evStatus === 'EventCancelled') {
             notice = textarea_announcemail.value;
             if (!notice) {
                 return alert('お客様への通知内容を入力してください');
@@ -318,7 +313,6 @@ $(function () {
             type: 'POST',
             data: {
                 performanceIds: targetPerformanceIdArray,
-                onlineStatus: onlineStatus,
                 evStatus: evStatus,
                 notice: notice
             },
@@ -326,7 +320,7 @@ $(function () {
                 $modal_suspension.modal('hide');
             }
         }).done(function () {
-            alert('販売を' + ((onlineStatus === 'Suspended') ? '停止' : '再開') + 'しました');
+            alert('販売を' + ((!bool_forResume) ? '停止' : '再開') + 'しました');
         }).fail(function (jqxhr, textStatus, error) {
             if (jqxhr.status === 500) {
                 alert('サーバエラーが発生しました');
@@ -338,8 +332,7 @@ $(function () {
             search({
                 page: 1,
                 day: ymd,
-                noTotalCount: '1',
-                useLegacySearch: '1'
+                noTotalCount: '1'
             });
         });
     };

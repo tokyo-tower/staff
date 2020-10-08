@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTicketInfo = exports.getTargetReservationsForRefund = exports.updateOnlineStatus = exports.search = exports.getUnitPriceByAcceptedOffer = void 0;
+exports.updateOnlineStatus = exports.search = void 0;
 /**
  * パフォーマンスAPIコントローラー
  */
@@ -17,6 +17,7 @@ const cinerinoapi = require("@cinerino/sdk");
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const conf = require("config");
 const createDebug = require("debug");
+const Email = require("email-templates");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const numeral = require("numeral");
@@ -32,7 +33,7 @@ function getUnitPriceByAcceptedOffer(offer) {
     if (offer.priceSpecification !== undefined) {
         const priceSpecification = offer.priceSpecification;
         if (Array.isArray(priceSpecification.priceComponent)) {
-            const unitPriceSpec = priceSpecification.priceComponent.find((c) => c.typeOf === tttsapi.factory.chevre.priceSpecificationType.UnitPriceSpecification);
+            const unitPriceSpec = priceSpecification.priceComponent.find((c) => c.typeOf === cinerinoapi.factory.chevre.priceSpecificationType.UnitPriceSpecification);
             if (unitPriceSpec !== undefined && unitPriceSpec.price !== undefined && Number.isInteger(unitPriceSpec.price)) {
                 unitPrice = unitPriceSpec.price;
             }
@@ -40,35 +41,42 @@ function getUnitPriceByAcceptedOffer(offer) {
     }
     return unitPrice;
 }
-exports.getUnitPriceByAcceptedOffer = getUnitPriceByAcceptedOffer;
 /**
  * パフォーマンス検索
  */
 function search(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const performanceService = new tttsapi.service.Event({
-                endpoint: process.env.API_ENDPOINT,
+            // Cinerinoで検索
+            // query:
+            // page: 1,
+            // day: ymd,
+            // noTotalCount: '1',
+            // useLegacySearch: '1'
+            const day = String(req.query.day);
+            const eventService = new cinerinoapi.service.Event({
+                endpoint: process.env.CINERINO_API_ENDPOINT,
                 auth: req.tttsAuthClient
             });
-            const searchResult = yield performanceService.search(req.query);
-            const performances = searchResult.data.data.map((d) => {
-                let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
-                let onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Normal;
-                switch (d.eventStatus) {
-                    case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:
-                        evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Suspended;
-                        onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Suspended;
-                        break;
-                    case cinerinoapi.factory.chevre.eventStatusType.EventPostponed:
-                        evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Slowdown;
-                        onlineSalesStatus = tttsapi.factory.performance.OnlineSalesStatus.Suspended;
-                        break;
-                    case cinerinoapi.factory.chevre.eventStatusType.EventScheduled:
-                        break;
-                    default:
-                }
-                return Object.assign(Object.assign({}, d), { evServiceStatus: evServiceStatus, onlineSalesStatus: onlineSalesStatus });
+            const searchResult = yield eventService.search(Object.assign({ limit: 100, page: 1, typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent, 
+                // tslint:disable-next-line:no-magic-numbers
+                startFrom: moment(`${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6, 8)}T00:00:00+09:00`)
+                    .toDate(), 
+                // tslint:disable-next-line:no-magic-numbers
+                startThrough: moment(`${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6, 8)}T23:59:59+09:00`)
+                    .toDate() }, {
+                $projection: { aggregateReservation: 0 }
+            }));
+            // const performanceService = new tttsapi.service.Event({
+            //     endpoint: <string>process.env.API_ENDPOINT,
+            //     auth: req.tttsAuthClient
+            // });
+            // const searchResult = await performanceService.search(req.query);
+            const performances = searchResult.data.map((event) => {
+                var _a, _b, _c;
+                // 一般座席の残席数に変更
+                const remainingAttendeeCapacity = (_c = (_b = (_a = event.aggregateOffer) === null || _a === void 0 ? void 0 : _a.offers) === null || _b === void 0 ? void 0 : _b.find((o) => o.identifier === '001')) === null || _c === void 0 ? void 0 : _c.remainingAttendeeCapacity;
+                return Object.assign(Object.assign({}, event), { remainingAttendeeCapacity: (typeof remainingAttendeeCapacity === 'number') ? remainingAttendeeCapacity : '?' });
             });
             res.json({ data: performances });
         }
@@ -94,15 +102,14 @@ function updateOnlineStatus(req, res) {
                 throw new Error(req.__('UnexpectedError'));
             }
             // パフォーマンス・予約(入塔記録のないもの)のステータス更新
-            const onlineStatus = req.body.onlineStatus;
             const evStatus = req.body.evStatus;
             const notice = req.body.notice;
-            debug('updating performances...', performanceIds, onlineStatus, evStatus, notice);
+            debug('updating performances...', performanceIds, evStatus, notice);
             const now = new Date();
             // 返金対象注文情報取得
             const targetOrders = yield getTargetReservationsForRefund(req, performanceIds);
             // 返金ステータスセット(運行停止は未指示、減速・再開はNONE)
-            const refundStatus = evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended ?
+            const refundStatus = evStatus === cinerinoapi.factory.chevre.eventStatusType.EventCancelled ?
                 tttsapi.factory.performance.RefundStatus.NotInstructed :
                 tttsapi.factory.performance.RefundStatus.None;
             // パフォーマンス更新
@@ -124,8 +131,8 @@ function updateOnlineStatus(req, res) {
                 // Chevreで予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
                 const searchReservationsResult = yield reservationService.search({
                     limit: 100,
-                    typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-                    reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+                    typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+                    reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
                     reservationFor: { id: performanceId }
                     // ...{
                     //     noTotalCount: '1'
@@ -143,20 +150,10 @@ function updateOnlineStatus(req, res) {
                         }
                     };
                 });
-                let newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventScheduled;
-                switch (evStatus) {
-                    case tttsapi.factory.performance.EvServiceStatus.Slowdown:
-                        newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventPostponed;
-                        break;
-                    case tttsapi.factory.performance.EvServiceStatus.Suspended:
-                        newEventStatus = cinerinoapi.factory.chevre.eventStatusType.EventCancelled;
-                        break;
-                    default:
-                }
                 yield performanceService.updateExtension({
                     id: performanceId,
                     reservationsAtLastUpdateDate: reservationsAtLastUpdateDate,
-                    eventStatus: newEventStatus,
+                    eventStatus: evStatus,
                     onlineSalesStatusUpdateUser: updateUser,
                     onlineSalesStatusUpdateAt: now,
                     evServiceStatusUpdateUser: updateUser,
@@ -165,32 +162,31 @@ function updateOnlineStatus(req, res) {
                     refundStatusUpdateUser: updateUser,
                     refundStatusUpdateAt: now
                 });
-                try {
-                    // Chevreイベントステータスに反映
-                    yield eventService.updatePartially({
-                        id: performanceId,
-                        eventStatus: newEventStatus
+                let sendEmailMessageParams = [];
+                // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、Cinerinoにメール送信指定
+                if (evStatus === cinerinoapi.factory.chevre.eventStatusType.EventCancelled) {
+                    const targetOrders4performance = targetOrders.filter((o) => {
+                        return o.acceptedOffers.some((offer) => {
+                            const reservation = offer.itemOffered;
+                            return reservation.typeOf === cinerinoapi.factory.chevre.reservationType.EventReservation
+                                && reservation.reservationFor.id === performanceId;
+                        });
                     });
+                    sendEmailMessageParams = yield createEmails(res, targetOrders4performance, notice);
                 }
-                catch (error) {
-                    // no op
-                }
+                // Chevreイベントステータスに反映
+                yield eventService.updatePartially(Object.assign({ id: performanceId, eventStatus: evStatus }, {
+                    onUpdated: {
+                        sendEmailMessage: sendEmailMessageParams
+                    }
+                }));
             }
-            debug('performance online_sales_status updated.');
-            // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、メール作成
-            if (evStatus === tttsapi.factory.performance.EvServiceStatus.Suspended) {
-                try {
-                    yield createEmails(req, res, targetOrders, notice);
-                }
-                catch (error) {
-                    // no op
-                    debug('createEmails failed', error);
-                }
-            }
-            res.status(http_status_1.NO_CONTENT).end();
+            res.status(http_status_1.NO_CONTENT)
+                .end();
         }
         catch (error) {
-            res.status(http_status_1.INTERNAL_SERVER_ERROR).json({
+            res.status(http_status_1.INTERNAL_SERVER_ERROR)
+                .json({
                 message: error.message
             });
         }
@@ -214,8 +210,8 @@ function getTargetReservationsForRefund(req, performanceIds) {
             auth: req.tttsAuthClient
         });
         const targetReservations = yield reservationService.distinct('underName', {
-            typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-            reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+            typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+            reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
             // クライアントがfrontend or pos
             underName: {
                 identifiers: [
@@ -261,149 +257,121 @@ function getTargetReservationsForRefund(req, performanceIds) {
         return orders;
     });
 }
-exports.getTargetReservationsForRefund = getTargetReservationsForRefund;
 /**
  * 運行・オンライン販売停止メール作成
- * @param {Response} res
- * @param {tttsapi.factory.transaction.placeOrder.ITransaction[]} transactions
- * @param {string} notice
- * @return {Promise<void>}
  */
-function createEmails(req, res, orders, notice) {
+function createEmails(res, orders, notice) {
     return __awaiter(this, void 0, void 0, function* () {
         if (orders.length === 0) {
-            return;
+            return [];
         }
-        // 購入単位ごとにメール作成
-        yield Promise.all(orders.map((order) => __awaiter(this, void 0, void 0, function* () {
-            yield createEmail(req, res, order, notice);
+        return Promise.all(orders.map((order) => __awaiter(this, void 0, void 0, function* () {
+            return createEmail(res, order, notice);
         })));
     });
 }
 /**
  * 運行・オンライン販売停止メール作成(1通)
- * @param {Response} res
- * @param {tttsapi.factory.reservation.event.IReservation[]} reservation
- * @param {string} notice
- * @return {Promise<void>}
  */
-// tslint:disable-next-line:max-func-body-length
-function createEmail(req, res, order, notice) {
+function createEmail(res, order, notice) {
     return __awaiter(this, void 0, void 0, function* () {
-        const reservation = order.acceptedOffers[0].itemOffered;
-        // タイトル編集
-        // 東京タワー TOP DECK Ticket
-        // 東京タワー TOP DECK エレベータ運行停止のお知らせ
-        const title = conf.get('emailSus.title');
-        const titleEn = conf.get('emailSus.titleEn');
-        //トウキョウ タロウ 様
         const purchaserNameJp = `${order.customer.familyName} ${order.customer.givenName}`;
         const purchaserName = `${res.__('{{name}}様', { name: purchaserNameJp })}`;
         const purchaserNameEn = `${res.__('Mr./Ms.{{name}}', { name: order.customer.name })}`;
-        // 購入チケット情報
-        const paymentTicketInfos = [];
-        // ご来塔日時 : 2017/12/10 09:15
-        const event = reservation.reservationFor;
-        const day = moment(event.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD');
-        const time = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
-        // 購入番号
-        let paymentNo = '';
-        if (Array.isArray(order.identifier)) {
-            const paymentNoProperty = order.identifier.find((p) => p.name === 'paymentNo');
-            if (paymentNoProperty !== undefined) {
-                paymentNo = paymentNoProperty.value;
+        const paymentTicketInfoText = createPaymentTicketInfoText(res, order);
+        const email = new Email({
+            views: { root: `${__dirname}/../../../../emails` },
+            message: {},
+            // uncomment below to send emails in development/test env:
+            // send: true
+            transport: {
+                jsonTransport: true
             }
-        }
-        paymentTicketInfos.push(`${res.__('PaymentNo')} : ${paymentNo}`);
-        paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);
-        paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`); // 券種 枚数
-        const infos = getTicketInfo(order, res.__, res.locale); // TOP DECKチケット(大人) 1枚
-        paymentTicketInfos.push(infos.join('\n'));
-        // 英語表記を追加
-        paymentTicketInfos.push(''); // 日英の間の改行
-        paymentTicketInfos.push(`${res.__({ phrase: 'PaymentNo', locale: 'en' })} : ${paymentNo}`);
-        paymentTicketInfos.push(`${res.__({ phrase: 'EmailReserveDate', locale: 'en' })} : ${day} ${time}`);
-        paymentTicketInfos.push(`${res.__({ phrase: 'TicketType', locale: 'en' })} ${res.__({ phrase: 'TicketCount', locale: 'en' })}`);
-        // TOP DECKチケット(大人) 1枚
-        const infosEn = getTicketInfo(order, res.__, 'en');
-        paymentTicketInfos.push(infosEn.join('\n'));
-        // foot
-        const foot1 = conf.get('emailSus.EmailFoot1');
-        const footEn1 = conf.get('emailSus.EmailFootEn1');
-        const foot2 = conf.get('emailSus.EmailFoot2');
-        const footEn2 = conf.get('emailSus.EmailFootEn2');
-        const foot3 = conf.get('emailSus.EmailFoot3');
-        const footEn3 = conf.get('emailSus.EmailFootEn3');
-        const access1 = conf.get('emailSus.EmailAccess1');
-        const accessEn1 = conf.get('emailSus.EmailAccessEn1');
-        const access2 = conf.get('emailSus.EmailAccess2');
-        const accessEn2 = conf.get('emailSus.EmailAccessEn2');
-        // 本文セット
-        // tslint:disable-next-line:max-line-length
-        const content = `${title}\n${titleEn}\n\n${purchaserName}\n${purchaserNameEn}\n\n${notice}\n\n${paymentTicketInfos.join('\n')}\n\n\n${foot1}\n${foot2}\n${foot3}\n\n${footEn1}\n${footEn2}\n${footEn3}\n\n${access1}\n${access2}\n\n${accessEn1}\n${accessEn2}`;
-        // メール編集
-        const emailAttributes = {
-            typeOf: cinerinoapi.factory.creativeWorkType.EmailMessage,
+            // htmlToText: false
+        });
+        const content = yield email.render('updateEventStatus', {
+            purchaserName,
+            purchaserNameEn,
+            notice,
+            paymentTicketInfos: paymentTicketInfoText
+        });
+        // メール作成
+        const emailMessage = {
+            project: { typeOf: order.project.typeOf, id: order.project.id },
+            typeOf: cinerinoapi.factory.chevre.creativeWorkType.EmailMessage,
+            identifier: `updateOnlineStatus-${order.orderNumber}`,
+            name: `updateOnlineStatus-${order.orderNumber}`,
             sender: {
+                typeOf: order.seller.typeOf,
                 name: conf.get('email.fromname'),
                 email: conf.get('email.from')
             },
             toRecipient: {
+                typeOf: order.customer.typeOf,
                 name: order.customer.name,
                 email: order.customer.email
             },
-            about: `${title} ${titleEn}`,
+            about: `東京タワートップデッキツアー中止のお知らせ Tokyo Tower Top Deck Tour Cancelled`,
             text: content
         };
-        // メール作成
-        const taskService = new tttsapi.service.Task({
-            endpoint: process.env.API_ENDPOINT,
-            auth: req.tttsAuthClient
-        });
-        const emailMessage = {
-            typeOf: cinerinoapi.factory.creativeWorkType.EmailMessage,
-            identifier: `updateOnlineStatus-${reservation.id}`,
-            name: `updateOnlineStatus-${reservation.id}`,
-            sender: {
-                typeOf: 'Corporation',
-                name: emailAttributes.sender.name,
-                email: emailAttributes.sender.email
-            },
-            toRecipient: {
-                typeOf: cinerinoapi.factory.personType.Person,
-                name: emailAttributes.toRecipient.name,
-                email: emailAttributes.toRecipient.email
-            },
-            about: emailAttributes.about,
-            text: emailAttributes.text
-        };
-        // その場で送信ではなく、DBにタスクを登録
-        const taskAttributes = {
-            name: tttsapi.factory.taskName.SendEmailMessage,
+        const purpose = {
             project: { typeOf: order.project.typeOf, id: order.project.id },
-            status: tttsapi.factory.taskStatus.Ready,
-            runsAt: new Date(),
-            remainingNumberOfTries: 10,
-            numberOfTried: 0,
-            executionResults: [],
-            data: {
-                actionAttributes: {
-                    typeOf: cinerinoapi.factory.actionType.SendAction,
-                    agent: req.staffUser,
-                    object: emailMessage,
-                    project: order.project,
-                    purpose: order,
-                    recipient: {
-                        id: order.customer.id,
-                        name: emailAttributes.toRecipient.name,
-                        typeOf: cinerinoapi.factory.personType.Person
-                    }
-                }
+            typeOf: order.typeOf,
+            seller: order.seller,
+            customer: order.customer,
+            confirmationNumber: order.confirmationNumber,
+            orderNumber: order.orderNumber,
+            price: order.price,
+            priceCurrency: order.priceCurrency,
+            orderDate: moment(order.orderDate)
+                .toDate()
+        };
+        return {
+            typeOf: cinerinoapi.factory.actionType.SendAction,
+            agent: {
+                typeOf: cinerinoapi.factory.personType.Person,
+                id: ''
+            },
+            object: emailMessage,
+            project: { typeOf: order.project.typeOf, id: order.project.id },
+            purpose: purpose,
+            recipient: {
+                id: order.customer.id,
+                name: emailMessage.toRecipient.name,
+                typeOf: order.customer.typeOf
             }
         };
-        yield taskService.create(taskAttributes);
-        debug('sendEmail task created.');
     });
+}
+function createPaymentTicketInfoText(res, order) {
+    var _a;
+    const reservation = order.acceptedOffers[0].itemOffered;
+    // ご来塔日時 : 2017/12/10 09:15
+    const event = reservation.reservationFor;
+    const day = moment(event.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD');
+    const time = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
+    // 購入番号
+    let paymentNo = '';
+    const paymentNoProperty = (_a = order.identifier) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'paymentNo');
+    if (paymentNoProperty !== undefined) {
+        paymentNo = paymentNoProperty.value;
+    }
+    // 購入チケット情報
+    const paymentTicketInfos = [];
+    paymentTicketInfos.push(`${res.__('PaymentNo')} : ${paymentNo}`);
+    paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);
+    paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`); // 券種 枚数
+    const infos = getTicketInfo(order, res.__, res.locale); // TOP DECKチケット(大人) 1枚
+    paymentTicketInfos.push(infos.join('\n'));
+    // 英語表記を追加
+    paymentTicketInfos.push(''); // 日英の間の改行
+    paymentTicketInfos.push(`${res.__({ phrase: 'PaymentNo', locale: 'en' })} : ${paymentNo}`);
+    paymentTicketInfos.push(`${res.__({ phrase: 'EmailReserveDate', locale: 'en' })} : ${day} ${time}`);
+    paymentTicketInfos.push(`${res.__({ phrase: 'TicketType', locale: 'en' })} ${res.__({ phrase: 'TicketCount', locale: 'en' })}`);
+    // TOP DECKチケット(大人) 1枚
+    const infosEn = getTicketInfo(order, res.__, 'en');
+    paymentTicketInfos.push(infosEn.join('\n'));
+    return paymentTicketInfos.join('\n');
 }
 /**
  * チケット情報取得
@@ -445,4 +413,3 @@ function getTicketInfo(order, __, locale) {
         return `${ticketInfos[ticketTypeId].ticket_type_name} ${__('{{n}}Leaf', { n: ticketInfos[ticketTypeId].count })}`;
     });
 }
-exports.getTicketInfo = getTicketInfo;
