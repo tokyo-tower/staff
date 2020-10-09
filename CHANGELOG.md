@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 返金処理実行時のイベント終了日時チェックをクライアントサイドへ移行
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.12.1 - 2020-10-09
+
+### Changed
+
+- 返金処理実行時のイベント終了日時チェックをクライアントサイドへ移行
 
 ## v6.12.0 - 2020-10-08
 
