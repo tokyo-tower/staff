@@ -180,6 +180,16 @@ $(function () {
     var busy_refund = false;
     var refund = function (performanceId) {
         var targetSuspension = suspensionsByPid[performanceId];
+
+        // TODO 「上映が終了していないので返品処理を実行できません。」の警告
+        var now = moment();
+        var endDate = moment(targetSuspension.end_date);
+        if (endDate >= now) {
+            alert('上映が終了していないので返品処理を実行できません。');
+
+            return false;
+        }
+
         var infoText = 'ツアー年月日: ' + moment(targetSuspension.start_date).format('YYYY/MM/DD HH:mm') + '～' + moment(targetSuspension.end_date).format('HH:mm') + '\nツアーNo: ' + targetSuspension.tour_number + '\n販売状況: ' + targetSuspension.ev_service_status_name;
         if (busy_refund
             || !confirm('このツアーへの返金処理を実行してよろしいですか？\n\n' + infoText)
@@ -220,7 +230,7 @@ $(function () {
         $input_performancedate.data('daterangepicker').setEndDate(moments_default.input_performancedate2);
         $input_onlinedate.data('daterangepicker').setStartDate(moments_default.input_onlinedate1);
         $input_onlinedate.data('daterangepicker').setEndDate(moments_default.input_onlinedate2);
-        $select_refund_status.val('').prop('selected',true);
+        $select_refund_status.val('').prop('selected', true);
         conditions.page = '1';
         search();
     };

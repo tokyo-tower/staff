@@ -261,15 +261,6 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
 
         const performanceId = req.params.performanceId;
 
-        // パフォーマンス終了済かどうか確認
-        const performance = await eventService.findPerofrmanceById({ id: performanceId });
-        debug('starting returnOrders by performance...', performance.id);
-        const now = moment();
-        const endDate = moment(performance.endDate);
-        if (endDate >= now) {
-            throw new Error('上映が終了していないので返品処理を実行できません。');
-        }
-
         // 返金対象注文を抽出する
         const returningOrders = await searchOrderNumberss4refund(req, performanceId, [...FRONTEND_CLIENT_IDS, ...POS_CLIENT_IDS]);
 
