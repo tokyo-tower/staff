@@ -503,13 +503,7 @@ async function createEmailMessage4sellerReason(
         return `${ticketInfo.name.en} ${ticketInfo.charge} × ${ticketInfo.count} ticket(s)`;
     }).join('\n');
 
-    let paymentNo = '';
-    if (Array.isArray(order.identifier)) {
-        const paymentNoProperty = order.identifier.find((p: any) => p.name === 'paymentNo');
-        if (paymentNoProperty !== undefined) {
-            paymentNo = paymentNoProperty.value;
-        }
-    }
+    const paymentNo = order.confirmationNumber;
 
     const message = await email.render('returnOrderBySeller', {
         purchaserNameJa: `${order.customer.familyName} ${order.customer.givenName}`,

@@ -407,11 +407,7 @@ function createPaymentTicketInfoText(
     const time: string = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
 
     // 購入番号
-    let paymentNo = '';
-    const paymentNoProperty = order.identifier?.find((p: any) => p.name === 'paymentNo');
-    if (paymentNoProperty !== undefined) {
-        paymentNo = paymentNoProperty.value;
-    }
+    const paymentNo = order.confirmationNumber;
 
     // 購入チケット情報
     const paymentTicketInfos: string[] = [];

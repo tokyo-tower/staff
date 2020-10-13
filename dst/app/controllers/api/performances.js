@@ -344,18 +344,13 @@ function createEmail(res, order, notice) {
     });
 }
 function createPaymentTicketInfoText(res, order) {
-    var _a;
     const reservation = order.acceptedOffers[0].itemOffered;
     // ご来塔日時 : 2017/12/10 09:15
     const event = reservation.reservationFor;
     const day = moment(event.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD');
     const time = moment(event.startDate).tz('Asia/Tokyo').format('HH:mm');
     // 購入番号
-    let paymentNo = '';
-    const paymentNoProperty = (_a = order.identifier) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'paymentNo');
-    if (paymentNoProperty !== undefined) {
-        paymentNo = paymentNoProperty.value;
-    }
+    const paymentNo = order.confirmationNumber;
     // 購入チケット情報
     const paymentTicketInfos = [];
     paymentTicketInfos.push(`${res.__('PaymentNo')} : ${paymentNo}`);
