@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.12.2 - 2020-10-13
+
+### Changed
+
+- 購入番号としてorder.confirmationNumberを使用するように調整
+
 ## v6.12.1 - 2020-10-09
 
 ### Changed
