@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 返金リストの来塔数について、検索の都度予約検索しないように調整
+
 ### Deprecated
 
 ### Removed

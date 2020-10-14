@@ -117,16 +117,16 @@ exports.searchSuspendedPerformances = searchSuspendedPerformances;
  */
 // tslint:disable-next-line:max-func-body-length
 function findSuspendedPerformances(req, conditions) {
-    var _a, _b;
+    var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
         const eventService = new tttsapi.service.Event({
             endpoint: process.env.API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        const reservationService = new tttsapi.service.Reservation({
-            endpoint: process.env.API_ENDPOINT,
-            auth: req.tttsAuthClient
-        });
+        // const reservationService = new tttsapi.service.Reservation({
+        //     endpoint: <string>process.env.API_ENDPOINT,
+        //     auth: req.tttsAuthClient
+        // });
         debug('finfing performances...', conditions);
         const searchResults = yield eventService.search(Object.assign(Object.assign({}, conditions), {
             countDocuments: '1',
@@ -137,7 +137,7 @@ function findSuspendedPerformances(req, conditions) {
         const results = [];
         for (const performance of performances) {
             let numberOfReservations = 0;
-            let nubmerOfUncheckedReservations = 0;
+            let nubmerOfCheckedReservations = 0;
             const extension = performance.ttts_extension;
             // 時点での予約
             let reservationsAtLastUpdateDate = extension === null || extension === void 0 ? void 0 : extension.reservationsAtLastUpdateDate;
@@ -148,16 +148,24 @@ function findSuspendedPerformances(req, conditions) {
                 numberOfReservations = reservationsAtLastUpdateDate.length;
                 // 時点での予約が存在していれば、そのうちの未入場数を検索
                 if (numberOfReservations > 0) {
-                    const searchReservationsResult = yield reservationService.search({
-                        limit: 1,
-                        typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-                        ids: reservationsAtLastUpdateDate.map((r) => r.id),
-                        checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
-                    });
-                    nubmerOfUncheckedReservations = searchReservationsResult.totalCount;
+                    const targetReservationIds = reservationsAtLastUpdateDate.map((r) => r.id);
+                    // その都度、予約検索する場合はコチラ↓
+                    // const searchReservationsResult = await reservationService.search({
+                    //     limit: 1,
+                    //     typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+                    //     ids: targetReservationIds,
+                    //     checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
+                    // });
+                    // const nubmerOfUncheckedReservations = <number>searchReservationsResult.totalCount;
+                    // nubmerOfCheckedReservations = numberOfReservations - nubmerOfUncheckedReservations;
+                    // performanceに保管された入場済予約から算出する場合はコチラ↓
+                    const checkedReservations = (_a = extension) === null || _a === void 0 ? void 0 : _a.checkedReservations;
+                    if (Array.isArray(checkedReservations)) {
+                        nubmerOfCheckedReservations = checkedReservations.filter((r) => targetReservationIds.includes(String(r.id))).length;
+                    }
                 }
             }
-            const tourNumber = (_b = (_a = performance.additionalProperty) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'tourNumber')) === null || _b === void 0 ? void 0 : _b.value;
+            const tourNumber = (_c = (_b = performance.additionalProperty) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'tourNumber')) === null || _c === void 0 ? void 0 : _c.value;
             let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
             switch (performance.eventStatus) {
                 case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:
@@ -185,7 +193,7 @@ function findSuspendedPerformances(req, conditions) {
                 online_sales_update_at: extension === null || extension === void 0 ? void 0 : extension.online_sales_update_at,
                 online_sales_update_user: extension === null || extension === void 0 ? void 0 : extension.online_sales_update_user,
                 canceled: numberOfReservations,
-                arrived: numberOfReservations - nubmerOfUncheckedReservations,
+                arrived: nubmerOfCheckedReservations,
                 refund_status: extension === null || extension === void 0 ? void 0 : extension.refund_status,
                 refund_status_name: ((extension === null || extension === void 0 ? void 0 : extension.refund_status) !== undefined) ? REFUND_STATUS_NAMES[extension.refund_status] : undefined,
                 refunded: extension === null || extension === void 0 ? void 0 : extension.refunded_count
