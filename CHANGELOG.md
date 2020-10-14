@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 売上レポート検索条件からaggregateUnitを削除
+
 ### Deprecated
 
 ### Removed

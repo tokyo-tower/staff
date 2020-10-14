@@ -48,7 +48,6 @@ function getAggregateSales(req, res) {
         try {
             switch (req.query.reportType) {
                 case ReportType.Sales:
-                    conditions.push({ aggregateUnit: 'SalesByEndDate' });
                     if (EXCLUDE_STAFF_RESERVATION) {
                         // 代理予約は除外
                         conditions.push({
