@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.12.3 - 2020-10-14
+
+### Changed
+
+- 売上レポート検索条件からaggregateUnitを削除
+
 ## v6.12.2 - 2020-10-13
 
 ### Changed
