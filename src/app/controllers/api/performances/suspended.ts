@@ -153,10 +153,10 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
         endpoint: <string>process.env.API_ENDPOINT,
         auth: req.tttsAuthClient
     });
-    const reservationService = new tttsapi.service.Reservation({
-        endpoint: <string>process.env.API_ENDPOINT,
-        auth: req.tttsAuthClient
-    });
+    // const reservationService = new tttsapi.service.Reservation({
+    //     endpoint: <string>process.env.API_ENDPOINT,
+    //     auth: req.tttsAuthClient
+    // });
 
     debug('finfing performances...', conditions);
     const searchResults = await eventService.search({
@@ -173,7 +173,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
 
     for (const performance of performances) {
         let numberOfReservations = 0;
-        let nubmerOfUncheckedReservations = 0;
+        let nubmerOfCheckedReservations = 0;
 
         const extension = performance.ttts_extension;
 
@@ -185,15 +185,26 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
                 .filter((r) => FRONTEND_CLIENT_IDS.indexOf(r.transaction_agent?.id) >= 0); // frontendアプリケーションでの購入
 
             numberOfReservations = reservationsAtLastUpdateDate.length;
+
             // 時点での予約が存在していれば、そのうちの未入場数を検索
             if (numberOfReservations > 0) {
-                const searchReservationsResult = await reservationService.search({
-                    limit: 1,
-                    typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-                    ids: reservationsAtLastUpdateDate.map((r) => r.id),
-                    checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
-                });
-                nubmerOfUncheckedReservations = <number>searchReservationsResult.totalCount;
+                const targetReservationIds = reservationsAtLastUpdateDate.map((r) => r.id);
+
+                // その都度、予約検索する場合はコチラ↓
+                // const searchReservationsResult = await reservationService.search({
+                //     limit: 1,
+                //     typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+                //     ids: targetReservationIds,
+                //     checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
+                // });
+                // const nubmerOfUncheckedReservations = <number>searchReservationsResult.totalCount;
+                // nubmerOfCheckedReservations = numberOfReservations - nubmerOfUncheckedReservations;
+
+                // performanceに保管された入場済予約から算出する場合はコチラ↓
+                const checkedReservations: any[] = (<any>extension)?.checkedReservations;
+                if (Array.isArray(checkedReservations)) {
+                    nubmerOfCheckedReservations = checkedReservations.filter((r) => targetReservationIds.includes(String(r.id))).length;
+                }
             }
         }
 
@@ -228,7 +239,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             online_sales_update_at: extension?.online_sales_update_at,
             online_sales_update_user: extension?.online_sales_update_user,
             canceled: numberOfReservations,
-            arrived: numberOfReservations - nubmerOfUncheckedReservations,
+            arrived: nubmerOfCheckedReservations,
             refund_status: extension?.refund_status,
             refund_status_name: (extension?.refund_status !== undefined) ? REFUND_STATUS_NAMES[extension.refund_status] : undefined,
             refunded: extension?.refunded_count
