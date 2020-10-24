@@ -98,16 +98,19 @@ export async function print(req: Request, res: Response, next: NextFunction): Pr
         orderNumbers = [...new Set(orderNumbers)];
         debug('printing reservations...ids:', ids, 'orderNumber:', orderNumbers);
 
-        // 印刷対象注文検索
-        const orderService = new cinerinoapi.service.Order({
-            endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient
-        });
-        const searchOrdersResult = await orderService.search({
-            limit: 100,
-            orderNumbers: orderNumbers
-        });
-        const orders = searchOrdersResult.data;
+        let orders: cinerinoapi.factory.order.IOrder[] = [];
+        if (Array.isArray(orderNumbers) && orderNumbers.length > 0) {
+            // 印刷対象注文検索
+            const orderService = new cinerinoapi.service.Order({
+                endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
+            const searchOrdersResult = await orderService.search({
+                limit: 100,
+                orderNumbers: orderNumbers
+            });
+            orders = searchOrdersResult.data;
+        }
         debug('printing...', orders.length, 'orders');
 
         // 印刷トークン発行

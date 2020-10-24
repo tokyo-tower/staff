@@ -93,16 +93,19 @@ function print(req, res, next) {
             let orderNumbers = req.query.orderNumbers;
             orderNumbers = [...new Set(orderNumbers)];
             debug('printing reservations...ids:', ids, 'orderNumber:', orderNumbers);
-            // 印刷対象注文検索
-            const orderService = new cinerinoapi.service.Order({
-                endpoint: process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient
-            });
-            const searchOrdersResult = yield orderService.search({
-                limit: 100,
-                orderNumbers: orderNumbers
-            });
-            const orders = searchOrdersResult.data;
+            let orders = [];
+            if (Array.isArray(orderNumbers) && orderNumbers.length > 0) {
+                // 印刷対象注文検索
+                const orderService = new cinerinoapi.service.Order({
+                    endpoint: process.env.CINERINO_API_ENDPOINT,
+                    auth: req.tttsAuthClient
+                });
+                const searchOrdersResult = yield orderService.search({
+                    limit: 100,
+                    orderNumbers: orderNumbers
+                });
+                orders = searchOrdersResult.data;
+            }
             debug('printing...', orders.length, 'orders');
             // 印刷トークン発行
             const token = yield createPrintToken(ids, orders);
