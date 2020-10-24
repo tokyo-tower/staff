@@ -408,6 +408,7 @@ $(function () {
         var orderNumbers = $('.td-checkbox input[type="checkbox"]:checked').map(function () {
             return this.parentNode.parentNode.getAttribute('data-order-number');
         }).get();
+        orderNumbers = Array.from(new Set(orderNumbers));
         console.log('printing...orderNumbers:', orderNumbers);
 
         var printQuery = ids.map(function (id) { return 'ids[]=' + id; }).join('&')
