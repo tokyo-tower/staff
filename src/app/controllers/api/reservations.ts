@@ -237,8 +237,16 @@ function addCustomAttributes(
             }
         }
 
+        // 注文番号
+        let orderNumber = '';
+        const orderNumberProperty = reservation.underName?.identifier?.find((p) => p.name === 'orderNumber');
+        if (orderNumberProperty !== undefined) {
+            orderNumber = orderNumberProperty.value;
+        }
+
         return {
             ...reservation,
+            orderNumber: orderNumber,
             paymentNo: paymentNo,
             payment_method_name: paymentMethod2name(paymentMethod4reservation),
             performance: reservation.reservationFor.id,

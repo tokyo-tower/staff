@@ -110,6 +110,7 @@ $(function () {
             html += ''
                 + '<tr data-seat-code="' + reservation.reservedTicket.ticketedSeat.seatNumber + '"'
                 + ' data-reservation-id="' + reservation.id + '"'
+                + ' data-order-number="' + reservation.orderNumber + '"'
                 + ' data-payment-no="' + reservation.paymentNo + '"'
                 + ' data-purchaser-name="' + reservation.purchaser_last_name + ' ' + reservation.purchaser_first_name + '"'
                 + ' data-purchaser-tel="' + reservation.purchaser_tel + '"'
@@ -404,15 +405,26 @@ $(function () {
             return alert('対象にする予約が選択されていません');
         }
 
+        var orderNumbers = $('.td-checkbox input[type="checkbox"]:checked').map(function () {
+            return this.parentNode.parentNode.getAttribute('data-order-number');
+        }).get();
+        console.log('printing...orderNumbers:', orderNumbers);
+
+        var printQuery = ids.map(function (id) { return 'ids[]=' + id; }).join('&')
+            + '&' + orderNumbers.map(function (orderNumber) { return 'orderNumbers[]=' + orderNumber; }).join('&');
+
         var action = document.getElementById('select_action').value;
         if (action === 'cancel') {
             cancel(ids);
         } else if (action === 'print') {
-            window.open('/staff/mypage/print?output=a4&' + ids.map(function (id) { return 'ids[]=' + id; }).join('&'));
+            // TODO まとめて印刷できる条件を限定する
+            window.open('/staff/mypage/print?output=a4&' + printQuery);
         } else if (action === 'thermalprint') {
-            window.open('/staff/mypage/print?output=thermal_normal&' + ids.map(function (id) { return 'ids[]=' + id; }).join('&'));
+            // TODO まとめて印刷できる条件を限定する
+            window.open('/staff/mypage/print?output=thermal_normal&' + printQuery);
         } else if (action === 'widethermalprint') {
-            window.open('/staff/mypage/print?output=thermal&' + ids.map(function (id) { return 'ids[]=' + id; }).join('&'));
+            // TODO まとめて印刷できる条件を限定する
+            window.open('/staff/mypage/print?output=thermal&' + printQuery);
         } else {
             alert('操作を選択してください');
         }

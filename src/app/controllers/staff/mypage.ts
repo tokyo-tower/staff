@@ -23,11 +23,21 @@ export type IPrintObject = string[];
 /**
  * 予約印刷トークンを発行する
  */
-export async function createPrintToken(object: IPrintObject): Promise<IPrintToken> {
+export async function createPrintToken(
+    object: IPrintObject,
+    orders: cinerinoapi.factory.order.IOrder[]
+): Promise<IPrintToken> {
     return new Promise<IPrintToken>((resolve, reject) => {
         const payload = {
-            object: object
+            object: object,
+            orders: orders.map((o) => {
+                return {
+                    orderNumber: o.orderNumber,
+                    confirmationNumber: o.confirmationNumber
+                };
+            })
         };
+        debug('signing jwt...', payload);
 
         jwt.sign(payload, <string>process.env.TTTS_TOKEN_SECRET, (jwtErr, token) => {
             if (jwtErr instanceof Error) {
@@ -84,10 +94,24 @@ export async function index(req: Request, res: Response, next: NextFunction): Pr
 export async function print(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const ids = <string[]>req.query.ids;
-        debug('printing reservations...ids:', ids);
+        let orderNumbers = <string[]>req.query.orderNumbers;
+        orderNumbers = [...new Set(orderNumbers)];
+        debug('printing reservations...ids:', ids, 'orderNumber:', orderNumbers);
+
+        // 印刷対象注文検索
+        const orderService = new cinerinoapi.service.Order({
+            endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+        const searchOrdersResult = await orderService.search({
+            limit: 100,
+            orderNumbers: orderNumbers
+        });
+        const orders = searchOrdersResult.data;
+        debug('printing...', orders.length, 'orders');
 
         // 印刷トークン発行
-        const token = await createPrintToken(ids);
+        const token = await createPrintToken(ids, orders);
         debug('printToken created.', token);
 
         const query = querystring.stringify({

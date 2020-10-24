@@ -189,6 +189,7 @@ exports.search = search;
 function addCustomAttributes(reservations) {
     // tslint:disable-next-line:cyclomatic-complexity
     return reservations.map((reservation) => {
+        var _a, _b;
         // 決済手段名称追加
         let paymentMethod4reservation = '';
         if (reservation.underName !== undefined && Array.isArray(reservation.underName.identifier)) {
@@ -220,7 +221,13 @@ function addCustomAttributes(reservations) {
                 paymentNo = paymentNoProperty.value;
             }
         }
-        return Object.assign(Object.assign({}, reservation), { paymentNo: paymentNo, payment_method_name: paymentMethod2name(paymentMethod4reservation), performance: reservation.reservationFor.id, performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'), performance_start_time: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HHmm'), performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'), performance_canceled: false, ticket_type: reservation.reservedTicket.ticketType.identifier, ticket_type_name: reservation.reservedTicket.ticketType.name, purchaser_group: (STAFF_CLIENT_IDS.indexOf(clientId) >= 0) ? 'Staff' : 'Customer', purchased_at: (reservation.bookingTime !== undefined) ? reservation.bookingTime : reservation.purchased_at, purchaser_name: (underName !== undefined) ? underName.name : '', purchaser_last_name: (underName !== undefined) ? underName.familyName : '', purchaser_first_name: (underName !== undefined) ? underName.givenName : '', purchaser_email: (underName !== undefined) ? underName.email : '', purchaser_tel: (underName !== undefined) ? underName.telephone : '', purchaser_international_tel: '', purchaser_age: age, purchaser_address: (underName !== undefined) ? underName.address : '', purchaser_gender: (underName !== undefined) ? underName.gender : '', watcher_name: reservation.additionalTicketText });
+        // 注文番号
+        let orderNumber = '';
+        const orderNumberProperty = (_b = (_a = reservation.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'orderNumber');
+        if (orderNumberProperty !== undefined) {
+            orderNumber = orderNumberProperty.value;
+        }
+        return Object.assign(Object.assign({}, reservation), { orderNumber: orderNumber, paymentNo: paymentNo, payment_method_name: paymentMethod2name(paymentMethod4reservation), performance: reservation.reservationFor.id, performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'), performance_start_time: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HHmm'), performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'), performance_canceled: false, ticket_type: reservation.reservedTicket.ticketType.identifier, ticket_type_name: reservation.reservedTicket.ticketType.name, purchaser_group: (STAFF_CLIENT_IDS.indexOf(clientId) >= 0) ? 'Staff' : 'Customer', purchased_at: (reservation.bookingTime !== undefined) ? reservation.bookingTime : reservation.purchased_at, purchaser_name: (underName !== undefined) ? underName.name : '', purchaser_last_name: (underName !== undefined) ? underName.familyName : '', purchaser_first_name: (underName !== undefined) ? underName.givenName : '', purchaser_email: (underName !== undefined) ? underName.email : '', purchaser_tel: (underName !== undefined) ? underName.telephone : '', purchaser_international_tel: '', purchaser_age: age, purchaser_address: (underName !== undefined) ? underName.address : '', purchaser_gender: (underName !== undefined) ? underName.gender : '', watcher_name: reservation.additionalTicketText });
     });
 }
 /**

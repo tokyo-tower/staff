@@ -22,12 +22,19 @@ const layout = 'layouts/staff/layout';
 /**
  * 予約印刷トークンを発行する
  */
-function createPrintToken(object) {
+function createPrintToken(object, orders) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
             const payload = {
-                object: object
+                object: object,
+                orders: orders.map((o) => {
+                    return {
+                        orderNumber: o.orderNumber,
+                        confirmationNumber: o.confirmationNumber
+                    };
+                })
             };
+            debug('signing jwt...', payload);
             jwt.sign(payload, process.env.TTTS_TOKEN_SECRET, (jwtErr, token) => {
                 if (jwtErr instanceof Error) {
                     reject(jwtErr);
@@ -83,9 +90,22 @@ function print(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const ids = req.query.ids;
-            debug('printing reservations...ids:', ids);
+            let orderNumbers = req.query.orderNumbers;
+            orderNumbers = [...new Set(orderNumbers)];
+            debug('printing reservations...ids:', ids, 'orderNumber:', orderNumbers);
+            // 印刷対象注文検索
+            const orderService = new cinerinoapi.service.Order({
+                endpoint: process.env.CINERINO_API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
+            const searchOrdersResult = yield orderService.search({
+                limit: 100,
+                orderNumbers: orderNumbers
+            });
+            const orders = searchOrdersResult.data;
+            debug('printing...', orders.length, 'orders');
             // 印刷トークン発行
-            const token = yield createPrintToken(ids);
+            const token = yield createPrintToken(ids, orders);
             debug('printToken created.', token);
             const query = querystring.stringify({
                 locale: 'ja',
