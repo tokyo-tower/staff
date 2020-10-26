@@ -390,14 +390,21 @@ $(function () {
         var modal_detail = document.getElementById('modal_detail');
         var reservationNode = this.parentNode.parentNode;
         var id = reservationNode.getAttribute('data-reservation-id');
+        var orderNumber = reservationNode.getAttribute('data-order-number');
+
         document.getElementById('echo_detailmodal__payment_no').innerHTML = reservationNode.getAttribute('data-payment-no');
         document.getElementById('echo_detailmodal__purchaserinfo').innerHTML = reservationNode.getAttribute('data-purchaser-name') + ' / ' + reservationNode.getAttribute('data-purchaser-tel');
         document.getElementById('echo_detailmodal__date').innerHTML = reservationNode.getAttribute('data-purchased-datetime') + ' / ' + reservationNode.getAttribute('data-performance-start-datetime');
         document.getElementById('echo_detailmodal__info').innerHTML = reservationNode.getAttribute('data-seat-code') + ' / ' + reservationNode.getAttribute('data-ticketname') + ' / ' + reservationNode.getAttribute('data-watcher-name');
         document.getElementById('echo_detailmodal__purchaseinfo').innerHTML = reservationNode.getAttribute('data-purchase-route') + ' / ' + reservationNode.getAttribute('data-payment-method') + ' / ' + reservationNode.getAttribute('data-checkined');
+
         modal_detail.querySelector('.btn-print').setAttribute('data-targetid', id);
         modal_detail.querySelector('.btn-thermalprint').setAttribute('data-targetid', id);
         modal_detail.querySelector('.btn-widethermalprint').setAttribute('data-targetid', id);
+        modal_detail.querySelector('.btn-print').setAttribute('data-order-number', orderNumber);
+        modal_detail.querySelector('.btn-thermalprint').setAttribute('data-order-number', orderNumber);
+        modal_detail.querySelector('.btn-widethermalprint').setAttribute('data-order-number', orderNumber);
+
         modal_detail.querySelector('.btn-cancelrsrv').onclick = function () { cancel([id]); };
         $(modal_detail).modal();
     });
