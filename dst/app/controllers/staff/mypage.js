@@ -93,6 +93,27 @@ function print(req, res, next) {
             let orderNumbers = req.query.orderNumbers;
             orderNumbers = [...new Set(orderNumbers)];
             debug('printing reservations...ids:', ids, 'orderNumber:', orderNumbers);
+            // クライアントのキャッシュ対応として、orderNumbersの指定がなければ、予約IDから自動検索
+            if (ids.length > 0 && orderNumbers.length === 0) {
+                const reservationService = new cinerinoapi.service.Reservation({
+                    endpoint: process.env.CINERINO_API_ENDPOINT,
+                    auth: req.tttsAuthClient
+                });
+                const searchReservationsResult = yield reservationService.search({
+                    limit: 100,
+                    typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+                    id: { $in: ids }
+                });
+                orderNumbers = [...new Set(searchReservationsResult.data.map((reservation) => {
+                        var _a, _b;
+                        let orderNumber = '';
+                        const orderNumberProperty = (_b = (_a = reservation.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'orderNumber');
+                        if (orderNumberProperty !== undefined) {
+                            orderNumber = orderNumberProperty.value;
+                        }
+                        return orderNumber;
+                    }))];
+            }
             let orders = [];
             if (Array.isArray(orderNumbers) && orderNumbers.length > 0) {
                 // 印刷対象注文検索
