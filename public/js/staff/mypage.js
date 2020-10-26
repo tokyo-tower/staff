@@ -36,13 +36,17 @@ $(function () {
     // サーマル印刷実行ボタン(58mm)
     $(document).on('click', '.btn-thermalprint', function (e) {
         var id = e.currentTarget.getAttribute('data-targetid');
-        window.open('/staff/mypage/print?output=thermal_normal&ids[]=' + id);
+        var orderNumber = e.currentTarget.getAttribute('data-order-number');
+
+        window.open('/staff/mypage/print?output=thermal_normal&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
     });
 
     // 厚紙印刷実行ボタン(72mm)
     $(document).on('click', '.btn-widethermalprint', function (e) {
         var id = e.currentTarget.getAttribute('data-targetid');
-        window.open('/staff/mypage/print?output=thermal&ids[]=' + id);
+        var orderNumber = e.currentTarget.getAttribute('data-order-number');
+
+        window.open('/staff/mypage/print?output=thermal&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
     });
 
     // 日付選択カレンダー (再読込時のために日付はsessionStorageにキープしておく)
@@ -143,9 +147,9 @@ $(function () {
             if (reservation.paymentNo && !reservation.performance_canceled) {
                 html += ''
                     + '<p class="btn call-modal"><span>詳細</span></p>'
-                    + '<p class="btn btn-print" data-targetid="' + reservation.id + '"><span>A4チケット印刷</span></p>'
-                    + '<p class="btn btn-thermalprint" data-targetid="' + reservation.id + '"><span>サーマル印刷</span></p>'
-                    + '<p class="btn btn-widethermalprint" data-targetid="' + reservation.id + '"><span>団体印刷</span></p>';
+                    + '<p class="btn btn-print" data-targetid="' + reservation.id + '" data-order-number="' + reservation.orderNumber + '"><span>A4チケット印刷</span></p>'
+                    + '<p class="btn btn-thermalprint" data-targetid="' + reservation.id + '" data-order-number="' + reservation.orderNumber + '"><span>サーマル印刷</span></p>'
+                    + '<p class="btn btn-widethermalprint" data-targetid="' + reservation.id + '" data-order-number="' + reservation.orderNumber + '"><span>団体印刷</span></p>';
             }
             html += ''
                 + '</td>'
@@ -375,8 +379,10 @@ $(function () {
     // A4印刷
     $(document).on('click', '.btn-print', function (e) {
         var id = e.currentTarget.getAttribute('data-targetid');
-        window.open('/staff/mypage/print?output=a4&ids[]=' + id);
-        console.log('/staff/mypage/print?output=a4&ids[]=' + id);
+        var orderNumber = e.currentTarget.getAttribute('data-order-number');
+
+        window.open('/staff/mypage/print?output=a4&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
+        console.log('/staff/mypage/print?output=a4&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
     });
 
     // 予約詳細モーダル呼び出し
