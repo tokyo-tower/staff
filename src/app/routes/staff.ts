@@ -13,6 +13,8 @@ const staffRouter = express.Router();
 
 staffRouter.all('/mypage', authentication, staffMyPageController.index);
 staffRouter.get('/mypage/print', authentication, staffMyPageController.print);
+staffRouter.get('/mypage/printByToken', authentication, staffMyPageController.printByToken);
+staffRouter.post('/mypage/print/token', authentication, staffMyPageController.getPrintToken);
 
 // 運行・オンライン販売停止設定コントローラー
 staffRouter.get('/suspension/setting/performances', authentication, staffSuspensionSettingController.performances);

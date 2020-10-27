@@ -38,7 +38,8 @@ $(function () {
         var id = e.currentTarget.getAttribute('data-targetid');
         var orderNumber = e.currentTarget.getAttribute('data-order-number');
 
-        window.open('/staff/mypage/print?output=thermal_normal&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
+        print([id], [orderNumber], 'thermal_normal');
+        // window.open('/staff/mypage/print?output=thermal_normal&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
     });
 
     // 厚紙印刷実行ボタン(72mm)
@@ -46,7 +47,8 @@ $(function () {
         var id = e.currentTarget.getAttribute('data-targetid');
         var orderNumber = e.currentTarget.getAttribute('data-order-number');
 
-        window.open('/staff/mypage/print?output=thermal&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
+        print([id], [orderNumber], 'thermal');
+        // window.open('/staff/mypage/print?output=thermal&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
     });
 
     // 日付選択カレンダー (再読込時のために日付はsessionStorageにキープしておく)
@@ -381,8 +383,9 @@ $(function () {
         var id = e.currentTarget.getAttribute('data-targetid');
         var orderNumber = e.currentTarget.getAttribute('data-order-number');
 
-        window.open('/staff/mypage/print?output=a4&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
-        console.log('/staff/mypage/print?output=a4&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
+        print([id], [orderNumber], 'a4');
+        // window.open('/staff/mypage/print?output=a4&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
+        // console.log('/staff/mypage/print?output=a4&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
     });
 
     // 予約詳細モーダル呼び出し
@@ -431,14 +434,14 @@ $(function () {
         if (action === 'cancel') {
             cancel(ids);
         } else if (action === 'print') {
-            // TODO まとめて印刷できる条件を限定する
-            window.open('/staff/mypage/print?output=a4&' + printQuery);
+            print(ids, orderNumbers, 'a4');
+            // window.open('/staff/mypage/print?output=a4&' + printQuery);
         } else if (action === 'thermalprint') {
-            // TODO まとめて印刷できる条件を限定する
-            window.open('/staff/mypage/print?output=thermal_normal&' + printQuery);
+            print(ids, orderNumbers, 'thermal_normal');
+            // window.open('/staff/mypage/print?output=thermal_normal&' + printQuery);
         } else if (action === 'widethermalprint') {
-            // TODO まとめて印刷できる条件を限定する
-            window.open('/staff/mypage/print?output=thermal&' + printQuery);
+            print(ids, orderNumbers, 'thermal');
+            // window.open('/staff/mypage/print?output=thermal&' + printQuery);
         } else {
             alert('操作を選択してください');
         }
@@ -456,3 +459,36 @@ $(function () {
     // 予約リスト表示
     search();
 });
+
+/**
+ * チケット印刷画面を表示する
+ * @param {Array} ids 
+ * @param {Array} orderNumbers 
+ * @param {String} output 
+ */
+function print(ids, orderNumbers, output) {
+    console.log('printing...', ids, orderNumbers, output);
+    // 印刷情報をトークン化する
+    $.ajax({
+        dataType: 'json',
+        url: '/staff/mypage/print/token',
+        type: 'POST',
+        data: { ids, orderNumbers, output },
+        beforeSend: function () {
+        }
+    }).done(function (data) {
+        console.log('token published', data.token);
+        window.open('/staff/mypage/printByToken?output=' + output);
+    }).fail(function (jqxhr, textStatus, error) {
+        alert('印刷できませんでした。再試行してください。');
+        console.log(error);
+    }).always(function () {
+    });
+
+    // var printQuery = '?output=' + output
+    //     + '&' + ids.map(function (id) { return 'ids[]=' + id; }).join('&')
+    //     + '&' + orderNumbers.map(function (orderNumber) { return 'orderNumbers[]=' + orderNumber; }).join('&');
+
+    // window.open('/staff/mypage/print' + printQuery);
+    // console.log('window opened', '/staff/mypage/print' + printQuery);
+}

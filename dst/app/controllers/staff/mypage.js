@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.print = exports.index = exports.createPrintToken = void 0;
+exports.printByToken = exports.getPrintToken = exports.print = exports.index = exports.createPrintToken = void 0;
 /**
  * マイページコントローラー
  */
@@ -146,3 +146,88 @@ function print(req, res, next) {
     });
 }
 exports.print = print;
+/**
+ * 印刷情報をトークン化する
+ */
+function getPrintToken(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const ids = req.body.ids;
+            let orderNumbers = req.body.orderNumbers;
+            orderNumbers = [...new Set(orderNumbers)];
+            debug('printing reservations...ids:', ids, 'orderNumber:', orderNumbers);
+            // クライアントのキャッシュ対応として、orderNumbersの指定がなければ、予約IDから自動検索
+            if (ids.length > 0 && orderNumbers.length === 0) {
+                const reservationService = new cinerinoapi.service.Reservation({
+                    endpoint: process.env.CINERINO_API_ENDPOINT,
+                    auth: req.tttsAuthClient
+                });
+                const searchReservationsResult = yield reservationService.search({
+                    limit: 100,
+                    typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+                    id: { $in: ids }
+                });
+                orderNumbers = [...new Set(searchReservationsResult.data.map((reservation) => {
+                        var _a, _b;
+                        let orderNumber = '';
+                        const orderNumberProperty = (_b = (_a = reservation.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'orderNumber');
+                        if (orderNumberProperty !== undefined) {
+                            orderNumber = orderNumberProperty.value;
+                        }
+                        return orderNumber;
+                    }))];
+            }
+            let orders = [];
+            if (Array.isArray(orderNumbers) && orderNumbers.length > 0) {
+                // 印刷対象注文検索
+                const orderService = new cinerinoapi.service.Order({
+                    endpoint: process.env.CINERINO_API_ENDPOINT,
+                    auth: req.tttsAuthClient
+                });
+                const searchOrdersResult = yield orderService.search({
+                    limit: 100,
+                    orderNumbers: orderNumbers
+                });
+                orders = searchOrdersResult.data;
+            }
+            debug('printing...', orders.length, 'orders');
+            // 印刷トークン発行
+            const token = yield createPrintToken(ids, orders);
+            debug('printToken created.', token);
+            req.session.printToken = token;
+            res.json({ token });
+        }
+        catch (error) {
+            next(error);
+        }
+    });
+}
+exports.getPrintToken = getPrintToken;
+function printByToken(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const token = req.session.printToken;
+            if (typeof token !== 'string' || token.length === 0) {
+                throw new Error('印刷情報が見つかりませんでした');
+            }
+            const query = querystring.stringify({
+                locale: 'ja',
+                output: req.query.output,
+                token: token
+            });
+            const printUrl = `${process.env.RESERVATIONS_PRINT_URL}?${query}`;
+            debug('printUrl:', printUrl);
+            res.render('staff/mypage/print', {
+                layout: false,
+                locale: 'ja',
+                output: req.query.output,
+                token,
+                action: process.env.RESERVATIONS_PRINT_URL
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    });
+}
+exports.printByToken = printByToken;

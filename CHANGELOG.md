@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 - 印刷トークンに注文情報を含めるように調整
+- 印刷アクションをPOSTメソッドへ変更
 
 ### Deprecated
 
