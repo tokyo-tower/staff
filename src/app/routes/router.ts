@@ -7,6 +7,7 @@ import { Router } from 'express';
 import * as languageController from '../controllers/language';
 
 import apiRouter from './api';
+import checkinRouter from './checkin';
 import reportsRouter from './reports';
 import staffRouter from './staff';
 
@@ -59,6 +60,9 @@ router.use('/reports', reportsRouter); //レポート出力
 
 // 言語
 router.get('/language/update/:locale', languageController.update);
+
+// 入場
+router.use('/checkin', checkinRouter);
 
 // 利用規約ページ
 // router.get('/terms/', (req: Request, res: Response) => {

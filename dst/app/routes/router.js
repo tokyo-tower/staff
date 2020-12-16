@@ -8,6 +8,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const languageController = require("../controllers/language");
 const api_1 = require("./api");
+const checkin_1 = require("./checkin");
 const reports_1 = require("./reports");
 const staff_1 = require("./staff");
 const DEFAULT_CALLBACK = process.env.DEFAULT_CALLBACK;
@@ -44,6 +45,8 @@ router.use('/staff', staff_1.default);
 router.use('/reports', reports_1.default); //レポート出力
 // 言語
 router.get('/language/update/:locale', languageController.update);
+// 入場
+router.use('/checkin', checkin_1.default);
 // 利用規約ページ
 // router.get('/terms/', (req: Request, res: Response) => {
 //     res.locals.req = req;

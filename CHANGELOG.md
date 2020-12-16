@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
+- 入場管理機能を追加
+
 ### Changed
 
 - 印刷トークンに注文情報を含めるように調整

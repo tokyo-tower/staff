@@ -1,9 +1,15 @@
 import * as cinerinoapi from '@cinerino/sdk';
 
+interface IGroup {
+    name: string;
+    description: string;
+}
+
 /**
  * 予約管理ユーザー
  */
 export class User {
+    public group: IGroup;
     public familyName: string;
     public givenName: string;
     public email: string;
@@ -13,13 +19,15 @@ export class User {
     public session: Express.Session;
     public state: string;
 
-    public static PARSE(session: Express.Session | undefined, host: string): User {
+    public static PARSE(session: Express.Session | undefined, host: string, state: string): User {
         const user = new User();
 
         user.session = <Express.Session>session;
+        user.state = state;
 
         // セッション値からオブジェクトにセット
         if (session !== undefined && session.staffUser !== undefined) {
+            user.group = session.staffUser.group;
             user.familyName = session.staffUser.familyName;
             user.givenName = session.staffUser.givenName;
             user.email = session.staffUser.email;
