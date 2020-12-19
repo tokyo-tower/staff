@@ -8,13 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
-- 入場管理機能を追加
-
 ### Changed
-
-- 印刷トークンに注文情報を含めるように調整
-- 印刷アクションをPOSTメソッドへ変更
-- update @motionpicture/ttts-api-nodejs-client
 
 ### Deprecated
 
@@ -23,6 +17,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.13.0 - 2020-12-19
+
+### Added
+
+- 入場管理機能を追加
+
+### Changed
+
+- 印刷トークンに注文情報を含めるように調整
+- 印刷アクションをPOSTメソッドへ変更
+- update @motionpicture/ttts-api-nodejs-client
 
 ## v6.12.4 - 2020-10-15
 
