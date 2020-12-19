@@ -23,8 +23,6 @@ function index(__, res, next) {
         try {
             res.render('staff/suspension/list', {
                 layout: layout,
-                EvServiceStatus: tttsapi.factory.performance.EvServiceStatus,
-                OnlineSalesStatus: tttsapi.factory.performance.OnlineSalesStatus,
                 RefundStatus: tttsapi.factory.performance.RefundStatus
             });
         }
