@@ -20,7 +20,7 @@ authRouter.get(
     async (req, res, next) => {
         try {
             // stateにはイベントオブジェクトとして受け取ったリクエストボディが入っている
-            const user = User.PARSE(req.session, req.hostname);
+            const user = User.PARSE(req.session, req.hostname, req.originalUrl);
 
             await user.signIn(req.query.code);
 
@@ -50,8 +50,10 @@ authRouter.get(
                 group: group
             };
 
-            const cb = (typeof req.query.cb === 'string' && req.query.cb.length > 0) ? req.query.cb : DEFAULT_CALLBACK;
-            res.redirect(cb);
+            const redirect = (typeof req.query.state === 'string' && req.query.state.length > 0)
+                ? req.query.state
+                : (typeof DEFAULT_CALLBACK === 'string' && DEFAULT_CALLBACK.length > 0) ? DEFAULT_CALLBACK : '/';
+            res.redirect(redirect);
         } catch (error) {
             next(error);
         }
@@ -67,10 +69,12 @@ authRouter.get(
     '/logout',
     async (req, res, next) => {
         try {
-            const user = User.PARSE(req.session, req.hostname);
+            const user = User.PARSE(req.session, req.hostname, req.originalUrl);
 
             user.logout();
-            res.redirect('/');
+
+            const redirect = (typeof req.query.redirect === 'string' && req.query.redirect.length > 0) ? req.query.redirect : '/';
+            res.redirect(redirect);
         } catch (error) {
             next(error);
         }

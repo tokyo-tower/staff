@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script type="text/javascript">
+        function submit() {
+            var f = document.forms["form1"];
+            f.submit();
+
+            return true;
+        }
+    </script>
+</head>
+
+<body onLoad="submit()">
+    <form name="form1" action="<%= action %>" method="post">
+        <input type="hidden" name="locale" value="<%= locale %>">
+        <input type="hidden" name="output" value="<%= output %>">
+        <input type="hidden" name="token" value="<%= token %>">
+    </form>
+
+</body>
+
+</html>

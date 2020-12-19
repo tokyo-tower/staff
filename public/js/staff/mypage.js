@@ -36,13 +36,19 @@ $(function () {
     // サーマル印刷実行ボタン(58mm)
     $(document).on('click', '.btn-thermalprint', function (e) {
         var id = e.currentTarget.getAttribute('data-targetid');
-        window.open('/staff/mypage/print?output=thermal_normal&ids[]=' + id);
+        var orderNumber = e.currentTarget.getAttribute('data-order-number');
+
+        print([id], [orderNumber], 'thermal_normal');
+        // window.open('/staff/mypage/print?output=thermal_normal&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
     });
 
     // 厚紙印刷実行ボタン(72mm)
     $(document).on('click', '.btn-widethermalprint', function (e) {
         var id = e.currentTarget.getAttribute('data-targetid');
-        window.open('/staff/mypage/print?output=thermal&ids[]=' + id);
+        var orderNumber = e.currentTarget.getAttribute('data-order-number');
+
+        print([id], [orderNumber], 'thermal');
+        // window.open('/staff/mypage/print?output=thermal&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
     });
 
     // 日付選択カレンダー (再読込時のために日付はsessionStorageにキープしておく)
@@ -110,6 +116,7 @@ $(function () {
             html += ''
                 + '<tr data-seat-code="' + reservation.reservedTicket.ticketedSeat.seatNumber + '"'
                 + ' data-reservation-id="' + reservation.id + '"'
+                + ' data-order-number="' + reservation.orderNumber + '"'
                 + ' data-payment-no="' + reservation.paymentNo + '"'
                 + ' data-purchaser-name="' + reservation.purchaser_last_name + ' ' + reservation.purchaser_first_name + '"'
                 + ' data-purchaser-tel="' + reservation.purchaser_tel + '"'
@@ -142,9 +149,9 @@ $(function () {
             if (reservation.paymentNo && !reservation.performance_canceled) {
                 html += ''
                     + '<p class="btn call-modal"><span>詳細</span></p>'
-                    + '<p class="btn btn-print" data-targetid="' + reservation.id + '"><span>A4チケット印刷</span></p>'
-                    + '<p class="btn btn-thermalprint" data-targetid="' + reservation.id + '"><span>サーマル印刷</span></p>'
-                    + '<p class="btn btn-widethermalprint" data-targetid="' + reservation.id + '"><span>団体印刷</span></p>';
+                    + '<p class="btn btn-print" data-targetid="' + reservation.id + '" data-order-number="' + reservation.orderNumber + '"><span>A4チケット印刷</span></p>'
+                    + '<p class="btn btn-thermalprint" data-targetid="' + reservation.id + '" data-order-number="' + reservation.orderNumber + '"><span>サーマル印刷</span></p>'
+                    + '<p class="btn btn-widethermalprint" data-targetid="' + reservation.id + '" data-order-number="' + reservation.orderNumber + '"><span>団体印刷</span></p>';
             }
             html += ''
                 + '</td>'
@@ -374,8 +381,11 @@ $(function () {
     // A4印刷
     $(document).on('click', '.btn-print', function (e) {
         var id = e.currentTarget.getAttribute('data-targetid');
-        window.open('/staff/mypage/print?output=a4&ids[]=' + id);
-        console.log('/staff/mypage/print?output=a4&ids[]=' + id);
+        var orderNumber = e.currentTarget.getAttribute('data-order-number');
+
+        print([id], [orderNumber], 'a4');
+        // window.open('/staff/mypage/print?output=a4&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
+        // console.log('/staff/mypage/print?output=a4&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
     });
 
     // 予約詳細モーダル呼び出し
@@ -383,14 +393,21 @@ $(function () {
         var modal_detail = document.getElementById('modal_detail');
         var reservationNode = this.parentNode.parentNode;
         var id = reservationNode.getAttribute('data-reservation-id');
+        var orderNumber = reservationNode.getAttribute('data-order-number');
+
         document.getElementById('echo_detailmodal__payment_no').innerHTML = reservationNode.getAttribute('data-payment-no');
         document.getElementById('echo_detailmodal__purchaserinfo').innerHTML = reservationNode.getAttribute('data-purchaser-name') + ' / ' + reservationNode.getAttribute('data-purchaser-tel');
         document.getElementById('echo_detailmodal__date').innerHTML = reservationNode.getAttribute('data-purchased-datetime') + ' / ' + reservationNode.getAttribute('data-performance-start-datetime');
         document.getElementById('echo_detailmodal__info').innerHTML = reservationNode.getAttribute('data-seat-code') + ' / ' + reservationNode.getAttribute('data-ticketname') + ' / ' + reservationNode.getAttribute('data-watcher-name');
         document.getElementById('echo_detailmodal__purchaseinfo').innerHTML = reservationNode.getAttribute('data-purchase-route') + ' / ' + reservationNode.getAttribute('data-payment-method') + ' / ' + reservationNode.getAttribute('data-checkined');
+
         modal_detail.querySelector('.btn-print').setAttribute('data-targetid', id);
         modal_detail.querySelector('.btn-thermalprint').setAttribute('data-targetid', id);
         modal_detail.querySelector('.btn-widethermalprint').setAttribute('data-targetid', id);
+        modal_detail.querySelector('.btn-print').setAttribute('data-order-number', orderNumber);
+        modal_detail.querySelector('.btn-thermalprint').setAttribute('data-order-number', orderNumber);
+        modal_detail.querySelector('.btn-widethermalprint').setAttribute('data-order-number', orderNumber);
+
         modal_detail.querySelector('.btn-cancelrsrv').onclick = function () { cancel([id]); };
         $(modal_detail).modal();
     });
@@ -404,15 +421,27 @@ $(function () {
             return alert('対象にする予約が選択されていません');
         }
 
+        var orderNumbers = $('.td-checkbox input[type="checkbox"]:checked').map(function () {
+            return this.parentNode.parentNode.getAttribute('data-order-number');
+        }).get();
+        orderNumbers = Array.from(new Set(orderNumbers));
+        console.log('printing...orderNumbers:', orderNumbers);
+
+        var printQuery = ids.map(function (id) { return 'ids[]=' + id; }).join('&')
+            + '&' + orderNumbers.map(function (orderNumber) { return 'orderNumbers[]=' + orderNumber; }).join('&');
+
         var action = document.getElementById('select_action').value;
         if (action === 'cancel') {
             cancel(ids);
         } else if (action === 'print') {
-            window.open('/staff/mypage/print?output=a4&' + ids.map(function (id) { return 'ids[]=' + id; }).join('&'));
+            print(ids, orderNumbers, 'a4');
+            // window.open('/staff/mypage/print?output=a4&' + printQuery);
         } else if (action === 'thermalprint') {
-            window.open('/staff/mypage/print?output=thermal_normal&' + ids.map(function (id) { return 'ids[]=' + id; }).join('&'));
+            print(ids, orderNumbers, 'thermal_normal');
+            // window.open('/staff/mypage/print?output=thermal_normal&' + printQuery);
         } else if (action === 'widethermalprint') {
-            window.open('/staff/mypage/print?output=thermal&' + ids.map(function (id) { return 'ids[]=' + id; }).join('&'));
+            print(ids, orderNumbers, 'thermal');
+            // window.open('/staff/mypage/print?output=thermal&' + printQuery);
         } else {
             alert('操作を選択してください');
         }
@@ -430,3 +459,36 @@ $(function () {
     // 予約リスト表示
     search();
 });
+
+/**
+ * チケット印刷画面を表示する
+ * @param {Array} ids 
+ * @param {Array} orderNumbers 
+ * @param {String} output 
+ */
+function print(ids, orderNumbers, output) {
+    console.log('printing...', ids, orderNumbers, output);
+    // 印刷情報をトークン化する
+    $.ajax({
+        dataType: 'json',
+        url: '/staff/mypage/print/token',
+        type: 'POST',
+        data: { ids, orderNumbers, output },
+        beforeSend: function () {
+        }
+    }).done(function (data) {
+        console.log('token published', data.token);
+        window.open('/staff/mypage/printByToken?output=' + output);
+    }).fail(function (jqxhr, textStatus, error) {
+        alert('印刷できませんでした。再試行してください。');
+        console.log(error);
+    }).always(function () {
+    });
+
+    // var printQuery = '?output=' + output
+    //     + '&' + ids.map(function (id) { return 'ids[]=' + id; }).join('&')
+    //     + '&' + orderNumbers.map(function (orderNumber) { return 'orderNumbers[]=' + orderNumber; }).join('&');
+
+    // window.open('/staff/mypage/print' + printQuery);
+    // console.log('window opened', '/staff/mypage/print' + printQuery);
+}

@@ -11,6 +11,8 @@ const authentication_1 = require("../middlewares/authentication");
 const staffRouter = express.Router();
 staffRouter.all('/mypage', authentication_1.default, staffMyPageController.index);
 staffRouter.get('/mypage/print', authentication_1.default, staffMyPageController.print);
+staffRouter.get('/mypage/printByToken', authentication_1.default, staffMyPageController.printByToken);
+staffRouter.post('/mypage/print/token', authentication_1.default, staffMyPageController.getPrintToken);
 // 運行・オンライン販売停止設定コントローラー
 staffRouter.get('/suspension/setting/performances', authentication_1.default, staffSuspensionSettingController.performances);
 // 運行・オンライン販売停止一覧コントローラー

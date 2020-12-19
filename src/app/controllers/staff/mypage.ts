@@ -23,11 +23,21 @@ export type IPrintObject = string[];
 /**
  * 予約印刷トークンを発行する
  */
-export async function createPrintToken(object: IPrintObject): Promise<IPrintToken> {
+export async function createPrintToken(
+    object: IPrintObject,
+    orders: cinerinoapi.factory.order.IOrder[]
+): Promise<IPrintToken> {
     return new Promise<IPrintToken>((resolve, reject) => {
         const payload = {
-            object: object
+            object: object,
+            orders: orders.map((o) => {
+                return {
+                    orderNumber: o.orderNumber,
+                    confirmationNumber: o.confirmationNumber
+                };
+            })
         };
+        debug('signing jwt...', payload);
 
         jwt.sign(payload, <string>process.env.TTTS_TOKEN_SECRET, (jwtErr, token) => {
             if (jwtErr instanceof Error) {
@@ -84,10 +94,50 @@ export async function index(req: Request, res: Response, next: NextFunction): Pr
 export async function print(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const ids = <string[]>req.query.ids;
-        debug('printing reservations...ids:', ids);
+        let orderNumbers = <string[]>req.query.orderNumbers;
+        orderNumbers = [...new Set(orderNumbers)];
+        debug('printing reservations...ids:', ids, 'orderNumber:', orderNumbers);
+
+        // クライアントのキャッシュ対応として、orderNumbersの指定がなければ、予約IDから自動検索
+        if (ids.length > 0 && orderNumbers.length === 0) {
+            const reservationService = new cinerinoapi.service.Reservation({
+                endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
+
+            const searchReservationsResult = await reservationService.search({
+                limit: 100,
+                typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+                id: { $in: ids }
+            });
+            orderNumbers = [...new Set(searchReservationsResult.data.map((reservation) => {
+                let orderNumber = '';
+                const orderNumberProperty = reservation.underName?.identifier?.find((p) => p.name === 'orderNumber');
+                if (orderNumberProperty !== undefined) {
+                    orderNumber = orderNumberProperty.value;
+                }
+
+                return orderNumber;
+            }))];
+        }
+
+        let orders: cinerinoapi.factory.order.IOrder[] = [];
+        if (Array.isArray(orderNumbers) && orderNumbers.length > 0) {
+            // 印刷対象注文検索
+            const orderService = new cinerinoapi.service.Order({
+                endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
+            const searchOrdersResult = await orderService.search({
+                limit: 100,
+                orderNumbers: orderNumbers
+            });
+            orders = searchOrdersResult.data;
+        }
+        debug('printing...', orders.length, 'orders');
 
         // 印刷トークン発行
-        const token = await createPrintToken(ids);
+        const token = await createPrintToken(ids, orders);
         debug('printToken created.', token);
 
         const query = querystring.stringify({
@@ -99,6 +149,92 @@ export async function print(req: Request, res: Response, next: NextFunction): Pr
         debug('printUrl:', printUrl);
 
         res.redirect(printUrl);
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * 印刷情報をトークン化する
+ */
+export async function getPrintToken(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+        const ids = <string[]>req.body.ids;
+        let orderNumbers = <string[]>req.body.orderNumbers;
+        orderNumbers = [...new Set(orderNumbers)];
+        debug('printing reservations...ids:', ids, 'orderNumber:', orderNumbers);
+
+        // クライアントのキャッシュ対応として、orderNumbersの指定がなければ、予約IDから自動検索
+        if (ids.length > 0 && orderNumbers.length === 0) {
+            const reservationService = new cinerinoapi.service.Reservation({
+                endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
+
+            const searchReservationsResult = await reservationService.search({
+                limit: 100,
+                typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+                id: { $in: ids }
+            });
+            orderNumbers = [...new Set(searchReservationsResult.data.map((reservation) => {
+                let orderNumber = '';
+                const orderNumberProperty = reservation.underName?.identifier?.find((p) => p.name === 'orderNumber');
+                if (orderNumberProperty !== undefined) {
+                    orderNumber = orderNumberProperty.value;
+                }
+
+                return orderNumber;
+            }))];
+        }
+
+        let orders: cinerinoapi.factory.order.IOrder[] = [];
+        if (Array.isArray(orderNumbers) && orderNumbers.length > 0) {
+            // 印刷対象注文検索
+            const orderService = new cinerinoapi.service.Order({
+                endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
+            const searchOrdersResult = await orderService.search({
+                limit: 100,
+                orderNumbers: orderNumbers
+            });
+            orders = searchOrdersResult.data;
+        }
+        debug('printing...', orders.length, 'orders');
+
+        // 印刷トークン発行
+        const token = await createPrintToken(ids, orders);
+        debug('printToken created.', token);
+
+        (<any>req.session).printToken = token;
+        res.json({ token });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function printByToken(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+        const token = (<any>req.session).printToken;
+        if (typeof token !== 'string' || token.length === 0) {
+            throw new Error('印刷情報が見つかりませんでした');
+        }
+
+        const query = querystring.stringify({
+            locale: 'ja',
+            output: req.query.output,
+            token: token
+        });
+        const printUrl = `${process.env.RESERVATIONS_PRINT_URL}?${query}`;
+        debug('printUrl:', printUrl);
+
+        res.render('staff/mypage/print', {
+            layout: false,
+            locale: 'ja',
+            output: req.query.output,
+            token,
+            action: process.env.RESERVATIONS_PRINT_URL
+        });
     } catch (error) {
         next(error);
     }

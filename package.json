@@ -13,10 +13,10 @@
     }
   ],
   "dependencies": {
-    "@cinerino/sdk": "^1.14.0",
+    "@cinerino/sdk": "1.18.1",
     "@motionpicture/express-middleware": "0.0.0",
-    "@motionpicture/ttts-api-nodejs-client": "8.0.0-alpha.0",
-    "@types/node": "^8.10.61",
+    "@motionpicture/ttts-api-nodejs-client": "8.0.1",
+    "axios": "0.18.0",
     "body-parser": "^1.18.2",
     "config": "^1.29.2",
     "connect-redis": "^3.3.3",
@@ -24,6 +24,7 @@
     "debug": "^3.1.0",
     "ejs": "^2.5.7",
     "email-templates": "^3.6.1",
+    "es6-promise": "4.2.4",
     "express": "^4.16.2",
     "express-partials": "^0.3.0",
     "express-session": "^1.15.6",
@@ -42,7 +43,9 @@
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
     "serve-favicon": "^2.4.5",
-    "underscore": "^1.8.3"
+    "type-detect": "4.0.8",
+    "underscore": "^1.8.3",
+    "vue": "2.6.12"
   },
   "description": "Repogitory for TTTS Staff Application",
   "devDependencies": {
@@ -64,6 +67,7 @@
     "@types/mocha": "^2.2.46",
     "@types/moment-timezone": "^0.5.12",
     "@types/multer": "0.0.33",
+    "@types/node": "^8.10.66",
     "@types/numeral": "0.0.19",
     "@types/redis": "^2.8.4",
     "@types/request": "^2.0.12",
@@ -110,5 +114,5 @@
     "version": "git add -A",
     "postversion": "git push origin --tags"
   },
-  "version": "6.12.4"
+  "version": "6.13.0"
 }

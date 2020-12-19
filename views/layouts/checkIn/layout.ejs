@@ -1,0 +1,32 @@
+
+<!DOCTYPE html>
+<html lang="ja" class="is-<%= process.env.NODE_ENV %>">
+<head>
+<meta charset="utf-8">
+<title><%= __('Title') %></title>
+<meta name="description" content="TOKYO TOWER TOP DECK TOUR">
+<meta name="keywords" content="TOKYO TOWER TOP DECK TOUR">
+<meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1">
+<meta name="format-detection" content="telephone=no">
+
+<link href="/css/checkin.css" rel="stylesheet">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="/js/lib/url.min.js"></script>
+<script src="/js/checkin.js"></script>
+
+</head>
+
+<body id="<%- pageId.trim() %>" class="<%- pageClassName.trim() %>">
+
+<%- include('./_header') %>
+
+<div class="container">
+    <%- body %>
+</div>
+
+<%- include('./_footer') %>
+
+</body>
+</html>

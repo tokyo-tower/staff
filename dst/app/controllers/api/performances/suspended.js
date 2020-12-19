@@ -77,7 +77,6 @@ function searchSuspendedPerformances(req, res) {
                 $in: [tttsapi.factory.chevre.eventStatusType.EventCancelled, tttsapi.factory.chevre.eventStatusType.EventPostponed]
             },
             ttts_extension: {
-                // online_sales_status: tttsapi.factory.performance.OnlineSalesStatus.Suspended,
                 online_sales_update_at: (day1 !== null || day2 !== null)
                     ? Object.assign(Object.assign({}, (day1 !== null)
                         ? { $gte: moment(`${day1}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').toDate() }

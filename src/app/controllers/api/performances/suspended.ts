@@ -73,7 +73,6 @@ export async function searchSuspendedPerformances(req: Request, res: Response): 
             $in: [tttsapi.factory.chevre.eventStatusType.EventCancelled, tttsapi.factory.chevre.eventStatusType.EventPostponed]
         },
         ttts_extension: {
-            // online_sales_status: tttsapi.factory.performance.OnlineSalesStatus.Suspended,
             online_sales_update_at: (day1 !== null || day2 !== null)
                 ? {
                     ...(day1 !== null)

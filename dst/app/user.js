@@ -15,11 +15,13 @@ const cinerinoapi = require("@cinerino/sdk");
  * 予約管理ユーザー
  */
 class User {
-    static PARSE(session, host) {
+    static PARSE(session, host, state) {
         const user = new User();
         user.session = session;
+        user.state = state;
         // セッション値からオブジェクトにセット
         if (session !== undefined && session.staffUser !== undefined) {
+            user.group = session.staffUser.group;
             user.familyName = session.staffUser.familyName;
             user.givenName = session.staffUser.givenName;
             user.email = session.staffUser.email;

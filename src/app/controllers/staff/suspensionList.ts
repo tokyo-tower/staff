@@ -14,8 +14,6 @@ export async function index(__: Request, res: Response, next: NextFunction): Pro
     try {
         res.render('staff/suspension/list', {
             layout: layout,
-            EvServiceStatus: tttsapi.factory.performance.EvServiceStatus,
-            OnlineSalesStatus: tttsapi.factory.performance.OnlineSalesStatus,
             RefundStatus: tttsapi.factory.performance.RefundStatus
         });
     } catch (error) {

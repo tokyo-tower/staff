@@ -25,7 +25,7 @@ const authRouter = express.Router();
 authRouter.get('/signIn', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // stateにはイベントオブジェクトとして受け取ったリクエストボディが入っている
-        const user = user_1.User.PARSE(req.session, req.hostname);
+        const user = user_1.User.PARSE(req.session, req.hostname, req.originalUrl);
         yield user.signIn(req.query.code);
         user.authClient.setCredentials({
             refresh_token: user.getRefreshToken()
@@ -49,8 +49,10 @@ authRouter.get('/signIn', (req, res, next) => __awaiter(void 0, void 0, void 0, 
             telephone: profile.phone_number,
             group: group
         };
-        const cb = (typeof req.query.cb === 'string' && req.query.cb.length > 0) ? req.query.cb : DEFAULT_CALLBACK;
-        res.redirect(cb);
+        const redirect = (typeof req.query.state === 'string' && req.query.state.length > 0)
+            ? req.query.state
+            : (typeof DEFAULT_CALLBACK === 'string' && DEFAULT_CALLBACK.length > 0) ? DEFAULT_CALLBACK : '/';
+        res.redirect(redirect);
     }
     catch (error) {
         next(error);
@@ -63,9 +65,10 @@ authRouter.get('/signIn', (req, res, next) => __awaiter(void 0, void 0, void 0, 
 /* istanbul ignore next */
 authRouter.get('/logout', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = user_1.User.PARSE(req.session, req.hostname);
+        const user = user_1.User.PARSE(req.session, req.hostname, req.originalUrl);
         user.logout();
-        res.redirect('/');
+        const redirect = (typeof req.query.redirect === 'string' && req.query.redirect.length > 0) ? req.query.redirect : '/';
+        res.redirect(redirect);
     }
     catch (error) {
         next(error);
