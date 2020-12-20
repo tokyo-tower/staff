@@ -4,6 +4,7 @@ npm-debug.log*
 iisnode/
 doc
 .env*
+app.yaml*
 .vscode/
 .DS_Store
 Thumbs.db
