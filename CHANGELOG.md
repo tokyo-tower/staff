@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 - 多言語対応を廃止
+- 不要なconfigを削除
 
 ### Deprecated
 
