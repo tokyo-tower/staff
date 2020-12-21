@@ -12,6 +12,7 @@ const checkin_1 = require("./checkin");
 const reports_1 = require("./reports");
 const staff_1 = require("./staff");
 const DEFAULT_CALLBACK = process.env.DEFAULT_CALLBACK;
+const GCP_REDIRECT = process.env.GCP_REDIRECT;
 // 本体サイトのトップページの言語別URL
 // const topUrlByLocale = conf.get<any>('official_url_top_by_locale');
 // 本体サイトのFAQページの言語別URL
@@ -36,6 +37,14 @@ const router = express_1.Router();
 router.get('/', (_, res, next) => {
     if (typeof DEFAULT_CALLBACK === 'string' && DEFAULT_CALLBACK.length > 0) {
         res.redirect(DEFAULT_CALLBACK);
+        return;
+    }
+    next();
+});
+// GCPへのリダイレクト指定があれば全てリダイレクト
+router.use((req, res, next) => {
+    if (typeof GCP_REDIRECT === 'string' && GCP_REDIRECT.length > 0) {
+        res.redirect(`${GCP_REDIRECT}${req.originalUrl}`);
         return;
     }
     next();

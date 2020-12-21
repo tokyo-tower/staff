@@ -90,7 +90,7 @@
     "typescript": "^3.9.7"
   },
   "engines": {
-    "node": "10.0.0",
+    "node": "10.x.x",
     "npm": ">=5.3.0"
   },
   "keywords": [],
@@ -114,5 +114,5 @@
     "version": "git add -A",
     "postversion": "git push origin --tags"
   },
-  "version": "6.13.0"
+  "version": "6.13.1"
 }

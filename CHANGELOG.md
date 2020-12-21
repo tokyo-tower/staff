@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.13.1 - 2020-12-21
+
+### Changed
+
+- GCP_REDIRECT設定を追加
+
 ## v6.13.0 - 2020-12-19
 
 ### Added
