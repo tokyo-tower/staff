@@ -267,7 +267,7 @@ function isInputEven(value1, value2) {
 function cancel(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (req.staffUser === undefined) {
-            next(new Error(req.__('UnexpectedError')));
+            next(new Error('システムエラーが発生しました。ご不便をおかけして申し訳ありませんがしばらく経ってから再度お試しください。'));
             return;
         }
         const successIds = [];
@@ -275,7 +275,7 @@ function cancel(req, res, next) {
         try {
             const reservationIds = req.body.reservationIds;
             if (!Array.isArray(reservationIds)) {
-                throw new Error(req.__('UnexpectedError'));
+                throw new Error('システムエラーが発生しました。ご不便をおかけして申し訳ありませんがしばらく経ってから再度お試しください。');
             }
             const reservationService = new tttsapi.service.Reservation({
                 endpoint: process.env.API_ENDPOINT,

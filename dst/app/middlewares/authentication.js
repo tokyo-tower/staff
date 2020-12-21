@@ -21,7 +21,7 @@ exports.default = (req, res, next) => __awaiter(void 0, void 0, void 0, function
         // tttsapi認証クライアントをリクエストオブジェクトにセット
         const cognitoCredentials = req.session.cognitoCredentials;
         if (cognitoCredentials === undefined) {
-            next(new Error(res.__('UnexpectedError')));
+            next(new Error('システムエラーが発生しました。ご不便をおかけして申し訳ありませんがしばらく経ってから再度お試しください。'));
             return;
         }
         const oauth2Client = new tttsapi.auth.OAuth2({

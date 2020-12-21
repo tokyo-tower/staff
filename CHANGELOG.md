@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 多言語対応を廃止
+
 ### Deprecated
 
 ### Removed

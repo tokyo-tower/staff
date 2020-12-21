@@ -89,7 +89,7 @@
         <div class="wrapper-inputs form-inline">
             <div class="form-group">
                 <label>
-                    <%- __('PaymentNo') %>
+                    購入番号
                 </label>
                 <input type="text" class="form-control" name="payment_no">
             </div>
@@ -187,9 +187,7 @@
                 <th>
                     <input type="checkbox" class="check-all">
                 </th>
-                <th>
-                    <%- __('PaymentNo') %>
-                </th>
+                <th>購入番号</th>
                 <th>氏名</th>
                 <th>メモ</th>
                 <th>
@@ -358,7 +356,7 @@
         <div class="modal-content">
             <div class="modal-body">
                 <div class="text-center">
-                    <%- __('Processing') %>
+                    処理中
                 </div>
             </div>
         </div>
@@ -367,9 +365,7 @@
 
 <input type="hidden" name="username" value="<%- req.staffUser.username %>">
 <input type="hidden" name="urlCancel" value="/api/reservations/cancel">
-<input type="hidden" name="messageAreYouSureCancel" value="<%- __('Message.AreYouSureCancel') %>">
-<input type="hidden" name="messageConfirmCancelSelectedTickets"
-    value="<%- __('Message.ConfirmCancelSelectedTickets') %>">
+<input type="hidden" name="messageAreYouSureCancel" value="本当にキャンセルしますか？">
 <input type="hidden" name="POS_CLIENT_ID" value="<%- process.env.POS_CLIENT_ID %>">
 
 <script src="/js/flatpickr/flatpickr.min.js"></script>

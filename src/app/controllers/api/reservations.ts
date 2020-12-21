@@ -313,7 +313,7 @@ function isInputEven(value1: string, value2: string): boolean {
  */
 export async function cancel(req: Request, res: Response, next: NextFunction): Promise<void> {
     if (req.staffUser === undefined) {
-        next(new Error(req.__('UnexpectedError')));
+        next(new Error('システムエラーが発生しました。ご不便をおかけして申し訳ありませんがしばらく経ってから再度お試しください。'));
 
         return;
     }
@@ -322,7 +322,7 @@ export async function cancel(req: Request, res: Response, next: NextFunction): P
     try {
         const reservationIds = req.body.reservationIds;
         if (!Array.isArray(reservationIds)) {
-            throw new Error(req.__('UnexpectedError'));
+            throw new Error('システムエラーが発生しました。ご不便をおかけして申し訳ありませんがしばらく経ってから再度お試しください。');
         }
 
         const reservationService = new tttsapi.service.Reservation({

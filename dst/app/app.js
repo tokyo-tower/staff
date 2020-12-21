@@ -9,7 +9,7 @@ const express = require("express");
 // tslint:disable-next-line:no-require-imports
 const partials = require("express-partials");
 const expressValidator = require("express-validator");
-const i18n = require("i18n");
+// import * as i18n from 'i18n';
 const multer = require("multer");
 const favicon = require("serve-favicon");
 const authentication_1 = require("./middlewares/authentication");
@@ -39,16 +39,16 @@ app.use(multer({ storage: storage }).any());
 app.use(cookieParser());
 app.use(express.static(`${__dirname}/../../public`));
 // i18n を利用する設定
-i18n.configure({
-    // locales: ['en', 'ja'],
-    locales: ['ja'],
-    defaultLocale: 'ja',
-    directory: `${__dirname}/../../locales`,
-    objectNotation: true,
-    updateFiles: false // ページのビューで自動的に言語ファイルを更新しない
-});
+// i18n.configure({
+//     // locales: ['en', 'ja'],
+//     locales: ['ja'],
+//     defaultLocale: 'ja',
+//     directory: `${__dirname}/../../locales`,
+//     objectNotation: true,
+//     updateFiles: false // ページのビューで自動的に言語ファイルを更新しない
+// });
 // i18n の設定を有効化
-app.use(i18n.init);
+// app.use(i18n.init);
 app.use(expressValidator()); // バリデーション
 app.use(setLocals_1.default); // ローカル変数セット
 // ルーティング登録の順序に注意！

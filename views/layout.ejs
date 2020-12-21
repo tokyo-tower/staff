@@ -1,7 +1,7 @@
 <%
 let routeName = req.path;
 
-let currentLang = locale;
+let currentLang = 'ja';
 let pageId = (routeName) ? 'page_'+routeName.replace(/\//,'').replace(/:[^\/]*\//g,'').replace(/\//g,'_') : '';
 let pageClassName = (routeName) ? 'page-'+routeName.replace(/\//,'').replace(/:[^\/]*\//g,'').replace(/\//g,' page-') : '';
 pageClassName = pageClassName + ' page-'+currentLang;
@@ -12,7 +12,7 @@ const path_header = /staff/.test(routeName) ? './layouts/staff/_header' : './lay
 <html lang="<%- currentLang %>">
 <head>
 <meta charset="utf-8">
-<title><%= __('Title') %></title>
+<title>東京タワー TOP DECK Ticket</title>
 <meta name="description" content="<%= conf.get('meta.description') %>">
 <meta name="keywords" content="<%= conf.get('meta.keywords') %>">
 <meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1">

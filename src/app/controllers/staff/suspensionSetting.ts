@@ -19,6 +19,6 @@ export async function performances(req: Request, res: Response, next: NextFuncti
             RefundStatus: tttsapi.factory.performance.RefundStatus
         });
     } catch (error) {
-        next(new Error(req.__('UnexpectedError')));
+        next(new Error('システムエラーが発生しました。ご不便をおかけして申し訳ありませんがしばらく経ってから再度お試しください。'));
     }
 }
