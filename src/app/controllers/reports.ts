@@ -6,18 +6,9 @@ import * as createDebug from 'debug';
 import { Request, Response } from 'express';
 import { OK } from 'http-status';
 import * as moment from 'moment-timezone';
-import * as _ from 'underscore';
 
 const debug = createDebug('ttts-backend:controllers');
 
-// const authClient = new tttsapi.auth.OAuth2({
-//     domain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
-//     clientId: <string>process.env.API_CLIENT_ID,
-//     clientSecret: <string>process.env.API_CLIENT_SECRET
-// });
-
-// const POS_CLIENT_ID = process.env.POS_CLIENT_ID;
-// const TOP_DECK_OPEN_DATE = process.env.TOP_DECK_OPEN_DATE;
 const RESERVATION_START_DATE = process.env.RESERVATION_START_DATE;
 const EXCLUDE_STAFF_RESERVATION = process.env.EXCLUDE_STAFF_RESERVATION === '1';
 
@@ -129,5 +120,5 @@ export async function getAggregateSales(req: Request, res: Response): Promise<vo
  */
 function getValue(inputValue: string | null): string | null {
     // tslint:disable-next-line:no-null-keyword
-    return (!_.isEmpty(inputValue)) ? inputValue : null;
+    return (typeof inputValue === 'string' && inputValue.length > 0) ? inputValue : null;
 }

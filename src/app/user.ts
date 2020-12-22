@@ -67,10 +67,7 @@ export class User {
     }
 
     public getRefreshToken(): string | undefined {
-        return (this.session !== undefined && this.session !== null
-            && this.session.cognitoCredentials !== undefined && this.session.cognitoCredentials !== null)
-            ? this.session.cognitoCredentials.refreshToken
-            : undefined;
+        return this.session?.cognitoCredentials?.refreshToken;
     }
 
     public async signIn(code: string) {

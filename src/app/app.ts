@@ -32,6 +32,14 @@ app.use(partials()); // レイアウト&パーシャルサポート
 
 app.use(session); // セッション
 
+// api version
+// tslint:disable-next-line:no-require-imports no-var-requires
+const packageInfo = require('../../package.json');
+app.use((__, res, next) => {
+    res.setHeader('x-api-version', <string>packageInfo.version);
+    next();
+});
+
 // view engine setup
 app.set('views', `${__dirname}/../../views`);
 app.set('view engine', 'ejs');

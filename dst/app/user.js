@@ -55,10 +55,8 @@ class User {
         return this.authClient.generateLogoutUrl();
     }
     getRefreshToken() {
-        return (this.session !== undefined && this.session !== null
-            && this.session.cognitoCredentials !== undefined && this.session.cognitoCredentials !== null)
-            ? this.session.cognitoCredentials.refreshToken
-            : undefined;
+        var _a, _b;
+        return (_b = (_a = this.session) === null || _a === void 0 ? void 0 : _a.cognitoCredentials) === null || _b === void 0 ? void 0 : _b.refreshToken;
     }
     signIn(code) {
         return __awaiter(this, void 0, void 0, function* () {

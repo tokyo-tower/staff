@@ -18,7 +18,6 @@ const conf = require("config");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
-const _ = require("underscore");
 const debug = createDebug('ttts-staff:controllers');
 const paymentMethodsForCustomer = conf.get('paymentMethodsForCustomer');
 const paymentMethodsForStaff = conf.get('paymentMethodsForStaff');
@@ -58,32 +57,44 @@ function search(req, res) {
             return;
         }
         // tslint:disable-next-line:no-magic-numbers
-        const limit = (!_.isEmpty(req.query.limit)) ? parseInt(req.query.limit, 10) : 10;
+        const limit = (typeof req.query.limit === 'string' && req.query.limit.length > 0) ? parseInt(req.query.limit, 10) : 10;
         // tslint:disable-next-line:no-magic-numbers
-        const page = (!_.isEmpty(req.query.page)) ? parseInt(req.query.page, 10) : 1;
+        const page = (typeof req.query.page === 'string' && req.query.page.length > 0) ? parseInt(req.query.page, 10) : 1;
         // ご来塔日時
-        const day = (!_.isEmpty(req.query.day)) ? req.query.day : null;
-        const startHour1 = (!_.isEmpty(req.query.start_hour1)) ? req.query.start_hour1 : null;
-        const startMinute1 = (!_.isEmpty(req.query.start_minute1)) ? req.query.start_minute1 : null;
-        const startHour2 = (!_.isEmpty(req.query.start_hour2)) ? req.query.start_hour2 : null;
-        const startMinute2 = (!_.isEmpty(req.query.start_minute2)) ? req.query.start_minute2 : null;
+        const day = (typeof req.query.day === 'string' && req.query.day.length > 0) ? req.query.day : null;
+        const startHour1 = (typeof req.query.start_hour1 === 'string' && req.query.start_hour1.length > 0)
+            ? req.query.start_hour1 : null;
+        const startMinute1 = (typeof req.query.start_minute1 === 'string' && req.query.start_minute1.length > 0)
+            ? req.query.start_minute1 : null;
+        const startHour2 = (typeof req.query.start_hour2 === 'string' && req.query.start_hour2.length > 0)
+            ? req.query.start_hour2 : null;
+        const startMinute2 = (typeof req.query.start_minute2 === 'string' && req.query.start_minute2.length > 0)
+            ? req.query.start_minute2 : null;
         // 購入番号
-        const paymentNo = (!_.isEmpty(req.query.payment_no)) ? req.query.payment_no : null;
+        const paymentNo = (typeof req.query.payment_no === 'string' && req.query.payment_no.length > 0)
+            ? req.query.payment_no : null;
         // アカウント
-        const owner = (!_.isEmpty(req.query.owner)) ? req.query.owner : null;
+        const owner = (typeof req.query.owner === 'string' && req.query.owner.length > 0) ? req.query.owner : null;
         // 予約方法
-        const purchaserGroup = (!_.isEmpty(req.query.purchaser_group)) ? req.query.purchaser_group : null;
+        const purchaserGroup = (typeof req.query.purchaser_group === 'string' && req.query.purchaser_group.length > 0)
+            ? req.query.purchaser_group : null;
         // 決済手段
-        const paymentMethod = (!_.isEmpty(req.query.payment_method)) ? req.query.payment_method : null;
+        const paymentMethod = (typeof req.query.payment_method === 'string' && req.query.payment_method.length > 0)
+            ? req.query.payment_method : null;
         // 名前
-        const purchaserLastName = (!_.isEmpty(req.query.purchaser_last_name)) ? req.query.purchaser_last_name : null;
-        const purchaserFirstName = (!_.isEmpty(req.query.purchaser_first_name)) ? req.query.purchaser_first_name : null;
+        const purchaserLastName = (typeof req.query.purchaser_last_name === 'string' && req.query.purchaser_last_name.length > 0)
+            ? req.query.purchaser_last_name : null;
+        const purchaserFirstName = (typeof req.query.purchaser_first_name === 'string' && req.query.purchaser_first_name.length > 0)
+            ? req.query.purchaser_first_name : null;
         // メアド
-        const purchaserEmail = (!_.isEmpty(req.query.purchaser_email)) ? req.query.purchaser_email : null;
+        const purchaserEmail = (typeof req.query.purchaser_email === 'string' && req.query.purchaser_email.length > 0)
+            ? req.query.purchaser_email : null;
         // 電話番号
-        const purchaserTel = (!_.isEmpty(req.query.purchaser_tel)) ? req.query.purchaser_tel : null;
+        const purchaserTel = (typeof req.query.purchaser_tel === 'string' && req.query.purchaser_tel.length > 0)
+            ? req.query.purchaser_tel : null;
         // メモ
-        const watcherName = (!_.isEmpty(req.query.watcher_name)) ? req.query.watcher_name : null;
+        const watcherName = (typeof req.query.watcher_name === 'string' && req.query.watcher_name.length > 0)
+            ? req.query.watcher_name : null;
         // 検索条件を作成
         const startTimeFrom = (startHour1 !== null && startMinute1 !== null) ? startHour1 + startMinute1 : null;
         const startTimeTo = (startHour2 !== null && startMinute2 !== null) ? startHour2 + startMinute2 : null;
@@ -253,10 +264,12 @@ function paymentMethod2name(method) {
  * 両方入力チェック(両方入力、または両方未入力の時true)
  */
 function isInputEven(value1, value2) {
-    if (_.isEmpty(value1) && _.isEmpty(value2)) {
+    if ((typeof value1 !== 'string' || value1.length === 0)
+        && (typeof value2 !== 'string' || value2.length === 0)) {
         return true;
     }
-    if (!_.isEmpty(value1) && !_.isEmpty(value2)) {
+    if ((typeof value1 === 'string' && value1.length > 0)
+        && (typeof value2 === 'string' && value2.length > 0)) {
         return true;
     }
     return false;

@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 - 多言語対応を廃止
 - 不要なconfigを削除
+- レスポンスヘッダーにx-api-versionを追加
 
 ### Deprecated
 
