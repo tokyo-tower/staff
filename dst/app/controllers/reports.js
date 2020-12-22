@@ -17,15 +17,7 @@ const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
-const _ = require("underscore");
 const debug = createDebug('ttts-backend:controllers');
-// const authClient = new tttsapi.auth.OAuth2({
-//     domain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
-//     clientId: <string>process.env.API_CLIENT_ID,
-//     clientSecret: <string>process.env.API_CLIENT_SECRET
-// });
-// const POS_CLIENT_ID = process.env.POS_CLIENT_ID;
-// const TOP_DECK_OPEN_DATE = process.env.TOP_DECK_OPEN_DATE;
 const RESERVATION_START_DATE = process.env.RESERVATION_START_DATE;
 const EXCLUDE_STAFF_RESERVATION = process.env.EXCLUDE_STAFF_RESERVATION === '1';
 var ReportType;
@@ -127,5 +119,5 @@ exports.getAggregateSales = getAggregateSales;
  */
 function getValue(inputValue) {
     // tslint:disable-next-line:no-null-keyword
-    return (!_.isEmpty(inputValue)) ? inputValue : null;
+    return (typeof inputValue === 'string' && inputValue.length > 0) ? inputValue : null;
 }

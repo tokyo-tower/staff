@@ -4,7 +4,7 @@ if (req.hasOwnProperty('route')) {
     routeName = req.route.path;
 }
 
-let currentLang = locale;
+let currentLang = 'ja';
 let pageId = (routeName) ? 'page_staff_'+routeName.replace(/\//,'').replace(/:[^\/]*\//g,'').replace(/\//g,'_') : '';
 let pageClassName = (routeName) ? 'page-'+routeName.replace(/\//,'').replace(/:[^\/]*\//g,'').replace(/\//g,' page-') : '';
 pageClassName = pageClassName + ' page-'+currentLang;
@@ -15,9 +15,9 @@ pageClassName += ' page-staff';
 <html lang="<%- currentLang %>">
 <head>
 <meta charset="utf-8">
-<title><%= __('Title') %></title>
-<meta name="description" content="<%= conf.get('meta.description') %>">
-<meta name="keywords" content="<%= conf.get('meta.keywords') %>">
+<title>東京タワー TOP DECK Ticket</title>
+<meta name="description" content="TOKYO TOWER TOP DECK TOUR">
+<meta name="keywords" content="TOKYO TOWER TOP DECK TOUR">
 <meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1">
 <meta name="format-detection" content="telephone=no">
 

@@ -15,7 +15,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
         // tttsapi認証クライアントをリクエストオブジェクトにセット
         const cognitoCredentials = (<Express.Session>req.session).cognitoCredentials;
         if (cognitoCredentials === undefined) {
-            next(new Error(res.__('UnexpectedError')));
+            next(new Error('システムエラーが発生しました。ご不便をおかけして申し訳ありませんがしばらく経ってから再度お試しください。'));
 
             return;
         }

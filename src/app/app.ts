@@ -8,7 +8,7 @@ import * as express from 'express';
 // tslint:disable-next-line:no-require-imports
 import partials = require('express-partials');
 import * as expressValidator from 'express-validator';
-import * as i18n from 'i18n';
+// import * as i18n from 'i18n';
 import * as multer from 'multer';
 import * as favicon from 'serve-favicon';
 
@@ -32,6 +32,14 @@ app.use(partials()); // レイアウト&パーシャルサポート
 
 app.use(session); // セッション
 
+// api version
+// tslint:disable-next-line:no-require-imports no-var-requires
+const packageInfo = require('../../package.json');
+app.use((__, res, next) => {
+    res.setHeader('x-api-version', <string>packageInfo.version);
+    next();
+});
+
 // view engine setup
 app.set('views', `${__dirname}/../../views`);
 app.set('view engine', 'ejs');
@@ -49,16 +57,16 @@ app.use(cookieParser());
 app.use(express.static(`${__dirname}/../../public`));
 
 // i18n を利用する設定
-i18n.configure({
-    // locales: ['en', 'ja'],
-    locales: ['ja'],
-    defaultLocale: 'ja',
-    directory: `${__dirname}/../../locales`,
-    objectNotation: true,
-    updateFiles: false // ページのビューで自動的に言語ファイルを更新しない
-});
+// i18n.configure({
+//     // locales: ['en', 'ja'],
+//     locales: ['ja'],
+//     defaultLocale: 'ja',
+//     directory: `${__dirname}/../../locales`,
+//     objectNotation: true,
+//     updateFiles: false // ページのビューで自動的に言語ファイルを更新しない
+// });
 // i18n の設定を有効化
-app.use(i18n.init);
+// app.use(i18n.init);
 
 app.use(expressValidator()); // バリデーション
 

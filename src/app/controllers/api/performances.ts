@@ -110,7 +110,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
         // パフォーマンスIDリストをjson形式で受け取る
         const performanceIds = req.body.performanceIds;
         if (!Array.isArray(performanceIds)) {
-            throw new Error(req.__('UnexpectedError'));
+            throw new Error('システムエラーが発生しました。ご不便をおかけして申し訳ありませんがしばらく経ってから再度お試しください。');
         }
 
         // パフォーマンス・予約(入塔記録のないもの)のステータス更新
@@ -198,7 +198,7 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
                             && reservation.reservationFor.id === performanceId;
                     });
                 });
-                sendEmailMessageParams = await createEmails(res, targetOrders4performance, notice);
+                sendEmailMessageParams = await createEmails(targetOrders4performance, notice);
             }
 
             // Chevreイベントステータスに反映
@@ -301,7 +301,6 @@ async function getTargetReservationsForRefund(req: Request, performanceIds: stri
  * 運行・オンライン販売停止メール作成
  */
 async function createEmails(
-    res: Response,
     orders: cinerinoapi.factory.order.IOrder[],
     notice: string
 ): Promise<cinerinoapi.factory.action.transfer.send.message.email.IAttributes[]> {
@@ -310,7 +309,7 @@ async function createEmails(
     }
 
     return Promise.all(orders.map(async (order) => {
-        return createEmail(res, order, notice);
+        return createEmail(order, notice);
     }));
 }
 
@@ -318,14 +317,13 @@ async function createEmails(
  * 運行・オンライン販売停止メール作成(1通)
  */
 async function createEmail(
-    res: Response,
     order: cinerinoapi.factory.order.IOrder,
     notice: string
 ): Promise<cinerinoapi.factory.action.transfer.send.message.email.IAttributes> {
     const purchaserNameJp = `${order.customer.familyName} ${order.customer.givenName}`;
-    const purchaserName: string = `${res.__('{{name}}様', { name: purchaserNameJp })}`;
-    const purchaserNameEn: string = `${res.__('Mr./Ms.{{name}}', { name: <string>order.customer.name })}`;
-    const paymentTicketInfoText = createPaymentTicketInfoText(res, order);
+    const purchaserName: string = `${purchaserNameJp}様`;
+    const purchaserNameEn: string = `Mr./Ms.${<string>order.customer.name}`;
+    const paymentTicketInfoText = createPaymentTicketInfoText(order);
 
     const email = new Email({
         views: { root: `${__dirname}/../../../../emails` },
@@ -395,10 +393,7 @@ async function createEmail(
     };
 }
 
-function createPaymentTicketInfoText(
-    res: Response,
-    order: cinerinoapi.factory.order.IOrder
-): string {
+function createPaymentTicketInfoText(order: cinerinoapi.factory.order.IOrder): string {
     const reservation = <IReservationOrderItem>order.acceptedOffers[0].itemOffered;
 
     // ご来塔日時 : 2017/12/10 09:15
@@ -412,19 +407,19 @@ function createPaymentTicketInfoText(
     // 購入チケット情報
     const paymentTicketInfos: string[] = [];
 
-    paymentTicketInfos.push(`${res.__('PaymentNo')} : ${paymentNo}`);
-    paymentTicketInfos.push(`${res.__('EmailReserveDate')} : ${day} ${time}`);
-    paymentTicketInfos.push(`${res.__('TicketType')} ${res.__('TicketCount')}`); // 券種 枚数
-    const infos = getTicketInfo(order, res.__, res.locale); // TOP DECKチケット(大人) 1枚
+    paymentTicketInfos.push(`購入番号 : ${paymentNo}`);
+    paymentTicketInfos.push(`ご予約日時 : ${day} ${time}`);
+    paymentTicketInfos.push(`券種 枚数`); // 券種 枚数
+    const infos = getTicketInfo(order, 'ja'); // TOP DECKチケット(大人) 1枚
     paymentTicketInfos.push(infos.join('\n'));
 
     // 英語表記を追加
     paymentTicketInfos.push(''); // 日英の間の改行
-    paymentTicketInfos.push(`${res.__({ phrase: 'PaymentNo', locale: 'en' })} : ${paymentNo}`);
-    paymentTicketInfos.push(`${res.__({ phrase: 'EmailReserveDate', locale: 'en' })} : ${day} ${time}`);
-    paymentTicketInfos.push(`${res.__({ phrase: 'TicketType', locale: 'en' })} ${res.__({ phrase: 'TicketCount', locale: 'en' })}`);
+    paymentTicketInfos.push(`Purchase Number : ${paymentNo}`);
+    paymentTicketInfos.push(`Date/Time of Tour : ${day} ${time}`);
+    paymentTicketInfos.push(`Ticket Type Quantity`);
     // TOP DECKチケット(大人) 1枚
-    const infosEn = getTicketInfo(order, res.__, 'en');
+    const infosEn = getTicketInfo(order, 'en');
     paymentTicketInfos.push(infosEn.join('\n'));
 
     return paymentTicketInfos.join('\n');
@@ -433,7 +428,7 @@ function createPaymentTicketInfoText(
 /**
  * チケット情報取得
  */
-function getTicketInfo(order: cinerinoapi.factory.order.IOrder, __: Function, locale: string): string[] {
+function getTicketInfo(order: cinerinoapi.factory.order.IOrder, locale: string): string[] {
     const acceptedOffers = order.acceptedOffers;
 
     // チケットコード順にソート
@@ -478,6 +473,6 @@ function getTicketInfo(order: cinerinoapi.factory.order.IOrder, __: Function, lo
 
     // 券種ごとの表示情報編集
     return Object.keys(ticketInfos).map((ticketTypeId) => {
-        return `${ticketInfos[ticketTypeId].ticket_type_name} ${__('{{n}}Leaf', { n: ticketInfos[ticketTypeId].count })}`;
+        return `${ticketInfos[ticketTypeId].ticket_type_name} ${ticketInfos[ticketTypeId].count}枚`;
     });
 }
