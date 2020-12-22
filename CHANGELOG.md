@@ -10,10 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 多言語対応を廃止
-- 不要なconfigを削除
-- レスポンスヘッダーにx-api-versionを追加
-
 ### Deprecated
 
 ### Removed
@@ -21,6 +17,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.14.0 - 2020-12-22
+
+### Changed
+
+- 多言語対応を廃止
+- 不要なconfigを削除
+- レスポンスヘッダーにx-api-versionを追加
 
 ## v6.13.1 - 2020-12-21
 
