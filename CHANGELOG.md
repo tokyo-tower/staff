@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- NEW_REPORT_URL設定を追加
+
 ### Deprecated
 
 ### Removed
