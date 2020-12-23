@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.14.1 - 2020-12-23
+
+### Changed
+
+- NEW_REPORT_URL設定を追加
+
 ## v6.14.0 - 2020-12-22
 
 ### Changed

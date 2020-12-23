@@ -16,6 +16,7 @@ const cinerinoapi = require("@cinerino/sdk");
 // import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 const express_1 = require("express");
 const reportsController = require("../controllers/reports");
+const NEW_REPORT_URL = process.env.NEW_REPORT_URL;
 const reportsRouter = express_1.Router();
 // const authClient = new tttsapi.auth.OAuth2({
 //     domain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
@@ -24,6 +25,10 @@ const reportsRouter = express_1.Router();
 // });
 // 売上レポート出力
 reportsRouter.get('', (__, res) => {
+    if (typeof NEW_REPORT_URL === 'string' && NEW_REPORT_URL.length > 0) {
+        res.redirect(NEW_REPORT_URL);
+        return;
+    }
     res.render('reports/index', {
         title: 'レポート',
         routeName: 'master.report.index',
