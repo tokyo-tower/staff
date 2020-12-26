@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.14.2 - 2020-12-26
+
+### Changed
+
+- tttsapi.factory.performance.EvServiceStatusへの依存を削除
+
 ## v6.14.1 - 2020-12-23
 
 ### Changed
