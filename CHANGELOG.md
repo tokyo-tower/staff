@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- tttsapi.factory.performance.EvServiceStatusへの依存を削除
+
 ### Deprecated
 
 ### Removed

@@ -17,11 +17,11 @@ import * as numeral from 'numeral';
 const debug = createDebug('ttts-staff:controllers');
 
 const EMPTY_STRING: string = '-';
-const EV_SERVICE_STATUS_NAMES: any = {
-};
-EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Normal] = EMPTY_STRING;
-EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Slowdown] = '一時休止';
-EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Suspended] = '完全中止';
+// const EV_SERVICE_STATUS_NAMES: any = {
+// };
+// EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Normal] = EMPTY_STRING;
+// EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Slowdown] = '一時休止';
+// EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Suspended] = '完全中止';
 const REFUND_STATUS_NAMES: any = {
 };
 REFUND_STATUS_NAMES[tttsapi.factory.performance.RefundStatus.None] = EMPTY_STRING;
@@ -209,13 +209,16 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
 
         const tourNumber = performance.additionalProperty?.find((p) => p.name === 'tourNumber')?.value;
 
-        let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
+        // let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
+        let evServiceStatusName: string = EMPTY_STRING;
         switch (performance.eventStatus) {
             case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:
-                evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Suspended;
+                // evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Suspended;
+                evServiceStatusName = '完全中止';
                 break;
             case cinerinoapi.factory.chevre.eventStatusType.EventPostponed:
-                evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Slowdown;
+                // evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Slowdown;
+                evServiceStatusName = '一時休止';
                 break;
             case cinerinoapi.factory.chevre.eventStatusType.EventScheduled:
                 break;
@@ -231,10 +234,8 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             start_date: performance.startDate,
             end_date: performance.endDate,
             tour_number: tourNumber,
-            ev_service_status: evServiceStatus,
-            ev_service_status_name: (evServiceStatus !== undefined)
-                ? EV_SERVICE_STATUS_NAMES[evServiceStatus]
-                : undefined,
+            // ev_service_status: evServiceStatus,
+            ev_service_status_name: evServiceStatusName,
             online_sales_update_at: extension?.online_sales_update_at,
             online_sales_update_user: extension?.online_sales_update_user,
             canceled: numberOfReservations,
