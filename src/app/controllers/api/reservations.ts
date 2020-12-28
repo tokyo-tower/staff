@@ -11,7 +11,9 @@ import * as moment from 'moment-timezone';
 
 const debug = createDebug('ttts-staff:controllers');
 
-const paymentMethodsForCustomer = conf.get<any>('paymentMethodsForCustomer');
+const paymentMethodsForCustomer: { [key: string]: string } = {
+    CreditCard: 'クレジットカード'
+};
 const paymentMethodsForStaff = conf.get<any>('paymentMethodsForStaff');
 
 const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')

@@ -1,26 +1,25 @@
 /**
- * 代理予約スタッフルーティング
+ * 予約管理スタッフルーティング
  */
 import * as express from 'express';
 
-import * as staffMyPageController from '../controllers/staff/mypage';
-import * as staffSuspensionListController from '../controllers/staff/suspensionList';
-import * as staffSuspensionSettingController from '../controllers/staff/suspensionSetting';
+import * as myPageController from '../controllers/staff/mypage';
+import * as suspensionController from '../controllers/staff/suspension';
 
 import authentication from '../middlewares/authentication';
 
 const staffRouter = express.Router();
 
-staffRouter.all('/mypage', authentication, staffMyPageController.index);
-staffRouter.get('/mypage/print', authentication, staffMyPageController.print);
-staffRouter.get('/mypage/printByToken', authentication, staffMyPageController.printByToken);
-staffRouter.post('/mypage/print/token', authentication, staffMyPageController.getPrintToken);
+staffRouter.all('/mypage', authentication, myPageController.index);
+staffRouter.get('/mypage/print', authentication, myPageController.print);
+staffRouter.get('/mypage/printByToken', authentication, myPageController.printByToken);
+staffRouter.post('/mypage/print/token', authentication, myPageController.getPrintToken);
 
 // 運行・オンライン販売停止設定コントローラー
-staffRouter.get('/suspension/setting/performances', authentication, staffSuspensionSettingController.performances);
+staffRouter.get('/suspension/setting/performances', authentication, suspensionController.performances);
 
 // 運行・オンライン販売停止一覧コントローラー
-staffRouter.get('/suspension/list', authentication, staffSuspensionListController.index);
+staffRouter.get('/suspension/list', authentication, suspensionController.index);
 
 staffRouter.get(
     '/auth',

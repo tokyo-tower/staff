@@ -19,7 +19,9 @@ const createDebug = require("debug");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const debug = createDebug('ttts-staff:controllers');
-const paymentMethodsForCustomer = conf.get('paymentMethodsForCustomer');
+const paymentMethodsForCustomer = {
+    CreditCard: 'クレジットカード'
+};
 const paymentMethodsForStaff = conf.get('paymentMethodsForStaff');
 const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
     ? process.env.FRONTEND_CLIENT_ID.split(',')
