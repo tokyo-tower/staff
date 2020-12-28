@@ -13,8 +13,8 @@ import { chevreReservation2ttts } from '../util/reservation';
 
 const authClient = new cinerinoapi.auth.ClientCredentials({
     domain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
-    clientId: <string>process.env.API_CLIENT_ID,
-    clientSecret: <string>process.env.API_CLIENT_SECRET,
+    clientId: <string>process.env.API_CLIENT_ID_CLIENT_CREDENTIALS,
+    clientSecret: <string>process.env.API_CLIENT_SECRET_CLIENT_CREDENTIALS,
     scopes: [],
     state: ''
 });
