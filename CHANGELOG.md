@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 予約使用時に、Cinerinoにlocationを連携するように調整
+
 ### Deprecated
 
 ### Removed
