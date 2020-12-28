@@ -117,15 +117,10 @@
                 <label>決済手段</label>
                 <select class="form-control" name="payment_method">
                     <option value="">指定無し</option>
-                    <%
-                        const paymentMethodsForCustomer = conf.get('paymentMethodsForCustomer');
-                        Object.keys(paymentMethodsForCustomer).forEach((methodCode) => {
-                    %>
-                    <option value="<%- methodCode %>">
-                        <%- paymentMethodsForCustomer[methodCode] %>
+                    <option value="CreditCard">
+                        クレジットカード
                     </option>
-                    <%  });
-                        const paymentMethodsForStaff = conf.get('paymentMethodsForStaff');
+                    <% const paymentMethodsForStaff = conf.get('paymentMethodsForStaff');
                         Object.keys(paymentMethodsForStaff).forEach((methodCode) => {
                     %>
                     <option value="<%- methodCode %>">

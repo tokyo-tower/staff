@@ -4,7 +4,6 @@
 import * as cinerinoapi from '@cinerino/sdk';
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
-import * as conf from 'config';
 import * as createDebug from 'debug';
 import * as Email from 'email-templates';
 import { Request, Response } from 'express';
@@ -351,8 +350,8 @@ async function createEmail(
         name: `updateOnlineStatus-${order.orderNumber}`,
         sender: {
             typeOf: order.seller.typeOf,
-            name: conf.get<string>('email.fromname'),
-            email: conf.get<string>('email.from')
+            name: 'Tokyo Tower TOP DECK TOUR Online Ticket',
+            email: <string>process.env.EMAIL_SENDER
         },
         toRecipient: {
             typeOf: order.customer.typeOf,

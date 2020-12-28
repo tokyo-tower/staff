@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.index = void 0;
+exports.performances = exports.index = void 0;
 /**
  * 運行・オンライン販売停止一覧コントローラー
  */
@@ -32,3 +32,22 @@ function index(__, res, next) {
     });
 }
 exports.index = index;
+/**
+ * スケジュール選択
+ */
+function performances(__, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // 運行・オンライン販売停止設定画面表示
+            res.render('staff/suspension/performances', {
+                // token: req.tttsAuthClient.credentials,
+                layout: layout,
+                EventStatusType: tttsapi.factory.chevre.eventStatusType
+            });
+        }
+        catch (error) {
+            next(new Error('システムエラーが発生しました。ご不便をおかけして申し訳ありませんがしばらく経ってから再度お試しください。'));
+        }
+    });
+}
+exports.performances = performances;

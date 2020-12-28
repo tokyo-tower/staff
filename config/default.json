@@ -1,11 +1,4 @@
 {
-    "email": {
-        "from": "noreply@tokyotower.co.jp",
-        "fromname": "Tokyo Tower TOP DECK TOUR Online Ticket"
-    },
-    "paymentMethodsForCustomer": {
-        "CreditCard": "クレジットカード"
-    },
     "paymentMethodsForStaff": {
         "CP": "団体（CP支払い）",
         "Invoice": "団体（納品書・請求書支払い）",

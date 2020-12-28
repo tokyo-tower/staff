@@ -15,7 +15,6 @@ exports.updateOnlineStatus = exports.search = void 0;
  */
 const cinerinoapi = require("@cinerino/sdk");
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
-const conf = require("config");
 const createDebug = require("debug");
 const Email = require("email-templates");
 const http_status_1 = require("http-status");
@@ -303,8 +302,8 @@ function createEmail(order, notice) {
             name: `updateOnlineStatus-${order.orderNumber}`,
             sender: {
                 typeOf: order.seller.typeOf,
-                name: conf.get('email.fromname'),
-                email: conf.get('email.from')
+                name: 'Tokyo Tower TOP DECK TOUR Online Ticket',
+                email: process.env.EMAIL_SENDER
             },
             toRecipient: {
                 typeOf: order.customer.typeOf,
