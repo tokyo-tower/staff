@@ -22,8 +22,8 @@ const moment = require("moment-timezone");
 const reservation_1 = require("../util/reservation");
 const authClient = new cinerinoapi.auth.ClientCredentials({
     domain: process.env.API_AUTHORIZE_SERVER_DOMAIN,
-    clientId: process.env.API_CLIENT_ID,
-    clientSecret: process.env.API_CLIENT_SECRET,
+    clientId: process.env.API_CLIENT_ID_CLIENT_CREDENTIALS,
+    clientSecret: process.env.API_CLIENT_SECRET_CLIENT_CREDENTIALS,
     scopes: [],
     state: ''
 });
