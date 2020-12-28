@@ -10,9 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- update @cinerino/sdk
-- update @motionpicture/ttts-api-nodejs-client
-
 ### Deprecated
 
 ### Removed
@@ -20,6 +17,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.14.3 - 2020-12-28
+
+### Changed
+
+- update @cinerino/sdk
+- update @motionpicture/ttts-api-nodejs-client
 
 ## v6.14.2 - 2020-12-26
 
