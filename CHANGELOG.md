@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.14.4 - 2020-12-28
+
+### Fixed
+
+- クライアント認証の認証情報を修正
+
 ## v6.14.3 - 2020-12-28
 
 ### Changed
