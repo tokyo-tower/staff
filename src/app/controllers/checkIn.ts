@@ -205,7 +205,13 @@ export async function addCheckIn(req: Request, res: Response): Promise<void> {
                 const { token } = await tokenService.getToken({ code });
 
                 // 予約使用
-                await reservationService.useByToken({ object: { id: reservationId }, instrument: { token } });
+                await reservationService.useByToken({
+                    object: { id: reservationId },
+                    instrument: { token },
+                    ...{
+                        location: { identifier: checkin.where }
+                    }
+                });
             } catch (error) {
                 // tslint:disable-next-line:no-console
                 console.error('useByToken failed', error);
