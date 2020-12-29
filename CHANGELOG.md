@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 予約検索結果表示最適化
+
 ### Deprecated
 
 ### Removed

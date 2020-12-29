@@ -74,13 +74,6 @@ $(function () {
     // モーダルを閉じたら中のカレンダーも閉じる
     $modal_calender.click(function () { calendar.close(); });
 
-    // purchaser_groupをキーにした「予約方法」辞書
-    var purchaseRoute = {
-        'Customer': '一般ネット予約',
-        'Staff': '窓口代理予約',
-        'Pos': 'POS'
-    };
-
     var conditions = {
         limit: $('.search-form input[name="limit"]').val(),
         page: '1'
@@ -104,7 +97,7 @@ $(function () {
             }
             // POS注文かどうか
             var orderedAtPOS = (clientId === POS_CLIENT_ID);
-            var transactionAgentName = (orderedAtPOS) ? 'POS' : purchaseRoute[reservation.purchaser_group];
+            var transactionAgentName = reservation.transactionAgentName;
             // とりあえずPOSの決済方法は「---」とする仕様
             var paymentMethodName = (orderedAtPOS) ? '---' : reservation.payment_method_name;
 
@@ -121,7 +114,7 @@ $(function () {
                 + ' data-purchaser-name="' + reservation.purchaser_last_name + ' ' + reservation.purchaser_first_name + '"'
                 + ' data-purchaser-tel="' + reservation.purchaser_tel + '"'
                 + ' data-performance-start-datetime="' + startDatetime + '"'
-                + ' data-purchased-datetime="' + moment(reservation.purchased_at).format('YYYY/MM/DD HH:mm') + '"'
+                + ' data-purchased-datetime="' + moment(reservation.bookingTime).format('YYYY/MM/DD HH:mm') + '"'
                 + ' data-watcher-name="' + reservation.watcher_name + '"'
                 + ' data-ticketname="' + reservation.ticket_type_name.ja + '"'
                 + ' data-purchase-route="' + transactionAgentName + '"'
