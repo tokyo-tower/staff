@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.printByToken = exports.getPrintToken = exports.print = exports.index = exports.createPrintToken = void 0;
+exports.printByToken = exports.getPrintToken = exports.print = exports.searchTicketClerks = exports.index = exports.createPrintToken = void 0;
 /**
  * マイページコントローラー
  */
@@ -53,25 +53,7 @@ exports.createPrintToken = createPrintToken;
 function index(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const iamService = new cinerinoapi.service.IAM({
-                endpoint: process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient
-            });
-            const searchMembersResult = yield iamService.searchMembers({
-                member: { typeOf: { $eq: cinerinoapi.factory.personType.Person } }
-            });
-            // ticketClerkロールを持つ管理者のみ表示
-            const owners = searchMembersResult.data
-                .filter((m) => {
-                return Array.isArray(m.member.hasRole) && m.member.hasRole.some((r) => r.roleName === 'ticketClerk');
-            })
-                .map((m) => {
-                return {
-                    username: m.member.username,
-                    familyName: m.member.name,
-                    givenName: ''
-                };
-            });
+            const owners = yield searchTicketClerks(req);
             res.render('staff/mypage/index', {
                 owners: owners,
                 layout: layout
@@ -83,6 +65,33 @@ function index(req, res, next) {
     });
 }
 exports.index = index;
+const TICKET_CLERK_USERNAMES_EXCLUDED = ['1F-ELEVATOR', 'TOPDECK-ELEVATOR', 'LANE', 'GATE'];
+function searchTicketClerks(req) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const iamService = new cinerinoapi.service.IAM({
+            endpoint: process.env.CINERINO_API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+        const searchMembersResult = yield iamService.searchMembers({
+            member: { typeOf: { $eq: cinerinoapi.factory.personType.Person } }
+        });
+        // ticketClerkロールを持つ管理者のみ表示
+        return searchMembersResult.data
+            .filter((m) => {
+            return Array.isArray(m.member.hasRole) && m.member.hasRole.some((r) => r.roleName === 'ticketClerk')
+                && typeof m.member.username === 'string'
+                && !TICKET_CLERK_USERNAMES_EXCLUDED.includes(m.member.username);
+        })
+            .map((m) => {
+            return {
+                username: m.member.username,
+                familyName: m.member.name,
+                givenName: ''
+            };
+        });
+    });
+}
+exports.searchTicketClerks = searchTicketClerks;
 /**
  * A4印刷
  */

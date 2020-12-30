@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- ticketClerk選択肢から特別に除外するユーザーネームを管理するように調整
+
 ### Deprecated
 
 ### Removed

@@ -54,30 +54,7 @@ export async function createPrintToken(
  */
 export async function index(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const iamService = new cinerinoapi.service.IAM({
-            endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient
-        });
-        const searchMembersResult = await iamService.searchMembers({
-            member: { typeOf: { $eq: cinerinoapi.factory.personType.Person } }
-        });
-
-        // ticketClerkロールを持つ管理者のみ表示
-        const owners: {
-            username?: string;
-            familyName?: string;
-            givenName: string;
-        }[] = searchMembersResult.data
-            .filter((m) => {
-                return Array.isArray(m.member.hasRole) && m.member.hasRole.some((r) => r.roleName === 'ticketClerk');
-            })
-            .map((m) => {
-                return {
-                    username: m.member.username,
-                    familyName: m.member.name,
-                    givenName: ''
-                };
-            });
+        const owners = await searchTicketClerks(req);
 
         res.render('staff/mypage/index', {
             owners: owners,
@@ -86,6 +63,39 @@ export async function index(req: Request, res: Response, next: NextFunction): Pr
     } catch (error) {
         next(error);
     }
+}
+
+export interface ITicketClerk {
+    username?: string;
+    familyName?: string;
+    givenName: string;
+}
+
+const TICKET_CLERK_USERNAMES_EXCLUDED = ['1F-ELEVATOR', 'TOPDECK-ELEVATOR', 'LANE', 'GATE'];
+
+export async function searchTicketClerks(req: Request): Promise<ITicketClerk[]> {
+    const iamService = new cinerinoapi.service.IAM({
+        endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+        auth: req.tttsAuthClient
+    });
+    const searchMembersResult = await iamService.searchMembers({
+        member: { typeOf: { $eq: cinerinoapi.factory.personType.Person } }
+    });
+
+    // ticketClerkロールを持つ管理者のみ表示
+    return searchMembersResult.data
+        .filter((m) => {
+            return Array.isArray(m.member.hasRole) && m.member.hasRole.some((r) => r.roleName === 'ticketClerk')
+                && typeof m.member.username === 'string'
+                && !TICKET_CLERK_USERNAMES_EXCLUDED.includes(m.member.username);
+        })
+        .map((m) => {
+            return {
+                username: m.member.username,
+                familyName: m.member.name,
+                givenName: ''
+            };
+        });
 }
 
 /**
