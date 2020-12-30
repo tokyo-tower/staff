@@ -198,8 +198,8 @@ function addCheckIn(req, res) {
                     // getToken
                     const { token } = yield tokenService.getToken({ code });
                     // 予約使用
-                    yield reservationService.useByToken(Object.assign({ object: { id: reservationId }, instrument: { token } }, {
-                        location: { identifier: checkin.where }
+                    yield reservationService.useByToken(Object.assign({ object: { id: reservationId }, instrument: { token }, location: { identifier: checkin.where } }, {
+                        includesActionId: '1'
                     }));
                 }
                 catch (error) {
