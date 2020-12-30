@@ -208,8 +208,9 @@ export async function addCheckIn(req: Request, res: Response): Promise<void> {
                 await reservationService.useByToken({
                     object: { id: reservationId },
                     instrument: { token },
+                    location: { identifier: checkin.where },
                     ...{
-                        location: { identifier: checkin.where }
+                        includesActionId: '1'
                     }
                 });
             } catch (error) {
