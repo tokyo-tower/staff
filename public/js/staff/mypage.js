@@ -25,9 +25,6 @@ if (!Array.prototype.find) {
 }
 
 $(function () {
-    // POSクライアントID
-    var POS_CLIENT_ID = $('input[name="POS_CLIENT_ID"]').val();
-
     // idごとにまとめた予約ドキュメントリスト
     var reservationsById = {};
 
@@ -96,10 +93,9 @@ $(function () {
                 }
             }
             // POS注文かどうか
-            var orderedAtPOS = (clientId === POS_CLIENT_ID);
             var transactionAgentName = reservation.transactionAgentName;
             // とりあえずPOSの決済方法は「---」とする仕様
-            var paymentMethodName = (orderedAtPOS) ? '---' : reservation.payment_method_name;
+            var paymentMethodName = reservation.payment_method_name;
 
             var startDatetime = reservation.performance_day.substr(0, 4)
                 + '/' + reservation.performance_day.substr(4, 2)

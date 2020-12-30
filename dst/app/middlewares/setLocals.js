@@ -1,9 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * テンプレート変数をセットする
- */
-const conf = require("config");
 const moment = require("moment-timezone");
 const numeral = require("numeral");
 exports.default = (req, res, next) => {
@@ -20,7 +16,6 @@ exports.default = (req, res, next) => {
     res.locals.req = req;
     res.locals.moment = moment;
     res.locals.numeral = numeral;
-    res.locals.conf = conf;
     res.locals.validation = null;
     next();
 };

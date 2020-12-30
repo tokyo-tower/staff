@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 - ticketClerk選択肢から特別に除外するユーザーネームを管理するように調整
 - 入場時のクライアント認証への依存を削除
+- 予約検索結果最適化
+- configモジュールへの依存を削除
 
 ### Deprecated
 

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.printByToken = exports.getPrintToken = exports.print = exports.searchTicketClerks = exports.index = exports.createPrintToken = void 0;
+exports.printByToken = exports.getPrintToken = exports.print = exports.searchTicketClerks = exports.index = exports.PAYMENT_METHODS = exports.createPrintToken = void 0;
 /**
  * マイページコントローラー
  */
@@ -47,6 +47,15 @@ function createPrintToken(object, orders) {
     });
 }
 exports.createPrintToken = createPrintToken;
+exports.PAYMENT_METHODS = {
+    CreditCard: 'クレジットカード',
+    CP: '団体（CP支払い）',
+    Invoice: '団体（納品書・請求書支払い）',
+    GroupReservation: '団体（現金支払い）',
+    Charter: '事前ブロック、貸切',
+    OTC: 'トップデッキのみ（手売り）',
+    Invitation: '無料招待、振替等対応'
+};
 /**
  * マイページ(予約一覧)
  */
@@ -56,7 +65,8 @@ function index(req, res, next) {
             const owners = yield searchTicketClerks(req);
             res.render('staff/mypage/index', {
                 owners: owners,
-                layout: layout
+                layout: layout,
+                paymentMethods: exports.PAYMENT_METHODS
             });
         }
         catch (error) {

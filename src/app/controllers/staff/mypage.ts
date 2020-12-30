@@ -49,6 +49,16 @@ export async function createPrintToken(
     });
 }
 
+export const PAYMENT_METHODS: { [key: string]: string } = {
+    CreditCard: 'クレジットカード',
+    CP: '団体（CP支払い）',
+    Invoice: '団体（納品書・請求書支払い）',
+    GroupReservation: '団体（現金支払い）',
+    Charter: '事前ブロック、貸切',
+    OTC: 'トップデッキのみ（手売り）',
+    Invitation: '無料招待、振替等対応'
+};
+
 /**
  * マイページ(予約一覧)
  */
@@ -58,7 +68,8 @@ export async function index(req: Request, res: Response, next: NextFunction): Pr
 
         res.render('staff/mypage/index', {
             owners: owners,
-            layout: layout
+            layout: layout,
+            paymentMethods: PAYMENT_METHODS
         });
     } catch (error) {
         next(error);
