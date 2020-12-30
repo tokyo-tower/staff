@@ -11,26 +11,8 @@ import * as moment from 'moment-timezone';
 
 import { chevreReservation2ttts } from '../util/reservation';
 
-const authClient = new cinerinoapi.auth.ClientCredentials({
-    domain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
-    clientId: <string>process.env.API_CLIENT_ID_CLIENT_CREDENTIALS,
-    clientSecret: <string>process.env.API_CLIENT_SECRET_CLIENT_CREDENTIALS,
-    scopes: [],
-    state: ''
-});
-
-const tokenService = new cinerinoapi.service.Token({
-    endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-    auth: authClient
-});
-// const reservationService = new cinerinoapi.service.Reservation({
-//     endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-//     auth: authClient
-// });
-
 /**
  * QRコード認証画面
- * @desc Rコードを読み取って結果を表示するための画面
  */
 export async function confirm(req: Request, res: Response, next: NextFunction): Promise<void> {
     if (req === null) {
@@ -187,6 +169,10 @@ export async function addCheckIn(req: Request, res: Response): Promise<void> {
         if (typeof code === 'string' && code.length > 0) {
             try {
                 // getToken
+                const tokenService = new cinerinoapi.service.Token({
+                    endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+                    auth: req.tttsAuthClient
+                });
                 const getTokenResult = await tokenService.getToken({ code });
                 token = getTokenResult.token;
 
@@ -202,6 +188,7 @@ export async function addCheckIn(req: Request, res: Response): Promise<void> {
             } catch (error) {
                 // tslint:disable-next-line:no-console
                 console.error('getToken failed', error);
+                // throw new Error('トークンを発行できませんでした');
             }
         }
 
