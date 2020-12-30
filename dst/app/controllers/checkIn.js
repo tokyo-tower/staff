@@ -31,10 +31,10 @@ const tokenService = new cinerinoapi.service.Token({
     endpoint: process.env.CINERINO_API_ENDPOINT,
     auth: authClient
 });
-const reservationService = new cinerinoapi.service.Reservation({
-    endpoint: process.env.CINERINO_API_ENDPOINT,
-    auth: authClient
-});
+// const reservationService = new cinerinoapi.service.Reservation({
+//     endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+//     auth: authClient
+// });
 /**
  * QRコード認証画面
  * @desc Rコードを読み取って結果を表示するための画面
@@ -176,13 +176,31 @@ function addCheckIn(req, res) {
                 });
                 return;
             }
-            const checkin = {
-                when: moment(req.body.when).toDate(),
-                where: req.body.where,
-                why: '',
-                how: req.body.how
-            };
             const reservationId = req.params.qr;
+            // Cinerinoで、req.body.codeを使用して予約使用
+            let token;
+            const code = req.body.code;
+            if (typeof code === 'string' && code.length > 0) {
+                try {
+                    // getToken
+                    const getTokenResult = yield tokenService.getToken({ code });
+                    token = getTokenResult.token;
+                    // 予約使用
+                    // await reservationService.useByToken({
+                    //     object: { id: reservationId },
+                    //     instrument: { token },
+                    //     location: { identifier: req.body.where },
+                    //     ...{
+                    //         includesActionId: '1'
+                    //     }
+                    // });
+                }
+                catch (error) {
+                    // tslint:disable-next-line:no-console
+                    console.error('getToken failed', error);
+                }
+            }
+            const checkin = Object.assign({ when: moment(req.body.when).toDate(), where: req.body.where, why: '', how: req.body.how }, (typeof token === 'string') ? { instrument: { token } } : undefined);
             const tttsReservationService = new tttsapi.service.Reservation({
                 endpoint: process.env.API_ENDPOINT,
                 auth: req.tttsAuthClient
@@ -191,23 +209,8 @@ function addCheckIn(req, res) {
                 reservationId: reservationId,
                 checkin: checkin
             });
-            // Cinerinoで、req.body.codeを使用して予約使用
-            const code = req.body.code;
-            if (typeof code === 'string' && code.length > 0) {
-                try {
-                    // getToken
-                    const { token } = yield tokenService.getToken({ code });
-                    // 予約使用
-                    yield reservationService.useByToken(Object.assign({ object: { id: reservationId }, instrument: { token }, location: { identifier: checkin.where } }, {
-                        includesActionId: '1'
-                    }));
-                }
-                catch (error) {
-                    // tslint:disable-next-line:no-console
-                    console.error('useByToken failed', error);
-                }
-            }
-            res.status(http_status_1.CREATED).json(checkin);
+            res.status(http_status_1.CREATED)
+                .json(checkin);
         }
         catch (error) {
             res.status(http_status_1.INTERNAL_SERVER_ERROR).json({

@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.14.8 - 2020-12-30
+
+### Changed
+
+- 入場時にChevreで予約を使用連携するように調整
+
 ## v6.14.7 - 2020-12-30
 
 ### Changed
