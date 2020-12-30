@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 入場時にChevreで予約を使用連携するように調整
+
 ### Deprecated
 
 ### Removed

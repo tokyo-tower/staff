@@ -23,10 +23,10 @@ const tokenService = new cinerinoapi.service.Token({
     endpoint: <string>process.env.CINERINO_API_ENDPOINT,
     auth: authClient
 });
-const reservationService = new cinerinoapi.service.Reservation({
-    endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-    auth: authClient
-});
+// const reservationService = new cinerinoapi.service.Reservation({
+//     endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+//     auth: authClient
+// });
 
 /**
  * QRコード認証画面
@@ -179,14 +179,40 @@ export async function addCheckIn(req: Request, res: Response): Promise<void> {
             return;
         }
 
+        const reservationId = req.params.qr;
+
+        // Cinerinoで、req.body.codeを使用して予約使用
+        let token: string | undefined;
+        const code = req.body.code;
+        if (typeof code === 'string' && code.length > 0) {
+            try {
+                // getToken
+                const getTokenResult = await tokenService.getToken({ code });
+                token = getTokenResult.token;
+
+                // 予約使用
+                // await reservationService.useByToken({
+                //     object: { id: reservationId },
+                //     instrument: { token },
+                //     location: { identifier: req.body.where },
+                //     ...{
+                //         includesActionId: '1'
+                //     }
+                // });
+            } catch (error) {
+                // tslint:disable-next-line:no-console
+                console.error('getToken failed', error);
+            }
+        }
+
         const checkin = {
             when: moment(req.body.when).toDate(),
             where: req.body.where,
             why: '',
-            how: req.body.how
+            how: req.body.how,
+            // トークンを発行できていれば連携
+            ...(typeof token === 'string') ? { instrument: { token } } : undefined
         };
-
-        const reservationId = req.params.qr;
 
         const tttsReservationService = new tttsapi.service.Reservation({
             endpoint: <string>process.env.API_ENDPOINT,
@@ -197,29 +223,8 @@ export async function addCheckIn(req: Request, res: Response): Promise<void> {
             checkin: checkin
         });
 
-        // Cinerinoで、req.body.codeを使用して予約使用
-        const code = req.body.code;
-        if (typeof code === 'string' && code.length > 0) {
-            try {
-                // getToken
-                const { token } = await tokenService.getToken({ code });
-
-                // 予約使用
-                await reservationService.useByToken({
-                    object: { id: reservationId },
-                    instrument: { token },
-                    location: { identifier: checkin.where },
-                    ...{
-                        includesActionId: '1'
-                    }
-                });
-            } catch (error) {
-                // tslint:disable-next-line:no-console
-                console.error('useByToken failed', error);
-            }
-        }
-
-        res.status(CREATED).json(checkin);
+        res.status(CREATED)
+            .json(checkin);
     } catch (error) {
         res.status(INTERNAL_SERVER_ERROR).json({
             error: 'チェックイン情報作成失敗',
