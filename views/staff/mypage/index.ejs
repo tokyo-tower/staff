@@ -117,14 +117,10 @@
                 <label>決済手段</label>
                 <select class="form-control" name="payment_method">
                     <option value="">指定無し</option>
-                    <option value="CreditCard">
-                        クレジットカード
-                    </option>
-                    <% const paymentMethodsForStaff = conf.get('paymentMethodsForStaff');
-                        Object.keys(paymentMethodsForStaff).forEach((methodCode) => {
+                    <% Object.keys(paymentMethods).forEach((methodCode) => {
                     %>
                     <option value="<%- methodCode %>">
-                        <%- paymentMethodsForStaff[methodCode] %>
+                        <%- paymentMethods[methodCode] %>
                     </option>
                     <%  }); %>
                 </select>
@@ -361,7 +357,6 @@
 <input type="hidden" name="username" value="<%- req.staffUser.username %>">
 <input type="hidden" name="urlCancel" value="/api/reservations/cancel">
 <input type="hidden" name="messageAreYouSureCancel" value="本当にキャンセルしますか？">
-<input type="hidden" name="POS_CLIENT_ID" value="<%- process.env.POS_CLIENT_ID %>">
 
 <script src="/js/flatpickr/flatpickr.min.js"></script>
 <script src="/js/flatpickr/flatpickr.locale.ja.js"></script>

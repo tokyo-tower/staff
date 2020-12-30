@@ -20,24 +20,8 @@ const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const reservation_1 = require("../util/reservation");
-const authClient = new cinerinoapi.auth.ClientCredentials({
-    domain: process.env.API_AUTHORIZE_SERVER_DOMAIN,
-    clientId: process.env.API_CLIENT_ID_CLIENT_CREDENTIALS,
-    clientSecret: process.env.API_CLIENT_SECRET_CLIENT_CREDENTIALS,
-    scopes: [],
-    state: ''
-});
-const tokenService = new cinerinoapi.service.Token({
-    endpoint: process.env.CINERINO_API_ENDPOINT,
-    auth: authClient
-});
-// const reservationService = new cinerinoapi.service.Reservation({
-//     endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-//     auth: authClient
-// });
 /**
  * QRコード認証画面
- * @desc Rコードを読み取って結果を表示するための画面
  */
 function confirm(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -183,6 +167,10 @@ function addCheckIn(req, res) {
             if (typeof code === 'string' && code.length > 0) {
                 try {
                     // getToken
+                    const tokenService = new cinerinoapi.service.Token({
+                        endpoint: process.env.CINERINO_API_ENDPOINT,
+                        auth: req.tttsAuthClient
+                    });
                     const getTokenResult = yield tokenService.getToken({ code });
                     token = getTokenResult.token;
                     // 予約使用
@@ -198,6 +186,7 @@ function addCheckIn(req, res) {
                 catch (error) {
                     // tslint:disable-next-line:no-console
                     console.error('getToken failed', error);
+                    // throw new Error('トークンを発行できませんでした');
                 }
             }
             const checkin = Object.assign({ when: moment(req.body.when).toDate(), where: req.body.where, why: '', how: req.body.how }, (typeof token === 'string') ? { instrument: { token } } : undefined);

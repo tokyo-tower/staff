@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.printByToken = exports.getPrintToken = exports.print = exports.index = exports.createPrintToken = void 0;
+exports.printByToken = exports.getPrintToken = exports.print = exports.searchTicketClerks = exports.index = exports.PAYMENT_METHODS = exports.createPrintToken = void 0;
 /**
  * マイページコントローラー
  */
@@ -47,34 +47,26 @@ function createPrintToken(object, orders) {
     });
 }
 exports.createPrintToken = createPrintToken;
+exports.PAYMENT_METHODS = {
+    CreditCard: 'クレジットカード',
+    CP: '団体（CP支払い）',
+    Invoice: '団体（納品書・請求書支払い）',
+    GroupReservation: '団体（現金支払い）',
+    Charter: '事前ブロック、貸切',
+    OTC: 'トップデッキのみ（手売り）',
+    Invitation: '無料招待、振替等対応'
+};
 /**
  * マイページ(予約一覧)
  */
 function index(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const iamService = new cinerinoapi.service.IAM({
-                endpoint: process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient
-            });
-            const searchMembersResult = yield iamService.searchMembers({
-                member: { typeOf: { $eq: cinerinoapi.factory.personType.Person } }
-            });
-            // ticketClerkロールを持つ管理者のみ表示
-            const owners = searchMembersResult.data
-                .filter((m) => {
-                return Array.isArray(m.member.hasRole) && m.member.hasRole.some((r) => r.roleName === 'ticketClerk');
-            })
-                .map((m) => {
-                return {
-                    username: m.member.username,
-                    familyName: m.member.name,
-                    givenName: ''
-                };
-            });
+            const owners = yield searchTicketClerks(req);
             res.render('staff/mypage/index', {
                 owners: owners,
-                layout: layout
+                layout: layout,
+                paymentMethods: exports.PAYMENT_METHODS
             });
         }
         catch (error) {
@@ -83,6 +75,33 @@ function index(req, res, next) {
     });
 }
 exports.index = index;
+const TICKET_CLERK_USERNAMES_EXCLUDED = ['1F-ELEVATOR', 'TOPDECK-ELEVATOR', 'LANE', 'GATE'];
+function searchTicketClerks(req) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const iamService = new cinerinoapi.service.IAM({
+            endpoint: process.env.CINERINO_API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+        const searchMembersResult = yield iamService.searchMembers({
+            member: { typeOf: { $eq: cinerinoapi.factory.personType.Person } }
+        });
+        // ticketClerkロールを持つ管理者のみ表示
+        return searchMembersResult.data
+            .filter((m) => {
+            return Array.isArray(m.member.hasRole) && m.member.hasRole.some((r) => r.roleName === 'ticketClerk')
+                && typeof m.member.username === 'string'
+                && !TICKET_CLERK_USERNAMES_EXCLUDED.includes(m.member.username);
+        })
+            .map((m) => {
+            return {
+                username: m.member.username,
+                familyName: m.member.name,
+                givenName: ''
+            };
+        });
+    });
+}
+exports.searchTicketClerks = searchTicketClerks;
 /**
  * A4印刷
  */

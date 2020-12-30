@@ -18,6 +18,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.15.0 - 2020-12-30
+
+### Changed
+
+- ticketClerk選択肢から特別に除外するユーザーネームを管理するように調整
+- 入場時のクライアント認証への依存を削除
+- 予約検索結果最適化
+- configモジュールへの依存を削除
+
 ## v6.14.8 - 2020-12-30
 
 ### Changed

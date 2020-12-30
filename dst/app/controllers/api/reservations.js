@@ -14,15 +14,11 @@ exports.cancel = exports.search = void 0;
  * 予約APIコントローラー
  */
 const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
-const conf = require("config");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
+const mypage_1 = require("../staff/mypage");
 const debug = createDebug('ttts-staff:controllers');
-const paymentMethodsForCustomer = {
-    CreditCard: 'クレジットカード'
-};
-const paymentMethodsForStaff = conf.get('paymentMethodsForStaff');
 const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
     ? process.env.FRONTEND_CLIENT_ID.split(',')
     : [];
@@ -200,43 +196,56 @@ function search(req, res) {
 }
 exports.search = search;
 function addCustomAttributes(reservations) {
-    // tslint:disable-next-line:cyclomatic-complexity
     return reservations.map((reservation) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         // 決済手段名称追加
         let paymentMethod4reservation = '';
         const paymentMethodProperty = (_c = (_b = (_a = reservation.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'paymentMethod')) === null || _c === void 0 ? void 0 : _c.value;
         if (typeof paymentMethodProperty === 'string') {
             paymentMethod4reservation = paymentMethodProperty;
         }
-        let age = '';
-        const ageProperty = (_f = (_e = (_d = reservation.underName) === null || _d === void 0 ? void 0 : _d.identifier) === null || _e === void 0 ? void 0 : _e.find((p) => p.name === 'age')) === null || _f === void 0 ? void 0 : _f.value;
-        if (typeof ageProperty === 'string') {
-            age = ageProperty;
-        }
+        // let age = '';
+        // const ageProperty = reservation.underName?.identifier?.find((p) => p.name === 'age')?.value;
+        // if (typeof ageProperty === 'string') {
+        //     age = ageProperty;
+        // }
         let clientId = '';
-        const clientIdProperty = (_j = (_h = (_g = reservation.underName) === null || _g === void 0 ? void 0 : _g.identifier) === null || _h === void 0 ? void 0 : _h.find((p) => p.name === 'clientId')) === null || _j === void 0 ? void 0 : _j.value;
+        const clientIdProperty = (_f = (_e = (_d = reservation.underName) === null || _d === void 0 ? void 0 : _d.identifier) === null || _e === void 0 ? void 0 : _e.find((p) => p.name === 'clientId')) === null || _f === void 0 ? void 0 : _f.value;
         if (typeof clientIdProperty === 'string') {
             clientId = clientIdProperty;
         }
         // 購入番号
         let paymentNo = reservation.reservationNumber;
-        const paymentNoProperty = (_m = (_l = (_k = reservation.underName) === null || _k === void 0 ? void 0 : _k.identifier) === null || _l === void 0 ? void 0 : _l.find((p) => p.name === 'paymentNo')) === null || _m === void 0 ? void 0 : _m.value;
+        const paymentNoProperty = (_j = (_h = (_g = reservation.underName) === null || _g === void 0 ? void 0 : _g.identifier) === null || _h === void 0 ? void 0 : _h.find((p) => p.name === 'paymentNo')) === null || _j === void 0 ? void 0 : _j.value;
         if (typeof paymentNoProperty === 'string') {
             paymentNo = paymentNoProperty;
         }
         // 注文番号
         let orderNumber = '';
-        const orderNumberProperty = (_q = (_p = (_o = reservation.underName) === null || _o === void 0 ? void 0 : _o.identifier) === null || _p === void 0 ? void 0 : _p.find((p) => p.name === 'orderNumber')) === null || _q === void 0 ? void 0 : _q.value;
+        const orderNumberProperty = (_m = (_l = (_k = reservation.underName) === null || _k === void 0 ? void 0 : _k.identifier) === null || _l === void 0 ? void 0 : _l.find((p) => p.name === 'orderNumber')) === null || _m === void 0 ? void 0 : _m.value;
         if (typeof orderNumberProperty === 'string') {
             orderNumber = orderNumberProperty;
         }
         const underName = reservation.underName;
-        return Object.assign(Object.assign({}, reservation), { orderNumber: orderNumber, paymentNo: paymentNo, payment_method_name: paymentMethod2name(paymentMethod4reservation), performance: reservation.reservationFor.id, performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'), performance_start_time: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HHmm'), performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'), performance_canceled: false, ticket_type: reservation.reservedTicket.ticketType.identifier, ticket_type_name: reservation.reservedTicket.ticketType.name, purchaser_group: (STAFF_CLIENT_IDS.indexOf(clientId) >= 0) ? 'Staff' : 'Customer', transactionAgentName: (STAFF_CLIENT_IDS.indexOf(clientId) >= 0)
+        return Object.assign(Object.assign({}, reservation), { orderNumber: orderNumber, paymentNo: paymentNo, payment_method_name: (POS_CLIENT_IDS.indexOf(clientId) >= 0)
+                ? '---'
+                : paymentMethod2name(paymentMethod4reservation), performance: reservation.reservationFor.id, performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'), performance_start_time: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HHmm'), performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'), performance_canceled: false, 
+            // ticket_type: reservation.reservedTicket.ticketType.identifier,
+            ticket_type_name: reservation.reservedTicket.ticketType.name, 
+            // purchaser_group: (STAFF_CLIENT_IDS.indexOf(clientId) >= 0) ? 'Staff' : 'Customer',
+            transactionAgentName: (STAFF_CLIENT_IDS.indexOf(clientId) >= 0)
                 ? '窓口代理予約'
                 : (POS_CLIENT_IDS.indexOf(clientId) >= 0) ? 'POS' : '一般ネット予約', 
             // purchased_at: (reservation.bookingTime !== undefined) ? reservation.bookingTime : (<any>reservation).purchased_at,
-            purchaser_name: (typeof (underName === null || underName === void 0 ? void 0 : underName.name) === 'string') ? underName.name : '', purchaser_last_name: (typeof (underName === null || underName === void 0 ? void 0 : underName.familyName) === 'string') ? underName.familyName : '', purchaser_first_name: (typeof (underName === null || underName === void 0 ? void 0 : underName.givenName) === 'string') ? underName.givenName : '', purchaser_email: (typeof (underName === null || underName === void 0 ? void 0 : underName.email) === 'string') ? underName.email : '', purchaser_tel: (typeof (underName === null || underName === void 0 ? void 0 : underName.telephone) === 'string') ? underName.telephone : '', purchaser_international_tel: '', purchaser_age: age, purchaser_address: (typeof (underName === null || underName === void 0 ? void 0 : underName.address) === 'string') ? underName.address : '', purchaser_gender: (typeof (underName === null || underName === void 0 ? void 0 : underName.gender) === 'string') ? underName.gender : '', watcher_name: reservation.additionalTicketText });
+            // purchaser_name: (typeof underName?.name === 'string') ? underName.name : '',
+            purchaser_last_name: (typeof (underName === null || underName === void 0 ? void 0 : underName.familyName) === 'string') ? underName.familyName : '', purchaser_first_name: (typeof (underName === null || underName === void 0 ? void 0 : underName.givenName) === 'string') ? underName.givenName : '', 
+            // purchaser_email: (typeof underName?.email === 'string') ? underName.email : '',
+            purchaser_tel: (typeof (underName === null || underName === void 0 ? void 0 : underName.telephone) === 'string') ? underName.telephone : '', 
+            // purchaser_international_tel: '',
+            // purchaser_age: age,
+            // purchaser_address: (typeof underName?.address === 'string') ? underName.address : '',
+            // purchaser_gender: (typeof underName?.gender === 'string') ? underName.gender : '',
+            watcher_name: reservation.additionalTicketText });
     });
 }
 /**
@@ -250,11 +259,8 @@ function toHalfWidth(str) {
     }).join('');
 }
 function paymentMethod2name(method) {
-    if (paymentMethodsForCustomer.hasOwnProperty(method)) {
-        return paymentMethodsForCustomer[method];
-    }
-    if (paymentMethodsForStaff.hasOwnProperty(method)) {
-        return paymentMethodsForStaff[method];
+    if (mypage_1.PAYMENT_METHODS.hasOwnProperty(method)) {
+        return mypage_1.PAYMENT_METHODS[method];
     }
     return method;
 }
