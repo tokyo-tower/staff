@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.15.1 - 2020-12-31
+
+### Changed
+
+- 入場QRコードに注文コードが含まれない場合、自動発行するように調整
+
 ## v6.15.0 - 2020-12-30
 
 ### Changed
