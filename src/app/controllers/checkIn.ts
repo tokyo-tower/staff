@@ -11,6 +11,8 @@ import * as moment from 'moment-timezone';
 
 import { chevreReservation2ttts } from '../util/reservation';
 
+const CODE_EXPIRES_IN_SECONDS = 60; // その場で使用するだけなので短くてよし
+
 /**
  * QRコード認証画面
  */
@@ -161,11 +163,17 @@ export async function addCheckIn(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        const reservationId = req.params.qr;
+        const reservationId = <string>req.params.qr;
 
         // Cinerinoで、req.body.codeを使用して予約使用
         let token: string | undefined;
-        const code = req.body.code;
+        let code = req.body.code;
+
+        // コードの指定がなければ注文コードを発行
+        if (typeof code !== 'string' || code.length === 0) {
+            code = await publishCode(req, reservationId);
+        }
+
         if (typeof code === 'string' && code.length > 0) {
             try {
                 // getToken
@@ -219,6 +227,45 @@ export async function addCheckIn(req: Request, res: Response): Promise<void> {
         });
     }
 }
+
+async function publishCode(req: Request, reservationId: string) {
+    let code: string | undefined;
+
+    try {
+        const tttsReservationService = new tttsapi.service.Reservation({
+            endpoint: <string>process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+        const reservation = await tttsReservationService.findById({ id: reservationId });
+
+        const orderNumber = reservation.underName?.identifier?.find((p) => p.name === 'orderNumber')?.value;
+        const telephone = reservation.underName?.telephone;
+
+        if (typeof orderNumber === 'string' && typeof telephone === 'string') {
+            const orderService = new cinerinoapi.service.Order({
+                endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
+
+            const authorizeOrderResult = await orderService.authorize({
+                object: {
+                    orderNumber,
+                    customer: { telephone }
+                },
+                result: {
+                    expiresInSeconds: CODE_EXPIRES_IN_SECONDS
+                }
+            });
+            code = authorizeOrderResult.code;
+        }
+    } catch (error) {
+        // tslint:disable-next-line:no-console
+        console.error('authorize order failed', error);
+    }
+
+    return code;
+}
+
 /**
  * チェックイン取り消し
  */
