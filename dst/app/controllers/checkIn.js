@@ -20,6 +20,7 @@ const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const reservation_1 = require("../util/reservation");
+const CODE_EXPIRES_IN_SECONDS = 60; // その場で使用するだけなので短くてよし
 /**
  * QRコード認証画面
  */
@@ -163,7 +164,11 @@ function addCheckIn(req, res) {
             const reservationId = req.params.qr;
             // Cinerinoで、req.body.codeを使用して予約使用
             let token;
-            const code = req.body.code;
+            let code = req.body.code;
+            // コードの指定がなければ注文コードを発行
+            if (typeof code !== 'string' || code.length === 0) {
+                code = yield publishCode(req, reservationId);
+            }
             if (typeof code === 'string' && code.length > 0) {
                 try {
                     // getToken
@@ -210,6 +215,42 @@ function addCheckIn(req, res) {
     });
 }
 exports.addCheckIn = addCheckIn;
+function publishCode(req, reservationId) {
+    var _a, _b, _c, _d;
+    return __awaiter(this, void 0, void 0, function* () {
+        let code;
+        try {
+            const tttsReservationService = new tttsapi.service.Reservation({
+                endpoint: process.env.API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
+            const reservation = yield tttsReservationService.findById({ id: reservationId });
+            const orderNumber = (_c = (_b = (_a = reservation.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'orderNumber')) === null || _c === void 0 ? void 0 : _c.value;
+            const telephone = (_d = reservation.underName) === null || _d === void 0 ? void 0 : _d.telephone;
+            if (typeof orderNumber === 'string' && typeof telephone === 'string') {
+                const orderService = new cinerinoapi.service.Order({
+                    endpoint: process.env.CINERINO_API_ENDPOINT,
+                    auth: req.tttsAuthClient
+                });
+                const authorizeOrderResult = yield orderService.authorize({
+                    object: {
+                        orderNumber,
+                        customer: { telephone }
+                    },
+                    result: {
+                        expiresInSeconds: CODE_EXPIRES_IN_SECONDS
+                    }
+                });
+                code = authorizeOrderResult.code;
+            }
+        }
+        catch (error) {
+            // tslint:disable-next-line:no-console
+            console.error('authorize order failed', error);
+        }
+        return code;
+    });
+}
 /**
  * チェックイン取り消し
  */
