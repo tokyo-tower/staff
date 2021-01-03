@@ -20,6 +20,7 @@ const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const mypage_1 = require("../staff/mypage");
 const debug = createDebug('ttts-staff:controllers');
+const USE_CINERINO_SEARCH_RESERVATION = process.env.USE_CINERINO_SEARCH_RESERVATION === '1';
 const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
     ? process.env.FRONTEND_CLIENT_ID.split(',')
     : [];
@@ -165,7 +166,7 @@ function search(req, res) {
             additionalTicketText: (watcherName !== null) ? watcherName : undefined
         };
         // Cinerinoでの予約検索対応
-        if (req.query.useCinerino === '1') {
+        if (USE_CINERINO_SEARCH_RESERVATION || req.query.useCinerino === '1') {
             debug('searching reservations...', searchConditions);
             const reservationService = new cinerinoapi.service.Reservation({
                 endpoint: process.env.CINERINO_API_ENDPOINT,
@@ -188,7 +189,8 @@ function search(req, res) {
                     results: addCustomAttributes(reservations),
                     count: count,
                     errors: null,
-                    message: message
+                    message: message,
+                    useCinerino: true
                 });
             }
             catch (error) {
