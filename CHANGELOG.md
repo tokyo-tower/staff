@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- USE_CINERINO_SEARCH_RESERVATION設定を追加
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.15.3 - 2021-01-03
+
+### Changed
+
+- USE_CINERINO_SEARCH_RESERVATION設定を追加
 
 ## v6.15.2 - 2021-01-03
 
