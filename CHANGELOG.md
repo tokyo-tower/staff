@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- 予約検索をCinerinoサービスに対応
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.15.2 - 2021-01-03
+
+### Changed
+
+- 予約検索をCinerinoサービスに対応
 
 ## v6.15.1 - 2020-12-31
 
