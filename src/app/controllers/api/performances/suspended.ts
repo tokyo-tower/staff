@@ -209,15 +209,12 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
 
         const tourNumber = performance.additionalProperty?.find((p) => p.name === 'tourNumber')?.value;
 
-        // let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
         let evServiceStatusName: string = EMPTY_STRING;
         switch (performance.eventStatus) {
             case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:
-                // evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Suspended;
                 evServiceStatusName = '完全中止';
                 break;
             case cinerinoapi.factory.chevre.eventStatusType.EventPostponed:
-                // evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Slowdown;
                 evServiceStatusName = '一時休止';
                 break;
             case cinerinoapi.factory.chevre.eventStatusType.EventScheduled:

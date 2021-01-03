@@ -1,6 +1,6 @@
 <div class="wrapper-searchform">
 
-    <form class="search-form" action="/api/reservations">
+    <form class="search-form" action="/api/reservations?useCinerino=<%= req.query.useCinerino %>">
         <input type="hidden" name="limit" value="50">
 
         <h3>

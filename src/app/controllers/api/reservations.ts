@@ -1,6 +1,7 @@
 /**
  * 予約APIコントローラー
  */
+import * as cinerinoapi from '@cinerino/sdk';
 import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 
 import * as createDebug from 'debug';
@@ -173,36 +174,77 @@ export async function search(req: Request, res: Response): Promise<void> {
         additionalTicketText: (watcherName !== null) ? watcherName : undefined
     };
 
-    debug('searching reservations...', searchConditions);
-    const reservationService = new tttsapi.service.Reservation({
-        endpoint: <string>process.env.API_ENDPOINT,
-        auth: req.tttsAuthClient
-    });
-
-    try {
-        // 総数検索
-        // データ検索(検索→ソート→指定ページ分切取り)
-        const searchReservationsResult = await reservationService.search(searchConditions);
-        const count = searchReservationsResult.totalCount;
-        debug('reservation count:', count);
-        const reservations = searchReservationsResult.data;
-
-        // 0件メッセージセット
-        const message: string = (reservations.length === 0) ?
-            '検索結果がありません。予約データが存在しないか、検索条件を見直してください' : '';
-
-        res.json({
-            results: addCustomAttributes(reservations),
-            count: count,
-            errors: null,
-            message: message
+    // Cinerinoでの予約検索対応
+    if (req.query.useCinerino === '1') {
+        debug('searching reservations...', searchConditions);
+        const reservationService = new cinerinoapi.service.Reservation({
+            endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+            auth: req.tttsAuthClient
         });
-    } catch (error) {
-        res.status(INTERNAL_SERVER_ERROR).json({
-            errors: [{
-                message: error.message
-            }]
+
+        try {
+            // 総数検索
+            // データ検索(検索→ソート→指定ページ分切取り)
+            const searchReservationsResult = await reservationService.search({
+                ...searchConditions,
+                ...{
+                    countDocuments: '1'
+                }
+            });
+            debug('searchReservationsResult by Cinerino:', searchReservationsResult);
+            const count = searchReservationsResult.totalCount;
+            debug('reservation count:', count);
+            const reservations = searchReservationsResult.data;
+
+            // 0件メッセージセット
+            const message: string = (reservations.length === 0) ?
+                '検索結果がありません。予約データが存在しないか、検索条件を見直してください' : '';
+
+            res.json({
+                results: addCustomAttributes(<any[]>reservations),
+                count: count,
+                errors: null,
+                message: message
+            });
+        } catch (error) {
+            res.status(INTERNAL_SERVER_ERROR).json({
+                errors: [{
+                    message: error.message
+                }]
+            });
+        }
+    } else {
+        debug('searching reservations...', searchConditions);
+        const reservationService = new tttsapi.service.Reservation({
+            endpoint: <string>process.env.API_ENDPOINT,
+            auth: req.tttsAuthClient
         });
+
+        try {
+            // 総数検索
+            // データ検索(検索→ソート→指定ページ分切取り)
+            const searchReservationsResult = await reservationService.search(searchConditions);
+            const count = searchReservationsResult.totalCount;
+            debug('reservation count:', count);
+            const reservations = searchReservationsResult.data;
+
+            // 0件メッセージセット
+            const message: string = (reservations.length === 0) ?
+                '検索結果がありません。予約データが存在しないか、検索条件を見直してください' : '';
+
+            res.json({
+                results: addCustomAttributes(reservations),
+                count: count,
+                errors: null,
+                message: message
+            });
+        } catch (error) {
+            res.status(INTERNAL_SERVER_ERROR).json({
+                errors: [{
+                    message: error.message
+                }]
+            });
+        }
     }
 }
 
@@ -245,8 +287,25 @@ function addCustomAttributes(
 
         const underName = reservation.underName;
 
+        // checkinsをtttsapi,cinerinoapiの両方のレスポンスに対応する
+        let checkins: tttsapi.factory.reservation.event.ICheckin[] = [];
+        if (Array.isArray(reservation.checkins)) {
+            checkins = reservation.checkins;
+        } else {
+            if ((<any>reservation).useActionExists === true) {
+                // 数が正であればよいので、中身は適当に
+                checkins = [{
+                    when: new Date(),
+                    where: '',
+                    why: '',
+                    how: ''
+                }];
+            }
+        }
+
         return {
             ...reservation,
+            checkins,
             orderNumber: orderNumber,
             paymentNo: paymentNo,
             payment_method_name: (POS_CLIENT_IDS.indexOf(clientId) >= 0)

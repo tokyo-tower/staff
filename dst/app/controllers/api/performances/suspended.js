@@ -166,15 +166,12 @@ function findSuspendedPerformances(req, conditions) {
                 }
             }
             const tourNumber = (_c = (_b = performance.additionalProperty) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'tourNumber')) === null || _c === void 0 ? void 0 : _c.value;
-            // let evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Normal;
             let evServiceStatusName = EMPTY_STRING;
             switch (performance.eventStatus) {
                 case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:
-                    // evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Suspended;
                     evServiceStatusName = '完全中止';
                     break;
                 case cinerinoapi.factory.chevre.eventStatusType.EventPostponed:
-                    // evServiceStatus = tttsapi.factory.performance.EvServiceStatus.Slowdown;
                     evServiceStatusName = '一時休止';
                     break;
                 case cinerinoapi.factory.chevre.eventStatusType.EventScheduled:
