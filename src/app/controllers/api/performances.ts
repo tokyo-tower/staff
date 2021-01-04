@@ -151,26 +151,31 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             const searchReservationsResult = await reservationService.search({
                 limit: 100,
                 typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+                // 確定ステータスのみ保管すればよい
                 reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
                 reservationFor: { id: performanceId }
-                // ...{
-                //     noTotalCount: '1'
-                // }
             });
 
             const reservationsAtLastUpdateDate: tttsapi.factory.performance.IReservationAtLastupdateDate[] =
-                searchReservationsResult.data.map((r) => {
-                    const clientId = r.underName?.identifier?.find((p) => p.name === 'clientId')?.value;
+                searchReservationsResult.data
+                    // frontendアプリケーションでの購入のみ保管すればよい
+                    .filter((r) => {
+                        const clientId = r.underName?.identifier?.find((p) => p.name === 'clientId')?.value;
 
-                    return {
-                        id: String(r.id),
-                        status: <cinerinoapi.factory.chevre.reservationStatusType>r.reservationStatus,
-                        transaction_agent: {
-                            typeOf: cinerinoapi.factory.personType.Person,
-                            id: (typeof clientId === 'string') ? clientId : ''
-                        }
-                    };
-                });
+                        return typeof clientId === 'string' && FRONTEND_CLIENT_IDS.includes(clientId);
+                    })
+                    .map((r) => {
+                        const clientId = r.underName?.identifier?.find((p) => p.name === 'clientId')?.value;
+
+                        return {
+                            id: String(r.id),
+                            status: <cinerinoapi.factory.chevre.reservationStatusType>r.reservationStatus,
+                            transaction_agent: {
+                                typeOf: cinerinoapi.factory.personType.Person,
+                                id: (typeof clientId === 'string') ? clientId : ''
+                            }
+                        };
+                    });
 
             await performanceService.updateExtension({
                 id: performanceId,

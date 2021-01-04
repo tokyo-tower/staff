@@ -131,13 +131,18 @@ function updateOnlineStatus(req, res) {
                 const searchReservationsResult = yield reservationService.search({
                     limit: 100,
                     typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+                    // 確定ステータスのみ保管すればよい
                     reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
                     reservationFor: { id: performanceId }
-                    // ...{
-                    //     noTotalCount: '1'
-                    // }
                 });
-                const reservationsAtLastUpdateDate = searchReservationsResult.data.map((r) => {
+                const reservationsAtLastUpdateDate = searchReservationsResult.data
+                    // frontendアプリケーションでの購入のみ保管すればよい
+                    .filter((r) => {
+                    var _a, _b, _c;
+                    const clientId = (_c = (_b = (_a = r.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'clientId')) === null || _c === void 0 ? void 0 : _c.value;
+                    return typeof clientId === 'string' && FRONTEND_CLIENT_IDS.includes(clientId);
+                })
+                    .map((r) => {
                     var _a, _b, _c;
                     const clientId = (_c = (_b = (_a = r.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'clientId')) === null || _c === void 0 ? void 0 : _c.value;
                     return {

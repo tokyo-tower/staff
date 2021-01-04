@@ -17,11 +17,6 @@ import * as numeral from 'numeral';
 const debug = createDebug('ttts-staff:controllers');
 
 const EMPTY_STRING: string = '-';
-// const EV_SERVICE_STATUS_NAMES: any = {
-// };
-// EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Normal] = EMPTY_STRING;
-// EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Slowdown] = '一時休止';
-// EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Suspended] = '完全中止';
 const REFUND_STATUS_NAMES: any = {
 };
 REFUND_STATUS_NAMES[tttsapi.factory.performance.RefundStatus.None] = EMPTY_STRING;
@@ -200,7 +195,7 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
                 // nubmerOfCheckedReservations = numberOfReservations - nubmerOfUncheckedReservations;
 
                 // performanceに保管された入場済予約から算出する場合はコチラ↓
-                const checkedReservations: any[] = (<any>extension)?.checkedReservations;
+                const checkedReservations = extension?.checkedReservations;
                 if (Array.isArray(checkedReservations)) {
                     nubmerOfCheckedReservations = checkedReservations.filter((r) => targetReservationIds.includes(String(r.id))).length;
                 }
