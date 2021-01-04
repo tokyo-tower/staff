@@ -147,10 +147,6 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
         endpoint: <string>process.env.API_ENDPOINT,
         auth: req.tttsAuthClient
     });
-    // const reservationService = new tttsapi.service.Reservation({
-    //     endpoint: <string>process.env.API_ENDPOINT,
-    //     auth: req.tttsAuthClient
-    // });
 
     debug('finfing performances...', conditions);
     const searchResults = await eventService.search({
