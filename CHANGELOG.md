@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 - update @motionpicture/ttts-api-nodejs-client
+- 入場&入場取消時に、入場済予約リストをパフォーマンスに連携するように調整
 
 ### Deprecated
 

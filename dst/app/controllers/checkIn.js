@@ -203,6 +203,8 @@ function addCheckIn(req, res) {
                 reservationId: reservationId,
                 checkin: checkin
             });
+            // 入場済予約リスト更新
+            yield updateCheckedReservations(req, reservationId);
             res.status(http_status_1.CREATED)
                 .json(checkin);
         }
@@ -278,7 +280,10 @@ function removeCheckIn(req, res) {
                 reservationId: req.params.qr,
                 when: moment(req.body.when).toDate()
             });
-            res.status(http_status_1.NO_CONTENT).end();
+            // 入場済予約リスト更新
+            yield updateCheckedReservations(req, req.params.qr);
+            res.status(http_status_1.NO_CONTENT)
+                .end();
         }
         catch (error) {
             res.status(http_status_1.INTERNAL_SERVER_ERROR).json({
@@ -289,3 +294,44 @@ function removeCheckIn(req, res) {
     });
 }
 exports.removeCheckIn = removeCheckIn;
+function updateCheckedReservations(req, reservationId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // 予約取得
+            const reservationService = new cinerinoapi.service.Reservation({
+                endpoint: process.env.CINERINO_API_ENDPOINT,
+                auth: req.tttsAuthClient
+            });
+            const searchReservationsResult = yield reservationService.search({
+                typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+                id: { $eq: reservationId }
+            });
+            const reservation = searchReservationsResult.data.shift();
+            if (reservation !== undefined) {
+                // 入場済予約検索
+                const searchReservationsResult4event = yield reservationService.search({
+                    limit: 100,
+                    typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+                    reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+                    reservationFor: { id: reservation.reservationFor.id }
+                });
+                const checkedReservations = searchReservationsResult4event.data
+                    .filter((r) => r.useActionExists === true)
+                    .map((r) => {
+                    return { id: String(r.id) };
+                });
+                const performanceService = new tttsapi.service.Event({
+                    endpoint: process.env.API_ENDPOINT,
+                    auth: req.tttsAuthClient
+                });
+                yield performanceService.updateExtension(Object.assign({ id: reservation.reservationFor.id }, {
+                    checkedReservations
+                }));
+            }
+        }
+        catch (error) {
+            // tslint:disable-next-line:no-console
+            console.error('updateCheckedReservations failed', error);
+        }
+    });
+}
