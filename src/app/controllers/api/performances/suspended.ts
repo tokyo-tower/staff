@@ -299,15 +299,21 @@ async function searchOrderNumberss4refund(
      */
     clientIds: string[]
 ): Promise<cinerinoapi.factory.order.IOrder[]> {
-    const reservationService = new tttsapi.service.Reservation({
-        endpoint: <string>process.env.API_ENDPOINT,
+    const reservationService = new cinerinoapi.service.Reservation({
+        endpoint: <string>process.env.CINERINO_API_ENDPOINT,
         auth: req.tttsAuthClient
     });
+    // const reservationService = new tttsapi.service.Reservation({
+    //     endpoint: <string>process.env.API_ENDPOINT,
+    //     auth: req.tttsAuthClient
+    // });
 
     // パフォーマンスに対する取引リストを、予約コレクションから検索する
-    let reservations: tttsapi.factory.reservation.event.IReservation[] = [];
+    let reservations: cinerinoapi.factory.chevre.reservation.IReservation<cinerinoapi.factory.chevre.reservationType.EventReservation>[]
+        = [];
+    // let reservations: tttsapi.factory.reservation.event.IReservation[] = [];
     if (clientIds.length > 0) {
-        const searchReservationsResult = await reservationService.search(
+        const searchReservationsResult = await reservationService.search<tttsapi.factory.chevre.reservationType.EventReservation>(
             {
                 limit: 100,
                 typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
@@ -329,8 +335,10 @@ async function searchOrderNumberss4refund(
 
     // 入場履歴なしの注文番号を取り出す
     let orderNumbers = reservations.map((r) => r.underName?.identifier?.find((p) => p.name === 'orderNumber')?.value);
-    const orderNumbersWithCheckins = reservations
-        .filter((r) => (r.checkins.length > 0))
+    // const orderNumbersWithCheckins = reservations
+    //     .filter((r) => (r.checkins.length > 0))
+    //     .map((r) => r.underName?.identifier?.find((p) => p.name === 'orderNumber')?.value);
+    const orderNumbersWithCheckins = reservations.filter((r) => ((<any>r).useActionExists === true))
         .map((r) => r.underName?.identifier?.find((p) => p.name === 'orderNumber')?.value);
     orderNumbers = uniq(difference(orderNumbers, orderNumbersWithCheckins));
 

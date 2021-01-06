@@ -241,12 +241,17 @@ function searchOrderNumberss4refund(req, performanceId,
  */
 clientIds) {
     return __awaiter(this, void 0, void 0, function* () {
-        const reservationService = new tttsapi.service.Reservation({
-            endpoint: process.env.API_ENDPOINT,
+        const reservationService = new cinerinoapi.service.Reservation({
+            endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
+        // const reservationService = new tttsapi.service.Reservation({
+        //     endpoint: <string>process.env.API_ENDPOINT,
+        //     auth: req.tttsAuthClient
+        // });
         // パフォーマンスに対する取引リストを、予約コレクションから検索する
         let reservations = [];
+        // let reservations: tttsapi.factory.reservation.event.IReservation[] = [];
         if (clientIds.length > 0) {
             const searchReservationsResult = yield reservationService.search(Object.assign({ limit: 100, typeOf: tttsapi.factory.chevre.reservationType.EventReservation, reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed], reservationFor: { id: performanceId }, underName: {
                     identifiers: clientIds.map((clientId) => {
@@ -259,8 +264,10 @@ clientIds) {
         }
         // 入場履歴なしの注文番号を取り出す
         let orderNumbers = reservations.map((r) => { var _a, _b, _c; return (_c = (_b = (_a = r.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'orderNumber')) === null || _c === void 0 ? void 0 : _c.value; });
-        const orderNumbersWithCheckins = reservations
-            .filter((r) => (r.checkins.length > 0))
+        // const orderNumbersWithCheckins = reservations
+        //     .filter((r) => (r.checkins.length > 0))
+        //     .map((r) => r.underName?.identifier?.find((p) => p.name === 'orderNumber')?.value);
+        const orderNumbersWithCheckins = reservations.filter((r) => (r.useActionExists === true))
             .map((r) => { var _a, _b, _c; return (_c = (_b = (_a = r.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'orderNumber')) === null || _c === void 0 ? void 0 : _c.value; });
         orderNumbers = uniq(difference(orderNumbers, orderNumbersWithCheckins));
         const returningOrderNumbers = orderNumbers.filter((orderNumber) => typeof orderNumber === 'string');

@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 販売停止時の予約検索をCinerinoで実装
+- 返品処理実行時の予約検索をCinerinoで実装
+
 ### Deprecated
 
 ### Removed

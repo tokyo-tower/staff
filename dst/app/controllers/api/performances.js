@@ -203,44 +203,92 @@ exports.updateOnlineStatus = updateOnlineStatus;
  * [予約データ]かつ
  * [同一購入単位に入塔記録のない]予約のid配列
  */
+// tslint:disable-next-line:max-func-body-length
 function getTargetReservationsForRefund(req, performanceIds) {
     return __awaiter(this, void 0, void 0, function* () {
         const orderService = new cinerinoapi.service.Order({
             endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        const reservationService = new tttsapi.service.Reservation({
-            endpoint: process.env.API_ENDPOINT,
+        const reservationService = new cinerinoapi.service.Reservation({
+            endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        const targetReservations = yield reservationService.distinct('underName', {
-            typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
-            reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
-            // クライアントがfrontend or pos
-            underName: {
-                identifiers: [
-                    ...POS_CLIENT_IDS.map((clientId) => {
-                        return { name: 'clientId', value: clientId };
-                    }),
-                    ...FRONTEND_CLIENT_IDS.map((clientId) => {
-                        return { name: 'clientId', value: clientId };
-                    })
-                ]
-            },
-            reservationFor: {
-                ids: performanceIds
-            },
-            checkins: { $size: 0 }
-        });
+        // const reservationService = new tttsapi.service.Reservation({
+        //     endpoint: <string>process.env.API_ENDPOINT,
+        //     auth: req.tttsAuthClient
+        // });
+        let targetReservations = [];
+        const limit4reservations = 100;
+        let page4reservations = 0;
+        let numData4reservations = limit4reservations;
+        while (numData4reservations === limit4reservations) {
+            page4reservations += 1;
+            const searchReservationsResult = yield reservationService.search(Object.assign({ limit: limit4reservations, page: page4reservations, typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation, reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed], 
+                // クライアントがfrontend or pos
+                underName: {
+                    identifiers: [
+                        ...POS_CLIENT_IDS.map((clientId) => {
+                            return { name: 'clientId', value: clientId };
+                        }),
+                        ...FRONTEND_CLIENT_IDS.map((clientId) => {
+                            return { name: 'clientId', value: clientId };
+                        })
+                    ]
+                }, reservationFor: {
+                    ids: performanceIds
+                } }, {
+                $projection: { underName: 1, useActionExists: 1 }
+            }));
+            numData4reservations = searchReservationsResult.data.length;
+            targetReservations.push(...searchReservationsResult.data);
+        }
+        targetReservations = targetReservations.filter((r) => r.useActionExists !== true);
+        // const targetReservations = await reservationService.distinct(
+        //     'underName',
+        //     {
+        //         typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+        //         reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+        //         // クライアントがfrontend or pos
+        //         underName: {
+        //             identifiers: [
+        //                 ...POS_CLIENT_IDS.map((clientId) => {
+        //                     return { name: 'clientId', value: clientId };
+        //                 }),
+        //                 ...FRONTEND_CLIENT_IDS.map((clientId) => {
+        //                     return { name: 'clientId', value: clientId };
+        //                 })
+        //             ]
+        //         },
+        //         reservationFor: {
+        //             ids: performanceIds
+        //         },
+        //         checkins: { $size: 0 }
+        //     }
+        // );
         const targetOrderNumbers = targetReservations.reduce((a, b) => {
-            if (Array.isArray(b.identifier)) {
-                const orderNumberProperty = b.identifier.find((p) => p.name === 'orderNumber');
+            var _a;
+            const underNameIdentifier = (_a = b.underName) === null || _a === void 0 ? void 0 : _a.identifier;
+            if (Array.isArray(underNameIdentifier)) {
+                const orderNumberProperty = underNameIdentifier.find((p) => p.name === 'orderNumber');
                 if (orderNumberProperty !== undefined) {
                     a.push(orderNumberProperty.value);
                 }
             }
             return a;
         }, []);
+        // const targetOrderNumbers = targetReservations.reduce<string[]>(
+        //     (a, b) => {
+        //         if (Array.isArray(b.identifier)) {
+        //             const orderNumberProperty = b.identifier.find((p: any) => p.name === 'orderNumber');
+        //             if (orderNumberProperty !== undefined) {
+        //                 a.push(orderNumberProperty.value);
+        //             }
+        //         }
+        //         return a;
+        //     },
+        //     []
+        // );
         // 全注文検索
         const orders = [];
         if (targetOrderNumbers.length > 0) {
