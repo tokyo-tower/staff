@@ -26,11 +26,6 @@ const moment = require("moment-timezone");
 const numeral = require("numeral");
 const debug = createDebug('ttts-staff:controllers');
 const EMPTY_STRING = '-';
-// const EV_SERVICE_STATUS_NAMES: any = {
-// };
-// EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Normal] = EMPTY_STRING;
-// EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Slowdown] = '一時休止';
-// EV_SERVICE_STATUS_NAMES[tttsapi.factory.performance.EvServiceStatus.Suspended] = '完全中止';
 const REFUND_STATUS_NAMES = {};
 REFUND_STATUS_NAMES[tttsapi.factory.performance.RefundStatus.None] = EMPTY_STRING;
 REFUND_STATUS_NAMES[tttsapi.factory.performance.RefundStatus.NotInstructed] = '未指示';
@@ -117,16 +112,12 @@ exports.searchSuspendedPerformances = searchSuspendedPerformances;
  */
 // tslint:disable-next-line:max-func-body-length
 function findSuspendedPerformances(req, conditions) {
-    var _a, _b, _c;
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         const eventService = new tttsapi.service.Event({
             endpoint: process.env.API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        // const reservationService = new tttsapi.service.Reservation({
-        //     endpoint: <string>process.env.API_ENDPOINT,
-        //     auth: req.tttsAuthClient
-        // });
         debug('finfing performances...', conditions);
         const searchResults = yield eventService.search(Object.assign(Object.assign({}, conditions), {
             countDocuments: '1',
@@ -159,13 +150,13 @@ function findSuspendedPerformances(req, conditions) {
                     // const nubmerOfUncheckedReservations = <number>searchReservationsResult.totalCount;
                     // nubmerOfCheckedReservations = numberOfReservations - nubmerOfUncheckedReservations;
                     // performanceに保管された入場済予約から算出する場合はコチラ↓
-                    const checkedReservations = (_a = extension) === null || _a === void 0 ? void 0 : _a.checkedReservations;
+                    const checkedReservations = extension === null || extension === void 0 ? void 0 : extension.checkedReservations;
                     if (Array.isArray(checkedReservations)) {
                         nubmerOfCheckedReservations = checkedReservations.filter((r) => targetReservationIds.includes(String(r.id))).length;
                     }
                 }
             }
-            const tourNumber = (_c = (_b = performance.additionalProperty) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'tourNumber')) === null || _c === void 0 ? void 0 : _c.value;
+            const tourNumber = (_b = (_a = performance.additionalProperty) === null || _a === void 0 ? void 0 : _a.find((p) => p.name === 'tourNumber')) === null || _b === void 0 ? void 0 : _b.value;
             let evServiceStatusName = EMPTY_STRING;
             switch (performance.eventStatus) {
                 case cinerinoapi.factory.chevre.eventStatusType.EventCancelled:

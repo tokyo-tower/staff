@@ -18,6 +18,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.16.0 - 2021-01-06
+
+### Changed
+
+- update @motionpicture/ttts-api-nodejs-client
+- 入場&入場取消時に、入場済予約リストをパフォーマンスに連携するように調整
+- APP_STOPPED設定を追加
+
 ## v6.15.3 - 2021-01-03
 
 ### Changed

@@ -285,23 +285,9 @@ function addCustomAttributes(reservations) {
         }
         return Object.assign(Object.assign({}, reservation), { checkins, orderNumber: orderNumber, paymentNo: paymentNo, payment_method_name: (POS_CLIENT_IDS.indexOf(clientId) >= 0)
                 ? '---'
-                : paymentMethod2name(paymentMethod4reservation), performance: reservation.reservationFor.id, performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'), performance_start_time: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HHmm'), performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'), performance_canceled: false, 
-            // ticket_type: reservation.reservedTicket.ticketType.identifier,
-            ticket_type_name: reservation.reservedTicket.ticketType.name, 
-            // purchaser_group: (STAFF_CLIENT_IDS.indexOf(clientId) >= 0) ? 'Staff' : 'Customer',
-            transactionAgentName: (STAFF_CLIENT_IDS.indexOf(clientId) >= 0)
+                : paymentMethod2name(paymentMethod4reservation), performance: reservation.reservationFor.id, performance_day: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYYMMDD'), performance_start_time: moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('HHmm'), performance_end_time: moment(reservation.reservationFor.endDate).tz('Asia/Tokyo').format('HHmm'), performance_canceled: false, ticket_type_name: reservation.reservedTicket.ticketType.name, transactionAgentName: (STAFF_CLIENT_IDS.indexOf(clientId) >= 0)
                 ? '窓口代理予約'
-                : (POS_CLIENT_IDS.indexOf(clientId) >= 0) ? 'POS' : '一般ネット予約', 
-            // purchased_at: (reservation.bookingTime !== undefined) ? reservation.bookingTime : (<any>reservation).purchased_at,
-            // purchaser_name: (typeof underName?.name === 'string') ? underName.name : '',
-            purchaser_last_name: (typeof (underName === null || underName === void 0 ? void 0 : underName.familyName) === 'string') ? underName.familyName : '', purchaser_first_name: (typeof (underName === null || underName === void 0 ? void 0 : underName.givenName) === 'string') ? underName.givenName : '', 
-            // purchaser_email: (typeof underName?.email === 'string') ? underName.email : '',
-            purchaser_tel: (typeof (underName === null || underName === void 0 ? void 0 : underName.telephone) === 'string') ? underName.telephone : '', 
-            // purchaser_international_tel: '',
-            // purchaser_age: age,
-            // purchaser_address: (typeof underName?.address === 'string') ? underName.address : '',
-            // purchaser_gender: (typeof underName?.gender === 'string') ? underName.gender : '',
-            watcher_name: reservation.additionalTicketText });
+                : (POS_CLIENT_IDS.indexOf(clientId) >= 0) ? 'POS' : '一般ネット予約', purchaser_last_name: (typeof (underName === null || underName === void 0 ? void 0 : underName.familyName) === 'string') ? underName.familyName : '', purchaser_first_name: (typeof (underName === null || underName === void 0 ? void 0 : underName.givenName) === 'string') ? underName.givenName : '', purchaser_tel: (typeof (underName === null || underName === void 0 ? void 0 : underName.telephone) === 'string') ? underName.telephone : '', watcher_name: reservation.additionalTicketText });
     });
 }
 /**

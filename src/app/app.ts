@@ -56,21 +56,21 @@ app.use(multer({ storage: storage }).any());
 app.use(cookieParser());
 app.use(express.static(`${__dirname}/../../public`));
 
-// i18n を利用する設定
-// i18n.configure({
-//     // locales: ['en', 'ja'],
-//     locales: ['ja'],
-//     defaultLocale: 'ja',
-//     directory: `${__dirname}/../../locales`,
-//     objectNotation: true,
-//     updateFiles: false // ページのビューで自動的に言語ファイルを更新しない
-// });
-// i18n の設定を有効化
-// app.use(i18n.init);
-
 app.use(expressValidator()); // バリデーション
 
 app.use(setLocals); // ローカル変数セット
+
+// GCPへのリダイレクト指定があれば全てリダイレクト
+const APP_STOPPED = process.env.APP_STOPPED === '1';
+app.use((__, res, next) => {
+    if (APP_STOPPED) {
+        res.end('このアプリケーションは停止いたしました。新しい環境をご利用ください。');
+
+        return;
+    }
+
+    next();
+});
 
 // ルーティング登録の順序に注意！
 app.use(authRouter);

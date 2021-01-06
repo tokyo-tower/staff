@@ -97,10 +97,7 @@ $(function () {
             // とりあえずPOSの決済方法は「---」とする仕様
             var paymentMethodName = reservation.payment_method_name;
 
-            var startDatetime = reservation.performance_day.substr(0, 4)
-                + '/' + reservation.performance_day.substr(4, 2)
-                + '/' + reservation.performance_day.substr(6)
-                + ' ' + reservation.performance_start_time.substr(0, 2) + ':' + reservation.performance_start_time.substr(2);
+            var startDatetime = moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD HH:mm');
 
             html += ''
                 + '<tr data-seat-code="' + reservation.reservedTicket.ticketedSeat.seatNumber + '"'
@@ -110,8 +107,8 @@ $(function () {
                 + ' data-purchaser-name="' + reservation.purchaser_last_name + ' ' + reservation.purchaser_first_name + '"'
                 + ' data-purchaser-tel="' + reservation.purchaser_tel + '"'
                 + ' data-performance-start-datetime="' + startDatetime + '"'
-                + ' data-purchased-datetime="' + moment(reservation.bookingTime).format('YYYY/MM/DD HH:mm') + '"'
-                + ' data-watcher-name="' + reservation.watcher_name + '"'
+                + ' data-purchased-datetime="' + moment(reservation.bookingTime).tz('Asia/Tokyo').format('YYYY/MM/DD HH:mm') + '"'
+                + ' data-watcher-name="' + reservation.additionalTicketText + '"'
                 + ' data-ticketname="' + reservation.ticket_type_name.ja + '"'
                 + ' data-purchase-route="' + transactionAgentName + '"'
                 + ' data-payment-method="' + paymentMethodName + '"'
@@ -119,23 +116,23 @@ $(function () {
                 + '>'
                 + '<th class="td-checkbox">';
 
-            if (reservation.paymentNo && !reservation.performance_canceled) {
+            if (reservation.paymentNo) {
                 html += ''
                     + '<input type="checkbox" value="">';
             }
             html += ''
                 + '</th>'
                 + '<td class="td-number">'
-                + '<span class="paymentno">' + reservation.paymentNo + '</span><span class="starttime">' + moment(reservation.performance_day + ' ' + reservation.performance_start_time, 'YYYYMMDD HHmm').format('YYYY/MM/DD HH:mm') + '</span></td>'
+                + '<span class="paymentno">' + reservation.paymentNo + '</span><span class="starttime">' + moment(reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYY/MM/DD HH:mm') + '</span></td>'
                 + '<td class="td-name">' + reservation.purchaser_last_name + ' ' + reservation.purchaser_first_name + '</td>'
-                + '<td class="td-amemo">' + reservation.watcher_name + '</td>'
+                + '<td class="td-amemo">' + reservation.additionalTicketText + '</td>'
                 + '<td class="td-seat">' + reservation.reservedTicket.ticketedSeat.seatNumber + '</td>'
                 + '<td class="td-ticket">' + reservation.ticket_type_name.ja + '</td>'
                 + '<td class="td-route">' + transactionAgentName + '</td>'
                 + '<td class="td-route">' + paymentMethodName + '</td>'
                 + '<td class="td-checkin">' + ((reservation.checkins.length) ? '<span class="entered">入場済み</span>' : '<span class="unentered">未入場</span>') + '</td>'
                 + '<td class="td-actions">';
-            if (reservation.paymentNo && !reservation.performance_canceled) {
+            if (reservation.paymentNo) {
                 html += ''
                     + '<p class="btn call-modal"><span>詳細</span></p>'
                     + '<p class="btn btn-print" data-targetid="' + reservation.id + '" data-order-number="' + reservation.orderNumber + '"><span>A4チケット印刷</span></p>'
