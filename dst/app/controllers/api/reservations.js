@@ -336,14 +336,34 @@ function cancel(req, res, next) {
             if (!Array.isArray(reservationIds)) {
                 throw new Error('システムエラーが発生しました。ご不便をおかけして申し訳ありませんがしばらく経ってから再度お試しください。');
             }
-            const reservationService = new tttsapi.service.Reservation({
-                endpoint: process.env.API_ENDPOINT,
+            const reservationService = new cinerinoapi.service.Reservation({
+                endpoint: process.env.CINERINO_API_ENDPOINT,
                 auth: req.tttsAuthClient
             });
+            // const reservationService = new tttsapi.service.Reservation({
+            //     endpoint: <string>process.env.API_ENDPOINT,
+            //     auth: req.tttsAuthClient
+            // });
             const promises = reservationIds.map((id) => __awaiter(this, void 0, void 0, function* () {
+                var _a, _b, _c;
                 // 予約データの解放
                 try {
-                    yield reservationService.cancel({ id: id });
+                    yield reservationService.cancel({
+                        project: { typeOf: cinerinoapi.factory.chevre.organizationType.Project, id: '' },
+                        typeOf: cinerinoapi.factory.chevre.transactionType.CancelReservation,
+                        agent: {
+                            typeOf: cinerinoapi.factory.personType.Person,
+                            id: String((_b = (_a = req.session) === null || _a === void 0 ? void 0 : _a.staffUser) === null || _b === void 0 ? void 0 : _b.sub),
+                            name: String((_c = req.staffUser) === null || _c === void 0 ? void 0 : _c.username)
+                        },
+                        object: {
+                            reservation: { id }
+                        },
+                        expires: moment()
+                            .add(1, 'minutes')
+                            .toDate()
+                    });
+                    // await reservationService.cancel({ id: id });
                     successIds.push(id);
                 }
                 catch (error) {

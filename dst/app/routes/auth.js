@@ -37,11 +37,12 @@ authRouter.get('/signIn', (req, res, next) => __awaiter(void 0, void 0, void 0, 
             throw new Error('cannot get profile from id_token');
         }
         // const profile = <IProfile>jwt.decode((<any>authClient.credentials).id_token);
-        const group = (Array.isArray((profile)['cognito:groups']) && profile['cognito:groups'].length > 0)
+        const group = (Array.isArray(profile['cognito:groups']) && profile['cognito:groups'].length > 0)
             ? { name: profile['cognito:groups'][0], description: '' }
             : { name: '', description: '' };
         // ログイン
         req.session.staffUser = {
+            sub: profile.sub,
             username: profile['cognito:username'],
             familyName: profile.family_name,
             givenName: profile.given_name,

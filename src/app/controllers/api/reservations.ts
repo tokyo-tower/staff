@@ -382,15 +382,34 @@ export async function cancel(req: Request, res: Response, next: NextFunction): P
             throw new Error('システムエラーが発生しました。ご不便をおかけして申し訳ありませんがしばらく経ってから再度お試しください。');
         }
 
-        const reservationService = new tttsapi.service.Reservation({
-            endpoint: <string>process.env.API_ENDPOINT,
+        const reservationService = new cinerinoapi.service.Reservation({
+            endpoint: <string>process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
+        // const reservationService = new tttsapi.service.Reservation({
+        //     endpoint: <string>process.env.API_ENDPOINT,
+        //     auth: req.tttsAuthClient
+        // });
 
         const promises = reservationIds.map(async (id) => {
             // 予約データの解放
             try {
-                await reservationService.cancel({ id: id });
+                await reservationService.cancel({
+                    project: { typeOf: cinerinoapi.factory.chevre.organizationType.Project, id: '' }, // プロジェクト指定は実質無意味
+                    typeOf: cinerinoapi.factory.chevre.transactionType.CancelReservation,
+                    agent: {
+                        typeOf: cinerinoapi.factory.personType.Person,
+                        id: String(req.session?.staffUser?.sub),
+                        name: String(req.staffUser?.username)
+                    },
+                    object: {
+                        reservation: { id }
+                    },
+                    expires: moment()
+                        .add(1, 'minutes')
+                        .toDate()
+                });
+                // await reservationService.cancel({ id: id });
 
                 successIds.push(id);
             } catch (error) {

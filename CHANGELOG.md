@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 - 販売停止時の予約検索をCinerinoで実装
 - 返品処理実行時の予約検索をCinerinoで実装
+- 予約取消をCinerinoで実装
 
 ### Deprecated
 
