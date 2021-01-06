@@ -65,32 +65,43 @@ function confirmTest(req, res, next) {
 exports.confirmTest = confirmTest;
 /**
  * 予約情報取得
+ * いったん予約キャッシュを廃止してみる
  */
 function getReservations(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const now = moment();
+            // const now = moment();
             if (req.staffUser === undefined) {
                 throw new Error('checkinAdminUser not defined.');
             }
             // 予約を検索
-            const tttsReservationService = new tttsapi.service.Reservation({
-                endpoint: process.env.API_ENDPOINT,
-                auth: req.tttsAuthClient
-            });
-            const searchReservationsResult = yield tttsReservationService.search(Object.assign({ limit: 100, typeOf: tttsapi.factory.chevre.reservationType.EventReservation, reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed], reservationFor: Object.assign({ id: ((typeof req.body.performanceId === 'number' || typeof req.body.performanceId === 'string')
-                        && String(req.body.performanceId).length > 0)
-                        ? String(req.body.performanceId)
-                        : undefined, startThrough: now.add(1, 'second').toDate() }, { endFrom: now.toDate() }) }, {
-                noTotalCount: '1'
-            }));
-            const reservations = searchReservationsResult.data.map(reservation_1.chevreReservation2ttts);
+            // const tttsReservationService = new tttsapi.service.Reservation({
+            //     endpoint: <string>process.env.API_ENDPOINT,
+            //     auth: req.tttsAuthClient
+            // });
+            // const searchReservationsResult = await tttsReservationService.search({
+            //     limit: 100,
+            //     typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+            //     reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+            //     reservationFor: {
+            //         id: ((typeof req.body.performanceId === 'number' || typeof req.body.performanceId === 'string')
+            //             && String(req.body.performanceId).length > 0)
+            //             ? String(req.body.performanceId)
+            //             : undefined,
+            //         startThrough: now.add(1, 'second').toDate(),
+            //         ...{ endFrom: now.toDate() }
+            //     },
+            //     ...{
+            //         noTotalCount: '1'
+            //     }
+            // });
+            // const reservations = searchReservationsResult.data.map(chevreReservation2ttts);
             const reservationsById = {};
             const reservationIdsByQrStr = {};
-            reservations.forEach((reservation) => {
-                reservationsById[reservation.id] = reservation;
-                reservationIdsByQrStr[reservation.id] = reservation.id;
-            });
+            // reservations.forEach((reservation) => {
+            //     reservationsById[reservation.id] = reservation;
+            //     reservationIdsByQrStr[reservation.id] = reservation.id;
+            // });
             res.json({
                 error: null,
                 reservationsById: reservationsById,

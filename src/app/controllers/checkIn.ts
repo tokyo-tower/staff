@@ -50,38 +50,39 @@ export async function confirmTest(req: Request, res: Response, next: NextFunctio
 
 /**
  * 予約情報取得
+ * いったん予約キャッシュを廃止してみる
  */
 export async function getReservations(req: Request, res: Response): Promise<void> {
     try {
-        const now = moment();
+        // const now = moment();
 
         if (req.staffUser === undefined) {
             throw new Error('checkinAdminUser not defined.');
         }
 
         // 予約を検索
-        const tttsReservationService = new tttsapi.service.Reservation({
-            endpoint: <string>process.env.API_ENDPOINT,
-            auth: req.tttsAuthClient
-        });
+        // const tttsReservationService = new tttsapi.service.Reservation({
+        //     endpoint: <string>process.env.API_ENDPOINT,
+        //     auth: req.tttsAuthClient
+        // });
 
-        const searchReservationsResult = await tttsReservationService.search({
-            limit: 100,
-            typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-            reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
-            reservationFor: {
-                id: ((typeof req.body.performanceId === 'number' || typeof req.body.performanceId === 'string')
-                    && String(req.body.performanceId).length > 0)
-                    ? String(req.body.performanceId)
-                    : undefined,
-                startThrough: now.add(1, 'second').toDate(),
-                ...{ endFrom: now.toDate() }
-            },
-            ...{
-                noTotalCount: '1'
-            }
-        });
-        const reservations = searchReservationsResult.data.map(chevreReservation2ttts);
+        // const searchReservationsResult = await tttsReservationService.search({
+        //     limit: 100,
+        //     typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
+        //     reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+        //     reservationFor: {
+        //         id: ((typeof req.body.performanceId === 'number' || typeof req.body.performanceId === 'string')
+        //             && String(req.body.performanceId).length > 0)
+        //             ? String(req.body.performanceId)
+        //             : undefined,
+        //         startThrough: now.add(1, 'second').toDate(),
+        //         ...{ endFrom: now.toDate() }
+        //     },
+        //     ...{
+        //         noTotalCount: '1'
+        //     }
+        // });
+        // const reservations = searchReservationsResult.data.map(chevreReservation2ttts);
 
         const reservationsById: {
             [id: string]: tttsapi.factory.reservation.event.IReservation;
@@ -89,10 +90,10 @@ export async function getReservations(req: Request, res: Response): Promise<void
         const reservationIdsByQrStr: {
             [qr: string]: string;
         } = {};
-        reservations.forEach((reservation) => {
-            reservationsById[reservation.id] = reservation;
-            reservationIdsByQrStr[reservation.id] = reservation.id;
-        });
+        // reservations.forEach((reservation) => {
+        //     reservationsById[reservation.id] = reservation;
+        //     reservationIdsByQrStr[reservation.id] = reservation.id;
+        // });
 
         res.json({
             error: null,
