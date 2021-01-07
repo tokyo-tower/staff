@@ -18,6 +18,7 @@ const notFoundHandler_1 = require("./middlewares/notFoundHandler");
 const session_1 = require("./middlewares/session");
 const setLocals_1 = require("./middlewares/setLocals");
 const auth_1 = require("./routes/auth");
+const health_1 = require("./routes/health");
 const router_1 = require("./routes/router");
 const app = express();
 app.use(middlewares.basicAuth({
@@ -57,6 +58,7 @@ app.use((__, res, next) => {
     next();
 });
 // ルーティング登録の順序に注意！
+app.use('/health', health_1.default);
 app.use(auth_1.default);
 app.use(authentication_1.default);
 app.use(router_1.default);

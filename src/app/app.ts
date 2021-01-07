@@ -19,6 +19,7 @@ import session from './middlewares/session';
 import setLocals from './middlewares/setLocals';
 
 import authRouter from './routes/auth';
+import healthRouter from './routes/health';
 import router from './routes/router';
 
 const app = express();
@@ -73,6 +74,7 @@ app.use((__, res, next) => {
 });
 
 // ルーティング登録の順序に注意！
+app.use('/health', healthRouter);
 app.use(authRouter);
 app.use(authentication);
 
