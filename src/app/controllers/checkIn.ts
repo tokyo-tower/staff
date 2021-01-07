@@ -119,16 +119,71 @@ export async function getReservation(req: Request, res: Response): Promise<void>
     }
 
     try {
-        const tttsReservationService = new tttsapi.service.Reservation({
-            endpoint: <string>process.env.API_ENDPOINT,
+        const reservationService = new cinerinoapi.service.Reservation({
+            endpoint: <string>process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        const reservation = await tttsReservationService.findById({ id: req.params.qr });
-        if (reservation.reservationStatus !== tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed) {
-            res.status(NOT_FOUND).json(null);
-        } else {
-            res.json(chevreReservation2ttts(reservation));
+        const searchReservationsResult = await reservationService.search<cinerinoapi.factory.chevre.reservationType.EventReservation>({
+            typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+            id: { $eq: req.params.qr }
+        });
+        const reservation = searchReservationsResult.data.shift();
+        if (reservation === undefined) {
+            throw new cinerinoapi.factory.errors.NotFound('Reservation');
         }
+        // const tttsReservationService = new tttsapi.service.Reservation({
+        //     endpoint: <string>process.env.API_ENDPOINT,
+        //     auth: req.tttsAuthClient
+        // });
+        // const reservation = await tttsReservationService.findById({ id: req.params.qr });
+
+        if (reservation.reservationStatus !== tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed) {
+            res.status(NOT_FOUND)
+                .json(null);
+
+            return;
+        }
+
+        // 予約使用アクション検索
+        const searchUseActionsResult = await reservationService.searchUseActions({
+            object: { id: reservation.id }
+        });
+        const checkins: tttsapi.factory.reservation.event.ICheckin[] = searchUseActionsResult.data
+            .filter((action) => {
+
+                const agentIdentifier = action.agent.identifier;
+
+                return Array.isArray(agentIdentifier)
+                    && typeof agentIdentifier.find((p) => p.name === 'when')?.value === 'string';
+            })
+            .map((action) => {
+                const agentIdentifier = action.agent.identifier;
+
+                let when: string = '';
+                let where: string | undefined;
+                let why: string | undefined;
+                let how: string | undefined;
+                if (Array.isArray(agentIdentifier)) {
+                    when = <string>agentIdentifier.find((p) => p.name === 'when')?.value;
+                    where = agentIdentifier.find((p) => p.name === 'where')?.value;
+                    why = agentIdentifier.find((p) => p.name === 'why')?.value;
+                    how = agentIdentifier.find((p) => p.name === 'how')?.value;
+                }
+
+                return {
+                    when: moment(when)
+                        .toDate(),
+                    where: (typeof where === 'string') ? where : '',
+                    why: (typeof why === 'string') ? why : '',
+                    how: (typeof how === 'string') ? how : '',
+                    id: action.id
+                };
+            });
+
+        res.json(chevreReservation2ttts({
+            ...reservation,
+            checkins
+        }));
     } catch (error) {
         if (error.code === NOT_FOUND) {
             res.status(NOT_FOUND).json(null);

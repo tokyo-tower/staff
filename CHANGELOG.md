@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - 返品処理実行時の予約検索をCinerinoで実装
 - 予約取消をCinerinoで実装
 - 入場時の予約キャッシュの利用を廃止
+- 入場時の予約照会をCinerinoで実装
 
 ### Deprecated
 
