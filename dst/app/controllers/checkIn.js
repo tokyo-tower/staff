@@ -201,6 +201,7 @@ exports.getReservation = getReservation;
 /**
  * チェックイン作成
  */
+// tslint:disable-next-line:cyclomatic-complexity max-func-body-length
 function addCheckIn(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -238,31 +239,51 @@ function addCheckIn(req, res) {
             if (typeof code !== 'string' || code.length === 0) {
                 code = yield publishCode(req, reservation);
             }
-            if (typeof code === 'string' && code.length > 0) {
-                try {
-                    // getToken
-                    const tokenService = new cinerinoapi.service.Token({
-                        endpoint: process.env.CINERINO_API_ENDPOINT,
-                        auth: req.tttsAuthClient
-                    });
-                    const getTokenResult = yield tokenService.getToken({ code });
-                    token = getTokenResult.token;
-                }
-                catch (error) {
-                    // tslint:disable-next-line:no-console
-                    console.error('getToken failed', error);
-                    // throw new Error('トークンを発行できませんでした');
-                }
+            try {
+                // getToken
+                const tokenService = new cinerinoapi.service.Token({
+                    endpoint: process.env.CINERINO_API_ENDPOINT,
+                    auth: req.tttsAuthClient
+                });
+                const getTokenResult = yield tokenService.getToken({ code });
+                token = getTokenResult.token;
+            }
+            catch (error) {
+                // tslint:disable-next-line:no-console
+                console.error('getToken failed', error);
+                throw new Error('トークンを発行できませんでした');
             }
             const checkin = Object.assign({ when: moment(req.body.when).toDate(), where: req.body.where, why: '', how: req.body.how }, (typeof token === 'string') ? { instrument: { token } } : undefined);
-            const tttsReservationService = new tttsapi.service.Reservation({
-                endpoint: process.env.API_ENDPOINT,
-                auth: req.tttsAuthClient
-            });
-            yield tttsReservationService.addCheckin({
-                reservationId: reservationId,
-                checkin: checkin
-            });
+            // const tttsReservationService = new tttsapi.service.Reservation({
+            //     endpoint: <string>process.env.API_ENDPOINT,
+            //     auth: req.tttsAuthClient
+            // });
+            // await tttsReservationService.addCheckin({
+            //     reservationId: reservationId,
+            //     checkin: checkin
+            // });
+            // 注文トークンで予約使用
+            yield reservationService.useByToken(Object.assign({ object: { id: reservationId }, instrument: { token }, location: { identifier: req.body.where } }, {
+                agent: {
+                    identifier: [
+                        ...(typeof req.body.how === 'string' && req.body.how.length > 0)
+                            ? [{ name: 'how', value: String(req.body.how) }]
+                            : [],
+                        ...(typeof req.body.when === 'string' && req.body.when.length > 0)
+                            ? [{ name: 'when', value: String(req.body.when) }] : [],
+                        ...(typeof req.body.where === 'string' && req.body.where.length > 0)
+                            ? [{ name: 'where', value: String(req.body.where) }]
+                            : [],
+                        ...(typeof req.body.why === 'string' && req.body.why.length > 0)
+                            ? [{ name: 'why', value: String(req.body.why) }]
+                            : []
+                    ]
+                },
+                // how: "motionpicture"
+                // when: "2021-01-06T23:51:18.293Z"
+                // where: "Staff"
+                includesActionId: '1'
+            }));
             // 入場済予約リスト更新
             yield updateCheckedReservations(req, reservation);
             res.status(http_status_1.CREATED)
@@ -301,10 +322,14 @@ function publishCode(req, reservation) {
                 });
                 code = authorizeOrderResult.code;
             }
+            else {
+                throw new Error('予約に注文番号あるいは電話番号が見つかりません');
+            }
         }
         catch (error) {
             // tslint:disable-next-line:no-console
             console.error('authorize order failed', error);
+            throw new Error('コードを発行できませんでした');
         }
         return code;
     });
@@ -343,15 +368,41 @@ function removeCheckIn(req, res) {
             if (reservation === undefined) {
                 throw new cinerinoapi.factory.errors.NotFound('Reservation');
             }
-            const tttsReservationService = new tttsapi.service.Reservation({
-                endpoint: process.env.API_ENDPOINT,
-                auth: req.tttsAuthClient
+            // const tttsReservationService = new tttsapi.service.Reservation({
+            //     endpoint: <string>process.env.API_ENDPOINT,
+            //     auth: req.tttsAuthClient
+            // });
+            // await tttsReservationService.cancelCheckin({
+            //     reservationId: reservationId,
+            //     when: moment(req.body.when)
+            //         .toDate()
+            // });
+            // 予約使用アクションから取り消そうとしているアクションを検索
+            const searchUseActionsResult = yield reservationService.searchUseActions({
+                object: { id: reservation.id }
             });
-            yield tttsReservationService.cancelCheckin({
-                reservationId: reservationId,
-                when: moment(req.body.when)
-                    .toDate()
+            const cancelingAction = searchUseActionsResult.data.find((action) => {
+                var _a;
+                const agentIdentifier = action.agent.identifier;
+                if (!Array.isArray(agentIdentifier)) {
+                    return false;
+                }
+                const whenValue = (_a = agentIdentifier.find((p) => p.name === 'when')) === null || _a === void 0 ? void 0 : _a.value;
+                return typeof whenValue === 'string'
+                    && whenValue === req.body.when;
             });
+            if (cancelingAction !== undefined) {
+                try {
+                    yield reservationService.cancelUseAction({
+                        id: cancelingAction.id,
+                        object: { id: reservation.id }
+                    });
+                }
+                catch (error) {
+                    // tslint:disable-next-line:no-console
+                    console.log('cancelUseAction failed.', error);
+                }
+            }
             // 入場済予約リスト更新
             yield updateCheckedReservations(req, reservation);
             res.status(http_status_1.NO_CONTENT)
