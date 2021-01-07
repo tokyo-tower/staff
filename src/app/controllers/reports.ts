@@ -93,7 +93,7 @@ export async function getAggregateSales(req: Request, res: Response): Promise<vo
         //     access_token: cognitoCredentials.accessToken,
         //     token_type: cognitoCredentials.tokenType
         // });
-        const aggregateSalesService = new tttsapi.service.AggregateSales({
+        const aggregateSalesService = new tttsapi.service.SalesReport({
             endpoint: <string>process.env.API_ENDPOINT,
             auth: req.tttsAuthClient
         });

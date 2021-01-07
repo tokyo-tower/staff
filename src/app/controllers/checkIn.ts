@@ -9,7 +9,7 @@ import { NextFunction, Request, Response } from 'express';
 import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, NO_CONTENT } from 'http-status';
 import * as moment from 'moment-timezone';
 
-import { chevreReservation2ttts } from '../util/reservation';
+import { chevreReservation2ttts, ICheckin, IReservation } from '../util/reservation';
 
 const CODE_EXPIRES_IN_SECONDS = 60; // その場で使用するだけなので短くてよし
 
@@ -85,7 +85,7 @@ export async function getReservations(req: Request, res: Response): Promise<void
         // const reservations = searchReservationsResult.data.map(chevreReservation2ttts);
 
         const reservationsById: {
-            [id: string]: tttsapi.factory.reservation.event.IReservation;
+            [id: string]: IReservation;
         } = {};
         const reservationIdsByQrStr: {
             [qr: string]: string;
@@ -151,7 +151,7 @@ export async function getReservation(req: Request, res: Response): Promise<void>
         const searchUseActionsResult = await reservationService.searchUseActions({
             object: { id: reservation.id }
         });
-        const checkins: tttsapi.factory.reservation.event.ICheckin[] = searchUseActionsResult.data
+        const checkins: ICheckin[] = searchUseActionsResult.data
             .filter((action) => {
 
                 const agentIdentifier = action.agent.identifier;
@@ -262,7 +262,7 @@ export async function addCheckIn(req: Request, res: Response): Promise<void> {
             throw new Error('トークンを発行できませんでした');
         }
 
-        const checkin: tttsapi.factory.reservation.event.ICheckin = {
+        const checkin: ICheckin = {
             when: moment(req.body.when).toDate(),
             where: req.body.where,
             why: '',
