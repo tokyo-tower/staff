@@ -138,7 +138,9 @@ function getReservation(req, res) {
             });
             const reservation = searchReservationsResult.data.shift();
             if (reservation === undefined) {
-                throw new cinerinoapi.factory.errors.NotFound('Reservation');
+                res.status(http_status_1.NOT_FOUND)
+                    .json(null);
+                return;
             }
             // const tttsReservationService = new tttsapi.service.Reservation({
             //     endpoint: <string>process.env.API_ENDPOINT,

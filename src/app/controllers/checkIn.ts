@@ -129,7 +129,10 @@ export async function getReservation(req: Request, res: Response): Promise<void>
         });
         const reservation = searchReservationsResult.data.shift();
         if (reservation === undefined) {
-            throw new cinerinoapi.factory.errors.NotFound('Reservation');
+            res.status(NOT_FOUND)
+                .json(null);
+
+            return;
         }
         // const tttsReservationService = new tttsapi.service.Reservation({
         //     endpoint: <string>process.env.API_ENDPOINT,
