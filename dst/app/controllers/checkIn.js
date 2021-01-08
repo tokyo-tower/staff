@@ -397,7 +397,7 @@ function updateCheckedReservations(req, reservation) {
             });
             yield performanceService.updateExtension({
                 id: reservation.reservationFor.id,
-                checkedReservations,
+                checkedReservations
             });
         }
         catch (error) {

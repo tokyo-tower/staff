@@ -424,7 +424,7 @@ async function updateCheckedReservations(
         });
         await performanceService.updateExtension({
             id: reservation.reservationFor.id,
-            checkedReservations,
+            checkedReservations
         });
     } catch (error) {
         // tslint:disable-next-line:no-console
