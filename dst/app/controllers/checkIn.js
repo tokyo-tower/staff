@@ -65,32 +65,16 @@ function confirmTest(req, res, next) {
 exports.confirmTest = confirmTest;
 /**
  * 予約情報取得
+ * いったん予約キャッシュを廃止してみる
  */
 function getReservations(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const now = moment();
             if (req.staffUser === undefined) {
                 throw new Error('checkinAdminUser not defined.');
             }
-            // 予約を検索
-            const tttsReservationService = new tttsapi.service.Reservation({
-                endpoint: process.env.API_ENDPOINT,
-                auth: req.tttsAuthClient
-            });
-            const searchReservationsResult = yield tttsReservationService.search(Object.assign({ limit: 100, typeOf: tttsapi.factory.chevre.reservationType.EventReservation, reservationStatuses: [tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed], reservationFor: Object.assign({ id: ((typeof req.body.performanceId === 'number' || typeof req.body.performanceId === 'string')
-                        && String(req.body.performanceId).length > 0)
-                        ? String(req.body.performanceId)
-                        : undefined, startThrough: now.add(1, 'second').toDate() }, { endFrom: now.toDate() }) }, {
-                noTotalCount: '1'
-            }));
-            const reservations = searchReservationsResult.data.map(reservation_1.chevreReservation2ttts);
             const reservationsById = {};
             const reservationIdsByQrStr = {};
-            reservations.forEach((reservation) => {
-                reservationsById[reservation.id] = reservation;
-                reservationIdsByQrStr[reservation.id] = reservation.id;
-            });
             res.json({
                 error: null,
                 reservationsById: reservationsById,
@@ -117,17 +101,59 @@ function getReservation(req, res) {
             throw new Error('checkinAdminUser not authenticated.');
         }
         try {
-            const tttsReservationService = new tttsapi.service.Reservation({
-                endpoint: process.env.API_ENDPOINT,
+            const reservationService = new cinerinoapi.service.Reservation({
+                endpoint: process.env.CINERINO_API_ENDPOINT,
                 auth: req.tttsAuthClient
             });
-            const reservation = yield tttsReservationService.findById({ id: req.params.qr });
+            const searchReservationsResult = yield reservationService.search({
+                typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+                id: { $eq: req.params.qr }
+            });
+            const reservation = searchReservationsResult.data.shift();
+            if (reservation === undefined) {
+                res.status(http_status_1.NOT_FOUND)
+                    .json(null);
+                return;
+            }
             if (reservation.reservationStatus !== tttsapi.factory.chevre.reservationStatusType.ReservationConfirmed) {
-                res.status(http_status_1.NOT_FOUND).json(null);
+                res.status(http_status_1.NOT_FOUND)
+                    .json(null);
+                return;
             }
-            else {
-                res.json(reservation_1.chevreReservation2ttts(reservation));
-            }
+            // 予約使用アクション検索
+            const searchUseActionsResult = yield reservationService.searchUseActions({
+                object: { id: reservation.id }
+            });
+            const checkins = searchUseActionsResult.data
+                .filter((action) => {
+                var _a;
+                const agentIdentifier = action.agent.identifier;
+                return Array.isArray(agentIdentifier)
+                    && typeof ((_a = agentIdentifier.find((p) => p.name === 'when')) === null || _a === void 0 ? void 0 : _a.value) === 'string';
+            })
+                .map((action) => {
+                var _a, _b, _c, _d;
+                const agentIdentifier = action.agent.identifier;
+                let when = '';
+                let where;
+                let why;
+                let how;
+                if (Array.isArray(agentIdentifier)) {
+                    when = (_a = agentIdentifier.find((p) => p.name === 'when')) === null || _a === void 0 ? void 0 : _a.value;
+                    where = (_b = agentIdentifier.find((p) => p.name === 'where')) === null || _b === void 0 ? void 0 : _b.value;
+                    why = (_c = agentIdentifier.find((p) => p.name === 'why')) === null || _c === void 0 ? void 0 : _c.value;
+                    how = (_d = agentIdentifier.find((p) => p.name === 'how')) === null || _d === void 0 ? void 0 : _d.value;
+                }
+                return {
+                    when: moment(when)
+                        .toDate(),
+                    where: (typeof where === 'string') ? where : '',
+                    why: (typeof why === 'string') ? why : '',
+                    how: (typeof how === 'string') ? how : '',
+                    id: action.id
+                };
+            });
+            res.json(reservation_1.chevreReservation2ttts(Object.assign(Object.assign({}, reservation), { checkins })));
         }
         catch (error) {
             if (error.code === http_status_1.NOT_FOUND) {
@@ -145,6 +171,7 @@ exports.getReservation = getReservation;
 /**
  * チェックイン作成
  */
+// tslint:disable-next-line:cyclomatic-complexity max-func-body-length
 function addCheckIn(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -182,31 +209,43 @@ function addCheckIn(req, res) {
             if (typeof code !== 'string' || code.length === 0) {
                 code = yield publishCode(req, reservation);
             }
-            if (typeof code === 'string' && code.length > 0) {
-                try {
-                    // getToken
-                    const tokenService = new cinerinoapi.service.Token({
-                        endpoint: process.env.CINERINO_API_ENDPOINT,
-                        auth: req.tttsAuthClient
-                    });
-                    const getTokenResult = yield tokenService.getToken({ code });
-                    token = getTokenResult.token;
-                }
-                catch (error) {
-                    // tslint:disable-next-line:no-console
-                    console.error('getToken failed', error);
-                    // throw new Error('トークンを発行できませんでした');
-                }
+            try {
+                // getToken
+                const tokenService = new cinerinoapi.service.Token({
+                    endpoint: process.env.CINERINO_API_ENDPOINT,
+                    auth: req.tttsAuthClient
+                });
+                const getTokenResult = yield tokenService.getToken({ code });
+                token = getTokenResult.token;
+            }
+            catch (error) {
+                // tslint:disable-next-line:no-console
+                console.error('getToken failed', error);
+                throw new Error('トークンを発行できませんでした');
             }
             const checkin = Object.assign({ when: moment(req.body.when).toDate(), where: req.body.where, why: '', how: req.body.how }, (typeof token === 'string') ? { instrument: { token } } : undefined);
-            const tttsReservationService = new tttsapi.service.Reservation({
-                endpoint: process.env.API_ENDPOINT,
-                auth: req.tttsAuthClient
-            });
-            yield tttsReservationService.addCheckin({
-                reservationId: reservationId,
-                checkin: checkin
-            });
+            // 注文トークンで予約使用
+            yield reservationService.useByToken(Object.assign({ object: { id: reservationId }, instrument: { token }, location: { identifier: req.body.where } }, {
+                agent: {
+                    identifier: [
+                        ...(typeof req.body.how === 'string' && req.body.how.length > 0)
+                            ? [{ name: 'how', value: String(req.body.how) }]
+                            : [],
+                        ...(typeof req.body.when === 'string' && req.body.when.length > 0)
+                            ? [{ name: 'when', value: String(req.body.when) }] : [],
+                        ...(typeof req.body.where === 'string' && req.body.where.length > 0)
+                            ? [{ name: 'where', value: String(req.body.where) }]
+                            : [],
+                        ...(typeof req.body.why === 'string' && req.body.why.length > 0)
+                            ? [{ name: 'why', value: String(req.body.why) }]
+                            : []
+                    ]
+                },
+                // how: "motionpicture"
+                // when: "2021-01-06T23:51:18.293Z"
+                // where: "Staff"
+                includesActionId: '1'
+            }));
             // 入場済予約リスト更新
             yield updateCheckedReservations(req, reservation);
             res.status(http_status_1.CREATED)
@@ -245,10 +284,14 @@ function publishCode(req, reservation) {
                 });
                 code = authorizeOrderResult.code;
             }
+            else {
+                throw new Error('予約に注文番号あるいは電話番号が見つかりません');
+            }
         }
         catch (error) {
             // tslint:disable-next-line:no-console
             console.error('authorize order failed', error);
+            throw new Error('コードを発行できませんでした');
         }
         return code;
     });
@@ -287,15 +330,32 @@ function removeCheckIn(req, res) {
             if (reservation === undefined) {
                 throw new cinerinoapi.factory.errors.NotFound('Reservation');
             }
-            const tttsReservationService = new tttsapi.service.Reservation({
-                endpoint: process.env.API_ENDPOINT,
-                auth: req.tttsAuthClient
+            // 予約使用アクションから取り消そうとしているアクションを検索
+            const searchUseActionsResult = yield reservationService.searchUseActions({
+                object: { id: reservation.id }
             });
-            yield tttsReservationService.cancelCheckin({
-                reservationId: reservationId,
-                when: moment(req.body.when)
-                    .toDate()
+            const cancelingAction = searchUseActionsResult.data.find((action) => {
+                var _a;
+                const agentIdentifier = action.agent.identifier;
+                if (!Array.isArray(agentIdentifier)) {
+                    return false;
+                }
+                const whenValue = (_a = agentIdentifier.find((p) => p.name === 'when')) === null || _a === void 0 ? void 0 : _a.value;
+                return typeof whenValue === 'string'
+                    && whenValue === req.body.when;
             });
+            if (cancelingAction !== undefined) {
+                try {
+                    yield reservationService.cancelUseAction({
+                        id: cancelingAction.id,
+                        object: { id: reservation.id }
+                    });
+                }
+                catch (error) {
+                    // tslint:disable-next-line:no-console
+                    console.log('cancelUseAction failed.', error);
+                }
+            }
             // 入場済予約リスト更新
             yield updateCheckedReservations(req, reservation);
             res.status(http_status_1.NO_CONTENT)
@@ -335,9 +395,10 @@ function updateCheckedReservations(req, reservation) {
                 endpoint: process.env.API_ENDPOINT,
                 auth: req.tttsAuthClient
             });
-            yield performanceService.updateExtension(Object.assign({ id: reservation.reservationFor.id }, {
+            yield performanceService.updateExtension({
+                id: reservation.reservationFor.id,
                 checkedReservations
-            }));
+            });
         }
         catch (error) {
             // tslint:disable-next-line:no-console

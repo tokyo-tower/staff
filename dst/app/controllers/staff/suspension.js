@@ -40,7 +40,6 @@ function performances(__, res, next) {
         try {
             // 運行・オンライン販売停止設定画面表示
             res.render('staff/suspension/performances', {
-                // token: req.tttsAuthClient.credentials,
                 layout: layout,
                 EventStatusType: tttsapi.factory.chevre.eventStatusType
             });

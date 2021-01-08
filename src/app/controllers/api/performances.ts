@@ -75,12 +75,6 @@ export async function search(req: Request, res: Response): Promise<void> {
             }
         });
 
-        // const performanceService = new tttsapi.service.Event({
-        //     endpoint: <string>process.env.API_ENDPOINT,
-        //     auth: req.tttsAuthClient
-        // });
-        // const searchResult = await performanceService.search(req.query);
-
         const performances = searchResult.data.map((event) => {
             // 一般座席の残席数に変更
             const remainingAttendeeCapacity = event.aggregateOffer?.offers?.find((o) => o.identifier === '001')?.remainingAttendeeCapacity;
@@ -233,20 +227,28 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
  * [予約データ]かつ
  * [同一購入単位に入塔記録のない]予約のid配列
  */
+// tslint:disable-next-line:max-func-body-length
 async function getTargetReservationsForRefund(req: Request, performanceIds: string[]): Promise<cinerinoapi.factory.order.IOrder[]> {
     const orderService = new cinerinoapi.service.Order({
         endpoint: <string>process.env.CINERINO_API_ENDPOINT,
         auth: req.tttsAuthClient
     });
 
-    const reservationService = new tttsapi.service.Reservation({
-        endpoint: <string>process.env.API_ENDPOINT,
+    const reservationService = new cinerinoapi.service.Reservation({
+        endpoint: <string>process.env.CINERINO_API_ENDPOINT,
         auth: req.tttsAuthClient
     });
 
-    const targetReservations = await reservationService.distinct(
-        'underName',
-        {
+    let targetReservations:
+        cinerinoapi.factory.chevre.reservation.IReservation<cinerinoapi.factory.chevre.reservationType.EventReservation>[] = [];
+    const limit4reservations = 100;
+    let page4reservations = 0;
+    let numData4reservations: number = limit4reservations;
+    while (numData4reservations === limit4reservations) {
+        page4reservations += 1;
+        const searchReservationsResult = await reservationService.search<cinerinoapi.factory.chevre.reservationType.EventReservation>({
+            limit: limit4reservations,
+            page: page4reservations,
             typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
             reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
             // クライアントがfrontend or pos
@@ -263,13 +265,20 @@ async function getTargetReservationsForRefund(req: Request, performanceIds: stri
             reservationFor: {
                 ids: performanceIds
             },
-            checkins: { $size: 0 }
-        }
-    );
+            // checkins: { $size: 0 },
+            ...{
+                $projection: { underName: 1, useActionExists: 1 }
+            }
+        });
+        numData4reservations = searchReservationsResult.data.length;
+        targetReservations.push(...searchReservationsResult.data);
+    }
+    targetReservations = targetReservations.filter((r) => (<any>r).useActionExists !== true);
     const targetOrderNumbers = targetReservations.reduce<string[]>(
         (a, b) => {
-            if (Array.isArray(b.identifier)) {
-                const orderNumberProperty = b.identifier.find((p: any) => p.name === 'orderNumber');
+            const underNameIdentifier = b.underName?.identifier;
+            if (Array.isArray(underNameIdentifier)) {
+                const orderNumberProperty = underNameIdentifier.find((p) => p.name === 'orderNumber');
                 if (orderNumberProperty !== undefined) {
                     a.push(orderNumberProperty.value);
                 }

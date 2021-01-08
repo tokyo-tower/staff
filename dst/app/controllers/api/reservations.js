@@ -20,7 +20,7 @@ const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const mypage_1 = require("../staff/mypage");
 const debug = createDebug('ttts-staff:controllers');
-const USE_CINERINO_SEARCH_RESERVATION = process.env.USE_CINERINO_SEARCH_RESERVATION === '1';
+// const USE_CINERINO_SEARCH_RESERVATION = process.env.USE_CINERINO_SEARCH_RESERVATION === '1';
 const FRONTEND_CLIENT_IDS = (typeof process.env.FRONTEND_CLIENT_ID === 'string')
     ? process.env.FRONTEND_CLIENT_ID.split(',')
     : [];
@@ -165,72 +165,39 @@ function search(req, res) {
             },
             additionalTicketText: (watcherName !== null) ? watcherName : undefined
         };
-        // Cinerinoでの予約検索対応
-        if (USE_CINERINO_SEARCH_RESERVATION || req.query.useCinerino === '1') {
-            debug('searching reservations...', searchConditions);
-            const reservationService = new cinerinoapi.service.Reservation({
-                endpoint: process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient
+        // Cinerinoでの予約検索
+        debug('searching reservations...', searchConditions);
+        const reservationService = new cinerinoapi.service.Reservation({
+            endpoint: process.env.CINERINO_API_ENDPOINT,
+            auth: req.tttsAuthClient
+        });
+        try {
+            // 総数検索
+            // データ検索(検索→ソート→指定ページ分切取り)
+            const searchReservationsResult = yield reservationService.search(Object.assign(Object.assign({}, searchConditions), {
+                countDocuments: '1'
+            }));
+            debug('searchReservationsResult by Cinerino:', searchReservationsResult);
+            const count = searchReservationsResult.totalCount;
+            debug('reservation count:', count);
+            const reservations = searchReservationsResult.data;
+            // 0件メッセージセット
+            const message = (reservations.length === 0) ?
+                '検索結果がありません。予約データが存在しないか、検索条件を見直してください' : '';
+            res.json({
+                results: addCustomAttributes(reservations),
+                count: count,
+                errors: null,
+                message: message,
+                useCinerino: true
             });
-            try {
-                // 総数検索
-                // データ検索(検索→ソート→指定ページ分切取り)
-                const searchReservationsResult = yield reservationService.search(Object.assign(Object.assign({}, searchConditions), {
-                    countDocuments: '1'
-                }));
-                debug('searchReservationsResult by Cinerino:', searchReservationsResult);
-                const count = searchReservationsResult.totalCount;
-                debug('reservation count:', count);
-                const reservations = searchReservationsResult.data;
-                // 0件メッセージセット
-                const message = (reservations.length === 0) ?
-                    '検索結果がありません。予約データが存在しないか、検索条件を見直してください' : '';
-                res.json({
-                    results: addCustomAttributes(reservations),
-                    count: count,
-                    errors: null,
-                    message: message,
-                    useCinerino: true
-                });
-            }
-            catch (error) {
-                res.status(http_status_1.INTERNAL_SERVER_ERROR).json({
-                    errors: [{
-                            message: error.message
-                        }]
-                });
-            }
         }
-        else {
-            debug('searching reservations...', searchConditions);
-            const reservationService = new tttsapi.service.Reservation({
-                endpoint: process.env.API_ENDPOINT,
-                auth: req.tttsAuthClient
+        catch (error) {
+            res.status(http_status_1.INTERNAL_SERVER_ERROR).json({
+                errors: [{
+                        message: error.message
+                    }]
             });
-            try {
-                // 総数検索
-                // データ検索(検索→ソート→指定ページ分切取り)
-                const searchReservationsResult = yield reservationService.search(searchConditions);
-                const count = searchReservationsResult.totalCount;
-                debug('reservation count:', count);
-                const reservations = searchReservationsResult.data;
-                // 0件メッセージセット
-                const message = (reservations.length === 0) ?
-                    '検索結果がありません。予約データが存在しないか、検索条件を見直してください' : '';
-                res.json({
-                    results: addCustomAttributes(reservations),
-                    count: count,
-                    errors: null,
-                    message: message
-                });
-            }
-            catch (error) {
-                res.status(http_status_1.INTERNAL_SERVER_ERROR).json({
-                    errors: [{
-                            message: error.message
-                        }]
-                });
-            }
         }
     });
 }
@@ -244,11 +211,6 @@ function addCustomAttributes(reservations) {
         if (typeof paymentMethodProperty === 'string') {
             paymentMethod4reservation = paymentMethodProperty;
         }
-        // let age = '';
-        // const ageProperty = reservation.underName?.identifier?.find((p) => p.name === 'age')?.value;
-        // if (typeof ageProperty === 'string') {
-        //     age = ageProperty;
-        // }
         let clientId = '';
         const clientIdProperty = (_f = (_e = (_d = reservation.underName) === null || _d === void 0 ? void 0 : _d.identifier) === null || _e === void 0 ? void 0 : _e.find((p) => p.name === 'clientId')) === null || _f === void 0 ? void 0 : _f.value;
         if (typeof clientIdProperty === 'string') {
@@ -336,14 +298,29 @@ function cancel(req, res, next) {
             if (!Array.isArray(reservationIds)) {
                 throw new Error('システムエラーが発生しました。ご不便をおかけして申し訳ありませんがしばらく経ってから再度お試しください。');
             }
-            const reservationService = new tttsapi.service.Reservation({
-                endpoint: process.env.API_ENDPOINT,
+            const reservationService = new cinerinoapi.service.Reservation({
+                endpoint: process.env.CINERINO_API_ENDPOINT,
                 auth: req.tttsAuthClient
             });
             const promises = reservationIds.map((id) => __awaiter(this, void 0, void 0, function* () {
+                var _a, _b, _c;
                 // 予約データの解放
                 try {
-                    yield reservationService.cancel({ id: id });
+                    yield reservationService.cancel({
+                        project: { typeOf: cinerinoapi.factory.chevre.organizationType.Project, id: '' },
+                        typeOf: cinerinoapi.factory.chevre.transactionType.CancelReservation,
+                        agent: {
+                            typeOf: cinerinoapi.factory.personType.Person,
+                            id: String((_b = (_a = req.session) === null || _a === void 0 ? void 0 : _a.staffUser) === null || _b === void 0 ? void 0 : _b.sub),
+                            name: String((_c = req.staffUser) === null || _c === void 0 ? void 0 : _c.username)
+                        },
+                        object: {
+                            reservation: { id }
+                        },
+                        expires: moment()
+                            .add(1, 'minutes')
+                            .toDate()
+                    });
                     successIds.push(id);
                 }
                 catch (error) {

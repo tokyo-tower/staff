@@ -180,16 +180,6 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             if (numberOfReservations > 0) {
                 const targetReservationIds = reservationsAtLastUpdateDate.map((r) => r.id);
 
-                // その都度、予約検索する場合はコチラ↓
-                // const searchReservationsResult = await reservationService.search({
-                //     limit: 1,
-                //     typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-                //     ids: targetReservationIds,
-                //     checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
-                // });
-                // const nubmerOfUncheckedReservations = <number>searchReservationsResult.totalCount;
-                // nubmerOfCheckedReservations = numberOfReservations - nubmerOfUncheckedReservations;
-
                 // performanceに保管された入場済予約から算出する場合はコチラ↓
                 const checkedReservations = extension?.checkedReservations;
                 if (Array.isArray(checkedReservations)) {
@@ -222,7 +212,6 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
             start_date: performance.startDate,
             end_date: performance.endDate,
             tour_number: tourNumber,
-            // ev_service_status: evServiceStatus,
             ev_service_status_name: evServiceStatusName,
             online_sales_update_at: extension?.online_sales_update_at,
             online_sales_update_user: extension?.online_sales_update_user,
@@ -299,15 +288,17 @@ async function searchOrderNumberss4refund(
      */
     clientIds: string[]
 ): Promise<cinerinoapi.factory.order.IOrder[]> {
-    const reservationService = new tttsapi.service.Reservation({
-        endpoint: <string>process.env.API_ENDPOINT,
+    const reservationService = new cinerinoapi.service.Reservation({
+        endpoint: <string>process.env.CINERINO_API_ENDPOINT,
         auth: req.tttsAuthClient
     });
 
     // パフォーマンスに対する取引リストを、予約コレクションから検索する
-    let reservations: tttsapi.factory.reservation.event.IReservation[] = [];
+    let reservations: cinerinoapi.factory.chevre.reservation.IReservation<cinerinoapi.factory.chevre.reservationType.EventReservation>[]
+        = [];
+    // let reservations: tttsapi.factory.reservation.event.IReservation[] = [];
     if (clientIds.length > 0) {
-        const searchReservationsResult = await reservationService.search(
+        const searchReservationsResult = await reservationService.search<tttsapi.factory.chevre.reservationType.EventReservation>(
             {
                 limit: 100,
                 typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
@@ -329,8 +320,7 @@ async function searchOrderNumberss4refund(
 
     // 入場履歴なしの注文番号を取り出す
     let orderNumbers = reservations.map((r) => r.underName?.identifier?.find((p) => p.name === 'orderNumber')?.value);
-    const orderNumbersWithCheckins = reservations
-        .filter((r) => (r.checkins.length > 0))
+    const orderNumbersWithCheckins = reservations.filter((r) => ((<any>r).useActionExists === true))
         .map((r) => r.underName?.identifier?.find((p) => p.name === 'orderNumber')?.value);
     orderNumbers = uniq(difference(orderNumbers, orderNumbersWithCheckins));
 

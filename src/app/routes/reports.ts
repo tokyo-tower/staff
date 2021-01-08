@@ -9,12 +9,6 @@ const NEW_REPORT_URL = process.env.NEW_REPORT_URL;
 
 const reportsRouter = Router();
 
-// const authClient = new tttsapi.auth.OAuth2({
-//     domain: <string>process.env.API_AUTHORIZE_SERVER_DOMAIN,
-//     clientId: <string>process.env.API_CLIENT_ID,
-//     clientSecret: <string>process.env.API_CLIENT_SECRET
-// });
-
 // 売上レポート出力
 reportsRouter.get('', (__, res) => {
     if (typeof NEW_REPORT_URL === 'string' && NEW_REPORT_URL.length > 0) {

@@ -1,10 +1,29 @@
 import * as cinerinoapi from '@cinerino/sdk';
-import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 import * as moment from 'moment-timezone';
 
-export function chevreReservation2ttts(
-    params: tttsapi.factory.reservation.event.IReservation
-): tttsapi.factory.reservation.event.IReservation {
+export interface ICheckin {
+    when: Date; // いつ
+    where: string; // どこで
+    why: string; // 何のために
+    how: string; // どうやって
+    /**
+     * アクションID
+     */
+    id?: string;
+    instrument?: {
+        /**
+         * 入場に使用するトークン
+         */
+        token?: string;
+    };
+}
+
+export type IReservation
+    = cinerinoapi.factory.chevre.reservation.IReservation<cinerinoapi.factory.chevre.reservationType.EventReservation> & {
+        checkins: ICheckin[];
+    };
+
+export function chevreReservation2ttts(params: IReservation): IReservation {
     const ticketType = params.reservedTicket.ticketType;
     const underName = params.underName;
 

@@ -18,6 +18,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.17.0 - 2021-01-08
+
+### Changed
+
+- 販売停止時の予約検索をCinerinoで実装
+- 返品処理実行時の予約検索をCinerinoで実装
+- 予約取消をCinerinoで実装
+- 入場時の予約キャッシュの利用を廃止
+- 入場時の予約照会をCinerinoで実装
+- 入場&入場取消をCinerinoで実装
+- update @motionpicture/ttts-api-nodejs-client
+
 ## v6.16.0 - 2021-01-06
 
 ### Changed

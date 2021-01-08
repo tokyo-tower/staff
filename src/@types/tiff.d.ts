@@ -16,6 +16,7 @@ declare global {
         }
 
         interface IStaffUser {
+            sub: string;
             group: IGroup;
             familyName: string;
             givenName: string;

@@ -30,23 +30,24 @@ authRouter.get(
             await user.authClient.refreshAccessToken();
 
             const loginTicket = user.authClient.verifyIdToken({});
-            const profile = (<any>loginTicket).payload;
+            const profile = loginTicket.payload;
             if (profile === undefined) {
                 throw new Error('cannot get profile from id_token');
             }
 
             // const profile = <IProfile>jwt.decode((<any>authClient.credentials).id_token);
-            const group = (Array.isArray((profile)['cognito:groups']) && profile['cognito:groups'].length > 0)
-                ? { name: profile['cognito:groups'][0], description: '' }
+            const group = (Array.isArray(((<any>profile))['cognito:groups']) && (<any>profile)['cognito:groups'].length > 0)
+                ? { name: (<any>profile)['cognito:groups'][0], description: '' }
                 : { name: '', description: '' };
 
             // ログイン
             (<Express.Session>req.session).staffUser = {
-                username: profile['cognito:username'],
-                familyName: profile.family_name,
-                givenName: profile.given_name,
-                email: profile.email,
-                telephone: profile.phone_number,
+                sub: profile.sub,
+                username: <string>profile['cognito:username'],
+                familyName: <string>profile.family_name,
+                givenName: <string>profile.given_name,
+                email: <string>profile.email,
+                telephone: <string>profile.phone_number,
                 group: group
             };
 

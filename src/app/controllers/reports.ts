@@ -86,14 +86,7 @@ export async function getAggregateSales(req: Request, res: Response): Promise<vo
             });
         }
 
-        // const cognitoCredentials = (<Express.ICredentials>(<Express.Session>req.session).cognitoCredentials);
-        // authClient.setCredentials({
-        //     refresh_token: cognitoCredentials.refreshToken,
-        //     // expiry_date: number;
-        //     access_token: cognitoCredentials.accessToken,
-        //     token_type: cognitoCredentials.tokenType
-        // });
-        const aggregateSalesService = new tttsapi.service.AggregateSales({
+        const aggregateSalesService = new tttsapi.service.SalesReport({
             endpoint: <string>process.env.API_ENDPOINT,
             auth: req.tttsAuthClient
         });
