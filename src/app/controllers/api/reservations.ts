@@ -228,12 +228,6 @@ function addCustomAttributes(reservations: IReservation[]): IReservation[] {
             paymentMethod4reservation = paymentMethodProperty;
         }
 
-        // let age = '';
-        // const ageProperty = reservation.underName?.identifier?.find((p) => p.name === 'age')?.value;
-        // if (typeof ageProperty === 'string') {
-        //     age = ageProperty;
-        // }
-
         let clientId = '';
         const clientIdProperty = reservation.underName?.identifier?.find((p) => p.name === 'clientId')?.value;
         if (typeof clientIdProperty === 'string') {
@@ -353,10 +347,6 @@ export async function cancel(req: Request, res: Response, next: NextFunction): P
             endpoint: <string>process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        // const reservationService = new tttsapi.service.Reservation({
-        //     endpoint: <string>process.env.API_ENDPOINT,
-        //     auth: req.tttsAuthClient
-        // });
 
         const promises = reservationIds.map(async (id) => {
             // 予約データの解放
@@ -376,7 +366,6 @@ export async function cancel(req: Request, res: Response, next: NextFunction): P
                         .add(1, 'minutes')
                         .toDate()
                 });
-                // await reservationService.cancel({ id: id });
 
                 successIds.push(id);
             } catch (error) {

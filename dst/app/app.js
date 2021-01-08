@@ -9,7 +9,6 @@ const express = require("express");
 // tslint:disable-next-line:no-require-imports
 const partials = require("express-partials");
 const expressValidator = require("express-validator");
-// import * as i18n from 'i18n';
 const multer = require("multer");
 const favicon = require("serve-favicon");
 const authentication_1 = require("./middlewares/authentication");

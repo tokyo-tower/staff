@@ -140,15 +140,6 @@ function findSuspendedPerformances(req, conditions) {
                 // 時点での予約が存在していれば、そのうちの未入場数を検索
                 if (numberOfReservations > 0) {
                     const targetReservationIds = reservationsAtLastUpdateDate.map((r) => r.id);
-                    // その都度、予約検索する場合はコチラ↓
-                    // const searchReservationsResult = await reservationService.search({
-                    //     limit: 1,
-                    //     typeOf: tttsapi.factory.chevre.reservationType.EventReservation,
-                    //     ids: targetReservationIds,
-                    //     checkins: { $size: 0 } // $sizeが0より大きい、という検索は現時点ではMongoDBが得意ではない
-                    // });
-                    // const nubmerOfUncheckedReservations = <number>searchReservationsResult.totalCount;
-                    // nubmerOfCheckedReservations = numberOfReservations - nubmerOfUncheckedReservations;
                     // performanceに保管された入場済予約から算出する場合はコチラ↓
                     const checkedReservations = extension === null || extension === void 0 ? void 0 : extension.checkedReservations;
                     if (Array.isArray(checkedReservations)) {
@@ -177,7 +168,6 @@ function findSuspendedPerformances(req, conditions) {
                 start_date: performance.startDate,
                 end_date: performance.endDate,
                 tour_number: tourNumber,
-                // ev_service_status: evServiceStatus,
                 ev_service_status_name: evServiceStatusName,
                 online_sales_update_at: extension === null || extension === void 0 ? void 0 : extension.online_sales_update_at,
                 online_sales_update_user: extension === null || extension === void 0 ? void 0 : extension.online_sales_update_user,
@@ -245,10 +235,6 @@ clientIds) {
             endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        // const reservationService = new tttsapi.service.Reservation({
-        //     endpoint: <string>process.env.API_ENDPOINT,
-        //     auth: req.tttsAuthClient
-        // });
         // パフォーマンスに対する取引リストを、予約コレクションから検索する
         let reservations = [];
         // let reservations: tttsapi.factory.reservation.event.IReservation[] = [];
@@ -264,9 +250,6 @@ clientIds) {
         }
         // 入場履歴なしの注文番号を取り出す
         let orderNumbers = reservations.map((r) => { var _a, _b, _c; return (_c = (_b = (_a = r.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'orderNumber')) === null || _c === void 0 ? void 0 : _c.value; });
-        // const orderNumbersWithCheckins = reservations
-        //     .filter((r) => (r.checkins.length > 0))
-        //     .map((r) => r.underName?.identifier?.find((p) => p.name === 'orderNumber')?.value);
         const orderNumbersWithCheckins = reservations.filter((r) => (r.useActionExists === true))
             .map((r) => { var _a, _b, _c; return (_c = (_b = (_a = r.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'orderNumber')) === null || _c === void 0 ? void 0 : _c.value; });
         orderNumbers = uniq(difference(orderNumbers, orderNumbersWithCheckins));

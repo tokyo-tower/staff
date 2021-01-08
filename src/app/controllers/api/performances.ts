@@ -75,12 +75,6 @@ export async function search(req: Request, res: Response): Promise<void> {
             }
         });
 
-        // const performanceService = new tttsapi.service.Event({
-        //     endpoint: <string>process.env.API_ENDPOINT,
-        //     auth: req.tttsAuthClient
-        // });
-        // const searchResult = await performanceService.search(req.query);
-
         const performances = searchResult.data.map((event) => {
             // 一般座席の残席数に変更
             const remainingAttendeeCapacity = event.aggregateOffer?.offers?.find((o) => o.identifier === '001')?.remainingAttendeeCapacity;
@@ -244,10 +238,6 @@ async function getTargetReservationsForRefund(req: Request, performanceIds: stri
         endpoint: <string>process.env.CINERINO_API_ENDPOINT,
         auth: req.tttsAuthClient
     });
-    // const reservationService = new tttsapi.service.Reservation({
-    //     endpoint: <string>process.env.API_ENDPOINT,
-    //     auth: req.tttsAuthClient
-    // });
 
     let targetReservations:
         cinerinoapi.factory.chevre.reservation.IReservation<cinerinoapi.factory.chevre.reservationType.EventReservation>[] = [];
@@ -284,28 +274,6 @@ async function getTargetReservationsForRefund(req: Request, performanceIds: stri
         targetReservations.push(...searchReservationsResult.data);
     }
     targetReservations = targetReservations.filter((r) => (<any>r).useActionExists !== true);
-    // const targetReservations = await reservationService.distinct(
-    //     'underName',
-    //     {
-    //         typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
-    //         reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
-    //         // クライアントがfrontend or pos
-    //         underName: {
-    //             identifiers: [
-    //                 ...POS_CLIENT_IDS.map((clientId) => {
-    //                     return { name: 'clientId', value: clientId };
-    //                 }),
-    //                 ...FRONTEND_CLIENT_IDS.map((clientId) => {
-    //                     return { name: 'clientId', value: clientId };
-    //                 })
-    //             ]
-    //         },
-    //         reservationFor: {
-    //             ids: performanceIds
-    //         },
-    //         checkins: { $size: 0 }
-    //     }
-    // );
     const targetOrderNumbers = targetReservations.reduce<string[]>(
         (a, b) => {
             const underNameIdentifier = b.underName?.identifier;
@@ -320,19 +288,6 @@ async function getTargetReservationsForRefund(req: Request, performanceIds: stri
         },
         []
     );
-    // const targetOrderNumbers = targetReservations.reduce<string[]>(
-    //     (a, b) => {
-    //         if (Array.isArray(b.identifier)) {
-    //             const orderNumberProperty = b.identifier.find((p: any) => p.name === 'orderNumber');
-    //             if (orderNumberProperty !== undefined) {
-    //                 a.push(orderNumberProperty.value);
-    //             }
-    //         }
-
-    //         return a;
-    //     },
-    //     []
-    // );
 
     // 全注文検索
     const orders: cinerinoapi.factory.order.IOrder[] = [];

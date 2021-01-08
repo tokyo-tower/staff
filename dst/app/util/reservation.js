@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.chevreReservation2ttts = void 0;
-// import * as tttsapi from '@motionpicture/ttts-api-nodejs-client';
 const moment = require("moment-timezone");
 function chevreReservation2ttts(params) {
     var _a, _b;

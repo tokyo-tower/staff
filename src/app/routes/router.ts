@@ -9,7 +9,6 @@ import reportsRouter from './reports';
 import staffRouter from './staff';
 
 const DEFAULT_CALLBACK = process.env.DEFAULT_CALLBACK;
-const GCP_REDIRECT = process.env.GCP_REDIRECT;
 
 const router = Router();
 
@@ -24,19 +23,7 @@ router.get('/', (_, res, next) => {
     next();
 });
 
-// GCPへのリダイレクト指定があれば全てリダイレクト
-router.use((req, res, next) => {
-    if (typeof GCP_REDIRECT === 'string' && GCP_REDIRECT.length > 0) {
-        res.redirect(`${GCP_REDIRECT}${req.originalUrl}`);
-
-        return;
-    }
-
-    next();
-});
-
 router.use('/api', apiRouter);
-
 router.use('/staff', staffRouter);
 router.use('/reports', reportsRouter); //レポート出力
 
