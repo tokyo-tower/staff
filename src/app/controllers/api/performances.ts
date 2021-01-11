@@ -267,13 +267,15 @@ async function getTargetReservationsForRefund(req: Request, performanceIds: stri
             },
             // checkins: { $size: 0 },
             ...{
-                $projection: { underName: 1, useActionExists: 1 }
+                $projection: { underName: 1, reservedTicket: 1 }
             }
         });
         numData4reservations = searchReservationsResult.data.length;
         targetReservations.push(...searchReservationsResult.data);
     }
-    targetReservations = targetReservations.filter((r) => (<any>r).useActionExists !== true);
+    targetReservations = targetReservations.filter((r) => {
+        return r.reservedTicket?.dateUsed === undefined || r.reservedTicket?.dateUsed === null;
+    });
     const targetOrderNumbers = targetReservations.reduce<string[]>(
         (a, b) => {
             const underNameIdentifier = b.underName?.identifier;

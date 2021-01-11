@@ -250,7 +250,9 @@ clientIds) {
         }
         // 入場履歴なしの注文番号を取り出す
         let orderNumbers = reservations.map((r) => { var _a, _b, _c; return (_c = (_b = (_a = r.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'orderNumber')) === null || _c === void 0 ? void 0 : _c.value; });
-        const orderNumbersWithCheckins = reservations.filter((r) => (r.useActionExists === true))
+        const orderNumbersWithCheckins = reservations.filter((r) => {
+            return r.reservedTicket.dateUsed !== undefined && r.reservedTicket.dateUsed !== null;
+        })
             .map((r) => { var _a, _b, _c; return (_c = (_b = (_a = r.underName) === null || _a === void 0 ? void 0 : _a.identifier) === null || _b === void 0 ? void 0 : _b.find((p) => p.name === 'orderNumber')) === null || _c === void 0 ? void 0 : _c.value; });
         orderNumbers = uniq(difference(orderNumbers, orderNumbersWithCheckins));
         const returningOrderNumbers = orderNumbers.filter((orderNumber) => typeof orderNumber === 'string');

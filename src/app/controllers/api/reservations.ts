@@ -255,7 +255,7 @@ function addCustomAttributes(reservations: IReservation[]): IReservation[] {
         if (Array.isArray(reservation.checkins)) {
             checkins = reservation.checkins;
         } else {
-            if ((<any>reservation).useActionExists === true) {
+            if (reservation.reservedTicket.dateUsed !== undefined && reservation.reservedTicket.dateUsed !== null) {
                 // 数が正であればよいので、中身は適当に
                 checkins = [{
                     when: new Date(),

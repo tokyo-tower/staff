@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.17.1 - 2021-01-11
+
+### Changed
+
+- 予約の入場日時について、useActionExistsへの依存をreservedTicket.dateUsedへの依存に変更
+
 ## v6.17.0 - 2021-01-08
 
 ### Changed
