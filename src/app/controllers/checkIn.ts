@@ -413,7 +413,7 @@ async function updateCheckedReservations(
             reservationFor: { id: reservation.reservationFor.id }
         });
         const checkedReservations: { id: string }[] = searchReservationsResult4event.data
-            .filter((r) => (<any>r).useActionExists === true)
+            .filter((r) => r.reservedTicket?.dateUsed !== undefined && r.reservedTicket?.dateUsed !== null)
             .map((r) => {
                 return { id: String(r.id) };
             });

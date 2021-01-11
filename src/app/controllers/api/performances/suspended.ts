@@ -320,7 +320,9 @@ async function searchOrderNumberss4refund(
 
     // 入場履歴なしの注文番号を取り出す
     let orderNumbers = reservations.map((r) => r.underName?.identifier?.find((p) => p.name === 'orderNumber')?.value);
-    const orderNumbersWithCheckins = reservations.filter((r) => ((<any>r).useActionExists === true))
+    const orderNumbersWithCheckins = reservations.filter((r) => {
+        return r.reservedTicket.dateUsed !== undefined && r.reservedTicket.dateUsed !== null;
+    })
         .map((r) => r.underName?.identifier?.find((p) => p.name === 'orderNumber')?.value);
     orderNumbers = uniq(difference(orderNumbers, orderNumbersWithCheckins));
 

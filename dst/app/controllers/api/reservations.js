@@ -235,7 +235,7 @@ function addCustomAttributes(reservations) {
             checkins = reservation.checkins;
         }
         else {
-            if (reservation.useActionExists === true) {
+            if (reservation.reservedTicket.dateUsed !== undefined && reservation.reservedTicket.dateUsed !== null) {
                 // 数が正であればよいので、中身は適当に
                 checkins = [{
                         when: new Date(),

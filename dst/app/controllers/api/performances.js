@@ -229,12 +229,15 @@ function getTargetReservationsForRefund(req, performanceIds) {
                 }, reservationFor: {
                     ids: performanceIds
                 } }, {
-                $projection: { underName: 1, useActionExists: 1 }
+                $projection: { underName: 1, reservedTicket: 1 }
             }));
             numData4reservations = searchReservationsResult.data.length;
             targetReservations.push(...searchReservationsResult.data);
         }
-        targetReservations = targetReservations.filter((r) => r.useActionExists !== true);
+        targetReservations = targetReservations.filter((r) => {
+            var _a, _b;
+            return ((_a = r.reservedTicket) === null || _a === void 0 ? void 0 : _a.dateUsed) === undefined || ((_b = r.reservedTicket) === null || _b === void 0 ? void 0 : _b.dateUsed) === null;
+        });
         const targetOrderNumbers = targetReservations.reduce((a, b) => {
             var _a;
             const underNameIdentifier = (_a = b.underName) === null || _a === void 0 ? void 0 : _a.identifier;

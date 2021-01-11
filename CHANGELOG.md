@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 予約の入場日時について、useActionExistsへの依存をreservedTicket.dateUsedへの依存に変更
+
 ### Deprecated
 
 ### Removed
