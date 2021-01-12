@@ -146,9 +146,15 @@ function search(req, res) {
                 startThrough: eventStartThrough
             },
             underName: {
-                familyName: (purchaserLastName !== null) ? purchaserLastName : undefined,
-                givenName: (purchaserFirstName !== null) ? purchaserFirstName : undefined,
-                email: (purchaserEmail !== null) ? purchaserEmail : undefined,
+                familyName: (purchaserLastName !== null)
+                    ? { $regex: purchaserLastName, $options: 'i' }
+                    : undefined,
+                givenName: (purchaserFirstName !== null)
+                    ? { $regex: purchaserFirstName, $options: 'i' }
+                    : undefined,
+                email: (purchaserEmail !== null)
+                    ? { $regex: purchaserEmail, $options: 'i' }
+                    : undefined,
                 telephone: (purchaserTel !== null) ? `${purchaserTel}$` : undefined,
                 identifier: Object.assign({ $all: [
                         ...(owner !== null) ? [{ name: 'username', value: owner }] : [],
@@ -163,7 +169,9 @@ function search(req, res) {
                         : undefined
                 })
             },
-            additionalTicketText: (watcherName !== null) ? watcherName : undefined
+            additionalTicketText: (watcherName !== null)
+                ? { $regex: watcherName, $options: 'i' }
+                : undefined
         };
         // Cinerinoでの予約検索
         debug('searching reservations...', searchConditions);

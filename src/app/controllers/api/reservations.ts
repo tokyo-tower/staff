@@ -154,9 +154,15 @@ export async function search(req: Request, res: Response): Promise<void> {
             startThrough: eventStartThrough
         },
         underName: {
-            familyName: (purchaserLastName !== null) ? purchaserLastName : undefined,
-            givenName: (purchaserFirstName !== null) ? purchaserFirstName : undefined,
-            email: (purchaserEmail !== null) ? purchaserEmail : undefined,
+            familyName: (purchaserLastName !== null)
+                ? { $regex: purchaserLastName, $options: 'i' }
+                : undefined,
+            givenName: (purchaserFirstName !== null)
+                ? { $regex: purchaserFirstName, $options: 'i' }
+                : undefined,
+            email: (purchaserEmail !== null)
+                ? { $regex: purchaserEmail, $options: 'i' }
+                : undefined,
             telephone: (purchaserTel !== null) ? `${purchaserTel}$` : undefined,
             identifier: {
                 $all: [
@@ -175,7 +181,9 @@ export async function search(req: Request, res: Response): Promise<void> {
                 }
             }
         },
-        additionalTicketText: (watcherName !== null) ? watcherName : undefined
+        additionalTicketText: (watcherName !== null)
+            ? { $regex: watcherName, $options: 'i' }
+            : undefined
     };
 
     // Cinerinoでの予約検索

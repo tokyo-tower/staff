@@ -89,7 +89,8 @@ function getAggregateSales(req, res) {
             }
             const aggregateSalesService = new tttsapi.service.SalesReport({
                 endpoint: process.env.API_ENDPOINT,
-                auth: req.tttsAuthClient
+                auth: req.tttsAuthClient,
+                project: req.project
             });
             const stream = yield aggregateSalesService.stream({ $and: conditions });
             res.setHeader('Content-disposition', `attachment; filename*=UTF-8\'\'${encodeURIComponent(`${filename}.tsv`)}`);

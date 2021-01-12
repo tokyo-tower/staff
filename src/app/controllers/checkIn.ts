@@ -420,7 +420,8 @@ async function updateCheckedReservations(
 
         const performanceService = new tttsapi.service.Event({
             endpoint: <string>process.env.API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: req.project
         });
         await performanceService.updateExtension({
             id: reservation.reservationFor.id,

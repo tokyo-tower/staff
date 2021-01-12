@@ -88,7 +88,8 @@ export async function getAggregateSales(req: Request, res: Response): Promise<vo
 
         const aggregateSalesService = new tttsapi.service.SalesReport({
             endpoint: <string>process.env.API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: req.project
         });
 
         const stream = <NodeJS.ReadableStream>await aggregateSalesService.stream({ $and: conditions });

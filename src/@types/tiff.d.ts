@@ -8,6 +8,9 @@ declare global {
         export interface Request {
             staffUser?: User;
             tttsAuthClient: tttsapi.auth.OAuth2;
+            project?: {
+                id: string;
+            };
         }
 
         export interface IGroup {

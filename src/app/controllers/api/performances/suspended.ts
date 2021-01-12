@@ -145,7 +145,8 @@ async function findSuspendedPerformances(req: Request, conditions: tttsapi.facto
 }> {
     const eventService = new tttsapi.service.Event({
         endpoint: <string>process.env.API_ENDPOINT,
-        auth: req.tttsAuthClient
+        auth: req.tttsAuthClient,
+        project: req.project
     });
 
     debug('finfing performances...', conditions);
@@ -244,7 +245,8 @@ export async function returnOrders(req: Request, res: Response): Promise<void> {
     try {
         const eventService = new tttsapi.service.Event({
             endpoint: <string>process.env.API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: req.project
         });
 
         const performanceId = req.params.performanceId;

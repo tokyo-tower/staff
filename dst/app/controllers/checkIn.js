@@ -393,7 +393,8 @@ function updateCheckedReservations(req, reservation) {
             });
             const performanceService = new tttsapi.service.Event({
                 endpoint: process.env.API_ENDPOINT,
-                auth: req.tttsAuthClient
+                auth: req.tttsAuthClient,
+                project: req.project
             });
             yield performanceService.updateExtension({
                 id: reservation.reservationFor.id,
