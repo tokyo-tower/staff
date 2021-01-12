@@ -10,9 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- APIリクエスト時にプロジェクトを指定するように調整
-- 予約検索のcase insensitive対応
-
 ### Deprecated
 
 ### Removed
@@ -20,6 +17,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.17.2 - 2021-01-12
+
+### Changed
+
+- APIリクエスト時にプロジェクトを指定するように調整
+- 予約検索のcase insensitive対応
 
 ## v6.17.1 - 2021-01-11
 
