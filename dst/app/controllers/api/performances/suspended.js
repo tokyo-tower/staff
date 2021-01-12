@@ -116,7 +116,8 @@ function findSuspendedPerformances(req, conditions) {
     return __awaiter(this, void 0, void 0, function* () {
         const eventService = new tttsapi.service.Event({
             endpoint: process.env.API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: req.project
         });
         debug('finfing performances...', conditions);
         const searchResults = yield eventService.search(Object.assign(Object.assign({}, conditions), {
@@ -197,7 +198,8 @@ function returnOrders(req, res) {
         try {
             const eventService = new tttsapi.service.Event({
                 endpoint: process.env.API_ENDPOINT,
-                auth: req.tttsAuthClient
+                auth: req.tttsAuthClient,
+                project: req.project
             });
             const performanceId = req.params.performanceId;
             // 返金対象注文を抽出する

@@ -8,6 +8,7 @@ import checkinRouter from './checkin';
 import reportsRouter from './reports';
 import staffRouter from './staff';
 
+const PROJECT_ID = process.env.PROJECT_ID;
 const DEFAULT_CALLBACK = process.env.DEFAULT_CALLBACK;
 
 const router = Router();
@@ -18,6 +19,15 @@ router.get('/', (_, res, next) => {
         res.redirect(DEFAULT_CALLBACK);
 
         return;
+    }
+
+    next();
+});
+
+// リクエストプロジェクトをセット
+router.use((req, __, next) => {
+    if (typeof PROJECT_ID === 'string' && PROJECT_ID.length > 0) {
+        req.project = { id: PROJECT_ID };
     }
 
     next();

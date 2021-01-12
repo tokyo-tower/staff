@@ -127,7 +127,8 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
 
         const performanceService = new tttsapi.service.Event({
             endpoint: <string>process.env.API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: req.project
         });
         const reservationService = new cinerinoapi.service.Reservation({
             endpoint: <string>process.env.CINERINO_API_ENDPOINT,

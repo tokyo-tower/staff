@@ -110,7 +110,8 @@ function updateOnlineStatus(req, res) {
             debug('updating performance online_sales_status...');
             const performanceService = new tttsapi.service.Event({
                 endpoint: process.env.API_ENDPOINT,
-                auth: req.tttsAuthClient
+                auth: req.tttsAuthClient,
+                project: req.project
             });
             const reservationService = new cinerinoapi.service.Reservation({
                 endpoint: process.env.CINERINO_API_ENDPOINT,
