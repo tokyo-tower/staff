@@ -59,29 +59,49 @@ export async function getAggregateSales(req: Request, res: Response): Promise<vo
                 // 売上げ
                 const endFrom = moment(`${getValue(req.query.dateFrom)}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ');
                 conditions.push({
-                    date_bucket: { $gte: moment.max(endFrom, minEndFrom).toDate() }
+                    // date_bucket: { $gte: moment.max(endFrom, minEndFrom).toDate() }
+                    orderDate: {
+                        $gte: moment.max(endFrom, minEndFrom)
+                            .toDate()
+                    }
                 });
             }
             // 登録日To
             if (dateTo !== null) {
                 // 売上げ
                 conditions.push({
-                    date_bucket: { $lt: moment(`${dateTo}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').add(1, 'days').toDate() }
+                    // date_bucket: { $lt: moment(`${dateTo}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').add(1, 'days').toDate() }
+                    orderDate: {
+                        $lt: moment(`${dateTo}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
+                            .add(1, 'days')
+                            .toDate()
+                    }
                 });
             }
         }
         if (eventStartFrom !== null) {
             conditions.push({
-                'performance.startDay': {
-                    $gte: moment(`${eventStartFrom}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').tz('Asia/Tokyo').format('YYYYMMDD')
+                // 'performance.startDay': {
+                //     $gte: moment(`${eventStartFrom}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').tz('Asia/Tokyo').format('YYYYMMDD')
+                // }
+                'reservation.reservationFor.startDate': {
+                    $exists: true,
+                    $gte: moment(`${eventStartFrom}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
+                        .toDate()
                 }
             });
         }
         if (eventStartThrough !== null) {
             conditions.push({
-                'performance.startDay': {
+                // 'performance.startDay': {
+                //     $lt: moment(`${eventStartThrough}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
+                //         .add(1, 'day').tz('Asia/Tokyo').format('YYYYMMDD')
+                // }
+                'reservation.reservationFor.startDate': {
+                    $exists: true,
                     $lt: moment(`${eventStartThrough}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
-                        .add(1, 'day').tz('Asia/Tokyo').format('YYYYMMDD')
+                        .add(1, 'day')
+                        .toDate()
                 }
             });
         }
