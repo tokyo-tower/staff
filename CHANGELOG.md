@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
+- 売上レポート検索画面を追加
+
 ### Changed
 
 ### Deprecated
