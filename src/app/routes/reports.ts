@@ -10,13 +10,16 @@ const NEW_REPORT_URL = process.env.NEW_REPORT_URL;
 const reportsRouter = Router();
 
 reportsRouter.get(
-    '/mypage',
+    '/suspension/list',
     (__, res) => {
-        res.render('reports/mypage', {
+        res.render('reports/list', {
             layout: 'layouts/staff/layout'
         });
     }
 );
+
+// 検索API
+reportsRouter.get('/search', reportsController.search);
 
 // 売上レポート出力
 reportsRouter.get('', (__, res) => {

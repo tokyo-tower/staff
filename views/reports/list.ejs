@@ -1,0 +1,82 @@
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.0/locale/ja.js"></script>
+<script src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+
+<div class="wrapper-searchform">
+    <form id="form_searchsuspensions" class="search-form">
+        <input id="input_limit" type="hidden" name="limit" value="20">
+
+        <div class="wrapper-inputs wrapper-date form-group">
+            <h3>売上期間選択</h3>
+            <div class="form-group">
+                <input type="text" class="form-control datepicker" name="dateFrom" id="dateFrom"> ～
+                <input type="text" class="form-control datepicker" name="dateTo" id="dateTo">
+            </div>
+        </div>
+
+        <div class="wrapper-inputs wrapper-execday form-group">
+            <h3>来塔予定日期間選択</h3>
+            <input type="text" class="form-control datepicker" name="eventStartFrom" id="eventStartFrom"> ～
+            <input type="text" class="form-control datepicker" name="eventStartThrough" id="eventStartThrough">
+        </div>
+
+        <a id="btn_execsearch" class="btn btn-next" href="javascript:void(0)">
+            <span>検索</span>
+        </a>
+        <a id="btn_clearconditions" class="btn btn-big" href="javascript:void(0)">
+            <span>検索条件リセット</span>
+        </a>
+    </form>
+</div>
+
+
+<div class="wrapper-reservations">
+    <p id="echo_suspensiontotal" class="total-count"></p>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>カテゴリー</th>
+                <th>確認番号</th>
+                <th>日時</th>
+                <th>金額</th>
+                <th>イベントID</th>
+                <th>イベント日時</th>
+                <th>オファー名称</th>
+                <th>オファー単価</th>
+                <th>座席コード</th>
+            </tr>
+        </thead>
+        <tbody id="reservations">
+
+        </tbody>
+    </table>
+</div>
+
+<div class="wrapper-controls">
+    <div class="navigation">
+    </div>
+</div>
+
+<div class="modal fade loading" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="text-center">
+                    処理中
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" name="username" value="<%- req.staffUser.username %>">
+
+<div class="modal-calender">
+    <div class="modal-calender-content">
+        <div id="calendercontainer"></div>
+    </div>
+</div>
+
+<script src="/js/flatpickr/flatpickr.min.js"></script>
+<script src="/js/flatpickr/flatpickr.locale.ja.js"></script>
+<script src="/js/reports/list.js"></script>

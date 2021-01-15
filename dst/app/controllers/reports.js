@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAggregateSales = exports.ReportType = void 0;
+exports.getAggregateSales = exports.ReportType = exports.search = void 0;
 /**
  * レポート出力コントローラー
  */
@@ -17,9 +17,90 @@ const tttsapi = require("@motionpicture/ttts-api-nodejs-client");
 const createDebug = require("debug");
 const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
-const debug = createDebug('ttts-backend:controllers');
+const debug = createDebug('ttts-staff:controllers');
 const RESERVATION_START_DATE = process.env.RESERVATION_START_DATE;
 const EXCLUDE_STAFF_RESERVATION = process.env.EXCLUDE_STAFF_RESERVATION === '1';
+// tslint:disable-next-line:max-func-body-length
+function search(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        debug('query:', req.query);
+        const dateFrom = getValue(req.query.dateFrom);
+        const dateTo = getValue(req.query.dateTo);
+        const eventStartFrom = getValue(req.query.eventStartFrom);
+        const eventStartThrough = getValue(req.query.eventStartThrough);
+        const conditions = [];
+        try {
+            if (dateFrom !== null || dateTo !== null) {
+                const minEndFrom = (RESERVATION_START_DATE !== undefined) ? moment(RESERVATION_START_DATE) : moment('2017-01-01T00:00:00Z');
+                // 登録日From
+                if (dateFrom !== null) {
+                    // 売上げ
+                    const endFrom = moment(`${getValue(req.query.dateFrom)}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ');
+                    conditions.push({
+                        // date_bucket: { $gte: moment.max(endFrom, minEndFrom).toDate() }
+                        orderDate: {
+                            $gte: moment.max(endFrom, minEndFrom)
+                                .toDate()
+                        }
+                    });
+                }
+                // 登録日To
+                if (dateTo !== null) {
+                    // 売上げ
+                    conditions.push({
+                        // date_bucket: { $lt: moment(`${dateTo}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').add(1, 'days').toDate() }
+                        orderDate: {
+                            $lt: moment(`${dateTo}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
+                                .add(1, 'days')
+                                .toDate()
+                        }
+                    });
+                }
+            }
+            if (eventStartFrom !== null) {
+                conditions.push({
+                    // 'performance.startDay': {
+                    //     $gte: moment(`${eventStartFrom}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').tz('Asia/Tokyo').format('YYYYMMDD')
+                    // }
+                    'reservation.reservationFor.startDate': {
+                        $exists: true,
+                        $gte: moment(`${eventStartFrom}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
+                            .toDate()
+                    }
+                });
+            }
+            if (eventStartThrough !== null) {
+                conditions.push({
+                    // 'performance.startDay': {
+                    //     $lt: moment(`${eventStartThrough}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
+                    //         .add(1, 'day').tz('Asia/Tokyo').format('YYYYMMDD')
+                    // }
+                    'reservation.reservationFor.startDate': {
+                        $exists: true,
+                        $lt: moment(`${eventStartThrough}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
+                            .add(1, 'day')
+                            .toDate()
+                    }
+                });
+            }
+            const aggregateSalesService = new tttsapi.service.SalesReport({
+                endpoint: process.env.API_ENDPOINT,
+                auth: req.tttsAuthClient,
+                project: req.project
+            });
+            const searchResult = yield aggregateSalesService.search(Object.assign({ $and: conditions }, {
+                limit: Number(req.query.limit),
+                page: Number(req.query.page)
+            }));
+            res.header('X-Total-Count', '0');
+            res.json(searchResult.data);
+        }
+        catch (error) {
+            res.send(error.message);
+        }
+    });
+}
+exports.search = search;
 var ReportType;
 (function (ReportType) {
     ReportType["Sales"] = "Sales";

@@ -17,11 +17,13 @@ const reportsController = require("../controllers/reports");
 const mypage_1 = require("../controllers/staff/mypage");
 const NEW_REPORT_URL = process.env.NEW_REPORT_URL;
 const reportsRouter = express_1.Router();
-reportsRouter.get('/mypage', (__, res) => {
-    res.render('reports/mypage', {
+reportsRouter.get('/suspension/list', (__, res) => {
+    res.render('reports/list', {
         layout: 'layouts/staff/layout'
     });
 });
+// 検索API
+reportsRouter.get('/search', reportsController.search);
 // 売上レポート出力
 reportsRouter.get('', (__, res) => {
     if (typeof NEW_REPORT_URL === 'string' && NEW_REPORT_URL.length > 0) {
