@@ -6,9 +6,48 @@
     <form id="" class="">
         <input id="input_limit" type="hidden" name="limit" value="20">
 
-        <div class="form-row">
-            <div class="form-group col-md-4">
-                <label for="dateFrom" class="bmd-label-static">
+        <div class="row">
+            <div class="form-group col-md-2">
+                <label for="category" class="">
+                    カテゴリー
+                </label>
+                <input type="text" class="form-control" name="category" id="category">
+            </div>
+
+            <div class="form-group col-md-2">
+                <label for="confirmationNumber" class="">
+                    確認番号
+                </label>
+                <input type="text" class="form-control" name="confirmationNumber" id="confirmationNumber">
+            </div>
+
+            <div class="form-group col-md-2">
+                <label for="customer[group]" class="">
+                    購入者グループ
+                </label>
+                <input type="text" class="form-control" name="customer[group]" id="customer[group]">
+            </div>
+
+            <div class="form-group col-md-2">
+                <label for="reservation[reservationFor][id]" class="">
+                    イベントID
+                </label>
+                <input type="text" class="form-control" name="reservation[reservationFor][id]"
+                    id="reservation[reservationFor][id]">
+            </div>
+
+            <div class="form-group col-md-2">
+                <label for="reservation[id]" class="">
+                    予約ID
+                </label>
+                <input type="text" class="form-control" name="reservation[id]" id="reservation[id]">
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="form-group col-md-2">
+                <label for="dateFrom" class="">
                     売上期間選択
                 </label>
 
@@ -24,8 +63,8 @@
                 </div>
             </div>
 
-            <div class="form-group col-md-4">
-                <label for="eventStartFrom" class="bmd-label-static">
+            <div class="form-group col-md-2">
+                <label for="eventStartFrom" class="">
                     来塔予定日期間選択
                 </label>
 
@@ -42,13 +81,13 @@
             </div>
         </div>
 
-        <div class="form-row">
+        <div class="row">
             <a id="btn_execsearch" class="btn btn-next" href="javascript:void(0)">
                 <span>検索</span>
             </a>
             <a id="btn_clearconditions" class="btn btn-big" href="javascript:void(0)">
                 <span>検索条件リセット</span>
-            </a>    
+            </a>
         </div>
 
     </form>

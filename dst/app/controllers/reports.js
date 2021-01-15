@@ -22,6 +22,7 @@ const RESERVATION_START_DATE = process.env.RESERVATION_START_DATE;
 const EXCLUDE_STAFF_RESERVATION = process.env.EXCLUDE_STAFF_RESERVATION === '1';
 // tslint:disable-next-line:max-func-body-length
 function search(req, res) {
+    var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
         debug('query:', req.query);
         const dateFrom = getValue(req.query.dateFrom);
@@ -81,6 +82,36 @@ function search(req, res) {
                             .add(1, 'day')
                             .toDate()
                     }
+                });
+            }
+            const categoryEq = req.query.category;
+            if (typeof categoryEq === 'string' && categoryEq.length > 0) {
+                conditions.push({
+                    category: { $eq: categoryEq }
+                });
+            }
+            const confirmationNumberEq = req.query.confirmationNumber;
+            if (typeof confirmationNumberEq === 'string' && confirmationNumberEq.length > 0) {
+                conditions.push({
+                    confirmationNumber: { $eq: confirmationNumberEq }
+                });
+            }
+            const customerGroupEq = (_a = req.query.customer) === null || _a === void 0 ? void 0 : _a.group;
+            if (typeof customerGroupEq === 'string' && customerGroupEq.length > 0) {
+                conditions.push({
+                    'customer.group': { $exists: true, $eq: customerGroupEq }
+                });
+            }
+            const reservationForIdEq = (_c = (_b = req.query.reservation) === null || _b === void 0 ? void 0 : _b.reservationFor) === null || _c === void 0 ? void 0 : _c.id;
+            if (typeof reservationForIdEq === 'string' && reservationForIdEq.length > 0) {
+                conditions.push({
+                    'reservation.reservationFor.id': { $exists: true, $eq: reservationForIdEq }
+                });
+            }
+            const reservationIdEq = (_d = req.query.reservation) === null || _d === void 0 ? void 0 : _d.id;
+            if (typeof reservationIdEq === 'string' && reservationIdEq.length > 0) {
+                conditions.push({
+                    'reservation.id': { $exists: true, $eq: reservationIdEq }
                 });
             }
             const aggregateSalesService = new tttsapi.service.SalesReport({

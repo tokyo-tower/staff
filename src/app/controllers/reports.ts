@@ -77,6 +77,41 @@ export async function search(req: Request, res: Response): Promise<void> {
             });
         }
 
+        const categoryEq = req.query.category;
+        if (typeof categoryEq === 'string' && categoryEq.length > 0) {
+            conditions.push({
+                category: { $eq: categoryEq }
+            });
+        }
+
+        const confirmationNumberEq = req.query.confirmationNumber;
+        if (typeof confirmationNumberEq === 'string' && confirmationNumberEq.length > 0) {
+            conditions.push({
+                confirmationNumber: { $eq: confirmationNumberEq }
+            });
+        }
+
+        const customerGroupEq = req.query.customer?.group;
+        if (typeof customerGroupEq === 'string' && customerGroupEq.length > 0) {
+            conditions.push({
+                'customer.group': { $exists: true, $eq: customerGroupEq }
+            });
+        }
+
+        const reservationForIdEq = req.query.reservation?.reservationFor?.id;
+        if (typeof reservationForIdEq === 'string' && reservationForIdEq.length > 0) {
+            conditions.push({
+                'reservation.reservationFor.id': { $exists: true, $eq: reservationForIdEq }
+            });
+        }
+
+        const reservationIdEq = req.query.reservation?.id;
+        if (typeof reservationIdEq === 'string' && reservationIdEq.length > 0) {
+            conditions.push({
+                'reservation.id': { $exists: true, $eq: reservationIdEq }
+            });
+        }
+
         const aggregateSalesService = new tttsapi.service.SalesReport({
             endpoint: <string>process.env.API_ENDPOINT,
             auth: req.tttsAuthClient,
