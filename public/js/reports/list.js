@@ -35,52 +35,7 @@ $(function () {
 
     // APIから得た検索結果
     var reports = [];
-    var suspensionsByPid = {};
 
-    // 検索条件の日付デフォルト
-    var moments_default = {
-        input_performancedate1: moment().subtract(30, 'days'),
-        input_performancedate2: moment().add(30, 'days'),
-        input_onlinedate1: moment().subtract(30, 'days'),
-        input_onlinedate2: moment()
-    };
-
-    // daterangepicker共通設定
-    var daterangepickerSettings = {
-        format: 'YYYY/MM/DD',
-        showDropdowns: false,
-        autoUpdateInput: true,
-        ranges: {
-            '直近7日': [moment().subtract(7, 'days'), moment()],
-            '直近30日': [moment().subtract(29, 'days'), moment()],
-            '今月': [moment().startOf('month'), moment().endOf('month')],
-            '先月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-        },
-        opens: 'left',
-        locale: {
-            applyLabel: '選択',
-            cancelLabel: '取消',
-            fromLabel: '開始日',
-            toLabel: '終了日',
-            weekLabel: 'W',
-            customRangeLabel: '日付指定',
-            daysOfWeek: moment.weekdaysMin(),
-            monthNames: moment.monthsShort(),
-            firstDay: moment.localeData()._week.dow
-        }
-    };
-
-    // 対象ツアー年月日初期化
-    daterangepickerSettings.startDate = moments_default.input_performancedate1;
-    daterangepickerSettings.endDate = moments_default.input_performancedate2;
-    var $input_performancedate = $('#input_performancedate').daterangepicker(daterangepickerSettings);
-
-    // 停止処理実行日初期化
-    daterangepickerSettings.startDate = moments_default.input_onlinedate1;
-    daterangepickerSettings.endDate = moments_default.input_onlinedate2;
-    var $input_onlinedate = $('#input_onlinedate').daterangepicker(daterangepickerSettings);
-
-    var $select_refund_status = $('#select_refund_status');
     /**
      * ページャーを表示する
      * @param {number} count 全件数
@@ -119,8 +74,6 @@ $(function () {
     var renderReports = function (totalCount) {
         var html = '';
         reports.forEach(function (report) {
-            suspensionsByPid[report.performance_id] = report;
-
             var seatNumber = '';
             if (report.reservation.reservedTicket.ticketedSeat !== undefined && report.reservation.reservedTicket.ticketedSeat !== null) {
                 seatNumber = report.reservation.reservedTicket.ticketedSeat.seatNumber;
@@ -184,11 +137,6 @@ $(function () {
 
     // 検索条件リセットボタン
     document.getElementById('btn_clearconditions').onclick = function () {
-        $input_performancedate.data('daterangepicker').setStartDate(moments_default.input_performancedate1);
-        $input_performancedate.data('daterangepicker').setEndDate(moments_default.input_performancedate2);
-        $input_onlinedate.data('daterangepicker').setStartDate(moments_default.input_onlinedate1);
-        $input_onlinedate.data('daterangepicker').setEndDate(moments_default.input_onlinedate2);
-        $select_refund_status.val('').prop('selected', true);
         conditions.page = '1';
         search();
     };
