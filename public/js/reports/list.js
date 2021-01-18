@@ -81,9 +81,9 @@ $(function () {
 
             html += '<tr>' +
                 '<td class="td-performance_day">' + report.category + '</td>' +
-                '<td class="td-tour_number">' + report.confirmationNumber + '</td>' +
-                '<td class="td-online_sales_update_at">' + moment(report.orderDate).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss') + '</td>' +
-                '<td class="td-ev_service_status_name">' + report.price + '</td>' +
+                '<td class="td-tour_number">' + report.mainEntity.confirmationNumber + '</td>' +
+                '<td class="td-online_sales_update_at">' + moment(report.dateRecorded).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss') + '</td>' +
+                '<td class="td-ev_service_status_name">' + report.amount + '</td>' +
                 '<td class="td-caceled">' + report.reservation.reservationFor.id + '</td>' +
                 '<td class="td-arrived">' + moment(report.reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss') + '</td>' +
                 '<td class="td-refund_status_name">' + report.reservation.reservedTicket.ticketType.name.ja + '</td>' +

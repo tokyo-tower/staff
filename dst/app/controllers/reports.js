@@ -19,7 +19,6 @@ const http_status_1 = require("http-status");
 const moment = require("moment-timezone");
 const debug = createDebug('ttts-staff:controllers');
 const RESERVATION_START_DATE = process.env.RESERVATION_START_DATE;
-const EXCLUDE_STAFF_RESERVATION = process.env.EXCLUDE_STAFF_RESERVATION === '1';
 // tslint:disable-next-line:max-func-body-length
 function search(req, res) {
     var _a, _b, _c, _d;
@@ -38,8 +37,7 @@ function search(req, res) {
                     // 売上げ
                     const endFrom = moment(`${getValue(req.query.dateFrom)}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ');
                     conditions.push({
-                        // date_bucket: { $gte: moment.max(endFrom, minEndFrom).toDate() }
-                        orderDate: {
+                        dateRecorded: {
                             $gte: moment.max(endFrom, minEndFrom)
                                 .toDate()
                         }
@@ -49,8 +47,7 @@ function search(req, res) {
                 if (dateTo !== null) {
                     // 売上げ
                     conditions.push({
-                        // date_bucket: { $lt: moment(`${dateTo}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').add(1, 'days').toDate() }
-                        orderDate: {
+                        dateRecorded: {
                             $lt: moment(`${dateTo}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
                                 .add(1, 'days')
                                 .toDate()
@@ -60,9 +57,6 @@ function search(req, res) {
             }
             if (eventStartFrom !== null) {
                 conditions.push({
-                    // 'performance.startDay': {
-                    //     $gte: moment(`${eventStartFrom}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').tz('Asia/Tokyo').format('YYYYMMDD')
-                    // }
                     'reservation.reservationFor.startDate': {
                         $exists: true,
                         $gte: moment(`${eventStartFrom}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
@@ -72,10 +66,6 @@ function search(req, res) {
             }
             if (eventStartThrough !== null) {
                 conditions.push({
-                    // 'performance.startDay': {
-                    //     $lt: moment(`${eventStartThrough}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
-                    //         .add(1, 'day').tz('Asia/Tokyo').format('YYYYMMDD')
-                    // }
                     'reservation.reservationFor.startDate': {
                         $exists: true,
                         $lt: moment(`${eventStartThrough}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
@@ -93,13 +83,13 @@ function search(req, res) {
             const confirmationNumberEq = req.query.confirmationNumber;
             if (typeof confirmationNumberEq === 'string' && confirmationNumberEq.length > 0) {
                 conditions.push({
-                    confirmationNumber: { $eq: confirmationNumberEq }
+                    'mainEntity.confirmationNumber': { $exists: true, $eq: confirmationNumberEq }
                 });
             }
             const customerGroupEq = (_a = req.query.customer) === null || _a === void 0 ? void 0 : _a.group;
             if (typeof customerGroupEq === 'string' && customerGroupEq.length > 0) {
                 conditions.push({
-                    'customer.group': { $exists: true, $eq: customerGroupEq }
+                    'mainEntity.customer.group': { $exists: true, $eq: customerGroupEq }
                 });
             }
             const reservationForIdEq = (_c = (_b = req.query.reservation) === null || _b === void 0 ? void 0 : _b.reservationFor) === null || _c === void 0 ? void 0 : _c.id;
@@ -148,20 +138,10 @@ function getAggregateSales(req, res) {
         const eventStartFrom = getValue(req.query.eventStartFrom);
         const eventStartThrough = getValue(req.query.eventStartThrough);
         const conditions = [];
-        let filename = 'DefaultReportName';
+        const filename = '売上レポート';
         try {
             switch (req.query.reportType) {
                 case ReportType.Sales:
-                    if (EXCLUDE_STAFF_RESERVATION) {
-                        // 代理予約は除外
-                        conditions.push({
-                            'customer.group': {
-                                $exists: true,
-                                $eq: '01'
-                            }
-                        });
-                    }
-                    filename = '売上レポート';
                     break;
                 default:
                     throw new Error(`${req.query.reportType}は非対応レポートタイプです`);
@@ -173,8 +153,7 @@ function getAggregateSales(req, res) {
                     // 売上げ
                     const endFrom = moment(`${getValue(req.query.dateFrom)}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ');
                     conditions.push({
-                        // date_bucket: { $gte: moment.max(endFrom, minEndFrom).toDate() }
-                        orderDate: {
+                        dateRecorded: {
                             $gte: moment.max(endFrom, minEndFrom)
                                 .toDate()
                         }
@@ -184,8 +163,7 @@ function getAggregateSales(req, res) {
                 if (dateTo !== null) {
                     // 売上げ
                     conditions.push({
-                        // date_bucket: { $lt: moment(`${dateTo}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').add(1, 'days').toDate() }
-                        orderDate: {
+                        dateRecorded: {
                             $lt: moment(`${dateTo}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
                                 .add(1, 'days')
                                 .toDate()
@@ -195,9 +173,6 @@ function getAggregateSales(req, res) {
             }
             if (eventStartFrom !== null) {
                 conditions.push({
-                    // 'performance.startDay': {
-                    //     $gte: moment(`${eventStartFrom}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ').tz('Asia/Tokyo').format('YYYYMMDD')
-                    // }
                     'reservation.reservationFor.startDate': {
                         $exists: true,
                         $gte: moment(`${eventStartFrom}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
@@ -207,10 +182,6 @@ function getAggregateSales(req, res) {
             }
             if (eventStartThrough !== null) {
                 conditions.push({
-                    // 'performance.startDay': {
-                    //     $lt: moment(`${eventStartThrough}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
-                    //         .add(1, 'day').tz('Asia/Tokyo').format('YYYYMMDD')
-                    // }
                     'reservation.reservationFor.startDate': {
                         $exists: true,
                         $lt: moment(`${eventStartThrough}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
