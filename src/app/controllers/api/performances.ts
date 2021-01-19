@@ -139,9 +139,20 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
             auth: req.tttsAuthClient
         });
 
+        const searchEventsResult = await eventService.search<cinerinoapi.factory.chevre.eventType.ScreeningEvent>({
+            limit: 100,
+            typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent,
+            ...{
+                id: { $in: performanceIds }
+            }
+        });
+        const updatingEvents = searchEventsResult.data;
+
         const updateUser = (<User>req.staffUser).username;
 
-        for (const performanceId of performanceIds) {
+        for (const updatingEvent of updatingEvents) {
+            const performanceId = updatingEvent.id;
+
             // Chevreで予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
             const searchReservationsResult = await reservationService.search({
                 limit: 100,
@@ -182,7 +193,13 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
                 evServiceStatusUpdateAt: now,
                 refundStatus: refundStatus,
                 refundStatusUpdateUser: updateUser,
-                refundStatusUpdateAt: now
+                refundStatusUpdateAt: now,
+                // イベント情報をセット
+                ...{
+                    startDate: updatingEvent.startDate,
+                    endDate: updatingEvent.endDate,
+                    additionalProperty: updatingEvent.additionalProperty
+                }
             });
 
             let sendEmailMessageParams: cinerinoapi.factory.action.transfer.send.message.email.IAttributes[] = [];
