@@ -121,8 +121,13 @@ function updateOnlineStatus(req, res) {
                 endpoint: process.env.CINERINO_API_ENDPOINT,
                 auth: req.tttsAuthClient
             });
+            const searchEventsResult = yield eventService.search(Object.assign({ limit: 100, typeOf: cinerinoapi.factory.chevre.eventType.ScreeningEvent }, {
+                id: { $in: performanceIds }
+            }));
+            const updatingEvents = searchEventsResult.data;
             const updateUser = req.staffUser.username;
-            for (const performanceId of performanceIds) {
+            for (const updatingEvent of updatingEvents) {
+                const performanceId = updatingEvent.id;
                 // Chevreで予約検索(1パフォーマンスに対する予約はmax41件なので、これで十分)
                 const searchReservationsResult = yield reservationService.search({
                     limit: 100,
@@ -160,7 +165,11 @@ function updateOnlineStatus(req, res) {
                     evServiceStatusUpdateAt: now,
                     refundStatus: refundStatus,
                     refundStatusUpdateUser: updateUser,
-                    refundStatusUpdateAt: now
+                    refundStatusUpdateAt: now,
+                    // イベント情報をセット
+                    startDate: updatingEvent.startDate,
+                    endDate: updatingEvent.endDate,
+                    additionalProperty: updatingEvent.additionalProperty
                 });
                 let sendEmailMessageParams = [];
                 // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、Cinerinoにメール送信指定

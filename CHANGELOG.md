@@ -18,6 +18,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.18.0 - 2021-01-20
+
+### Added
+
+- 売上レポート検索画面を追加
+
+### Changed
+
+- 売上レポート検索条件を最適化
+- イベントステータス変更時にイベントの他属性も更新するように調整
+
 ## v6.17.2 - 2021-01-12
 
 ### Changed
