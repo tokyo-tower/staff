@@ -195,11 +195,9 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
                 refundStatusUpdateUser: updateUser,
                 refundStatusUpdateAt: now,
                 // イベント情報をセット
-                ...{
-                    startDate: updatingEvent.startDate,
-                    endDate: updatingEvent.endDate,
-                    additionalProperty: updatingEvent.additionalProperty
-                }
+                startDate: updatingEvent.startDate,
+                endDate: updatingEvent.endDate,
+                additionalProperty: updatingEvent.additionalProperty
             });
 
             let sendEmailMessageParams: cinerinoapi.factory.action.transfer.send.message.email.IAttributes[] = [];

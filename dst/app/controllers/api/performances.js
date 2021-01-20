@@ -155,11 +155,22 @@ function updateOnlineStatus(req, res) {
                         }
                     };
                 });
-                yield performanceService.updateExtension(Object.assign({ id: performanceId, reservationsAtLastUpdateDate: reservationsAtLastUpdateDate, eventStatus: evStatus, onlineSalesStatusUpdateUser: updateUser, onlineSalesStatusUpdateAt: now, evServiceStatusUpdateUser: updateUser, evServiceStatusUpdateAt: now, refundStatus: refundStatus, refundStatusUpdateUser: updateUser, refundStatusUpdateAt: now }, {
+                yield performanceService.updateExtension({
+                    id: performanceId,
+                    reservationsAtLastUpdateDate: reservationsAtLastUpdateDate,
+                    eventStatus: evStatus,
+                    onlineSalesStatusUpdateUser: updateUser,
+                    onlineSalesStatusUpdateAt: now,
+                    evServiceStatusUpdateUser: updateUser,
+                    evServiceStatusUpdateAt: now,
+                    refundStatus: refundStatus,
+                    refundStatusUpdateUser: updateUser,
+                    refundStatusUpdateAt: now,
+                    // イベント情報をセット
                     startDate: updatingEvent.startDate,
                     endDate: updatingEvent.endDate,
                     additionalProperty: updatingEvent.additionalProperty
-                }));
+                });
                 let sendEmailMessageParams = [];
                 // 運行停止の時(＜必ずオンライン販売停止・infoセット済)、Cinerinoにメール送信指定
                 if (evStatus === cinerinoapi.factory.chevre.eventStatusType.EventCancelled) {
