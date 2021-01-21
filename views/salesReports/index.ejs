@@ -36,10 +36,10 @@
                             <!--        Here you can write extra buttons/actions for the toolbar              -->
                             <a class="btn btn-default btn-sm search" href="#">
                                 <i class="fa fa-redo"></i>&nbsp;&nbsp;更新</a>
-                            <a class="btn btn-default btn-sm downloadCSV" href="#">
-                                <i class="fa fa-download"></i>&nbsp;&nbsp;CSV</a>
-                            <a class="btn btn-default btn-sm downloadJson" href="#">
-                                <i class="fa fa-download"></i>&nbsp;&nbsp;JSON</a>
+                            <!-- <a class="btn btn-default btn-sm downloadCSV" href="#">
+                                <i class="fa fa-download"></i>&nbsp;&nbsp;CSV</a> -->
+                            <!-- <a class="btn btn-default btn-sm downloadJson" href="#">
+                                <i class="fa fa-download"></i>&nbsp;&nbsp;JSON</a> -->
                         </div>
                     </div>
                     <!-- /.card-header -->
@@ -53,7 +53,7 @@
                                         カテゴリー
                                     </label>
                                     <input type="text" class="form-control form-control-sm" name="category"
-                                        id="category">
+                                        id="category" value="<%= query.category%>">
                                 </div>
 
                                 <div class="form-group col-md-2">
@@ -61,7 +61,7 @@
                                         確認番号
                                     </label>
                                     <input type="text" class="form-control form-control-sm" name="confirmationNumber"
-                                        id="confirmationNumber">
+                                        id="confirmationNumber" value="<%= query.confirmationNumber%>">
                                 </div>
 
                                 <div class="form-group col-md-2">
@@ -69,7 +69,8 @@
                                         購入者グループ
                                     </label>
                                     <input type="text" class="form-control form-control-sm" name="customer[group]"
-                                        id="customer[group]">
+                                        id="customer[group]"
+                                        value="<%= (query.customer !== undefined && query.customer !== null) ? query.customer.group : ''%>">
                                 </div>
 
                                 <div class="form-group col-md-2">
@@ -77,7 +78,8 @@
                                         イベントID
                                     </label>
                                     <input type="text" class="form-control form-control-sm"
-                                        name="reservation[reservationFor][id]" id="reservation[reservationFor][id]">
+                                        name="reservation[reservationFor][id]" id="reservation[reservationFor][id]"
+                                        value="<%= (query.reservation !== undefined && query.reservation !== null && query.reservation.reservationFor !== undefined && query.reservation.reservationFor !== null) ? query.reservation.reservationFor.id : ''%>">
                                 </div>
 
                                 <div class="form-group col-md-2">
@@ -85,7 +87,8 @@
                                         予約ID
                                     </label>
                                     <input type="text" class="form-control form-control-sm" name="reservation[id]"
-                                        id="reservation[id]">
+                                        id="reservation[id]"
+                                        value="<%= (query.reservation !== undefined && query.reservation !== null) ? query.reservation.id : ''%>">
                                 </div>
 
                             </div>
@@ -98,12 +101,12 @@
 
                                     <div class="input-group input-group-sm">
                                         <input type="text" class="form-control form-control-sm datepicker"
-                                            name="dateFrom" id="dateFrom">
+                                            name="dateFrom" id="dateFrom" value="<%= query.dateFrom %>">
                                         <div class="input-group-append">
                                             <span class="input-group-text">から</span>
                                         </div>
                                         <input type="text" class="form-control form-control-sm datepicker" name="dateTo"
-                                            id="dateTo">
+                                            id="dateTo" value="<%= query.dateTo %>">
                                         <div class="input-group-append">
                                             <span class="input-group-text">まで</span>
                                         </div>
@@ -117,12 +120,14 @@
 
                                     <div class="input-group input-group-sm">
                                         <input type="text" class="form-control form-control-sm datepicker"
-                                            name="eventStartFrom" id="eventStartFrom">
+                                            name="eventStartFrom" id="eventStartFrom"
+                                            value="<%= query.eventStartFrom %>">
                                         <div class="input-group-append">
                                             <span class="input-group-text">から</span>
                                         </div>
                                         <input type="text" class="form-control form-control-sm datepicker"
-                                            name="eventStartThrough" id="eventStartThrough">
+                                            name="eventStartThrough" id="eventStartThrough"
+                                            value="<%= query.eventStartThrough %>">
                                         <div class="input-group-append">
                                             <span class="input-group-text">まで</span>
                                         </div>

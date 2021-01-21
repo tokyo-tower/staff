@@ -28,49 +28,43 @@ salesReportsRouter.get('',
     var _a, _b, _c, _d;
     try {
         debug('query:', req.query);
-        const dateFrom = getValue(req.query.dateFrom);
-        const dateTo = getValue(req.query.dateTo);
-        const eventStartFrom = getValue(req.query.eventStartFrom);
-        const eventStartThrough = getValue(req.query.eventStartThrough);
         const conditions = [];
-        if (dateFrom !== null || dateTo !== null) {
-            // 登録日From
-            if (dateFrom !== null) {
-                // 売上げ
-                const endFrom = moment(`${getValue(req.query.dateFrom)}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ');
-                conditions.push({
-                    dateRecorded: {
-                        $gte: endFrom
-                            .toDate()
-                    }
-                });
-            }
-            // 登録日To
-            if (dateTo !== null) {
-                // 売上げ
-                conditions.push({
-                    dateRecorded: {
-                        $lt: moment(`${dateTo}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
-                            .add(1, 'days')
-                            .toDate()
-                    }
-                });
-            }
-        }
-        if (eventStartFrom !== null) {
+        // 登録日From
+        if (typeof req.query.dateFrom === 'string' && req.query.dateFrom.length > 0) {
+            // 売上げ
+            const endFrom = moment(`${getValue(req.query.dateFrom)}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ');
             conditions.push({
-                'reservation.reservationFor.startDate': {
-                    $exists: true,
-                    $gte: moment(`${eventStartFrom}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
+                dateRecorded: {
+                    $gte: endFrom
                         .toDate()
                 }
             });
         }
-        if (eventStartThrough !== null) {
+        // 登録日To
+        if (typeof req.query.dateTo === 'string' && req.query.dateTo.length > 0) {
+            // 売上げ
+            conditions.push({
+                dateRecorded: {
+                    $lt: moment(`${req.query.dateTo}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
+                        .add(1, 'days')
+                        .toDate()
+                }
+            });
+        }
+        if (typeof req.query.eventStartFrom === 'string' && req.query.eventStartFrom.length > 0) {
             conditions.push({
                 'reservation.reservationFor.startDate': {
                     $exists: true,
-                    $lt: moment(`${eventStartThrough}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
+                    $gte: moment(`${req.query.eventStartFrom}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
+                        .toDate()
+                }
+            });
+        }
+        if (typeof req.query.eventStartThrough === 'string' && req.query.eventStartThrough.length > 0) {
+            conditions.push({
+                'reservation.reservationFor.startDate': {
+                    $exists: true,
+                    $lt: moment(`${req.query.eventStartThrough}T00:00:00+09:00`, 'YYYY/MM/DDTHH:mm:ssZ')
                         .add(1, 'day')
                         .toDate()
                 }
@@ -154,6 +148,7 @@ salesReportsRouter.get('',
         else {
             res.render('salesReports/index', {
                 moment: moment,
+                query: req.query,
                 searchConditions: searchConditions,
                 extractScripts: true
             });
