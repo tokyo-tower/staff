@@ -1,0 +1,249 @@
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">売上レポート検索</h1>
+            </div>
+            <!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item">
+                        <a href="/projects/<%= req.project.id %>/home">Home</a>
+                    </li>
+                    <li class="breadcrumb-item active">売上レポート検索</li>
+                </ol>
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- left column -->
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="card card-default">
+                    <div class="card-header">
+                        <!-- <h3 class="card-title">Quick Example</h3> -->
+                        <div class="toolbar">
+                            <!--        Here you can write extra buttons/actions for the toolbar              -->
+                            <a class="btn btn-default btn-sm search" href="#">
+                                <i class="fa fa-redo"></i>&nbsp;&nbsp;更新</a>
+                            <!-- <a class="btn btn-default btn-sm downloadCSV" href="#">
+                                <i class="fa fa-download"></i>&nbsp;&nbsp;CSV</a> -->
+                            <!-- <a class="btn btn-default btn-sm downloadJson" href="#">
+                                <i class="fa fa-download"></i>&nbsp;&nbsp;JSON</a> -->
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+
+                    <div class="card-body">
+                        <!-- form start -->
+                        <form role="form" method="get" class="search">
+                            <div class="form-row">
+                                <div class="form-group col-md-2">
+                                    <label for="category" class="">
+                                        カテゴリー
+                                    </label>
+                                    <input type="text" class="form-control form-control-sm" name="category"
+                                        id="category" value="<%= query.category%>">
+                                </div>
+
+                                <div class="form-group col-md-2">
+                                    <label for="confirmationNumber" class="">
+                                        確認番号
+                                    </label>
+                                    <input type="text" class="form-control form-control-sm" name="confirmationNumber"
+                                        id="confirmationNumber" value="<%= query.confirmationNumber%>">
+                                </div>
+
+                                <div class="form-group col-md-2">
+                                    <label for="customer[group]" class="">
+                                        購入者グループ
+                                    </label>
+                                    <input type="text" class="form-control form-control-sm" name="customer[group]"
+                                        id="customer[group]"
+                                        value="<%= (query.customer !== undefined && query.customer !== null) ? query.customer.group : ''%>">
+                                </div>
+
+                                <div class="form-group col-md-2">
+                                    <label for="reservation[reservationFor][id]" class="">
+                                        イベントID
+                                    </label>
+                                    <input type="text" class="form-control form-control-sm"
+                                        name="reservation[reservationFor][id]" id="reservation[reservationFor][id]"
+                                        value="<%= (query.reservation !== undefined && query.reservation !== null && query.reservation.reservationFor !== undefined && query.reservation.reservationFor !== null) ? query.reservation.reservationFor.id : ''%>">
+                                </div>
+
+                                <div class="form-group col-md-2">
+                                    <label for="reservation[id]" class="">
+                                        予約ID
+                                    </label>
+                                    <input type="text" class="form-control form-control-sm" name="reservation[id]"
+                                        id="reservation[id]"
+                                        value="<%= (query.reservation !== undefined && query.reservation !== null) ? query.reservation.id : ''%>">
+                                </div>
+
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <label for="dateFrom" class="">
+                                        売上期間選択
+                                    </label>
+
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control form-control-sm datepicker"
+                                            name="dateFrom" id="dateFrom" value="<%= query.dateFrom %>">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">から</span>
+                                        </div>
+                                        <input type="text" class="form-control form-control-sm datepicker" name="dateTo"
+                                            id="dateTo" value="<%= query.dateTo %>">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">まで</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-md-3">
+                                    <label for="eventStartFrom" class="">
+                                        来塔予定日期間選択
+                                    </label>
+
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control form-control-sm datepicker"
+                                            name="eventStartFrom" id="eventStartFrom"
+                                            value="<%= query.eventStartFrom %>">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">から</span>
+                                        </div>
+                                        <input type="text" class="form-control form-control-sm datepicker"
+                                            name="eventStartThrough" id="eventStartThrough"
+                                            value="<%= query.eventStartThrough %>">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">まで</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center"><a class="" data-toggle="collapse" href=".advanced" role="button"
+                                    aria-expanded="false"><i class="fa fa-angle-double-down"></i></a>
+                            </div>
+
+                            <div class="advanced collapse">
+                                <div class="form-row">
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="table-responsive">
+                            <table id="salesReports-table" class="table table-sm table-hover dataTable">
+                                <thead>
+                                    <tr>
+                                        <th>カテゴリー</th>
+                                        <th>注文番号</th>
+                                        <th>確認番号</th>
+                                        <th>計上日時</th>
+                                        <th>金額</th>
+                                        <th>予約ID</th>
+                                        <th>イベントID</th>
+                                        <th>イベント日時</th>
+                                        <th>オファー名称</th>
+                                        <th>オファー単価</th>
+                                        <th>座席コード</th>
+                                        <th>入場日時</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+
+            </div>
+            <!--/.col (left) -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+
+<div class="modal" id="modal-order" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-sm" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-createReport" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="reportName">レポート名称</label>
+                    <input class="form-control form-control-sm" type="text" name="reportName" placeholder="レポート名称">
+                </div>
+                <div class="form-group">
+                    <label for="recipientEmail">通知先メールアドレス</label>
+                    <input class="form-control form-control-sm" type="text" name="recipientEmail"
+                        placeholder="通知先メールアドレス">
+                </div>
+                <input type="hidden" name="format">
+                <input type="hidden" name="orderDateRange">
+                <input type="hidden" name="reservationForInSessionRange">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
+                <button type="button" class="btn btn-primary submit" data-dismiss="modal">作成する</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DataTables -->
+<link rel="stylesheet" href="/node_modules/admin-lte/plugins/datatables-bs4/css/dataTables.bootstrap4.css">
+
+<script src="/js/salesReports/index.js"></script>
