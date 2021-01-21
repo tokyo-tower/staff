@@ -79,16 +79,29 @@ $(function () {
                 seatNumber = report.reservation.reservedTicket.ticketedSeat.seatNumber;
             }
 
+            var dateUsed = '';
+            if (report.reservation.reservedTicket !== undefined
+                && report.reservation.reservedTicket !== null
+                && typeof report.reservation.reservedTicket.dateUsed === 'string'
+                && report.reservation.reservedTicket.dateUsed.length > 0) {
+                dateUsed = moment(report.reservation.reservedTicket.dateUsed)
+                    .tz('Asia/Tokyo')
+                    .format('YYYY-MM-DD HH:mm:ssZ');
+            }
+
             html += '<tr>' +
-                '<td class="td-performance_day">' + report.category + '</td>' +
-                '<td class="td-tour_number">' + report.mainEntity.confirmationNumber + '</td>' +
-                '<td class="td-online_sales_update_at">' + moment(report.dateRecorded).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss') + '</td>' +
-                '<td class="td-ev_service_status_name">' + report.amount + '</td>' +
-                '<td class="td-caceled">' + report.reservation.reservationFor.id + '</td>' +
-                '<td class="td-arrived">' + moment(report.reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss') + '</td>' +
-                '<td class="td-refund_status_name">' + report.reservation.reservedTicket.ticketType.name.ja + '</td>' +
-                '<td class="td-refunded">' + report.reservation.reservedTicket.ticketType.priceSpecification.price + '</td>' +
-                '<td class="td-actions">' + seatNumber + '</td>' +
+                '<td>' + report.category + '</td>' +
+                '<td>' + report.mainEntity.orderNumber + '</td>' +
+                '<td>' + report.mainEntity.confirmationNumber + '</td>' +
+                '<td>' + moment(report.dateRecorded).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ssZ') + '</td>' +
+                '<td>' + report.amount + '</td>' +
+                '<td>' + report.reservation.id + '</td>' +
+                '<td>' + report.reservation.reservationFor.id + '</td>' +
+                '<td>' + moment(report.reservation.reservationFor.startDate).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ssZ') + '</td>' +
+                '<td>' + report.reservation.reservedTicket.ticketType.name.ja + '</td>' +
+                '<td>' + report.reservation.reservedTicket.ticketType.priceSpecification.price + '</td>' +
+                '<td>' + seatNumber + '</td>' +
+                '<td>' + dateUsed + '</td>' +
                 '</tr>';
         });
         dom_reservations.innerHTML = html;
