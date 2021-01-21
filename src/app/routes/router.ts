@@ -2,9 +2,13 @@
  * ルーティング
  */
 import { Router } from 'express';
+import * as expressLayouts from 'express-ejs-layouts';
+// tslint:disable-next-line:no-require-imports
+import partials = require('express-partials');
 
 import apiRouter from './api';
 import checkinRouter from './checkin';
+import projectsRouter from './projects';
 import reportsRouter from './reports';
 import staffRouter from './staff';
 
@@ -34,10 +38,15 @@ router.use((req, __, next) => {
 });
 
 router.use('/api', apiRouter);
-router.use('/staff', staffRouter);
-router.use('/reports', reportsRouter); //レポート出力
+
+router.use('/staff', partials(), staffRouter);
+router.use('/reports', partials(), reportsRouter); //レポート出力
 
 // 入場
-router.use('/checkin', checkinRouter);
+router.use('/checkin', partials(), checkinRouter);
+
+// 以下新しいレイアウト
+router.use(expressLayouts);
+router.use('/projects', projectsRouter);
 
 export default router;

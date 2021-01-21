@@ -6,7 +6,7 @@ import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
 // tslint:disable-next-line:no-require-imports
-import partials = require('express-partials');
+// import partials = require('express-partials');
 import * as expressValidator from 'express-validator';
 import * as multer from 'multer';
 import * as favicon from 'serve-favicon';
@@ -28,7 +28,7 @@ app.use(middlewares.basicAuth({ // ベーシック認証
     pass: process.env.BASIC_AUTH_PASS
 }));
 
-app.use(partials()); // レイアウト&パーシャルサポート
+// app.use(partials()); // レイアウト&パーシャルサポート
 
 app.use(session); // セッション
 
@@ -36,6 +36,7 @@ app.use(session); // セッション
 // tslint:disable-next-line:no-require-imports no-var-requires
 const packageInfo = require('../../package.json');
 app.use((__, res, next) => {
+    res.locals.version = <string>packageInfo.version;
     res.setHeader('x-api-version', <string>packageInfo.version);
     next();
 });
@@ -55,6 +56,7 @@ app.use(multer({ storage: storage }).any());
 
 app.use(cookieParser());
 app.use(express.static(`${__dirname}/../../public`));
+app.use('/node_modules', express.static(`${__dirname}/../../node_modules`));
 
 app.use(expressValidator()); // バリデーション
 

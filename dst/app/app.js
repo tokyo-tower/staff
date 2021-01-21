@@ -7,7 +7,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const express = require("express");
 // tslint:disable-next-line:no-require-imports
-const partials = require("express-partials");
+// import partials = require('express-partials');
 const expressValidator = require("express-validator");
 const multer = require("multer");
 const favicon = require("serve-favicon");
@@ -24,12 +24,13 @@ app.use(middlewares.basicAuth({
     name: process.env.BASIC_AUTH_NAME,
     pass: process.env.BASIC_AUTH_PASS
 }));
-app.use(partials()); // レイアウト&パーシャルサポート
+// app.use(partials()); // レイアウト&パーシャルサポート
 app.use(session_1.default); // セッション
 // api version
 // tslint:disable-next-line:no-require-imports no-var-requires
 const packageInfo = require('../../package.json');
 app.use((__, res, next) => {
+    res.locals.version = packageInfo.version;
     res.setHeader('x-api-version', packageInfo.version);
     next();
 });
@@ -45,6 +46,7 @@ const storage = multer.memoryStorage();
 app.use(multer({ storage: storage }).any());
 app.use(cookieParser());
 app.use(express.static(`${__dirname}/../../public`));
+app.use('/node_modules', express.static(`${__dirname}/../../node_modules`));
 app.use(expressValidator()); // バリデーション
 app.use(setLocals_1.default); // ローカル変数セット
 // GCPへのリダイレクト指定があれば全てリダイレクト

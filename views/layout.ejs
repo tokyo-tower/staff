@@ -1,43 +1,230 @@
-<%
-let routeName = req.path;
-
-let currentLang = 'ja';
-let pageId = (routeName) ? 'page_'+routeName.replace(/\//,'').replace(/:[^\/]*\//g,'').replace(/\//g,'_') : '';
-let pageClassName = (routeName) ? 'page-'+routeName.replace(/\//,'').replace(/:[^\/]*\//g,'').replace(/\//g,' page-') : '';
-pageClassName = pageClassName + ' page-'+currentLang;
-const path_header = /staff/.test(routeName) ? './layouts/staff/_header' : './layouts/_header';
-%>
-
 <!DOCTYPE html>
-<html lang="<%- currentLang %>">
+<html style="font-size:14px;">
+
 <head>
-<meta charset="utf-8">
-<title>東京タワー TOP DECK Ticket</title>
-<meta name="description" content="TOKYO TOWER TOP DECK TOUR">
-<meta name="keywords" content="TOKYO TOWER TOP DECK TOUR">
-<meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1">
-<meta name="format-detection" content="telephone=no">
-
-<link href="/css/style.css" rel="stylesheet">
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-<script src="/js/lib/url.min.js"></script>
-<script src="/js/lib/moment.min.js"></script>
-<script src="/js/lib/moment-timezone-with-data.min.js"></script>
-<script src="/js/common.js"></script>
-
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Cinerino | Console</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/default.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="/node_modules/admin-lte/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+        integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="/node_modules/admin-lte/dist/css/adminlte.min.css">
+    <!-- Daterange picker -->
+    <link rel="stylesheet" href="/node_modules/admin-lte/plugins/daterangepicker/daterangepicker.css">
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 </head>
 
-<body id="<%- pageId %>" class="<%- pageClassName %>">
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
 
-<%- include(path_header) %>
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand bg-white navbar-light border-bottom">
+            <!-- Left navbar links -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#">
+                        <i class="fa fa-bars"></i>
+                    </a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="/projects/<%= req.project.id %>/home" class="nav-link">Home</a>
+                </li>
+            </ul>
 
-<div class="container">
-    <%- body %>
-</div>
+            <!-- SEARCH FORM -->
+            <!-- <form class="form-inline ml-3">
+                <div class="input-group input-group-sm">
+                    <input class="form-control form-control-navbar" type="search" placeholder="Searching..."
+                        aria-label="Search">
+                    <div class="input-group-append">
+                        <button class="btn btn-navbar" type="submit">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form> -->
 
-<%- include('./layouts/_footer') %>
+            <!-- Right navbar links -->
+            <ul class="navbar-nav ml-auto">
+                <!-- Notifications Dropdown Menu -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user"></i>
+                        <!-- <span class="badge badge-warning navbar-badge">15</span> -->
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <!-- Sidebar user panel (optional) -->
+                        <div class="user-panel mt-3 mb-3 d-flex">
+                            <div class="image">
+                                <img src="https://s3-ap-northeast-1.amazonaws.com/cinerino/logos/cinerino.png"
+                                    class="img-circle elevation-2" alt="User Image">
+                            </div>
+                            <div class="info">
+                                <!-- <a href="#" class="d-block"> -->
+                                <%= req.staffUser.username %>
+                                <!-- </a> -->
+                            </div>
+                        </div>
 
+                        <!-- <span class="dropdown-item dropdown-header">15 Notifications</span> -->
+                        <div class="dropdown-divider"></div>
+                        <a href="/projects/<%= req.project.id %>/iam/members/me" class="dropdown-item">
+                            <i class="fa fa-user-tag mr-2"></i> My Account
+                            <!-- <span class="float-right text-muted text-sm">3 mins</span> -->
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="<%= req.staffUser.generateLogoutUrl() %>" class="dropdown-item">
+                            <i class="fa fa-sign-out-alt mr-2"></i> Sign Out
+                            <!-- <span class="float-right text-muted text-sm">2 days</span> -->
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <!-- <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a> -->
+                    </div>
+                </li>
+                <!-- <li class="nav-item">
+                    <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#">
+                        <i class="fas fa-th-large"></i>
+                    </a>
+                </li> -->
+            </ul>
+        </nav>
+        <!-- /.navbar -->
+
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo -->
+            <a href="/" class="brand-link">
+                <img src="/projects/<%= req.project.id %>/logo" alt="Cinerino Logo"
+                    class="brand-image img-circle elevation-3" style="opacity: .8">
+                <span class="brand-text font-weight-light">Cinerino Console</span>
+            </a>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Sidebar Menu -->
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        data-accordion="false">
+                        <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+                        <li class="nav-item">
+                            <a href="/projects/<%= req.project.id %>/home" class="nav-link">
+                                <i class="nav-icon fa fa-tachometer-alt"></i>
+                                <p>
+                                    HOME
+                                    <span class="badge badge-info right"></span>
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-header">リソース検索</li>
+                        <li class="nav-item">
+                            <a href="/projects/<%= req.project.id %>/salesReports" class="nav-link">
+                                <i class="nav-icon fa fa-shopping-cart"></i>
+                                <p>
+                                    売上レポート
+                                    <span class="badge badge-danger right"></span>
+                                </p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+        </aside>
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <script>
+                var PROJECT_ID = '<%= req.project.id %>';
+            </script>
+            <input type="hidden" name="PROJECT_ID" value="<%= req.project.id %>">
+            <%- body %>
+        </div>
+        <!-- /.content-wrapper -->
+        <footer class="main-footer">
+            <strong>Copyright &copy; 2017-<%= new Date().getFullYear() %>
+                <a href="https://motionpicture.jp">motionpicture.jp</a>.</strong>
+            All rights reserved.
+            <div class="float-right d-none d-sm-inline-block">
+                <b>Version</b> <%= version %>
+            </div>
+        </footer>
+
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+        </aside>
+        <!-- /.control-sidebar -->
+    </div>
+    <!-- ./wrapper -->
+
+    <!-- jQuery -->
+    <script src="/node_modules/admin-lte/plugins/jquery/jquery.min.js"></script>
+    <!-- jQuery UI 1.11.4 -->
+    <script src="/node_modules/admin-lte/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <!-- jQuery -->
+    <!-- <script src="/node_modules/admin-lte/plugins/jquery/jquery.min.js"></script> -->
+    <!-- jQuery UI 1.11.4 -->
+    <!-- <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script> -->
+    <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+    <script>
+        $.widget.bridge('uibutton', $.ui.button)
+    </script>
+    <!-- Bootstrap 4 -->
+    <script src="/node_modules/admin-lte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- ChartJS -->
+    <script src="/node_modules/admin-lte/plugins/chart.js/Chart.min.js"></script>
+    <!-- Sparkline -->
+    <script src="/node_modules/admin-lte/plugins/sparklines/sparkline.js"></script>
+    <!-- Morris.js charts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+    <!-- jQuery Knob Chart -->
+    <script src="/node_modules/admin-lte/plugins/jquery-knob/jquery.knob.min.js"></script>
+    <!-- daterangepicker -->
+    <script src="/node_modules/admin-lte/plugins/moment/moment.min.js"></script>
+    <script src="/node_modules/admin-lte/plugins/daterangepicker/daterangepicker.js"></script>
+    <!-- Tempusdominus Bootstrap 4 -->
+    <script
+        src="/node_modules/admin-lte/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+    <!-- FastClick -->
+    <script src="/node_modules/admin-lte/plugins/fastclick/fastclick.js"></script>
+    <!-- AdminLTE App -->
+    <script src="/node_modules/admin-lte/dist/js/adminlte.js"></script>
+    <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+    <!-- <script src="/node_modules/admin-lte/dist/js/pages/dashboard.js"></script> -->
+    <!-- AdminLTE for demo purposes -->
+    <script src="/node_modules/admin-lte/dist/js/demo.js"></script>
+    <!-- DataTables -->
+    <script src="/node_modules/admin-lte/plugins/datatables/jquery.dataTables.js"></script>
+    <script src="/node_modules/admin-lte/plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
+    <%- script %>
+
+    <% if (typeof process.env.NEW_CONSOLE_RECOMMENDATION === 'string') { %>
+    <script>
+        $(function () {
+            $(document).Toasts('create', {
+                autohide: false,
+                delay: 10000,
+                fade: true,
+                icon: 'fas fa-exclamation-triangle',
+                class: 'bg-warning',
+                close: true,
+                title: '新しいコンソールの推奨',
+                body: '本コンソールは情報が最新でない可能性があります。<br>最新の情報を確認するには <a href="<%= process.env.NEW_CONSOLE_RECOMMENDATION %>">新しいコンソール</a> をご利用ください。'
+            })
+
+        });
+    </script>
+    <% } %>
 </body>
+
 </html>
