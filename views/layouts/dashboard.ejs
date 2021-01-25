@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<!--
+This is a starter template page. Use this page to start your new project from
+scratch. This page gets rid of all links and provides the needed markup only.
+-->
+<html style="font-size:14px;">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>Cinerino | Console</title>
+
+    <link rel="stylesheet" href="/css/default.css">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="/node_modules/admin-lte/plugins/fontawesome-free/css/all.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="/node_modules/admin-lte/dist/css/adminlte.min.css">
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+</head>
+
+<body class="hold-transition layout-top-nav">
+    <div class="wrapper">
+
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand-md navbar-light navbar-white">
+            <div class="container-fluid">
+                <a href="/" class="navbar-brand">
+                    <img src="https://s3-ap-northeast-1.amazonaws.com/cinerino/logos/cinerino.png" alt="Cinerino Console Logo" class="brand-image img-circle"
+                        style="opacity: .8">
+                    <span class="brand-text font-weight-light">Cinerino Console</span>
+                </a>
+
+                <button class="navbar-toggler order-1" type="button" data-toggle="collapse"
+                    data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Right navbar links -->
+                <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
+                    <!-- Notifications Dropdown Menu -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" data-toggle="dropdown" href="#">
+                            <i class="fa fa-user"></i>
+                            <!-- <span class="badge badge-warning navbar-badge">15</span> -->
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                            <!-- Sidebar user panel (optional) -->
+                            <div class="user-panel mt-3 mb-3 d-flex">
+                                <div class="image">
+                                    <img src="https://s3-ap-northeast-1.amazonaws.com/cinerino/logos/cinerino.png"
+                                        class="img-circle elevation-2" alt="User Image">
+                                </div>
+                                <div class="info">
+                                    <!-- <a href="#" class="d-block"> -->
+                                    <%= req.staffUser.username %>
+                                    <!-- </a> -->
+                                </div>
+                            </div>
+
+                            <div class="dropdown-divider"></div>
+                            <a href="<%= req.staffUser.generateLogoutUrl() %>" class="dropdown-item">
+                                <i class="fa fa-sign-out-alt mr-2"></i> Sign Out
+                                <!-- <span class="float-right text-muted text-sm">2 days</span> -->
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <!-- <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a> -->
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <!-- /.navbar -->
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <%- body %>
+        </div>
+        <!-- /.content-wrapper -->
+
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+            <div class="p-3">
+                <h5>Title</h5>
+                <p>Sidebar content</p>
+            </div>
+        </aside>
+        <!-- /.control-sidebar -->
+
+        <!-- Main Footer -->
+        <footer class="main-footer">
+            <strong>Copyright &copy; 2017-<%= new Date().getFullYear() %>
+                <a href="https://motionpicture.jp">motionpicture.jp</a>.</strong>
+            All rights reserved.
+            <div class="float-right d-none d-sm-inline-block">
+                <b>Version</b> <%= version %>
+            </div>
+        </footer>
+    </div>
+    <!-- ./wrapper -->
+
+    <!-- REQUIRED SCRIPTS -->
+
+    <!-- jQuery -->
+    <script src="/node_modules/admin-lte/plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="/node_modules/admin-lte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="/node_modules/admin-lte/dist/js/adminlte.min.js"></script>
+    <%- script %>
+</body>
+
+</html>

@@ -10,6 +10,8 @@ exports.default = (req, res) => {
     }
     else {
         res.status(http_status_1.NOT_FOUND);
-        res.render('error/notFound', {});
+        res.render('error/notFound', {
+            layout: false
+        });
     }
 };

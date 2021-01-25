@@ -18,6 +18,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v6.20.0 - 2021-01-25
+
+### Added
+
+- コンソールダッシュボードを追加
+- プロジェクトホームを追加
+
 ## v6.19.0 - 2021-01-21
 
 ### Added

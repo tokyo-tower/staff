@@ -10,7 +10,11 @@ export default (req: Request, res: Response) => {
         res.status(NOT_FOUND).send({ error: 'Not Found.' });
     } else {
         res.status(NOT_FOUND);
-        res.render('error/notFound', {
-        });
+        res.render(
+            'error/notFound',
+            {
+                layout: false
+            }
+        );
     }
 };
