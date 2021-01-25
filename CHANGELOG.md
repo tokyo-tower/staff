@@ -8,9 +8,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
-- コンソールダッシュボードを追加
-- プロジェクトホームを追加
-
 ### Changed
 
 ### Deprecated
@@ -20,6 +17,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v6.20.0 - 2021-01-25
+
+### Added
+
+- コンソールダッシュボードを追加
+- プロジェクトホームを追加
 
 ## v6.19.0 - 2021-01-21
 
