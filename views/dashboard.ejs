@@ -1,0 +1,115 @@
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark"> Dashboard</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <!-- <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item"><a href="#">Layout</a></li>
+                    <li class="breadcrumb-item active">Top Navigation</li> -->
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+
+        <!-- <div class="alert alert-info alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            <h5>
+                <i class="icon fa fa-info"></i> お知らせ</h5>
+            <% if (process.env.LINE_ASSISTANT_QR_CODE !== undefined) { %>
+            <p>
+                <a href="<%= process.env.LINE_ASSISTANT_QR_CODE %>" target="_blank">LINE
+                    Assistant</a>では簡易的なコンソール機能をご利用いただけます。
+                <a href="<%= process.env.LINE_ASSISTANT_QR_CODE %>" target="_blank">使ってみる</a>
+
+            </p>
+            <% } %>
+        </div> -->
+
+        <!-- <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">Dashboard</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item">
+                        <a href="/">Dashboard</a>
+                    </li>
+                </ol>
+            </div>
+        </div> -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+
+<!-- Main content -->
+<div class="content">
+    <div class="container">
+        <!-- Main row -->
+        <div class="row">
+            <!-- Left col -->
+            <section class="col-lg-6 connectedSortable">
+                <!-- TABLE: LATEST ORDERS -->
+                <div class="card latestOrders">
+                    <div class="card-header border-transparent">
+                        <h3 class="card-title">Projects</h3>
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-widget="collapse">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-widget="remove">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <!-- <thead>
+                                    <tr>
+                                        <th>Project ID</th>
+                                    </tr>
+                                </thead> -->
+                                <tbody>
+                                    <% if (projects.length === 0) { %>
+                                    <tr>
+                                        <td>
+                                            <p>プロジェクト作成する、あるいは、プロジェクト管理者にメンバー追加を依頼してください。</p>
+                                        </td>
+                                    </tr>
+                                    <% } else { %>
+                                    <% projects.forEach(function(project) { %>
+                                    <tr>
+                                        <td>
+                                            <a href="/projects/<%= project.id %>/home">
+                                                <img width="40" class="rounded float-left mr-3"
+                                                    src="/projects/<%= project.id %>/logo">
+                                                <%= project.name %><br>
+                                                <span class="text-muted"><%= String(project.id).toUpperCase() %></span>
+                                            </a></td>
+                                    </tr>
+                                    <% }) %>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /.table-responsive -->
+                    </div>
+                    <!-- /.card-body -->
+
+                    <!-- <div class="card-footer clearfix">
+                    </div> -->
+                    <!-- /.card-footer -->
+                </div>
+                <!-- /.card -->
+            </section>
+            <!-- /.Left col -->
+        </div>
+        <!-- /.row (main row) -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- /.content -->

@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
+- コンソールダッシュボードを追加
+- プロジェクトホームを追加
+
 ### Changed
 
 ### Deprecated

@@ -17,6 +17,7 @@ export default (err: any, req: Request, res: Response, __: NextFunction) => {
     } else {
         res.status(INTERNAL_SERVER_ERROR);
         res.render('error/error', {
+            layout: false,
             message: err.message,
             error: err
         });

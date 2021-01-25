@@ -10,36 +10,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
- * プロジェクトルーター
+ * ダッシュボードルーター
  */
 const cinerinoapi = require("@cinerino/sdk");
 const express = require("express");
-const home_1 = require("./home");
-const salesReports_1 = require("./salesReports");
-const projectsRouter = express.Router();
-projectsRouter.all('/:id/*', (req, _, next) => __awaiter(void 0, void 0, void 0, function* () {
-    req.project = { id: req.params.id };
-    next();
-}));
-projectsRouter.get('/:id/logo', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    let logo = 'https://s3-ap-northeast-1.amazonaws.com/cinerino/logos/cinerino.png';
+const dashboardRouter = express.Router();
+dashboardRouter.get('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const projectService = new cinerinoapi.service.Project({
             endpoint: process.env.CINERINO_API_ENDPOINT,
             auth: req.tttsAuthClient
         });
-        const project = yield projectService.findById({ id: (_a = req.project) === null || _a === void 0 ? void 0 : _a.id });
-        if (typeof project.logo === 'string') {
-            logo = project.logo;
-        }
+        const searchProjectsResult = yield projectService.search({});
+        const projects = searchProjectsResult.data;
+        res.render('dashboard', {
+            layout: 'layouts/dashboard',
+            message: 'Welcome to Cinerino Console!',
+            projects: projects,
+            extractScripts: true
+        });
     }
     catch (error) {
-        // tslint:disable-next-line:no-console
-        console.error(error);
+        next(error);
     }
-    res.redirect(logo);
 }));
-projectsRouter.use('/:id/home', home_1.default);
-projectsRouter.use('/:id/salesReports', salesReports_1.default);
-exports.default = projectsRouter;
+exports.default = dashboardRouter;

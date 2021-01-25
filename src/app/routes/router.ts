@@ -8,6 +8,7 @@ import partials = require('express-partials');
 
 import apiRouter from './api';
 import checkinRouter from './checkin';
+import dashboardRouter from './dashboard';
 import projectsRouter from './projects';
 import reportsRouter from './reports';
 import staffRouter from './staff';
@@ -47,6 +48,8 @@ router.use('/checkin', partials(), checkinRouter);
 
 // 以下新しいレイアウト
 router.use(expressLayouts);
+
+router.use(dashboardRouter);
 router.use('/projects', projectsRouter);
 
 export default router;
