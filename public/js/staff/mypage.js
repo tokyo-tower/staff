@@ -36,7 +36,6 @@ $(function () {
         var orderNumber = e.currentTarget.getAttribute('data-order-number');
 
         print([id], [orderNumber], 'thermal_normal');
-        // window.open('/staff/mypage/print?output=thermal_normal&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
     });
 
     // 厚紙印刷実行ボタン(72mm)
@@ -45,7 +44,6 @@ $(function () {
         var orderNumber = e.currentTarget.getAttribute('data-order-number');
 
         print([id], [orderNumber], 'thermal');
-        // window.open('/staff/mypage/print?output=thermal&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
     });
 
     // 日付選択カレンダー (再読込時のために日付はsessionStorageにキープしておく)
@@ -370,8 +368,6 @@ $(function () {
         var orderNumber = e.currentTarget.getAttribute('data-order-number');
 
         print([id], [orderNumber], 'a4');
-        // window.open('/staff/mypage/print?output=a4&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
-        // console.log('/staff/mypage/print?output=a4&ids[]=' + id + '&orderNumbers[]=' + orderNumber);
     });
 
     // 予約詳細モーダル呼び出し
@@ -413,21 +409,15 @@ $(function () {
         orderNumbers = Array.from(new Set(orderNumbers));
         console.log('printing...orderNumbers:', orderNumbers);
 
-        var printQuery = ids.map(function (id) { return 'ids[]=' + id; }).join('&')
-            + '&' + orderNumbers.map(function (orderNumber) { return 'orderNumbers[]=' + orderNumber; }).join('&');
-
         var action = document.getElementById('select_action').value;
         if (action === 'cancel') {
             cancel(ids);
         } else if (action === 'print') {
             print(ids, orderNumbers, 'a4');
-            // window.open('/staff/mypage/print?output=a4&' + printQuery);
         } else if (action === 'thermalprint') {
             print(ids, orderNumbers, 'thermal_normal');
-            // window.open('/staff/mypage/print?output=thermal_normal&' + printQuery);
         } else if (action === 'widethermalprint') {
             print(ids, orderNumbers, 'thermal');
-            // window.open('/staff/mypage/print?output=thermal&' + printQuery);
         } else {
             alert('操作を選択してください');
         }
@@ -470,11 +460,4 @@ function print(ids, orderNumbers, output) {
         console.log(error);
     }).always(function () {
     });
-
-    // var printQuery = '?output=' + output
-    //     + '&' + ids.map(function (id) { return 'ids[]=' + id; }).join('&')
-    //     + '&' + orderNumbers.map(function (orderNumber) { return 'orderNumbers[]=' + orderNumber; }).join('&');
-
-    // window.open('/staff/mypage/print' + printQuery);
-    // console.log('window opened', '/staff/mypage/print' + printQuery);
 }
