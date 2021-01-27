@@ -66,7 +66,10 @@ $(function () {
             {
                 data: null,
                 render: function (data, type, row) {
-                    var html = data.amount;
+                    var html = '';
+                    if (typeof data.amount === 'number') {
+                        html += data.amount;
+                    }
 
                     return html;
 
@@ -75,7 +78,10 @@ $(function () {
             {
                 data: null,
                 render: function (data, type, row) {
-                    var html = data.reservation.id;
+                    var html = '';
+                    if (data.reservation !== undefined && data.reservation !== null && typeof data.reservation.id === 'string') {
+                        html += data.reservation.id;
+                    }
 
                     return html;
 
@@ -84,7 +90,10 @@ $(function () {
             {
                 data: null,
                 render: function (data, type, row) {
-                    var html = data.reservation.reservationFor.id;
+                    var html = '';
+                    if (data.reservation !== undefined && data.reservation !== null && typeof data.reservation.reservationFor.id === 'string') {
+                        html += data.reservation.reservationFor.id;
+                    }
 
                     return html;
                 }
@@ -92,9 +101,12 @@ $(function () {
             {
                 data: null,
                 render: function (data, type, row) {
-                    var html = moment(data.reservation.reservationFor.startDate)
-                        // .tz('Asia/Tokyo')
-                        .format('YYYY-MM-DD HH:mm:ssZ');
+                    var html = '';
+                    if (data.reservation !== undefined && data.reservation !== null && typeof data.reservation.reservationFor.startDate === 'string') {
+                        html += moment(data.reservation.reservationFor.startDate)
+                            // .tz('Asia/Tokyo')
+                            .format('YYYY-MM-DD HH:mm:ssZ');
+                    }
 
                     return html;
                 }
@@ -102,13 +114,24 @@ $(function () {
             {
                 data: null,
                 render: function (data, type, row) {
-                    return data.reservation.reservedTicket.ticketType.name.ja;
+                    var html = '';
+                    if (data.reservation !== undefined && data.reservation !== null && typeof data.reservation.reservedTicket.ticketType.name.ja === 'string') {
+                        html += data.reservation.reservedTicket.ticketType.name.ja;
+                    }
+
+                    return html;
                 }
             },
             {
                 data: null,
                 render: function (data, type, row) {
-                    return data.reservation.reservedTicket.ticketType.priceSpecification.price;
+                    var html = '';
+                    if (data.reservation !== undefined && data.reservation !== null
+                        && typeof data.reservation.reservedTicket.ticketType.priceSpecification.price === 'number') {
+                        html += data.reservation.reservedTicket.ticketType.priceSpecification.price;
+                    }
+
+                    return html;
                 }
             },
             {
