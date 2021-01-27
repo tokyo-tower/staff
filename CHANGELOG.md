@@ -17,6 +17,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Removed
 
+- 販売停止時の返金処理対象パフォーマンスへの連携を廃止
+- 入場時の返金処理対象パフォーマンスへの連携を廃止
+
 ### Fixed
 
 ### Security

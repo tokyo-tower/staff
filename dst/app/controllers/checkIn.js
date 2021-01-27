@@ -252,7 +252,7 @@ function addCheckIn(req, res) {
                 includesActionId: '1'
             }));
             // 入場済予約リスト更新
-            yield updateCheckedReservations(req, reservation);
+            // await updateCheckedReservations(req, reservation);
             res.status(http_status_1.CREATED)
                 .json(checkin);
         }
@@ -365,7 +365,7 @@ function removeCheckIn(req, res) {
                 }
             }
             // 入場済予約リスト更新
-            yield updateCheckedReservations(req, reservation);
+            // await updateCheckedReservations(req, reservation);
             res.status(http_status_1.NO_CONTENT)
                 .end();
         }
@@ -379,41 +379,40 @@ function removeCheckIn(req, res) {
     });
 }
 exports.removeCheckIn = removeCheckIn;
-function updateCheckedReservations(req, reservation) {
-    var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            // 予約取得
-            const reservationService = new cinerinoapi.service.Reservation({
-                endpoint: process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient,
-                project: { id: (_a = req.project) === null || _a === void 0 ? void 0 : _a.id }
-            });
-            // 入場済予約検索
-            const searchReservationsResult4event = yield reservationService.search({
-                limit: 100,
-                typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
-                reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
-                reservationFor: { id: reservation.reservationFor.id }
-            });
-            const checkedReservations = searchReservationsResult4event.data
-                .filter((r) => { var _a, _b; return ((_a = r.reservedTicket) === null || _a === void 0 ? void 0 : _a.dateUsed) !== undefined && ((_b = r.reservedTicket) === null || _b === void 0 ? void 0 : _b.dateUsed) !== null; })
-                .map((r) => {
-                return { id: String(r.id) };
-            });
-            const performanceService = new tttsapi.service.Event({
-                endpoint: process.env.API_ENDPOINT,
-                auth: req.tttsAuthClient,
-                project: req.project
-            });
-            yield performanceService.updateExtension({
-                id: reservation.reservationFor.id,
-                checkedReservations
-            });
-        }
-        catch (error) {
-            // tslint:disable-next-line:no-console
-            console.error('updateCheckedReservations failed', error);
-        }
-    });
-}
+// async function updateCheckedReservations(
+//     req: Request,
+//     reservation: cinerinoapi.factory.chevre.reservation.IReservation<cinerinoapi.factory.chevre.reservationType.EventReservation>
+// ) {
+//     try {
+//         // 予約取得
+//         const reservationService = new cinerinoapi.service.Reservation({
+//             endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+//             auth: req.tttsAuthClient,
+//             project: { id: req.project?.id }
+//         });
+//         // 入場済予約検索
+//         const searchReservationsResult4event = await reservationService.search({
+//             limit: 100,
+//             typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+//             reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+//             reservationFor: { id: reservation.reservationFor.id }
+//         });
+//         const checkedReservations: { id: string }[] = searchReservationsResult4event.data
+//             .filter((r) => r.reservedTicket?.dateUsed !== undefined && r.reservedTicket?.dateUsed !== null)
+//             .map((r) => {
+//                 return { id: String(r.id) };
+//             });
+//         const performanceService = new tttsapi.service.Event({
+//             endpoint: <string>process.env.API_ENDPOINT,
+//             auth: req.tttsAuthClient,
+//             project: req.project
+//         });
+//         await performanceService.updateExtension({
+//             id: reservation.reservationFor.id,
+//             checkedReservations
+//         });
+//     } catch (error) {
+//         // tslint:disable-next-line:no-console
+//         console.error('updateCheckedReservations failed', error);
+//     }
+// }

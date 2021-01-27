@@ -268,7 +268,7 @@ export async function addCheckIn(req: Request, res: Response): Promise<void> {
         });
 
         // 入場済予約リスト更新
-        await updateCheckedReservations(req, reservation);
+        // await updateCheckedReservations(req, reservation);
 
         res.status(CREATED)
             .json(checkin);
@@ -386,7 +386,7 @@ export async function removeCheckIn(req: Request, res: Response): Promise<void> 
         }
 
         // 入場済予約リスト更新
-        await updateCheckedReservations(req, reservation);
+        // await updateCheckedReservations(req, reservation);
 
         res.status(NO_CONTENT)
             .end();
@@ -399,43 +399,43 @@ export async function removeCheckIn(req: Request, res: Response): Promise<void> 
     }
 }
 
-async function updateCheckedReservations(
-    req: Request,
-    reservation: cinerinoapi.factory.chevre.reservation.IReservation<cinerinoapi.factory.chevre.reservationType.EventReservation>
-) {
-    try {
-        // 予約取得
-        const reservationService = new cinerinoapi.service.Reservation({
-            endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient,
-            project: { id: req.project?.id }
-        });
+// async function updateCheckedReservations(
+//     req: Request,
+//     reservation: cinerinoapi.factory.chevre.reservation.IReservation<cinerinoapi.factory.chevre.reservationType.EventReservation>
+// ) {
+//     try {
+//         // 予約取得
+//         const reservationService = new cinerinoapi.service.Reservation({
+//             endpoint: <string>process.env.CINERINO_API_ENDPOINT,
+//             auth: req.tttsAuthClient,
+//             project: { id: req.project?.id }
+//         });
 
-        // 入場済予約検索
-        const searchReservationsResult4event = await reservationService.search({
-            limit: 100,
-            typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
-            reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
-            reservationFor: { id: reservation.reservationFor.id }
-        });
-        const checkedReservations: { id: string }[] = searchReservationsResult4event.data
-            .filter((r) => r.reservedTicket?.dateUsed !== undefined && r.reservedTicket?.dateUsed !== null)
-            .map((r) => {
-                return { id: String(r.id) };
-            });
+//         // 入場済予約検索
+//         const searchReservationsResult4event = await reservationService.search({
+//             limit: 100,
+//             typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
+//             reservationStatuses: [cinerinoapi.factory.chevre.reservationStatusType.ReservationConfirmed],
+//             reservationFor: { id: reservation.reservationFor.id }
+//         });
+//         const checkedReservations: { id: string }[] = searchReservationsResult4event.data
+//             .filter((r) => r.reservedTicket?.dateUsed !== undefined && r.reservedTicket?.dateUsed !== null)
+//             .map((r) => {
+//                 return { id: String(r.id) };
+//             });
 
-        const performanceService = new tttsapi.service.Event({
-            endpoint: <string>process.env.API_ENDPOINT,
-            auth: req.tttsAuthClient,
-            project: req.project
-        });
-        await performanceService.updateExtension({
-            id: reservation.reservationFor.id,
-            checkedReservations
-        });
-    } catch (error) {
-        // tslint:disable-next-line:no-console
-        console.error('updateCheckedReservations failed', error);
-    }
+//         const performanceService = new tttsapi.service.Event({
+//             endpoint: <string>process.env.API_ENDPOINT,
+//             auth: req.tttsAuthClient,
+//             project: req.project
+//         });
+//         await performanceService.updateExtension({
+//             id: reservation.reservationFor.id,
+//             checkedReservations
+//         });
+//     } catch (error) {
+//         // tslint:disable-next-line:no-console
+//         console.error('updateCheckedReservations failed', error);
+//     }
 
-}
+// }
