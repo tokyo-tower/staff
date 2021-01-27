@@ -37,6 +37,7 @@ const STAFF_CLIENT_IDS = [
  */
 // tslint:disable-next-line:cyclomatic-complexity max-func-body-length
 function search(req, res) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         // バリデーション
         const errors = {};
@@ -177,7 +178,8 @@ function search(req, res) {
         debug('searching reservations...', searchConditions);
         const reservationService = new cinerinoapi.service.Reservation({
             endpoint: process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: { id: (_a = req.project) === null || _a === void 0 ? void 0 : _a.id }
         });
         try {
             // 総数検索
@@ -294,6 +296,7 @@ function isInputEven(value1, value2) {
  * キャンセル実行api
  */
 function cancel(req, res, next) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (req.staffUser === undefined) {
             next(new Error('システムエラーが発生しました。ご不便をおかけして申し訳ありませんがしばらく経ってから再度お試しください。'));
@@ -308,10 +311,11 @@ function cancel(req, res, next) {
             }
             const reservationService = new cinerinoapi.service.Reservation({
                 endpoint: process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient
+                auth: req.tttsAuthClient,
+                project: { id: (_a = req.project) === null || _a === void 0 ? void 0 : _a.id }
             });
             const promises = reservationIds.map((id) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b, _c;
+                var _b, _c, _d;
                 // 予約データの解放
                 try {
                     yield reservationService.cancel({
@@ -319,8 +323,8 @@ function cancel(req, res, next) {
                         typeOf: cinerinoapi.factory.chevre.transactionType.CancelReservation,
                         agent: {
                             typeOf: cinerinoapi.factory.personType.Person,
-                            id: String((_b = (_a = req.session) === null || _a === void 0 ? void 0 : _a.staffUser) === null || _b === void 0 ? void 0 : _b.sub),
-                            name: String((_c = req.staffUser) === null || _c === void 0 ? void 0 : _c.username)
+                            id: String((_c = (_b = req.session) === null || _b === void 0 ? void 0 : _b.staffUser) === null || _c === void 0 ? void 0 : _c.sub),
+                            name: String((_d = req.staffUser) === null || _d === void 0 ? void 0 : _d.username)
                         },
                         object: {
                             reservation: { id }

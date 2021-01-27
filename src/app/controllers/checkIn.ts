@@ -91,7 +91,8 @@ export async function getReservation(req: Request, res: Response): Promise<void>
     try {
         const reservationService = new cinerinoapi.service.Reservation({
             endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: { id: req.project?.id }
         });
         const searchReservationsResult = await reservationService.search<cinerinoapi.factory.chevre.reservationType.EventReservation>({
             typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
@@ -193,7 +194,8 @@ export async function addCheckIn(req: Request, res: Response): Promise<void> {
         // 予約取得
         const reservationService = new cinerinoapi.service.Reservation({
             endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: { id: req.project?.id }
         });
         const searchReservationsResult = await reservationService.search<cinerinoapi.factory.chevre.reservationType.EventReservation>({
             typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
@@ -217,7 +219,8 @@ export async function addCheckIn(req: Request, res: Response): Promise<void> {
             // getToken
             const tokenService = new cinerinoapi.service.Token({
                 endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient
+                auth: req.tttsAuthClient,
+                project: { id: req.project?.id }
             });
             const getTokenResult = await tokenService.getToken({ code });
             token = getTokenResult.token;
@@ -291,7 +294,8 @@ async function publishCode(
         if (typeof orderNumber === 'string' && typeof telephone === 'string') {
             const orderService = new cinerinoapi.service.Order({
                 endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient
+                auth: req.tttsAuthClient,
+                project: { id: req.project?.id }
             });
 
             const authorizeOrderResult = await orderService.authorize({
@@ -342,7 +346,8 @@ export async function removeCheckIn(req: Request, res: Response): Promise<void> 
         // 予約取得
         const reservationService = new cinerinoapi.service.Reservation({
             endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: { id: req.project?.id }
         });
         const searchReservationsResult = await reservationService.search<cinerinoapi.factory.chevre.reservationType.EventReservation>({
             typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
@@ -402,7 +407,8 @@ async function updateCheckedReservations(
         // 予約取得
         const reservationService = new cinerinoapi.service.Reservation({
             endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: { id: req.project?.id }
         });
 
         // 入場済予約検索

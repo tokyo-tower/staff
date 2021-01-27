@@ -77,10 +77,12 @@ function index(req, res, next) {
 exports.index = index;
 const TICKET_CLERK_USERNAMES_EXCLUDED = ['1F-ELEVATOR', 'TOPDECK-ELEVATOR', 'LANE', 'GATE'];
 function searchTicketClerks(req) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const iamService = new cinerinoapi.service.IAM({
             endpoint: process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: { id: (_a = req.project) === null || _a === void 0 ? void 0 : _a.id }
         });
         const searchMembersResult = yield iamService.searchMembers({
             member: { typeOf: { $eq: cinerinoapi.factory.personType.Person } }
@@ -106,6 +108,7 @@ exports.searchTicketClerks = searchTicketClerks;
  * A4印刷
  */
 function print(req, res, next) {
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const ids = req.query.ids;
@@ -116,7 +119,8 @@ function print(req, res, next) {
             if (ids.length > 0 && orderNumbers.length === 0) {
                 const reservationService = new cinerinoapi.service.Reservation({
                     endpoint: process.env.CINERINO_API_ENDPOINT,
-                    auth: req.tttsAuthClient
+                    auth: req.tttsAuthClient,
+                    project: { id: (_a = req.project) === null || _a === void 0 ? void 0 : _a.id }
                 });
                 const searchReservationsResult = yield reservationService.search({
                     limit: 100,
@@ -138,7 +142,8 @@ function print(req, res, next) {
                 // 印刷対象注文検索
                 const orderService = new cinerinoapi.service.Order({
                     endpoint: process.env.CINERINO_API_ENDPOINT,
-                    auth: req.tttsAuthClient
+                    auth: req.tttsAuthClient,
+                    project: { id: (_b = req.project) === null || _b === void 0 ? void 0 : _b.id }
                 });
                 const searchOrdersResult = yield orderService.search({
                     limit: 100,
@@ -169,6 +174,7 @@ exports.print = print;
  * 印刷情報をトークン化する
  */
 function getPrintToken(req, res, next) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const ids = req.body.ids;
@@ -200,7 +206,8 @@ function getPrintToken(req, res, next) {
                 // 印刷対象注文検索
                 const orderService = new cinerinoapi.service.Order({
                     endpoint: process.env.CINERINO_API_ENDPOINT,
-                    auth: req.tttsAuthClient
+                    auth: req.tttsAuthClient,
+                    project: { id: (_a = req.project) === null || _a === void 0 ? void 0 : _a.id }
                 });
                 const searchOrdersResult = yield orderService.search({
                     limit: 100,

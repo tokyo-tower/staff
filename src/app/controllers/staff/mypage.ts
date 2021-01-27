@@ -87,7 +87,8 @@ const TICKET_CLERK_USERNAMES_EXCLUDED = ['1F-ELEVATOR', 'TOPDECK-ELEVATOR', 'LAN
 export async function searchTicketClerks(req: Request): Promise<ITicketClerk[]> {
     const iamService = new cinerinoapi.service.IAM({
         endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-        auth: req.tttsAuthClient
+        auth: req.tttsAuthClient,
+        project: { id: req.project?.id }
     });
     const searchMembersResult = await iamService.searchMembers({
         member: { typeOf: { $eq: cinerinoapi.factory.personType.Person } }
@@ -123,7 +124,8 @@ export async function print(req: Request, res: Response, next: NextFunction): Pr
         if (ids.length > 0 && orderNumbers.length === 0) {
             const reservationService = new cinerinoapi.service.Reservation({
                 endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient
+                auth: req.tttsAuthClient,
+                project: { id: req.project?.id }
             });
 
             const searchReservationsResult = await reservationService.search({
@@ -147,7 +149,8 @@ export async function print(req: Request, res: Response, next: NextFunction): Pr
             // 印刷対象注文検索
             const orderService = new cinerinoapi.service.Order({
                 endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient
+                auth: req.tttsAuthClient,
+                project: { id: req.project?.id }
             });
             const searchOrdersResult = await orderService.search({
                 limit: 100,
@@ -213,7 +216,8 @@ export async function getPrintToken(req: Request, res: Response, next: NextFunct
             // 印刷対象注文検索
             const orderService = new cinerinoapi.service.Order({
                 endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient
+                auth: req.tttsAuthClient,
+                project: { id: req.project?.id }
             });
             const searchOrdersResult = await orderService.search({
                 limit: 100,

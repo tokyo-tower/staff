@@ -190,7 +190,8 @@ export async function search(req: Request, res: Response): Promise<void> {
     debug('searching reservations...', searchConditions);
     const reservationService = new cinerinoapi.service.Reservation({
         endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-        auth: req.tttsAuthClient
+        auth: req.tttsAuthClient,
+        project: { id: req.project?.id }
     });
 
     try {
@@ -353,7 +354,8 @@ export async function cancel(req: Request, res: Response, next: NextFunction): P
 
         const reservationService = new cinerinoapi.service.Reservation({
             endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: { id: req.project?.id }
         });
 
         const promises = reservationIds.map(async (id) => {

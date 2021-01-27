@@ -232,10 +232,12 @@ function searchOrderNumberss4refund(req, performanceId,
  * 返品対象の注文クライアントID
  */
 clientIds) {
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         const reservationService = new cinerinoapi.service.Reservation({
             endpoint: process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: { id: (_a = req.project) === null || _a === void 0 ? void 0 : _a.id }
         });
         // パフォーマンスに対する取引リストを、予約コレクションから検索する
         let reservations = [];
@@ -260,7 +262,8 @@ clientIds) {
         const returningOrderNumbers = orderNumbers.filter((orderNumber) => typeof orderNumber === 'string');
         const orderService = new cinerinoapi.service.Order({
             endpoint: process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: { id: (_b = req.project) === null || _b === void 0 ? void 0 : _b.id }
         });
         const searchOrdersResult = yield orderService.search({
             limit: 100,
@@ -270,10 +273,12 @@ clientIds) {
     });
 }
 function processReturnOrders(params) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const returnOrderService = new cinerinoapi.service.transaction.ReturnOrder({
             endpoint: process.env.CINERINO_API_ENDPOINT,
-            auth: params.req.tttsAuthClient
+            auth: params.req.tttsAuthClient,
+            project: { id: (_a = params.req.project) === null || _a === void 0 ? void 0 : _a.id }
         });
         const returnableOrders = [];
         const returnOrderActions = [];

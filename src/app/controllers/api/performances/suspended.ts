@@ -292,7 +292,8 @@ async function searchOrderNumberss4refund(
 ): Promise<cinerinoapi.factory.order.IOrder[]> {
     const reservationService = new cinerinoapi.service.Reservation({
         endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-        auth: req.tttsAuthClient
+        auth: req.tttsAuthClient,
+        project: { id: req.project?.id }
     });
 
     // パフォーマンスに対する取引リストを、予約コレクションから検索する
@@ -332,7 +333,8 @@ async function searchOrderNumberss4refund(
 
     const orderService = new cinerinoapi.service.Order({
         endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-        auth: req.tttsAuthClient
+        auth: req.tttsAuthClient,
+        project: { id: req.project?.id }
     });
     const searchOrdersResult = await orderService.search({
         limit: 100,
@@ -349,7 +351,8 @@ async function processReturnOrders(params: {
 }) {
     const returnOrderService = new cinerinoapi.service.transaction.ReturnOrder({
         endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-        auth: params.req.tttsAuthClient
+        auth: params.req.tttsAuthClient,
+        project: { id: params.req.project?.id }
     });
 
     const returnableOrders: cinerinoapi.factory.transaction.returnOrder.IReturnableOrder[] = [];

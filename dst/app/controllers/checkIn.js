@@ -93,6 +93,7 @@ exports.getReservations = getReservations;
  * 予約情報取得
  */
 function getReservation(req, res) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (req.staffUser === undefined) {
             throw new Error('checkinAdminUser not defined.');
@@ -103,7 +104,8 @@ function getReservation(req, res) {
         try {
             const reservationService = new cinerinoapi.service.Reservation({
                 endpoint: process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient
+                auth: req.tttsAuthClient,
+                project: { id: (_a = req.project) === null || _a === void 0 ? void 0 : _a.id }
             });
             const searchReservationsResult = yield reservationService.search({
                 typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
@@ -173,6 +175,7 @@ exports.getReservation = getReservation;
  */
 // tslint:disable-next-line:cyclomatic-complexity max-func-body-length
 function addCheckIn(req, res) {
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (req.staffUser === undefined) {
@@ -192,7 +195,8 @@ function addCheckIn(req, res) {
             // 予約取得
             const reservationService = new cinerinoapi.service.Reservation({
                 endpoint: process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient
+                auth: req.tttsAuthClient,
+                project: { id: (_a = req.project) === null || _a === void 0 ? void 0 : _a.id }
             });
             const searchReservationsResult = yield reservationService.search({
                 typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
@@ -213,7 +217,8 @@ function addCheckIn(req, res) {
                 // getToken
                 const tokenService = new cinerinoapi.service.Token({
                     endpoint: process.env.CINERINO_API_ENDPOINT,
-                    auth: req.tttsAuthClient
+                    auth: req.tttsAuthClient,
+                    project: { id: (_b = req.project) === null || _b === void 0 ? void 0 : _b.id }
                 });
                 const getTokenResult = yield tokenService.getToken({ code });
                 token = getTokenResult.token;
@@ -262,7 +267,7 @@ function addCheckIn(req, res) {
 }
 exports.addCheckIn = addCheckIn;
 function publishCode(req, reservation) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     return __awaiter(this, void 0, void 0, function* () {
         let code;
         try {
@@ -271,7 +276,8 @@ function publishCode(req, reservation) {
             if (typeof orderNumber === 'string' && typeof telephone === 'string') {
                 const orderService = new cinerinoapi.service.Order({
                     endpoint: process.env.CINERINO_API_ENDPOINT,
-                    auth: req.tttsAuthClient
+                    auth: req.tttsAuthClient,
+                    project: { id: (_e = req.project) === null || _e === void 0 ? void 0 : _e.id }
                 });
                 const authorizeOrderResult = yield orderService.authorize({
                     object: {
@@ -300,6 +306,7 @@ function publishCode(req, reservation) {
  * チェックイン取り消し
  */
 function removeCheckIn(req, res) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (req.staffUser === undefined) {
@@ -320,7 +327,8 @@ function removeCheckIn(req, res) {
             // 予約取得
             const reservationService = new cinerinoapi.service.Reservation({
                 endpoint: process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient
+                auth: req.tttsAuthClient,
+                project: { id: (_a = req.project) === null || _a === void 0 ? void 0 : _a.id }
             });
             const searchReservationsResult = yield reservationService.search({
                 typeOf: cinerinoapi.factory.chevre.reservationType.EventReservation,
@@ -372,12 +380,14 @@ function removeCheckIn(req, res) {
 }
 exports.removeCheckIn = removeCheckIn;
 function updateCheckedReservations(req, reservation) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // 予約取得
             const reservationService = new cinerinoapi.service.Reservation({
                 endpoint: process.env.CINERINO_API_ENDPOINT,
-                auth: req.tttsAuthClient
+                auth: req.tttsAuthClient,
+                project: { id: (_a = req.project) === null || _a === void 0 ? void 0 : _a.id }
             });
             // 入場済予約検索
             const searchReservationsResult4event = yield reservationService.search({

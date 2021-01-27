@@ -58,7 +58,8 @@ export async function search(req: Request, res: Response): Promise<void> {
 
         const eventService = new cinerinoapi.service.Event({
             endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: { id: req.project?.id }
         });
         const searchResult = await eventService.search({
             limit: 100,
@@ -132,11 +133,13 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
         });
         const reservationService = new cinerinoapi.service.Reservation({
             endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: { id: req.project?.id }
         });
         const eventService = new cinerinoapi.service.Event({
             endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-            auth: req.tttsAuthClient
+            auth: req.tttsAuthClient,
+            project: { id: req.project?.id }
         });
 
         const searchEventsResult = await eventService.search<cinerinoapi.factory.chevre.eventType.ScreeningEvent>({
@@ -247,12 +250,14 @@ export async function updateOnlineStatus(req: Request, res: Response): Promise<v
 async function getTargetReservationsForRefund(req: Request, performanceIds: string[]): Promise<cinerinoapi.factory.order.IOrder[]> {
     const orderService = new cinerinoapi.service.Order({
         endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-        auth: req.tttsAuthClient
+        auth: req.tttsAuthClient,
+        project: { id: req.project?.id }
     });
 
     const reservationService = new cinerinoapi.service.Reservation({
         endpoint: <string>process.env.CINERINO_API_ENDPOINT,
-        auth: req.tttsAuthClient
+        auth: req.tttsAuthClient,
+        project: { id: req.project?.id }
     });
 
     let targetReservations:
